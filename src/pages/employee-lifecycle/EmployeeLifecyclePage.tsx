@@ -1,47 +1,244 @@
-import { useState } from 'react'
-import { cross, lifecycle, masterGroups, masterItems, relationships, support, workflows, type Detail, type Workflow } from './data'
+import { useMemo, useState } from 'react'
+import { crossFunctional, lifecycle, masterData, relationships, sharedServices } from '../../data'
 import './employee-lifecycle.css'
 
-type Selected = Detail | { id: string; title: string; subtitle: string; kind: 'master-item'; masterId: keyof typeof masterItems }
-const allDetails = [...masterGroups, ...lifecycle, ...cross]
+type DetailItem = {
+  id: string
+  title: string
+  subtitle: string
+  category: 'master' | 'lifecycle' | 'cross' | 'support'
+  sourceStatus?: string
+  inputs: string[]
+  outputs: string[]
+  actors: Array<{ name: string; role: string; action: string }>
+  rules?: string[]
+  process?: { steps: string[]; source?: string; status?: string }
+  sopIds: string[]
+  usedBy?: string[]
+  uiFields?: string[]
+}
+
+type Selected = DetailItem | null
+
+const masterItems: DetailItem[] = masterData.map((item) => ({
+  id: item.id,
+  title: item.title,
+  subtitle: item.usedBy[0] ?? 'Master data',
+  category: 'master',
+  sourceStatus: item.sourceStatus,
+  inputs: [...item.inputs],
+  outputs: [...item.outputs],
+  actors: item.actors.map((actor) => ({ ...actor })),
+  rules: [...item.rules],
+  process: { ...item.process },
+  sopIds: [...item.sopIds],
+  usedBy: [...item.usedBy],
+  uiFields: [...item.process.steps],
+}))
+
+const lifecycleItems: DetailItem[] = lifecycle.map((item) => ({
+  id: item.id,
+  title: item.title,
+  subtitle: item.subtitle,
+  category: 'lifecycle',
+  sourceStatus: item.sourceStatus,
+  inputs: [...item.inputs],
+  outputs: [...item.outputs],
+  actors: item.actors.map((actor) => ({ ...actor })),
+  process: { ...item.process },
+  sopIds: [...item.sopIds],
+  uiFields: [...item.uiFields],
+}))
+
+const crossItems: DetailItem[] = crossFunctional.map((item) => ({
+  id: item.id,
+  title: item.title,
+  subtitle: item.subtitle,
+  category: 'cross',
+  sourceStatus: item.sourceStatus,
+  inputs: [...(item.inputs as readonly string[])],
+  outputs: [...(item.outputs as readonly string[])],
+  actors: item.actors.map((actor) => ({ ...actor })),
+  rules: [...(item.rules as readonly string[])],
+  process: { ...item.process, steps: [...(item.process.steps as readonly string[])] },
+  sopIds: [...(item.sopIds as readonly string[])],
+  uiFields: [...(item.inputs as readonly string[])],
+}))
+
+const supportItems: DetailItem[] = sharedServices.map((item) => ({
+  id: item.id,
+  title: item.title,
+  subtitle: item.subtitle,
+  category: 'support',
+  sourceStatus: item.sourceStatus,
+  inputs: [],
+  outputs: [],
+  actors: [],
+  sopIds: [],
+}))
+
+const allDetails: DetailItem[] = [...masterItems, ...lifecycleItems, ...crossItems, ...supportItems]
 
 export function EmployeeLifecyclePage() {
-  const [selected, setSelected] = useState<Selected | null>(null)
-  const selectMaster = (masterId: keyof typeof masterItems) => setSelected({ id: masterId, masterId, title: masterItems[masterId].title, subtitle: 'Master Data chi tiết', kind: 'master-item' })
-  const selectReference = (id: string) => { if (id in masterItems) selectMaster(id as keyof typeof masterItems); else setSelected(allDetails.find((item) => item.id === id) ?? null) }
-  return <main className="lifecycle-page"><header className="lifecycle-header"><div className="lifecycle-eyebrow">Bức tranh tổng thể</div><h1>Luồng nghiệp vụ quản lý vòng đời nhân viên</h1><p>Business Process Map · Nhấp vào một node để xem chi tiết nghiệp vụ</p></header>
-    <div className="lifecycle-workspace"><section className="map-section"><SectionLabel>Tầng 1 · Master Data</SectionLabel><div className="map-grid master-grid">{masterGroups.map((item) => <MapNode key={item.id} item={item} active={selected?.id === item.id} onClick={() => setSelected(item)} />)}</div></section>
-      <section className="map-section"><SectionLabel>Tầng 2 · Luồng nghiệp vụ chính — Vòng đời nhân viên</SectionLabel><div className="lifecycle-flow">{lifecycle.map((item, index) => <div className="flow-entry" key={item.id}><MapNode item={item} active={selected?.id === item.id} onClick={() => setSelected(item)} />{index < lifecycle.length - 1 && <span className="flow-arrow">→</span>}</div>)}</div><p className="flow-caption">Tiếp nhận → Hồ sơ → Bố trí → Hợp đồng → Lương → Làm việc → Nghỉ việc</p></section>
-      <section className="map-section cross-section"><SectionLabel>Tầng 3 · Các nghiệp vụ phát sinh trong quá trình làm việc</SectionLabel><div className="map-grid cross-grid">{cross.map((item) => <MapNode key={item.id} item={item} active={selected?.id === item.id} onClick={() => setSelected(item)} />)}</div><p className="map-note">Nét đứt biểu thị nghiệp vụ xuyên suốt, không phải bước tuần tự của lifecycle.</p></section>
-      <section className="map-section"><SectionLabel>Tầng 4 · Hỗ trợ xuyên suốt</SectionLabel><div className="support-list">{support.map((item) => <span key={item}>{item}</span>)}</div></section>
+  const [selected, setSelected] = useState<Selected>(null)
+
+  const mapNodes = useMemo(() => ({
+    master: masterItems,
+    lifecycle: lifecycleItems,
+    cross: crossItems,
+    support: supportItems,
+  }), [])
+
+  const openItemById = (id: string) => {
+    const item = allDetails.find((entry) => entry.id === id)
+    if (item) {
+      setSelected(item)
+    }
+  }
+
+  return <main className="lifecycle-page">
+    <header className="lifecycle-header">
+      <div className="lifecycle-eyebrow">Bức tranh tổng thể</div>
+      <h1>Luồng nghiệp vụ quản lý vòng đời nhân viên</h1>
+      <p>Business Process Map · Nhấp vào một node để xem chi tiết nghiệp vụ</p>
+    </header>
+
+    <div className="lifecycle-workspace">
+      <section className="map-section">
+        <SectionLabel>Tầng 1 · Master Data</SectionLabel>
+        <div className="map-grid master-grid">{mapNodes.master.map((item) => <MapNode key={item.id} item={item} active={selected?.id === item.id} onClick={() => setSelected(item)} />)}</div>
+      </section>
+
+      <section className="map-section">
+        <SectionLabel>Tầng 2 · Luồng nghiệp vụ chính — Vòng đời nhân viên</SectionLabel>
+        <div className="lifecycle-flow">{mapNodes.lifecycle.map((item, index) => <div className="flow-entry" key={item.id}><MapNode item={item} active={selected?.id === item.id} onClick={() => setSelected(item)} />{index < mapNodes.lifecycle.length - 1 && <span className="flow-arrow">→</span>}</div>)}</div>
+        <p className="flow-caption">Tiếp nhận → Hồ sơ → Bố trí → Hợp đồng → Lương → Làm việc → Nghỉ việc</p>
+      </section>
+
+      <section className="map-section cross-section">
+        <SectionLabel>Tầng 3 · Các nghiệp vụ phát sinh trong quá trình làm việc</SectionLabel>
+        <div className="map-grid cross-grid">{mapNodes.cross.map((item) => <MapNode key={item.id} item={item} active={selected?.id === item.id} onClick={() => setSelected(item)} />)}</div>
+        <p className="map-note">Nét đứt biểu thị nghiệp vụ xuyên suốt, không phải bước tuần tự của lifecycle.</p>
+      </section>
+
+      <section className="map-section">
+        <SectionLabel>Tầng 4 · Hỗ trợ xuyên suốt</SectionLabel>
+        <div className="support-list">{mapNodes.support.map((item) => <span key={item.id}>{item.title}</span>)}</div>
+      </section>
     </div>
-    {selected && <DetailPanel item={selected} onClose={() => setSelected(null)} onReference={selectReference} />}
+
+    {selected && <DetailPanel item={selected} onClose={() => setSelected(null)} onSelect={openItemById} />}
   </main>
 }
 
 function SectionLabel({ children }: { children: string }) { return <h2 className="map-section-label">{children}</h2> }
-function MapNode({ item, active, onClick }: { item: Detail; active: boolean; onClick: () => void }) { return <button className={`map-node ${item.kind} ${active ? 'active' : ''}`} onClick={onClick}><span className="map-node-code">{item.code}</span><span className="map-node-icon">▣</span><b>{item.title}</b><small>{item.subtitle}</small></button> }
 
-function DetailPanel({ item, onClose, onReference }: { item: Selected; onClose: () => void; onReference: (id: string) => void }) {
-  const isMasterItem = item.kind === 'master-item'
-  const master = isMasterItem ? masterItems[item.masterId] : null
-  const linked = isMasterItem ? relationships[item.masterId] ?? [] : item.kind === 'master' ? item.used ?? [] : item.used ?? []
-  return <><button className="detail-backdrop" aria-label="Đóng panel" onClick={onClose}/><aside className="detail-panel"><header className="detail-header"><span className="detail-icon">▣</span><div><span className="detail-kind">{isMasterItem || item.kind === 'master' ? 'MASTER DATA' : item.kind === 'life' ? 'LIFECYCLE PROCESS' : 'CROSS-FUNCTIONAL'}</span><h2>{item.title}</h2><p>{item.subtitle}</p></div><button onClick={onClose} className="detail-close" aria-label="Đóng">×</button></header><div className="detail-body">
-    <DetailSection title="01 · Tổng quan"><p><b>Mục đích:</b> {isMasterItem ? `Quản lý và duy trì dữ liệu ${master?.title.toLowerCase()}.` : item.purpose}</p><p><b>Vai trò:</b> {isMasterItem ? 'Nguồn dữ liệu master cho các nghiệp vụ liên quan.' : item.kind === 'life' ? 'Một bước trong vòng đời nhân viên.' : 'Nghiệp vụ phát sinh xuyên suốt lifecycle.'}</p></DetailSection>
-    {isMasterItem ? <MasterContent masterId={item.masterId} onReference={onReference}/> : <ProcessContent item={item}/>} 
-    <DetailSection title="05 · Master Data liên quan"><p><b>{isMasterItem ? 'Được sử dụng bởi:' : 'Master Data được sử dụng:'}</b></p>{linked.length ? <ReferenceList ids={linked} onReference={onReference}/> : <Empty>Đang chờ mapping từ SOP/Excel.</Empty>}</DetailSection>
-    <DetailSection title="06 · Quan hệ dữ liệu"><div className="data-relation"><span>{isMasterItem ? item.masterId : (linked[0] ?? 'Dữ liệu đầu vào')}</span><i>↓</i><span>{item.title}</span><i>↓</i><span>{isMasterItem ? 'Nghiệp vụ sử dụng' : 'Kết quả nghiệp vụ'}</span></div></DetailSection>
-    <DetailSection title="07 · Quy trình chi tiết">{workflows[isMasterItem ? item.masterId : item.id] ? <WorkflowDiagram workflow={workflows[isMasterItem ? item.masterId : item.id]} /> : item.kind === 'life' && item.process ? <StepList steps={item.process}/> : <Empty>Chưa có dữ liệu quy trình chi tiết trong nguồn hiện tại.</Empty>}</DetailSection>
-    <DetailSection title="08 · SOP / Nghiệp vụ liên quan"><Empty>Chưa xác định mapping từ SOP - HRUX.xlsx</Empty></DetailSection>
-    <DetailSection title="09 · Giao diện sơ khảo"><Wireframe title={item.title} fields={isMasterItem ? master?.input.split(', ').slice(0, 4) ?? [] : item.inputs ?? []}/></DetailSection>
-  </div></aside></>
+function MapNode({ item, active, onClick }: { item: DetailItem; active: boolean; onClick: () => void }) {
+  return <button className={`map-node ${item.category} ${active ? 'active' : ''}`} onClick={onClick}>
+    <span className="map-node-code">{item.id}</span>
+    <span className="map-node-icon">▣</span>
+    <b>{item.title}</b>
+    <small>{item.subtitle}</small>
+  </button>
 }
-function ProcessContent({ item }: { item: Exclude<Selected, { kind: 'master-item' }> }) { return <><DetailSection title="02 · Input / Đầu vào"><DataBlocks title="Dữ liệu" values={item.inputs}/></DetailSection><DetailSection title="03 · Output / Đầu ra"><DataBlocks title="Dữ liệu tạo/cập nhật" values={item.outputs}/></DetailSection><DetailSection title="04 · Tác nhân tham gia">{item.actors?.length ? <table><thead><tr><th>Tác nhân</th><th>Vai trò</th></tr></thead><tbody>{item.actors.map(([actor, role]) => <tr key={actor}><td><b>{actor}</b></td><td>{role}</td></tr>)}</tbody></table> : <Empty>Chưa có dữ liệu nguồn hiện tại.</Empty>}</DetailSection></> }
-function MasterContent({ masterId, onReference }: { masterId: keyof typeof masterItems; onReference: (id: string) => void }) { const master = masterItems[masterId]; return <><DetailSection title="02 · Input / Đầu vào"><DataBlocks title="Dữ liệu nhập" values={[master.input]}/></DetailSection><DetailSection title="03 · Output / Đầu ra"><DataBlocks title="Dữ liệu tạo/cập nhật" values={[master.output]}/></DetailSection><DetailSection title="04 · Tác nhân tham gia"><table><thead><tr><th>Tác nhân</th><th>Vai trò</th></tr></thead><tbody><tr><td><b>{master.actor}</b></td><td>Tạo, cập nhật và đảm bảo quy tắc dữ liệu master.</td></tr></tbody></table><p className="rule"><b>Quy tắc:</b> {master.rule}</p></DetailSection><DetailSection title="Master Data cùng nhóm">{masterId === 'MD-05' ? <ReferenceList ids={['MD-06']} onReference={onReference}/> : <ReferenceList ids={['MD-05']} onReference={onReference}/>}</DetailSection></> }
+
+function DetailPanel({ item, onClose, onSelect }: { item: DetailItem; onClose: () => void; onSelect: (id: string) => void }) {
+  const relatedMasterIds = relationships
+    .filter((relationship) => relationship.source === item.id && relationship.target.startsWith('MD-'))
+    .map((relationship) => relationship.target)
+  const relatedSopNames = item.sopIds.length ? item.sopIds : []
+  const processSteps = item.process?.steps ?? []
+  const sourceLabel = item.category === 'master' ? 'MASTER DATA' : item.category === 'lifecycle' ? 'LIFECYCLE PROCESS' : item.category === 'cross' ? 'CROSS-FUNCTIONAL' : 'SHARED SERVICE'
+
+  return <>
+    <button className="detail-backdrop" aria-label="Đóng panel" onClick={onClose} />
+    <aside className="detail-panel">
+      <header className="detail-header">
+        <span className="detail-icon">▣</span>
+        <div>
+          <span className="detail-kind">{sourceLabel}</span>
+          <h2>{item.title}</h2>
+          <p>{item.subtitle}</p>
+        </div>
+        <button onClick={onClose} className="detail-close" aria-label="Đóng">×</button>
+      </header>
+
+      <div className="detail-body">
+        <DetailSection title="01 · Tổng quan">
+          <p><b>Mục đích:</b> {item.category === 'master' ? 'Vận hành dữ liệu nền tảng để hỗ trợ các nghiệp vụ nhân sự.' : item.category === 'lifecycle' ? 'Bước chính trong vòng đời nhân viên.' : item.category === 'cross' ? 'Nghiệp vụ phát sinh xuyên suốt vòng đời.' : 'Dịch vụ hỗ trợ xuyên suốt hệ thống.'}</p>
+          <p><b>Trạng thái nguồn:</b> {item.sourceStatus ?? 'official'}</p>
+        </DetailSection>
+
+        <DetailSection title="02 · Input">
+          {item.inputs.length ? <DataBlocks values={item.inputs} /> : <Empty>Chưa có dữ liệu đầu vào.</Empty>}
+        </DetailSection>
+
+        <DetailSection title="03 · Output">
+          {item.outputs.length ? <DataBlocks values={item.outputs} /> : <Empty>Chưa có dữ liệu đầu ra.</Empty>}
+        </DetailSection>
+
+        <DetailSection title="04 · Actor">
+          {item.actors.length ? <table><thead><tr><th>Tác nhân</th><th>Vai trò</th><th>Hành động</th></tr></thead><tbody>{item.actors.map((actor) => <tr key={`${item.id}-${actor.name}`}><td><b>{actor.name}</b></td><td>{actor.role}</td><td>{actor.action}</td></tr>)}</tbody></table> : <Empty>Chưa có dữ liệu tác nhân.</Empty>}
+        </DetailSection>
+
+        {item.category === 'master' ? (
+          <DetailSection title="05 · Dữ liệu liên quan">
+            {relatedMasterIds.length ? <ReferenceList ids={relatedMasterIds} onSelect={onSelect} /> : <Empty>Master Data này chưa có dữ liệu liên quan khác.</Empty>}
+          </DetailSection>
+        ) : (
+          <DetailSection title="05 · Master Data">
+            {relatedMasterIds.length ? <ReferenceList ids={relatedMasterIds} onSelect={onSelect} /> : <Empty>Chưa có dữ liệu Master Data.</Empty>}
+          </DetailSection>
+        )}
+
+        <DetailSection title="06 · SOP liên quan">
+          {relatedSopNames.length ? <ReferenceList ids={relatedSopNames} onSelect={onSelect} /> : <Empty>Chưa có dữ liệu SOP.</Empty>}
+        </DetailSection>
+
+        <DetailSection title="07 · Quan hệ dữ liệu">
+          <div className="data-relation">
+            <span>{relatedMasterIds[0] ?? 'Input'}</span>
+            <i>↓</i>
+            <span>{item.title}</span>
+            <i>↓</i>
+            <span>{item.outputs[0] ?? 'Output'}</span>
+          </div>
+        </DetailSection>
+
+        <DetailSection title="08 · Quy trình thực tế">
+          {processSteps.length ? <StepList steps={processSteps} /> : <Empty>Chưa có quy trình.</Empty>}
+        </DetailSection>
+
+        <DetailSection title="09 · UI sơ khảo">
+          <Wireframe title={item.title} fields={item.uiFields ?? item.inputs.slice(0, 4)} />
+        </DetailSection>
+      </div>
+    </aside>
+  </>
+}
+
 function DetailSection({ title, children }: { title: string; children: React.ReactNode }) { return <section className="detail-section"><h3>{title}</h3>{children}</section> }
-function DataBlocks({ title, values }: { title: string; values?: string[] }) { return values?.length ? <div className="data-blocks">{values.map((value) => <div key={value}><b>{title}</b>{value}<small>Nguồn/Người nhập: theo nghiệp vụ thực hiện</small></div>)}</div> : <Empty>Chưa có dữ liệu nguồn hiện tại.</Empty> }
-function ReferenceList({ ids, onReference }: { ids: string[]; onReference: (id: string) => void }) { return <div className="reference-list">{ids.map((id) => { const master = masterItems[id as keyof typeof masterItems]; const process = allDetails.find((entry) => entry.id === id); return <button key={id} onClick={() => onReference(id)}><b>{id}</b> {master?.title ?? process?.title}</button> })}</div> }
+
+function DataBlocks({ values }: { values: string[] }) {
+  return <div className="data-blocks">{values.map((value) => <div key={value}><b>Value</b>{value}<small>Nguồn/Người nhập: theo nghiệp vụ thực hiện</small></div>)}</div>
+}
+
+function ReferenceList({ ids, onSelect }: { ids: string[]; onSelect: (id: string) => void }) {
+  return <div className="reference-list">{ids.map((id) => {
+    const item = allDetails.find((entry) => entry.id === id || entry.title === id)
+    return <button key={id} type="button" onClick={() => item && onSelect(item.id)}><b>{id}</b> {item?.title ?? id}</button>
+  })}</div>
+}
+
 function Empty({ children }: { children: string }) { return <p className="empty-state">{children}</p> }
+
 function StepList({ steps }: { steps: string[] }) { return <ol className="detail-steps">{steps.map((step) => <li key={step}>{step}</li>)}</ol> }
-function WorkflowDiagram({ workflow }: { workflow: Workflow }) { return <><p className="workflow-title">{workflow.title}</p><div className="swimlanes">{workflow.lanes.map(([name, steps]) => <div className="swimlane" key={name}><b>{name}</b><div>{steps.map((step) => <span key={step}>{step}</span>)}</div></div>)}</div><p className="source-note">Nguồn: {workflow.source}</p></> }
-function Wireframe({ title, fields }: { title: string; fields: string[] }) { return <div className="wireframe"><b>{title.toUpperCase()}</b>{fields.slice(0, 4).map((field) => <div key={field}>{field}: <i>[ &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ]</i></div>)}<footer><button>HỦY</button><button>LƯU</button></footer></div> }
+
+function Wireframe({ title, fields }: { title: string; fields: string[] }) {
+  return <div className="wireframe">
+    <b>{title.toUpperCase()}</b>
+    {fields.slice(0, 4).map((field) => <div key={field}>{field}: <i>[ &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ]</i></div>)}
+    <footer><button type="button">HỦY</button><button type="button">LƯU</button></footer>
+  </div>
+}
+

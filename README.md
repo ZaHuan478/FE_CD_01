@@ -1,32 +1,89 @@
-# React + TypeScript + Vite
+# Employee Lifecycle – README
 
-This template provides a minimal setup to get React working in Vite with HMR and some Oxlint rules.
+## 1. Tổng quan
 
-Currently, two official plugins are available:
+## 2. Mục tiêu của Business Process Map
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+## 3. Kiến trúc 4 tầng
 
-## React Compiler
+### Tầng 1 — Master Data
+### Tầng 2 — Employee Lifecycle
+### Tầng 3 — Cross Functional Processes
+### Tầng 4 — Shared Services
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+## 4. 7 Lifecycle Business Processes
 
-## Expanding the Oxlint configuration
+01. Tiếp nhận nhân viên mới
+02. Tạo hồ sơ nhân viên
+03. Bố trí công tác
+04. Thiết lập hợp đồng
+05. Lương & chế độ
+06. Quá trình làm việc
+07. Nghỉ việc & đóng hồ sơ
 
-If you are developing a production application, we recommend enabling type-aware lint rules by installing `oxlint-tsgolint` and editing `.oxlintrc.json`:
+> Đây là Business Process, không phải module.
 
-```json
-{
-  "$schema": "./node_modules/oxlint/configuration_schema.json",
-  "plugins": ["react", "typescript", "oxc"],
-  "options": {
-    "typeAware": true
-  },
-  "rules": {
-    "react/rules-of-hooks": "error",
-    "react/only-export-components": ["warn", { "allowConstantExport": true }]
-  }
-}
-```
+## 5. Master Data
 
-See the [Oxlint rules documentation](https://oxc.rs/docs/guide/usage/linter/rules) for the full list of rules and categories.
+MD-01 → MD-10
+
+## 6. SOP
+
+Nguồn SOP
+Mapping SOP
+Trạng thái SOP
+
+## 7. Quy trình thực tế
+
+Official
+Draft
+Not available
+
+## 8. Data Traceability
+
+Master Data
+↕
+Business Process
+↕
+SOP
+↕
+Process
+↕
+Output
+
+## 9. Modal Detail Specification
+
+01 Tổng quan
+02 Input
+03 Output
+04 Actor
+05 Master Data
+06 Relationships
+07 SOP
+08 Quy trình thực tế
+09 UI
+
+## 10. Data Model
+
+data.ts
+
+## 11. Relationship Model
+
+## 12. Source & Data Status
+
+source
+designed
+draft
+placeholder
+
+## 13. UI behavior
+
+Click node
+→ Detail modal
+→ Click SOP
+→ SOP detail
+→ Click Master Data
+→ Master Data detail
+→ Back
+
+## 14. Trạng thái hiện tại / TODO
