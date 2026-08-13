@@ -1,0 +1,34 @@
+export type Detail = { id: string; code: string; title: string; subtitle: string; kind: 'master' | 'life' | 'cross'; purpose: string; inputs?: string[]; outputs?: string[]; actors?: [string, string][]; used?: string[]; process?: string[] }
+
+export const masterItems = {
+  'MD-05': { title: 'Quản lý cơ cấu tổ chức', actor: 'HR Admin/Quản trị viên', input: 'Mã, tên, loại đơn vị, đơn vị cha, quản lý, hiệu lực', rule: 'Không tạo vòng lặp; đơn vị cha hoạt động; mã duy nhất.', output: 'Cập nhật cây tổ chức và nguồn chọn vị trí.' },
+  'MD-06': { title: 'Quản lý chức vụ/chức danh', actor: 'HR Admin', input: 'Chức vụ/chức danh, level, cấp bậc, trạng thái', rule: 'Mã duy nhất; level/cấp bậc tồn tại và hoạt động.', output: 'Danh mục vị trí công tác sẵn sàng sử dụng.' },
+  'MD-07': { title: 'Thiết lập thang/bậc lương', actor: 'C&B/HR Admin', input: 'Thang, bậc, cấp, loại lương, tiền tệ, mức, hiệu lực', rule: 'Mức không âm; bậc thuộc thang; không trùng hiệu lực.', output: 'Cấu hình lương sẵn sàng gán cho nhân viên.' },
+  'MD-08': { title: 'Thiết lập ca và loại nghỉ', actor: 'Chuyên viên chấm công', input: 'Ca, giờ, loại nghỉ, đối tượng phép, chu kỳ', rule: 'Thời gian ca hợp lệ; mã ca duy nhất; ngày phép không âm.', output: 'Cấu hình ca/phép sẵn sàng áp dụng.' },
+  'MD-09': { title: 'Quản lý danh mục bảo hiểm/y tế', actor: 'Chuyên viên bảo hiểm', input: 'Đối tượng, chế độ, bệnh viện, nơi KCB', rule: 'Mã duy nhất; chỉ giá trị hoạt động được chọn.', output: 'Danh mục bảo hiểm/y tế được cập nhật.' },
+  'MD-10': { title: 'Quản lý danh mục kỷ luật', actor: 'HR Admin', input: 'Hành vi, loại, hình thức, mô tả', rule: 'Mã duy nhất; hình thức phù hợp loại/hành vi.', output: 'Quy định kỷ luật sẵn sàng áp dụng.' },
+} as const
+
+export const masterGroups: Detail[] = [
+  { id: 'md-org', code: '01', title: 'Cơ cấu tổ chức', subtitle: 'Đơn vị, vị trí và chức danh', kind: 'master', purpose: 'Quản lý cấu trúc tổ chức làm nguồn dữ liệu cho bố trí công tác.', used: ['MD-05', 'MD-06'] },
+  { id: 'md-person', code: '02', title: 'Danh mục nhân sự', subtitle: 'Thông tin nền tảng nhân viên', kind: 'master', purpose: 'Nhóm danh mục nhân sự.', used: [] },
+  { id: 'md-policy', code: '03', title: 'Chính sách lao động', subtitle: 'Lương, bảo hiểm và kỷ luật', kind: 'master', purpose: 'Cấu hình chính sách lao động.', used: ['MD-07', 'MD-09', 'MD-10'] },
+  { id: 'md-operation', code: '04', title: 'Danh mục vận hành', subtitle: 'Ca làm việc và loại nghỉ', kind: 'master', purpose: 'Cấu hình dữ liệu vận hành.', used: ['MD-08'] },
+]
+export const lifecycle: Detail[] = [
+  { id:'life-01',code:'01',title:'Tiếp nhận nhân viên mới',subtitle:'Khởi tạo hành trình',kind:'life',purpose:'Tiếp nhận thông tin cơ bản để bắt đầu vòng đời.',inputs:['Thông tin ứng viên/nhân viên mới','Nguồn tuyển dụng hoặc đề xuất tiếp nhận'],outputs:['Bản ghi tiếp nhận','Thông tin chuyển sang tạo hồ sơ'],actors:[['HR/Admin','Tiếp nhận và kiểm tra thông tin']],used:['MD-05','MD-06'] },
+  { id:'life-02',code:'02',title:'Tạo hồ sơ nhân viên',subtitle:'Thiết lập hồ sơ',kind:'life',purpose:'Thiết lập hồ sơ nhân sự đã xác nhận.',inputs:['Thông tin tiếp nhận','Thông tin cá nhân và giấy tờ'],outputs:['Hồ sơ nhân viên'],actors:[['HR Admin','Nhập và quản lý hồ sơ']],used:['MD-05','MD-06'] },
+  { id:'life-03',code:'03',title:'Bố trí công tác',subtitle:'Đơn vị và chức danh',kind:'life',purpose:'Gán nhân viên vào đơn vị và chức danh có hiệu lực.',inputs:['Nhân viên','Đơn vị / phòng ban','Chức vụ/chức danh'],outputs:['Vị trí công tác','Đơn vị công tác','Hiệu lực phân công'],actors:[['HR Admin','Thực hiện phân công'],['Quản lý đơn vị','Xác nhận nhu cầu/vị trí']],used:['MD-05','MD-06'],process:['Chọn nhân viên','Chọn đơn vị','Chọn chức vụ','Kiểm tra dữ liệu','Lưu bố trí công tác'] },
+  { id:'life-04',code:'04',title:'Thiết lập hợp đồng',subtitle:'Quan hệ lao động',kind:'life',purpose:'Thiết lập quan hệ lao động của nhân viên.',inputs:['Hồ sơ nhân viên','Thông tin bố trí công tác'],outputs:['Thông tin hợp đồng'],actors:[['HR Admin','Lập và quản lý thông tin hợp đồng']],used:['MD-05','MD-06'] },
+  { id:'life-05',code:'05',title:'Lương & chế độ',subtitle:'Cấu hình quyền lợi',kind:'life',purpose:'Gán cấu hình lương và chế độ cho nhân viên.',inputs:['Hồ sơ nhân viên','Thông tin hợp đồng'],outputs:['Cấu hình lương'],actors:[['C&B/HR Admin','Thiết lập lương và chế độ']],used:['MD-07','MD-09'] },
+  { id:'life-06',code:'06',title:'Quá trình làm việc',subtitle:'Quản lý xuyên suốt',kind:'life',purpose:'Ghi nhận phát sinh trong thời gian làm việc.',inputs:['Hồ sơ hiệu lực','Nghiệp vụ phát sinh'],outputs:['Lịch sử quá trình làm việc'],actors:[['HR Admin','Theo dõi quá trình làm việc']],used:['MD-08','MD-10'] },
+  { id:'life-07',code:'07',title:'Nghỉ việc & đóng hồ sơ',subtitle:'Kết thúc lifecycle',kind:'life',purpose:'Hoàn tất nghỉ việc và đóng hồ sơ.',inputs:['Đề nghị nghỉ việc','Hồ sơ hiện hành'],outputs:['Trạng thái nghỉ việc'],actors:[['HR Admin','Xử lý và đóng hồ sơ']],used:['MD-05','MD-06'] },
+]
+export const cross: Detail[] = [
+  {id:'cross-01',code:'A',title:'Công & phép',subtitle:'Chấm công, nghỉ và ca làm việc',kind:'cross',purpose:'Theo dõi thời gian làm việc và nghỉ phép.',used:['MD-08']},
+  {id:'cross-02',code:'B',title:'Hợp đồng',subtitle:'Điều chỉnh quan hệ lao động',kind:'cross',purpose:'Quản lý các phát sinh liên quan hợp đồng.',used:['MD-05','MD-06']},
+  {id:'cross-03',code:'C',title:'Biến động nhân sự',subtitle:'Thay đổi thông tin công tác',kind:'cross',purpose:'Ghi nhận thay đổi nhân sự trong quá trình làm việc.',used:['MD-05','MD-06']},
+  {id:'cross-04',code:'D',title:'Ghi nhận thành tích',subtitle:'Theo dõi kết quả và kỷ luật',kind:'cross',purpose:'Ghi nhận kết quả, thành tích hoặc kỷ luật.',used:['MD-10']},
+]
+export const support = ['Phân quyền người dùng','Phê duyệt nghiệp vụ','Cảnh báo - Thông báo','Tra cứu - Import/Export','Báo cáo - Nhật ký']
+export const relationships: Record<string, string[]> = {'MD-05':['life-01','life-02','life-03','life-04'],'MD-06':['life-01','life-02','life-03','life-04'],'MD-07':['life-05'],'MD-08':['life-06','cross-01'],'MD-09':['life-05'],'MD-10':['life-06','cross-04']}
