@@ -234,11 +234,194 @@ function Empty({ children }: { children: string }) { return <p className="empty-
 
 function StepList({ steps }: { steps: string[] }) { return <ol className="detail-steps">{steps.map((step) => <li key={step}>{step}</li>)}</ol> }
 
-function Wireframe({ title, fields }: { title: string; fields: string[] }) {
-  return <div className="wireframe">
-    <b>{title.toUpperCase()}</b>
-    {fields.slice(0, 4).map((field) => <div key={field}>{field}: <i>[ &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ]</i></div>)}
-    <footer><button type="button">HỦY</button><button type="button">LƯU</button></footer>
+function Wireframe({ title }: { title: string; fields: string[] }) {
+  const variant = getWireframeVariant(title)
+
+  return <div className="wireframe-panel">
+    <div className="wireframe-header">
+      <span>{variant.badge}</span>
+      <b>{variant.label}</b>
+    </div>
+
+    <div className={`wireframe-form ${variant.layout}`}>
+      {variant.fields.map((item, index) => {
+        const isSelect = item.type === 'select'
+        const isTextarea = item.type === 'textarea'
+        const isWide = item.wide
+
+        return <label
+          key={`${item.label}-${index}`}
+          className={`wireframe-field ${isSelect ? 'is-select' : ''} ${isTextarea ? 'is-textarea' : ''} ${isWide ? 'wide' : ''}`}
+        >
+          <span>{item.label}</span>
+          {isTextarea ? (
+            <div className="wireframe-textarea" aria-label={item.label}><span>{item.placeholder}</span></div>
+          ) : isSelect ? (
+            <div className="wireframe-select" aria-label={item.label}>
+              <span>{item.placeholder}</span>
+              <i>▾</i>
+            </div>
+          ) : (
+            <div className="wireframe-input" aria-label={item.label}>
+              <span>{item.placeholder}</span>
+            </div>
+          )}
+        </label>
+      })}
+    </div>
+
+    {variant.summary && <div className="wireframe-summary">
+      {variant.summary.map((item) => <div key={item.title}><strong>{item.title}</strong><p>{item.value}</p></div>)}
+    </div>}
+
+    <div className="wireframe-actions">
+      {variant.actions.map((action, index) => (
+        <button key={`${action}-${index}`} type="button" className={index === 0 ? 'secondary' : ''}>{action}</button>
+      ))}
+    </div>
   </div>
+}
+
+type WireframeField = {
+  label: string
+  placeholder: string
+  type: 'text' | 'select' | 'textarea'
+  wide?: boolean
+}
+
+type WireframeVariant = {
+  badge: string
+  label: string
+  layout: 'two-col' | 'three-col'
+  fields: WireframeField[]
+  summary: Array<{ title: string; value: string }>
+  actions: string[]
+}
+
+function getWireframeVariant(title: string): WireframeVariant {
+  const normalized = title.toLowerCase()
+
+  if (normalized.includes('tiếp nhận') || normalized.includes('nhân viên mới')) {
+    return {
+      badge: 'Onboarding',
+      label: 'Tiếp nhận nhân viên mới',
+      layout: 'two-col',
+      fields: [
+        { label: 'Họ tên', placeholder: 'Nguyễn Văn A', type: 'text', wide: false },
+        { label: 'Nguồn tuyển dụng', placeholder: 'LinkedIn / Referral / JobBoard', type: 'select', wide: false },
+        { label: 'Vị trí dự kiến', placeholder: 'Nhân viên kinh doanh', type: 'select', wide: false },
+        { label: 'Ngày bắt đầu', placeholder: '13/08/2026', type: 'text', wide: false },
+        { label: 'Phòng ban', placeholder: 'Phòng Sales', type: 'select', wide: false },
+        { label: 'Ghi chú', placeholder: 'Thông tin đặc biệt, ưu tiên, lịch trình...', type: 'textarea', wide: true }
+      ],
+      summary: [
+        { title: 'Thông tin chính', value: 'Khởi tạo hồ sơ, xác nhận vị trí và lịch bắt đầu làm việc.' },
+        { title: 'Phụ trách', value: 'HR Admin / Người quản lý / Phòng Tuyển dụng' }
+      ],
+      actions: ['Hủy', 'Lưu', 'Tiếp tục']
+    }
+  }
+
+  if (normalized.includes('hợp đồng') || normalized.includes('lao động')) {
+    return {
+      badge: 'Contract',
+      label: 'Thiết lập hợp đồng',
+      layout: 'three-col',
+      fields: [
+        { label: 'Loại hợp đồng', placeholder: 'Hợp đồng xác định thời hạn', type: 'select', wide: false },
+        { label: 'Ngày hiệu lực', placeholder: '13/08/2026', type: 'text', wide: false },
+        { label: 'Ngày kết thúc', placeholder: '12/08/2027', type: 'text', wide: false },
+        { label: 'Mức lương', placeholder: '18,000,000 VNĐ', type: 'text', wide: false },
+        { label: 'Chức danh', placeholder: 'Nhân viên', type: 'select', wide: false },
+        { label: 'Người phê duyệt', placeholder: 'Quản lý trực tiếp', type: 'select', wide: false },
+        { label: 'Điều khoản đặc biệt', placeholder: 'Bảo mật, nghỉ phép, thời gian thử việc...', type: 'textarea', wide: true }
+      ],
+      summary: [
+        { title: 'Điều kiện', value: 'Hợp đồng phải phù hợp với vị trí công tác và chính sách lao động.' },
+        { title: 'Trạng thái', value: 'Đang chờ phê duyệt / Đã ký / Đã lưu' }
+      ],
+      actions: ['Hủy', 'Lưu', 'Ký']
+    }
+  }
+
+  if (normalized.includes('lương') || normalized.includes('chế độ')) {
+    return {
+      badge: 'Payroll',
+      label: 'Lương & chế độ',
+      layout: 'two-col',
+      fields: [
+        { label: 'Mức lương cơ bản', placeholder: '18,000,000', type: 'text', wide: false },
+        { label: 'Phụ cấp', placeholder: 'Ăn trưa / Đi lại / Công tác', type: 'select', wide: false },
+        { label: 'Bảo hiểm', placeholder: 'BHXH / BHYT / BHTN', type: 'select', wide: false },
+        { label: 'Hiệu lực', placeholder: '01/08/2026', type: 'text', wide: false },
+        { label: 'Trạng thái', placeholder: 'Đang áp dụng', type: 'select', wide: false },
+        { label: 'Ghi chú', placeholder: 'Phân bổ thu nhập theo chính sách C&B', type: 'textarea', wide: true }
+      ],
+      summary: [
+        { title: 'Quyền lợi', value: 'Tính toán lương, bảo hiểm và phụ cấp theo cấu hình hiện hành.' },
+        { title: 'Người xử lý', value: 'C&B / HR Admin / Quản lý trực tiếp' }
+      ],
+      actions: ['Hủy', 'Lưu', 'Phê duyệt']
+    }
+  }
+
+  if (normalized.includes('nghỉ việc') || normalized.includes('đóng hồ sơ')) {
+    return {
+      badge: 'Separation',
+      label: 'Nghỉ việc & đóng hồ sơ',
+      layout: 'two-col',
+      fields: [
+        { label: 'Ngày nghỉ', placeholder: '25/08/2026', type: 'text', wide: false },
+        { label: 'Nguyên nhân', placeholder: 'Kết thúc hợp đồng / Xin nghỉ', type: 'select', wide: false },
+        { label: 'Phòng ban bàn giao', placeholder: 'Phòng Sales', type: 'select', wide: false },
+        { label: 'Trạng thái hồ sơ', placeholder: 'Chờ bàn giao', type: 'select', wide: false },
+        { label: 'Hồ sơ cần hoàn tất', placeholder: 'Chứng từ, BHXH, tài sản, giấy tờ', type: 'textarea', wide: true }
+      ],
+      summary: [
+        { title: 'Khâu quyết toán', value: 'Đảm bảo hồ sơ, công nợ, bảo hiểm và tài sản đã được bàn giao.' },
+        { title: 'Phụ trách', value: 'HR Admin / Quản lý / Bộ phận tài chính' }
+      ],
+      actions: ['Hủy', 'Lưu', 'Kết thúc']
+    }
+  }
+
+  if (normalized.includes('phê duyệt')) {
+    return {
+      badge: 'Approval',
+      label: 'Phê duyệt nghiệp vụ',
+      layout: 'two-col',
+      fields: [
+        { label: 'Yêu cầu', placeholder: 'Duyệt điều chỉnh hợp đồng / vị trí / lương', type: 'select', wide: false },
+        { label: 'Người duyệt', placeholder: 'Quản lý cấp trên', type: 'select', wide: false },
+        { label: 'Trạng thái', placeholder: 'Chờ phê duyệt', type: 'select', wide: false },
+        { label: 'Mức ưu tiên', placeholder: 'Bình thường / Cao / Khẩn cấp', type: 'select', wide: false },
+        { label: 'Ghi chú', placeholder: 'Lý do duyệt / từ chối / điều kiện bổ sung', type: 'textarea', wide: true }
+      ],
+      summary: [
+        { title: 'Quy trình', value: 'Các yêu cầu được xem xét theo quyền hạn và thời hạn hiệu lực.' },
+        { title: 'Kết quả', value: 'Phê duyệt / từ chối / yêu cầu bổ sung thông tin' }
+      ],
+      actions: ['Từ chối', 'Yêu cầu bổ sung', 'Phê duyệt']
+    }
+  }
+
+  return {
+    badge: 'Form',
+    label: title,
+    layout: 'two-col',
+    fields: [
+      { label: 'Thông tin chính', placeholder: 'Nhập thông tin', type: 'text' },
+      { label: 'Phòng ban', placeholder: 'Chọn phòng ban', type: 'select' },
+      { label: 'Trạng thái', placeholder: 'Chọn trạng thái', type: 'select' },
+      { label: 'Người xử lý', placeholder: 'Nhập người xử lý', type: 'text' },
+      { label: 'Mức ưu tiên', placeholder: 'Chọn mức ưu tiên', type: 'select' },
+      { label: 'Ghi chú', placeholder: 'Nhập ghi chú', type: 'textarea', wide: true }
+    ],
+    summary: [
+      { title: 'Thông tin chính', value: 'Nhập dữ liệu đầu vào theo nghiệp vụ, kiểm tra ràng buộc và xác nhận quyền thao tác.' },
+      { title: 'Phụ trách', value: 'HR Admin / Người quản lý / Bộ phận liên quan' }
+    ],
+    actions: ['Hủy', 'Lưu']
+  }
 }
 
