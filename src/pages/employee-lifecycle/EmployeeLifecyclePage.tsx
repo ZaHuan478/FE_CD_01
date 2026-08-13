@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { cross, lifecycle, masterGroups, masterItems, relationships, support, type Detail } from './data'
+import { cross, lifecycle, masterGroups, masterItems, relationships, support, workflows, type Detail, type Workflow } from './data'
 import './employee-lifecycle.css'
 
 type Selected = Detail | { id: string; title: string; subtitle: string; kind: 'master-item'; masterId: keyof typeof masterItems }
@@ -31,7 +31,7 @@ function DetailPanel({ item, onClose, onReference }: { item: Selected; onClose: 
     {isMasterItem ? <MasterContent masterId={item.masterId} onReference={onReference}/> : <ProcessContent item={item}/>} 
     <DetailSection title="05 · Master Data liên quan"><p><b>{isMasterItem ? 'Được sử dụng bởi:' : 'Master Data được sử dụng:'}</b></p>{linked.length ? <ReferenceList ids={linked} onReference={onReference}/> : <Empty>Đang chờ mapping từ SOP/Excel.</Empty>}</DetailSection>
     <DetailSection title="06 · Quan hệ dữ liệu"><div className="data-relation"><span>{isMasterItem ? item.masterId : (linked[0] ?? 'Dữ liệu đầu vào')}</span><i>↓</i><span>{item.title}</span><i>↓</i><span>{isMasterItem ? 'Nghiệp vụ sử dụng' : 'Kết quả nghiệp vụ'}</span></div></DetailSection>
-    <DetailSection title="07 · Quy trình chi tiết">{isMasterItem && item.masterId === 'MD-05' ? <MD05Workflow/> : item.kind === 'life' && item.process ? <StepList steps={item.process}/> : <Empty>Chưa có dữ liệu quy trình chi tiết trong nguồn hiện tại.</Empty>}</DetailSection>
+    <DetailSection title="07 · Quy trình chi tiết">{workflows[isMasterItem ? item.masterId : item.id] ? <WorkflowDiagram workflow={workflows[isMasterItem ? item.masterId : item.id]} /> : item.kind === 'life' && item.process ? <StepList steps={item.process}/> : <Empty>Chưa có dữ liệu quy trình chi tiết trong nguồn hiện tại.</Empty>}</DetailSection>
     <DetailSection title="08 · SOP / Nghiệp vụ liên quan"><Empty>Chưa xác định mapping từ SOP - HRUX.xlsx</Empty></DetailSection>
     <DetailSection title="09 · Giao diện sơ khảo"><Wireframe title={item.title} fields={isMasterItem ? master?.input.split(', ').slice(0, 4) ?? [] : item.inputs ?? []}/></DetailSection>
   </div></aside></>
@@ -43,5 +43,5 @@ function DataBlocks({ title, values }: { title: string; values?: string[] }) { r
 function ReferenceList({ ids, onReference }: { ids: string[]; onReference: (id: string) => void }) { return <div className="reference-list">{ids.map((id) => { const master = masterItems[id as keyof typeof masterItems]; const process = allDetails.find((entry) => entry.id === id); return <button key={id} onClick={() => onReference(id)}><b>{id}</b> {master?.title ?? process?.title}</button> })}</div> }
 function Empty({ children }: { children: string }) { return <p className="empty-state">{children}</p> }
 function StepList({ steps }: { steps: string[] }) { return <ol className="detail-steps">{steps.map((step) => <li key={step}>{step}</li>)}</ol> }
-function MD05Workflow() { const lanes = [['Nhân viên',['Cung cấp thông tin và hồ sơ','Xác nhận thông tin','Ký hợp đồng lao động']],['HR',['Tiếp nhận nhân viên','Tạo mới hồ sơ nhân viên','Gán phòng ban và chức vụ','Tạo hợp đồng lao động']],['Hệ thống',['Kiểm tra dữ liệu hợp lệ','Sinh mã nhân viên duy nhất','Lưu vị trí công tác','Sinh mã và lưu hợp đồng']]]; return <><div className="swimlanes">{lanes.map(([name, steps]) => <div className="swimlane" key={name as string}><b>{name as string}</b><div>{(steps as string[]).map((step) => <span key={step}>{step}</span>)}</div></div>)}</div><p className="source-note">Nguồn: sơ đồ luồng chi tiết do bạn cung cấp.</p></> }
+function WorkflowDiagram({ workflow }: { workflow: Workflow }) { return <><p className="workflow-title">{workflow.title}</p><div className="swimlanes">{workflow.lanes.map(([name, steps]) => <div className="swimlane" key={name}><b>{name}</b><div>{steps.map((step) => <span key={step}>{step}</span>)}</div></div>)}</div><p className="source-note">Nguồn: {workflow.source}</p></> }
 function Wireframe({ title, fields }: { title: string; fields: string[] }) { return <div className="wireframe"><b>{title.toUpperCase()}</b>{fields.slice(0, 4).map((field) => <div key={field}>{field}: <i>[ &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ]</i></div>)}<footer><button>HỦY</button><button>LƯU</button></footer></div> }
