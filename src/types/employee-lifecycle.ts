@@ -7,6 +7,8 @@ export type MasterDataCategory = {
   count?: number
   inputsCount: number
   outputsCount: number
+  sopIds?: string[]
+  sopBadge?: string
 }
 
 export type ERDCluster = {
@@ -17,11 +19,14 @@ export type ERDCluster = {
   color: string
   badgeBg: string
   badgeText?: string
+  sopIds?: string[]
   items: Array<{
     id: string
     code: string
     title: string
     subtitle: string
+    sopBadge?: string
+    sopIds?: string[]
   }>
 }
 
@@ -36,6 +41,8 @@ export type LifecycleStep = {
   inputs: string[]
   outputs: string[]
   actors: Array<{ name: string; role: string; action: string }>
+  sopIds?: string[]
+  sopBadge?: string
 }
 
 export type OperationModule = {
@@ -47,6 +54,8 @@ export type OperationModule = {
   category: string
   inputs: string[]
   outputs: string[]
+  sopIds?: string[]
+  sopBadge?: string
 }
 
 export type SystemSupportUtility = {
@@ -57,6 +66,8 @@ export type SystemSupportUtility = {
   iconName: string
   description: string
   features: string[]
+  sopIds?: string[]
+  sopBadge?: string
 }
 
 export type DetailItem = {
@@ -71,6 +82,8 @@ export type DetailItem = {
   rules?: string[]
   process?: { steps: string[]; source?: string; status?: string }
   sopIds: string[]
+  sopTitles?: string[]
   usedBy?: string[]
   uiFields?: string[]
 }
+

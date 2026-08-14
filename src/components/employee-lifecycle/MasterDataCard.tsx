@@ -75,6 +75,11 @@ export const MasterDataCard: React.FC<MasterDataCardProps> = ({
                 {cat.code}
               </span>
               <span>{cat.title}</span>
+              {cat.sopBadge && (
+                <span className="px-1.5 py-0.2 text-[9px] font-mono font-bold bg-emerald-50 text-emerald-700 border border-emerald-200 rounded group-hover:bg-emerald-100 transition-colors">
+                  📋 {cat.sopBadge}
+                </span>
+              )}
             </button>
           ))}
         </div>

@@ -100,11 +100,22 @@ export const LifecycleStepper: React.FC<LifecycleStepperProps> = ({
                   </h3>
 
                   {/* Subtitle */}
-                  <span className={`text-[11px] leading-tight line-clamp-1 ${
+                  <span className={`text-[11px] leading-tight line-clamp-1 mb-2 ${
                     isActive ? 'text-blue-100' : 'text-slate-500'
                   }`}>
                     {step.subtitle}
                   </span>
+
+                  {/* SOP Badge Tag */}
+                  {step.sopBadge && (
+                    <span className={`mt-auto px-2 py-0.5 text-[9px] font-mono font-bold rounded border transition-colors ${
+                      isActive
+                        ? 'bg-white/20 text-white border-white/40'
+                        : 'bg-emerald-50 text-emerald-700 border-emerald-200 group-hover:bg-emerald-100'
+                    }`}>
+                      📋 {step.sopBadge}
+                    </span>
+                  )}
                 </button>
               </div>
             )

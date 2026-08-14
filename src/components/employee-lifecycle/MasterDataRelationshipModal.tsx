@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react'
-import { X, Network, UserCheck, Briefcase, FileText, ArrowRight, ShieldCheck, Database, Layers } from 'lucide-react'
+import { X, Network, UserCheck, Briefcase, FileText, ArrowRight, ShieldCheck, Database, Layers, ScrollText } from 'lucide-react'
 import type { ERDCluster } from '../../types/employee-lifecycle'
 
 interface MasterDataRelationshipModalProps {
@@ -16,11 +16,12 @@ const erdClusters: ERDCluster[] = [
     targetField: 'SƠ YẾU LÝ LỊCH',
     color: 'from-sky-500 to-blue-600',
     badgeBg: 'bg-sky-50 text-sky-700 border-sky-200',
+    sopIds: ['SOP-NS-04'],
     items: [
-      { id: 'MD-04', code: 'MD-04', title: 'Đơn vị hành chính', subtitle: 'Tỉnh/Thành, Quận/Huyện, Xã/Phường' },
-      { id: 'MD-01', code: 'MD-01', title: 'Thêm giá trị danh mục', subtitle: 'Dân tộc, Tôn giáo, Quốc tịch' },
-      { id: 'MD-02', code: 'MD-02', title: 'Cập nhật giá trị danh mục', subtitle: 'Trình độ học vấn, Ngoại ngữ' },
-      { id: 'MD-03', code: 'MD-03', title: 'Khóa/Kích hoạt danh mục', subtitle: 'Trạng thái hiệu lực danh mục' },
+      { id: 'MD-04', code: 'MD-04', title: 'Đơn vị hành chính', subtitle: 'Tỉnh/Thành, Quận/Huyện, Xã/Phường', sopBadge: 'SOP-NS-01' },
+      { id: 'MD-01', code: 'MD-01', title: 'Thêm giá trị danh mục', subtitle: 'Dân tộc, Tôn giáo, Quốc tịch', sopBadge: 'SOP-NS-04' },
+      { id: 'MD-02', code: 'MD-02', title: 'Cập nhật giá trị danh mục', subtitle: 'Trình độ học vấn, Ngoại ngữ', sopBadge: 'SOP-NS-04' },
+      { id: 'MD-03', code: 'MD-03', title: 'Khóa/Kích hoạt danh mục', subtitle: 'Trạng thái hiệu lực danh mục', sopBadge: 'SOP-NS-04' },
     ]
   },
   {
@@ -30,9 +31,10 @@ const erdClusters: ERDCluster[] = [
     targetField: 'VỊ TRÍ CÔNG TÁC',
     color: 'from-indigo-500 to-purple-600',
     badgeBg: 'bg-indigo-50 text-indigo-700 border-indigo-200',
+    sopIds: ['SOP-NS-01', 'SOP-NS-09'],
     items: [
-      { id: 'MD-05', code: 'MD-05', title: 'Cơ cấu tổ chức', subtitle: 'Sơ đồ cây Đơn vị / Phòng ban' },
-      { id: 'MD-06', code: 'MD-06', title: 'Chức vụ / Chức danh', subtitle: 'Danh mục vị trí, Level, Định biên' },
+      { id: 'MD-05', code: 'MD-05', title: 'Cơ cấu tổ chức', subtitle: 'Sơ đồ cây Đơn vị / Phòng ban', sopBadge: 'SOP-NS-01' },
+      { id: 'MD-06', code: 'MD-06', title: 'Chức vụ / Chức danh', subtitle: 'Danh mục vị trí, Level, Định biên', sopBadge: 'SOP-NS-09' },
     ]
   },
   {
@@ -42,11 +44,12 @@ const erdClusters: ERDCluster[] = [
     targetField: 'HỢP ĐỒNG & CHẾ ĐỘ',
     color: 'from-emerald-500 to-teal-600',
     badgeBg: 'bg-emerald-50 text-emerald-700 border-emerald-200',
+    sopIds: ['SOP-L-02', 'SOP-CC-01', 'SOP-BH-01', 'SOP-NS-14'],
     items: [
-      { id: 'MD-07', code: 'MD-07', title: 'Thang / Bậc lương', subtitle: 'Mức lương cơ bản & Hệ số' },
-      { id: 'MD-08', code: 'MD-08', title: 'Ca & Loại nghỉ', subtitle: 'Cấu hình ca kíp, phép năm' },
-      { id: 'MD-09', code: 'MD-09', title: 'Bảo hiểm & Y tế', subtitle: 'BHXH, BHYT, Nơi KCB' },
-      { id: 'MD-10', code: 'MD-10', title: 'Danh mục Kỷ luật', subtitle: 'Hình thức khen thưởng & kỷ luật' },
+      { id: 'MD-07', code: 'MD-07', title: 'Thang / Bậc lương', subtitle: 'Mức lương cơ bản & Hệ số', sopBadge: 'SOP-L-02' },
+      { id: 'MD-08', code: 'MD-08', title: 'Ca & Loại nghỉ', subtitle: 'Cấu hình ca kíp, phép năm', sopBadge: 'SOP-CC-01' },
+      { id: 'MD-09', code: 'MD-09', title: 'Bảo hiểm & Y tế', subtitle: 'BHXH, BHYT, Nơi KCB', sopBadge: 'SOP-BH-01' },
+      { id: 'MD-10', code: 'MD-10', title: 'Danh mục Kỷ luật', subtitle: 'Hình thức khen thưởng & kỷ luật', sopBadge: 'SOP-NS-14' },
     ]
   }
 ]
@@ -87,12 +90,12 @@ export const MasterDataRelationshipModal: React.FC<MasterDataRelationshipModalPr
             <div>
               <div className="flex items-center gap-2">
                 <span className="text-[11px] font-bold text-blue-400 bg-blue-950/80 px-2 py-0.5 rounded border border-blue-800/60 uppercase tracking-wider">
-                  Data Dependency Flow
+                  Data & SOP Dependency Flow
                 </span>
                 <span className="text-xs text-slate-400">ERD Diagram</span>
               </div>
               <h2 className="text-xl font-bold text-white tracking-tight mt-0.5">
-                SƠ ĐỒ MỐI QUAN HỆ & PHỤ THUỘC DỮ LIỆU MASTER DATA
+                SƠ ĐỒ MỐI QUAN HỆ & PHỤ THUỘC DỮ LIỆU MASTER DATA · SOP
               </h2>
             </div>
           </div>
@@ -111,11 +114,18 @@ export const MasterDataRelationshipModal: React.FC<MasterDataRelationshipModalPr
         <div className="p-6 md:p-8 overflow-y-auto flex-1 bg-slate-950/60 space-y-8">
 
           {/* Top Banner Explainer */}
-          <div className="bg-slate-900/80 rounded-2xl p-4 border border-slate-800 flex items-center gap-4 text-xs text-slate-300">
-            <Database className="w-5 h-5 text-blue-400 shrink-0" />
-            <span>
-              Tất cả 10 danh mục <strong>Master Data (Tầng 1)</strong> được phân thành 3 cụm logic chính, chảy trực tiếp qua các Visual Connectors để hội tụ vào <strong>Bảng Hồ sơ Nhân viên Trung tâm</strong>.
-            </span>
+          <div className="bg-slate-900/80 rounded-2xl p-4 border border-slate-800 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 text-xs text-slate-300">
+            <div className="flex items-center gap-3">
+              <Database className="w-5 h-5 text-blue-400 shrink-0" />
+              <span>
+                Tất cả 10 danh mục <strong>Master Data (Tầng 1)</strong> chuẩn hóa theo <strong>SOP Quy trình</strong> chảy trực tiếp qua các Visual Connectors để hội tụ vào <strong>Bảng Hồ sơ Nhân viên Trung tâm</strong>.
+              </span>
+            </div>
+
+            <div className="flex items-center gap-2 shrink-0 bg-emerald-950/60 px-3 py-1.5 rounded-lg border border-emerald-700/60 text-emerald-300 font-medium">
+              <ScrollText className="w-4 h-4 text-emerald-400" />
+              <span>Gắn thẻ Quy trình SOP chuẩn</span>
+            </div>
           </div>
 
           {/* Interactive ERD Diagram Grid */}
@@ -131,9 +141,17 @@ export const MasterDataRelationshipModal: React.FC<MasterDataRelationshipModalPr
                   {/* Cluster Header */}
                   <div className="flex items-center justify-between mb-3.5 pb-2 border-b border-slate-800/80">
                     <div>
-                      <span className={`text-[11px] font-bold px-2.5 py-0.5 rounded border uppercase tracking-wider ${cluster.badgeBg}`}>
-                        {cluster.title}
-                      </span>
+                      <div className="flex items-center gap-2">
+                        <span className={`text-[11px] font-bold px-2.5 py-0.5 rounded border uppercase tracking-wider ${cluster.badgeBg}`}>
+                          {cluster.title}
+                        </span>
+                        {cluster.sopIds && cluster.sopIds.map((sop) => (
+                          <span key={sop} className="px-2 py-0.5 text-[10px] font-mono font-bold bg-emerald-950 text-emerald-400 rounded border border-emerald-800/60 flex items-center gap-1">
+                            <ScrollText className="w-3 h-3 text-emerald-400" />
+                            {sop}
+                          </span>
+                        ))}
+                      </div>
                       <p className="text-xs text-slate-400 mt-1">{cluster.subtitle}</p>
                     </div>
                     <div className="flex items-center gap-1.5 text-xs text-slate-300 font-semibold bg-slate-800/80 px-3 py-1 rounded-lg border border-slate-700">
@@ -158,8 +176,15 @@ export const MasterDataRelationshipModal: React.FC<MasterDataRelationshipModalPr
                           {item.code}
                         </span>
                         <div className="min-w-0 flex-1">
-                          <div className="text-xs font-semibold text-slate-200 group-hover/item:text-blue-300 transition-colors truncate">
-                            {item.title}
+                          <div className="flex items-center justify-between gap-1">
+                            <span className="text-xs font-semibold text-slate-200 group-hover/item:text-blue-300 transition-colors truncate">
+                              {item.title}
+                            </span>
+                            {item.sopBadge && (
+                              <span className="px-1.5 py-0.2 text-[9px] font-mono font-bold bg-emerald-950/80 text-emerald-400 rounded border border-emerald-800/60 shrink-0">
+                                {item.sopBadge}
+                              </span>
+                            )}
                           </div>
                           <div className="text-[11px] text-slate-400 truncate mt-0.5">
                             {item.subtitle}
@@ -194,40 +219,55 @@ export const MasterDataRelationshipModal: React.FC<MasterDataRelationshipModalPr
                     BẢNG HỒ SƠ NHÂN VIÊN TRUNG TÂM
                   </h3>
                   <p className="text-xs text-slate-400 mb-6">
-                    Central Employee Master Record (Tập hợp toàn bộ thông tin định danh & vận hành nhân sự)
+                    Central Employee Master Record (Tập hợp toàn bộ thông tin định danh & vận hành nhân sự theo chuẩn SOP)
                   </p>
 
                   {/* 3 Core Fields Converging */}
                   <div className="space-y-3">
-                    <div className="p-3 bg-slate-950/80 rounded-xl border border-sky-500/30 flex items-center gap-3">
-                      <FileText className="w-4 h-4 text-sky-400 shrink-0" />
-                      <div>
-                        <div className="text-[11px] text-sky-400 font-bold uppercase">Sơ yếu Lý lịch</div>
-                        <div className="text-xs text-slate-300">Thông tin cá nhân & Địa lý</div>
+                    <div className="p-3 bg-slate-950/80 rounded-xl border border-sky-500/30 flex items-center justify-between">
+                      <div className="flex items-center gap-3">
+                        <FileText className="w-4 h-4 text-sky-400 shrink-0" />
+                        <div>
+                          <div className="text-[11px] text-sky-400 font-bold uppercase">Sơ yếu Lý lịch</div>
+                          <div className="text-xs text-slate-300">Thông tin cá nhân & Địa lý</div>
+                        </div>
                       </div>
+                      <span className="px-2 py-0.5 text-[9px] font-mono font-bold bg-emerald-950 text-emerald-400 rounded border border-emerald-800">
+                        SOP-NS-04
+                      </span>
                     </div>
 
-                    <div className="p-3 bg-slate-950/80 rounded-xl border border-indigo-500/30 flex items-center gap-3">
-                      <Briefcase className="w-4 h-4 text-indigo-400 shrink-0" />
-                      <div>
-                        <div className="text-[11px] text-indigo-400 font-bold uppercase">Vị trí Công tác</div>
-                        <div className="text-xs text-slate-300">Cơ cấu, Chức danh & Level</div>
+                    <div className="p-3 bg-slate-950/80 rounded-xl border border-indigo-500/30 flex items-center justify-between">
+                      <div className="flex items-center gap-3">
+                        <Briefcase className="w-4 h-4 text-indigo-400 shrink-0" />
+                        <div>
+                          <div className="text-[11px] text-indigo-400 font-bold uppercase">Vị trí Công tác</div>
+                          <div className="text-xs text-slate-300">Cơ cấu, Chức danh & Level</div>
+                        </div>
                       </div>
+                      <span className="px-2 py-0.5 text-[9px] font-mono font-bold bg-emerald-950 text-emerald-400 rounded border border-emerald-800">
+                        SOP-NS-01/09
+                      </span>
                     </div>
 
-                    <div className="p-3 bg-slate-950/80 rounded-xl border border-emerald-500/30 flex items-center gap-3">
-                      <Layers className="w-4 h-4 text-emerald-400 shrink-0" />
-                      <div>
-                        <div className="text-[11px] text-emerald-400 font-bold uppercase">Hợp đồng & Chế độ</div>
-                        <div className="text-xs text-slate-300">Lương, Ca kíp & Bảo hiểm</div>
+                    <div className="p-3 bg-slate-950/80 rounded-xl border border-emerald-500/30 flex items-center justify-between">
+                      <div className="flex items-center gap-3">
+                        <Layers className="w-4 h-4 text-emerald-400 shrink-0" />
+                        <div>
+                          <div className="text-[11px] text-emerald-400 font-bold uppercase">Hợp đồng & Chế độ</div>
+                          <div className="text-xs text-slate-300">Lương, Ca kíp & Bảo hiểm</div>
+                        </div>
                       </div>
+                      <span className="px-2 py-0.5 text-[9px] font-mono font-bold bg-emerald-950 text-emerald-400 rounded border border-emerald-800">
+                        SOP-L/BH/CC
+                      </span>
                     </div>
                   </div>
                 </div>
 
                 <div className="relative z-10 mt-6 pt-4 border-t border-slate-800/80 text-center">
                   <span className="text-[11px] text-slate-400 font-medium">
-                    ✦ Sẵn sàng cung cấp dữ liệu cho 7 bước Vòng đời Nhân viên (Tầng 2)
+                    ✦ Sẵn sàng cung cấp dữ liệu chuẩn SOP cho 7 bước Vòng đời Nhân viên (Tầng 2)
                   </span>
                 </div>
               </div>
@@ -240,7 +280,7 @@ export const MasterDataRelationshipModal: React.FC<MasterDataRelationshipModalPr
         {/* Modal Footer */}
         <div className="px-6 py-4 bg-slate-900 border-t border-slate-800 flex items-center justify-between">
           <span className="text-xs text-slate-400">
-            Mối quan hệ dữ liệu được cấu hình chuẩn mực theo mô hình Enterprise SaaS
+            Mối quan hệ dữ liệu & Quy định SOP được cấu hình chuẩn mực theo mô hình Enterprise SaaS
           </span>
           <button
             type="button"
@@ -254,3 +294,4 @@ export const MasterDataRelationshipModal: React.FC<MasterDataRelationshipModalPr
     </div>
   )
 }
+

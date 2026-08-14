@@ -16,7 +16,8 @@ const defaultModules: OperationModule[] = [
     iconName: 'Clock',
     category: 'Time & Attendance',
     inputs: ['Chấm công', 'Đơn xin nghỉ'],
-    outputs: ['Bảng tổng hợp công']
+    outputs: ['Bảng tổng hợp công'],
+    sopBadge: 'SOP-CC-01'
   },
   {
     id: 'CF-02',
@@ -26,7 +27,8 @@ const defaultModules: OperationModule[] = [
     iconName: 'FileEdit',
     category: 'Contract Admin',
     inputs: ['Yêu cầu tái ký', 'Phụ lục HĐ'],
-    outputs: ['Hợp đồng mới']
+    outputs: ['Hợp đồng mới'],
+    sopBadge: 'SOP-NS-05'
   },
   {
     id: 'CF-03',
@@ -36,7 +38,8 @@ const defaultModules: OperationModule[] = [
     iconName: 'UserSquare2',
     category: 'Movement',
     inputs: ['Tờ trình luân chuyển'],
-    outputs: ['Quyết định điều động']
+    outputs: ['Quyết định điều động'],
+    sopBadge: 'SOP-NS-12'
   },
   {
     id: 'CF-04',
@@ -46,7 +49,8 @@ const defaultModules: OperationModule[] = [
     iconName: 'Award',
     category: 'Conduct & Rewards',
     inputs: ['Đề xuất khen thưởng'],
-    outputs: ['Quyết định khen thưởng/kỷ luật']
+    outputs: ['Quyết định khen thưởng/kỷ luật'],
+    sopBadge: 'SOP-NS-13'
   },
   {
     id: 'CF-05',
@@ -56,7 +60,8 @@ const defaultModules: OperationModule[] = [
     iconName: 'GraduationCap',
     category: 'Learning',
     inputs: ['Nhu cầu đào tạo'],
-    outputs: ['Kết quả đánh giá khóa học']
+    outputs: ['Kết quả đánh giá khóa học'],
+    sopBadge: 'SOP-DT-02'
   },
   {
     id: 'CF-06',
@@ -66,7 +71,8 @@ const defaultModules: OperationModule[] = [
     iconName: 'Target',
     category: 'Performance',
     inputs: ['Chỉ tiêu KPI'],
-    outputs: ['Kết quả đánh giá kỳ']
+    outputs: ['Kết quả đánh giá kỳ'],
+    sopBadge: 'SOP-ĐG-02'
   },
   {
     id: 'CF-07',
@@ -76,7 +82,8 @@ const defaultModules: OperationModule[] = [
     iconName: 'HeartHandshake',
     category: 'Benefits',
     inputs: ['Danh sách đăng ký'],
-    outputs: ['Chi phí phúc lợi']
+    outputs: ['Chi phí phúc lợi'],
+    sopBadge: 'SOP-PL-01'
   },
   {
     id: 'CF-08',
@@ -86,7 +93,8 @@ const defaultModules: OperationModule[] = [
     iconName: 'Receipt',
     category: 'Travel & Expense',
     inputs: ['Lịch công tác'],
-    outputs: ['Quyết toán chi phí']
+    outputs: ['Quyết toán chi phí'],
+    sopBadge: 'SOP-NS-15'
   }
 ]
 
@@ -146,7 +154,12 @@ export const OperationsGrid: React.FC<OperationsGridProps> = ({
                   <div className="p-2.5 bg-white group-hover:bg-blue-50 text-slate-700 group-hover:text-blue-600 rounded-lg border border-slate-200/70 group-hover:border-blue-200 transition-colors">
                     {icon}
                   </div>
-                  <div className="flex items-center gap-1">
+                  <div className="flex items-center gap-1.5">
+                    {mod.sopBadge && (
+                      <span className="px-1.5 py-0.5 text-[9px] font-mono font-bold bg-emerald-50 text-emerald-700 border border-emerald-200/80 rounded group-hover:bg-emerald-100 transition-colors">
+                        📋 {mod.sopBadge}
+                      </span>
+                    )}
                     <span className="px-2 py-0.5 text-[10px] font-mono font-bold bg-slate-200/70 group-hover:bg-blue-600 text-slate-700 group-hover:text-white rounded transition-colors">
                       {mod.code}
                     </span>
