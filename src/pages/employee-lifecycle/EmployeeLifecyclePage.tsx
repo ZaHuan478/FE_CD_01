@@ -9,6 +9,7 @@ import { OperationsGrid } from '../../components/employee-lifecycle/OperationsGr
 import { SystemSupportBar } from '../../components/employee-lifecycle/SystemSupportBar'
 import { SystemGuideBanner } from '../../components/employee-lifecycle/SystemGuideBanner'
 import { WireframeFormModal } from '../../components/employee-lifecycle/WireframeFormModal'
+import { NodeDetailDrawer } from '../../components/employee-lifecycle/NodeDetailDrawer'
 
 import { masterData, lifecycleProcesses, crossFunctionalProcesses, sharedServices } from './data'
 import type { MasterDataCategory, LifecycleStep, OperationModule, DetailItem } from '../../types/employee-lifecycle'
@@ -286,7 +287,7 @@ export const EmployeeLifecyclePage: React.FC = () => {
 
       {/* NODE DETAIL INSPECTOR DRAWER MODAL */}
       {selectedItem && (
-        <DetailDrawer
+        <NodeDetailDrawer
           item={selectedItem}
           onClose={() => setSelectedItem(null)}
           onOpenWireframe={(itemToOpen) => setWireframeItem(itemToOpen)}
@@ -300,195 +301,6 @@ export const EmployeeLifecyclePage: React.FC = () => {
         onClose={() => setWireframeItem(null)}
       />
 
-    </div>
-  )
-}
-
-/* Detail Drawer Modal for Node Inspection */
-const DetailDrawer: React.FC<{
-  item: DetailItem
-  onClose: () => void
-  onOpenWireframe?: (item: DetailItem) => void
-}> = ({ item, onClose, onOpenWireframe }) => {
-  return (
-    <div className="fixed inset-0 z-50 flex items-center justify-end bg-slate-900/60 backdrop-blur-xs">
-      <div className="bg-white w-full max-w-xl h-full shadow-2xl flex flex-col border-l border-slate-200 animate-in slide-in-from-right duration-200">
-
-        {/* Header */}
-        <div className="p-6 border-b border-slate-200 bg-slate-900 text-white flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div className="p-2 bg-blue-600 text-white rounded-lg font-mono text-xs font-bold">
-              {item.id}
-            </div>
-            <div>
-              <span className="text-[10px] font-bold uppercase tracking-wider text-blue-400">
-                {item.category.toUpperCase()} NODE DETAILS
-              </span>
-              <h3 className="text-lg font-bold leading-tight">{item.title}</h3>
-            </div>
-          </div>
-          <button
-            type="button"
-            onClick={onClose}
-            className="p-2 text-slate-400 hover:text-white hover:bg-slate-800 rounded-lg transition-colors cursor-pointer"
-          >
-            <X className="w-5 h-5" />
-          </button>
-        </div>
-
-        {/* Body */}
-        <div className="p-6 overflow-y-auto flex-1 space-y-6 text-sm text-slate-700">
-
-          {/* SOP Governing Banner */}
-          {item.sopIds && item.sopIds.length > 0 && (
-            <div className="p-4 bg-emerald-50/80 rounded-2xl border border-emerald-200/80">
-              <div className="flex items-center gap-2 text-xs font-bold text-emerald-800 uppercase tracking-wider mb-1">
-                <FileText className="w-4 h-4 text-emerald-600" />
-                <span>Quy trình SOP Điều phối (Governance)</span>
-              </div>
-              <div className="flex flex-wrap gap-2 mt-2">
-                {item.sopIds.map((sop, idx) => (
-                  <span key={idx} className="px-2.5 py-1 bg-emerald-700 text-white rounded-lg font-mono text-xs font-bold shadow-xs">
-                    📋 {sop}
-                  </span>
-                ))}
-              </div>
-              {item.sopTitles && item.sopTitles.length > 0 && (
-                <p className="text-xs text-emerald-900 font-medium mt-2 leading-relaxed">
-                  {item.sopTitles.join(', ')}
-                </p>
-              )}
-            </div>
-          )}
-
-          <div>
-            <h4 className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">01 · Mô tả nghiệp vụ</h4>
-            <p className="p-3 bg-slate-50 rounded-xl border border-slate-200 text-xs leading-relaxed text-slate-800">
-              {item.subtitle || 'Dữ liệu và quy trình tiêu chuẩn thuộc hệ thống Quản trị Nhân sự.'}
-            </p>
-          </div>
-
-          <div>
-            <h4 className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">02 · Input (Dữ liệu đầu vào)</h4>
-            {item.inputs.length ? (
-              <ul className="space-y-1.5">
-                {item.inputs.map((inp, idx) => (
-                  <li key={idx} className="flex items-center gap-2 p-2 bg-slate-50 rounded-lg text-xs border border-slate-200/70">
-                    <Database className="w-3.5 h-3.5 text-blue-600" />
-                    <span>{inp}</span>
-                  </li>
-                ))}
-              </ul>
-            ) : (
-              <p className="text-xs text-slate-400 italic">Không có dữ liệu đầu vào đặc thù.</p>
-            )}
-          </div>
-
-          <div>
-            <h4 className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">03 · Output (Kết quả đầu ra)</h4>
-            {item.outputs.length ? (
-              <ul className="space-y-1.5">
-                {item.outputs.map((out, idx) => (
-                  <li key={idx} className="flex items-center gap-2 p-2 bg-emerald-50 text-emerald-800 rounded-lg text-xs border border-emerald-200/70">
-                    <FileText className="w-3.5 h-3.5 text-emerald-600" />
-                    <span>{out}</span>
-                  </li>
-                ))}
-              </ul>
-            ) : (
-              <p className="text-xs text-slate-400 italic">Không có dữ liệu đầu ra đặc thù.</p>
-            )}
-          </div>
-
-          {item.actors.length > 0 && (
-            <div>
-              <h4 className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">04 · Tác nhân thực hiện</h4>
-              <div className="space-y-2">
-                {item.actors.map((actor, idx) => (
-                  <div key={idx} className="p-3 bg-slate-50 rounded-xl border border-slate-200 text-xs">
-                    <div className="font-bold text-slate-900">{actor.name} ({actor.role})</div>
-                    <div className="text-slate-500 mt-0.5">Hành động: {actor.action}</div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
-
-          {item.process?.steps && item.process.steps.length > 0 && (
-            <div>
-              <h4 className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">05 · Các bước quy trình</h4>
-              <ol className="space-y-2 list-decimal list-inside text-xs">
-                {item.process.steps.map((step, idx) => (
-                  <li key={idx} className="p-2 bg-slate-50 rounded-lg border border-slate-200/70">
-                    {step}
-                  </li>
-                ))}
-              </ol>
-            </div>
-          )}
-
-          {/* 06 · UI Wireframe Form Fields Preview & Modal Launcher */}
-          <div>
-            <h4 className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">
-              06 · Giao diện Form & Trường dữ liệu Sơ khảo (UI Wireframe Preview)
-            </h4>
-            <div className="p-4 bg-slate-900 text-slate-100 rounded-2xl border border-slate-800 shadow-inner space-y-3">
-              <div className="flex items-center justify-between border-b border-slate-800 pb-2">
-                <div className="flex items-center gap-1.5 text-xs font-semibold text-blue-400">
-                  <Layout className="w-3.5 h-3.5 text-blue-400" />
-                  <span>Mẫu Form nhập liệu sơ khảo ({item.id})</span>
-                </div>
-                <span className="text-[10px] text-slate-400 bg-slate-800 px-2 py-0.5 rounded font-mono">Form UI Schema</span>
-              </div>
-
-              {item.uiFields && item.uiFields.length > 0 && (
-                <div className="grid grid-cols-2 gap-2 pt-1">
-                  {item.uiFields.map((field, idx) => (
-                    <div key={idx} className="p-2 bg-slate-800/80 rounded-xl border border-slate-700/60 flex items-center justify-between text-xs">
-                      <span className="text-slate-300 font-medium">{field}</span>
-                      <span className="text-[9px] text-blue-400 bg-blue-950/60 px-1.5 py-0.5 rounded border border-blue-800/40">Input</span>
-                    </div>
-                  ))}
-                </div>
-              )}
-
-              {/* Action Button to Launch Full Form UI Modal */}
-              <div className="pt-2">
-                <button
-                  type="button"
-                  onClick={() => onOpenWireframe?.(item)}
-                  className="w-full flex items-center justify-center gap-2 py-2.5 px-4 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-semibold text-xs rounded-xl shadow-sm transition-all duration-200 transform hover:-translate-y-0.5 cursor-pointer"
-                >
-                  <Layout className="w-4 h-4" />
-                  <span>🖥️ Mở Xem & Thao tác Form UI Sơ Khảo (Interactive Form Modal)</span>
-                </button>
-              </div>
-            </div>
-          </div>
-
-        </div>
-
-        {/* Footer */}
-        <div className="p-4 border-t border-slate-200 bg-slate-50 flex items-center justify-between">
-          <button
-            type="button"
-            onClick={() => onOpenWireframe?.(item)}
-            className="inline-flex items-center gap-1.5 px-3 py-2 bg-blue-50 text-blue-700 hover:bg-blue-100 rounded-xl text-xs font-semibold border border-blue-200 transition-colors cursor-pointer"
-          >
-            <Layout className="w-3.5 h-3.5" />
-            <span>Mở Form UI Sơ khảo</span>
-          </button>
-
-          <button
-            type="button"
-            onClick={onClose}
-            className="px-4 py-2 bg-slate-900 hover:bg-slate-800 text-white rounded-xl text-xs font-semibold cursor-pointer"
-          >
-            Đóng
-          </button>
-        </div>
-
-      </div>
     </div>
   )
 }

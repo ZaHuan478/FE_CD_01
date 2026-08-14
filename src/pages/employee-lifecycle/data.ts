@@ -1,3 +1,5 @@
+import { lifecycleMockNodes } from '../../data/lifecycle-mock-data'
+
 export type SourceStatus = 'official' | 'designed' | 'draft' | 'not_available' | 'placeholder'
 export type ProcessStatus = 'official' | 'designed' | 'draft' | 'not_available'
 
@@ -478,451 +480,80 @@ export const masterData: BusinessNode[] = [
 ]
 
 export const lifecycleProcesses: BusinessNode[] = [
-  {
-    id: 'LIFE-01',
+  'LIFE-01', 'LIFE-02', 'LIFE-03', 'LIFE-04', 'LIFE-05', 'LIFE-06', 'LIFE-07'
+].map(id => {
+  const node = lifecycleMockNodes[id]
+  return {
+    id: node.id,
     type: 'lifecycle',
-    code: '01',
-    title: 'Tiếp nhận nhân viên mới',
-    subtitle: 'Khởi tạo hành trình',
+    code: node.code,
+    title: node.title,
+    subtitle: node.subtitle,
     overview: {
-      purpose: 'Tiếp nhận thông tin cơ bản của ứng viên hoặc nhân viên mới để khởi đầu vòng đời nhân viên.',
-      description: 'Bước đầu tiên của lifecycle, tạo nền tảng cho hồ sơ, vị trí và điều kiện làm việc.',
+      purpose: node.contextTrigger,
+      description: node.subtitle,
       status: 'official',
       phase: 'Lifecycle'
     },
-    inputs: [
-      { name: 'Thông tin ứng viên/nhân viên mới', source: 'Nguồn tuyển dụng / đề xuất tiếp nhận', sourceType: 'manual' },
-      { name: 'Thông tin cơ bản cá nhân', source: 'Hồ sơ ứng viên', sourceType: 'manual' }
-    ],
-    outputs: [
-      { name: 'Bản ghi tiếp nhận', source: 'Hệ thống', sourceType: 'system' },
-      { name: 'Thông tin chuyển sang tạo hồ sơ', source: 'Hệ thống', sourceType: 'system' }
-    ],
+    inputs: node.inputs.map(inp => ({ name: inp, source: 'SOP Standard', sourceType: 'manual' })),
+    outputs: node.outputs.map(out => ({ name: out, source: 'HRM Core Engine', sourceType: 'system' })),
     actors: [
-      { name: 'HR/Admin', role: 'Tiếp nhận', action: 'Thu thập và kiểm tra thông tin' }
+      { name: node.actorsMatrix.proposer, role: 'Đề xuất', action: 'Kích hoạt' },
+      { name: node.actorsMatrix.approver, role: 'Phê duyệt', action: 'Thẩm định' },
+      { name: node.actorsMatrix.executor, role: 'Thực thi', action: 'Xử lý hệ thống' }
     ],
     masterDataIds: ['MD-05', 'MD-06'],
-    sopIds: [],
-    process: {
-      status: 'designed',
-      steps: ['Nhận thông tin ứng viên', 'Kiểm tra dữ liệu ban đầu', 'Khởi tạo bản ghi', 'Chuyển sang tạo hồ sơ'],
-      source: 'Quy trình được mô tả trong bản đồ nghiệp vụ hiện có.'
-    },
+    sopIds: node.sopIds,
+    process: node.process,
     wireframe: {
-      title: 'Tiếp nhận nhân viên mới',
-      fields: ['Họ tên', 'Nguồn tuyển dụng', 'Vị trí', 'Ngày bắt đầu'],
+      title: node.title,
+      fields: node.uiFields,
       actions: ['Hủy', 'Lưu', 'Tiếp tục']
     },
     source: {
-      note: 'Nguồn nghiệp vụ lấy từ sơ đồ hiện có và căn cứ vào SOP tuyển dụng / tiếp nhận.',
-      status: 'official'
-    }
-  },
-  {
-    id: 'LIFE-02',
-    type: 'lifecycle',
-    code: '02',
-    title: 'Tạo hồ sơ nhân viên',
-    subtitle: 'Thiết lập hồ sơ',
-    overview: {
-      purpose: 'Thiết lập hồ sơ nhân sự đầy đủ để phục vụ các nghiệp vụ tiếp theo.',
-      description: 'Xử lý thông tin cá nhân, giấy tờ và dữ liệu bắt buộc cho một nhân viên mới.',
-      status: 'official',
-      phase: 'Lifecycle'
-    },
-    inputs: [
-      { name: 'Thông tin tiếp nhận', source: 'LIFE-01', sourceType: 'system' },
-      { name: 'Thông tin cá nhân', source: 'Người dùng / HR', sourceType: 'manual' }
-    ],
-    outputs: [
-      { name: 'Hồ sơ nhân viên', source: 'Hệ thống', sourceType: 'system' }
-    ],
-    actors: [
-      { name: 'HR Admin', role: 'Quản lý hồ sơ', action: 'Nhập và duy trì hồ sơ' }
-    ],
-    masterDataIds: ['MD-05', 'MD-06'],
-    sopIds: [],
-    process: {
-      status: 'designed',
-      steps: ['Kiểm tra thông tin', 'Nhập hồ sơ', 'Xác nhận dữ liệu', 'Lưu hồ sơ'],
-      source: 'Sơ đồ nghiệp vụ và quy trình hồ sơ nhân sự.'
-    },
-    wireframe: {
-      title: 'Hồ sơ nhân viên',
-      fields: ['Họ tên', 'Ngày sinh', 'CCCD', 'Địa chỉ'],
-      actions: ['Hủy', 'Lưu']
-    },
-    source: {
-      note: 'Dữ liệu nguồn dựa trên nghiệp vụ hồ sơ nhân sự.',
-      status: 'official'
-    }
-  },
-  {
-    id: 'LIFE-03',
-    type: 'lifecycle',
-    code: '03',
-    title: 'Bố trí công tác',
-    subtitle: 'Đơn vị và chức danh',
-    overview: {
-      purpose: 'Gán nhân viên vào đơn vị, vị trí công tác và chức danh phù hợp.',
-      description: 'Liên kết nhân viên với cơ cấu tổ chức và định nghĩa vị trí làm việc.',
-      status: 'official',
-      phase: 'Lifecycle'
-    },
-    inputs: [
-      { name: 'Nhân viên', source: 'LIFE-02', sourceType: 'system' },
-      { name: 'Đơn vị / phòng ban', source: 'MD-05', sourceType: 'master' },
-      { name: 'Chức vụ / chức danh', source: 'MD-06', sourceType: 'master' }
-    ],
-    outputs: [
-      { name: 'Vị trí công tác', source: 'Hệ thống', sourceType: 'system' },
-      { name: 'Đơn vị công tác', source: 'Hệ thống', sourceType: 'system' }
-    ],
-    actors: [
-      { name: 'HR Admin', role: 'Phân công', action: 'Định vị và gắn nhân viên' },
-      { name: 'Quản lý đơn vị', role: 'Xác nhận', action: 'Phê duyệt vị trí' }
-    ],
-    masterDataIds: ['MD-05', 'MD-06'],
-    sopIds: [],
-    process: {
-      status: 'designed',
-      steps: ['Chọn nhân viên', 'Chọn đơn vị', 'Chọn chức vụ', 'Kiểm tra dữ liệu', 'Lưu bố trí'],
-      source: 'Quy trình được thiết kế và nhấn mạnh bởi roadmap hiện có.'
-    },
-    wireframe: {
-      title: 'Bố trí công tác',
-      fields: ['Nhân viên', 'Đơn vị', 'Chức danh', 'Hiệu lực'],
-      actions: ['Hủy', 'Lưu', 'Phê duyệt']
-    },
-    source: {
-      note: 'Dữ liệu nguồn được xác định từ quy trình bố trí và cơ cấu tổ chức.',
-      status: 'official'
-    }
-  },
-  {
-    id: 'LIFE-04',
-    type: 'lifecycle',
-    code: '04',
-    title: 'Thiết lập hợp đồng',
-    subtitle: 'Quan hệ lao động',
-    overview: {
-      purpose: 'Thiết lập quan hệ lao động của nhân viên với thông tin hiệu lực và điều kiện làm việc.',
-      description: 'Hợp đồng đóng vai trò kết nối hồ sơ nhân sự với điều kiện lao động và chính sách áp dụng.',
-      status: 'official',
-      phase: 'Lifecycle'
-    },
-    inputs: [
-      { name: 'Hồ sơ nhân viên', source: 'LIFE-02', sourceType: 'system' },
-      { name: 'Thông tin bố trí công tác', source: 'LIFE-03', sourceType: 'system' }
-    ],
-    outputs: [
-      { name: 'Thông tin hợp đồng', source: 'Hệ thống', sourceType: 'system' }
-    ],
-    actors: [
-      { name: 'HR Admin', role: 'Hợp đồng', action: 'Lập và quản lý hợp đồng' }
-    ],
-    masterDataIds: ['MD-05', 'MD-06'],
-    sopIds: [],
-    process: {
-      status: 'designed',
-      steps: ['Tạo hồ sơ hợp đồng', 'Xác thực dữ liệu', 'Phê duyệt', 'Lưu hợp đồng'],
-      source: 'Quy trình hợp đồng lao động được mô tả trong sơ đồ hiện có.'
-    },
-    wireframe: {
-      title: 'Hợp đồng lao động',
-      fields: ['Loại hợp đồng', 'Ngày hiệu lực', 'Mức lương', 'Chức danh'],
-      actions: ['Hủy', 'Lưu', 'Ký']
-    },
-    source: {
-      note: 'Nguồn nghiệp vụ từ quy trình hợp đồng nhân sự.',
-      status: 'official'
-    }
-  },
-  {
-    id: 'LIFE-05',
-    type: 'lifecycle',
-    code: '05',
-    title: 'Lương & chế độ',
-    subtitle: 'Cấu hình quyền lợi',
-    overview: {
-      purpose: 'Gán cấu hình lương, bảo hiểm và quyền lợi cho nhân viên.',
-      description: 'Unify thu nhập, bảo hiểm và chế độ theo dữ liệu cấu hình và hợp đồng.',
-      status: 'official',
-      phase: 'Lifecycle'
-    },
-    inputs: [
-      { name: 'Hồ sơ nhân viên', source: 'LIFE-02', sourceType: 'system' },
-      { name: 'Thông tin hợp đồng', source: 'LIFE-04', sourceType: 'system' },
-      { name: 'Thang/bậc lương', source: 'MD-07', sourceType: 'master' }
-    ],
-    outputs: [
-      { name: 'Cấu hình lương', source: 'Hệ thống', sourceType: 'system' },
-      { name: 'Chế độ bảo hiểm', source: 'Hệ thống', sourceType: 'system' }
-    ],
-    actors: [
-      { name: 'C&B/HR Admin', role: 'Lương', action: 'Thiết lập và cập nhật lương' }
-    ],
-    masterDataIds: ['MD-07', 'MD-09'],
-    sopIds: [],
-    process: {
-      status: 'designed',
-      steps: ['Xác định chính sách', 'Gán thang lương', 'Cấu hình bảo hiểm', 'Lưu quyền lợi'],
-      source: 'Quy trình lương và chế độ được thiết kế trong mô hình hiện có.'
-    },
-    wireframe: {
-      title: 'Lương & chế độ',
-      fields: ['Mức lương', 'Phụ cấp', 'Bảo hiểm', 'Hiệu lực'],
-      actions: ['Hủy', 'Lưu', 'Phê duyệt']
-    },
-    source: {
-      note: 'Nguồn nghiệp vụ dựa trên chính sách lương và bảo hiểm.',
-      status: 'official'
-    }
-  },
-  {
-    id: 'LIFE-06',
-    type: 'lifecycle',
-    code: '06',
-    title: 'Quá trình làm việc',
-    subtitle: 'Quản lý xuyên suốt',
-    overview: {
-      purpose: 'Theo dõi và ghi nhận các phát sinh trong thời gian nhân viên làm việc.',
-      description: 'Bước này tích hợp các nghiệp vụ xuyên suốt như chấm công, ca, nghỉ phép và kỷ luật.',
-      status: 'official',
-      phase: 'Lifecycle'
-    },
-    inputs: [
-      { name: 'Hồ sơ đang hiệu lực', source: 'Hệ thống', sourceType: 'system' },
-      { name: 'Nghiệp vụ phát sinh', source: 'Quy trình nghiệp vụ', sourceType: 'system' }
-    ],
-    outputs: [
-      { name: 'Lịch sử quá trình làm việc', source: 'Hệ thống', sourceType: 'system' }
-    ],
-    actors: [
-      { name: 'HR Admin', role: 'Theo dõi', action: 'Ghi nhận và kiểm tra phát sinh' },
-      { name: 'Quản lý', role: 'Phê duyệt', action: 'Xác nhận nghiệp vụ' }
-    ],
-    masterDataIds: ['MD-08', 'MD-10'],
-    sopIds: [],
-    process: {
-      status: 'draft',
-      steps: ['Thu thập phát sinh', 'Kiểm tra dữ liệu', 'Cập nhật lịch sử', 'Kết thúc hiệu lực nếu cần'],
-      source: 'Dự thảo quy trình thực tế cho giai đoạn làm việc.'
-    },
-    wireframe: {
-      title: 'Quá trình làm việc',
-      fields: ['Ngày', 'Loại phát sinh', 'Trạng thái', 'Người xử lý'],
-      actions: ['Lưu', 'Duyệt']
-    },
-    source: {
-      note: 'Nghiệp vụ được mô tả trong sơ đồ nhưng chưa có mapping SOP chính thức đầy đủ.',
-      status: 'draft'
-    }
-  },
-  {
-    id: 'LIFE-07',
-    type: 'lifecycle',
-    code: '07',
-    title: 'Nghỉ việc & đóng hồ sơ',
-    subtitle: 'Kết thúc lifecycle',
-    overview: {
-      purpose: 'Hoàn tất nghỉ việc, bàn giao và đóng hồ sơ nhân viên.',
-      description: 'Bước kết thúc vòng đời nhân viên, bao gồm xác nhận nghỉ việc và thanh lý hồ sơ.',
-      status: 'official',
-      phase: 'Lifecycle'
-    },
-    inputs: [
-      { name: 'Đề nghị nghỉ việc', source: 'Nhân viên / quản lý', sourceType: 'manual' },
-      { name: 'Hồ sơ hiện hành', source: 'Hệ thống', sourceType: 'system' }
-    ],
-    outputs: [
-      { name: 'Trạng thái nghỉ việc', source: 'Hệ thống', sourceType: 'system' },
-      { name: 'Hồ sơ đã đóng', source: 'Hệ thống', sourceType: 'system' }
-    ],
-    actors: [
-      { name: 'HR Admin', role: 'Thanh lý', action: 'Xử lý và đóng hồ sơ' }
-    ],
-    masterDataIds: ['MD-05', 'MD-06'],
-    sopIds: [],
-    process: {
-      status: 'designed',
-      steps: ['Nhận đề nghị', 'Xác nhận ngày nghỉ', 'Bàn giao', 'Đóng hồ sơ'],
-      source: 'Quy trình nghỉ việc và thanh lý hồ sơ được mô tả bằng sơ đồ.'
-    },
-    wireframe: {
-      title: 'Nghỉ việc & đóng hồ sơ',
-      fields: ['Ngày nghỉ', 'Nguyên nhân', 'Hồ sơ bàn giao', 'Trạng thái'],
-      actions: ['Hủy', 'Lưu', 'Kết thúc']
-    },
-    source: {
-      note: 'Dữ liệu nguồn phù hợp với quy trình nghỉ việc và giao nhận hồ sơ.',
+      note: node.process.source,
       status: 'official'
     }
   }
-]
+})
 
 export const crossFunctionalProcesses: BusinessNode[] = [
-  {
-    id: 'CROSS-01',
+  'CF-01', 'CF-02', 'CF-03', 'CF-04', 'CF-05', 'CF-06', 'CF-07', 'CF-08'
+].map(id => {
+  const node = lifecycleMockNodes[id]
+  return {
+    id: node.id,
     type: 'cross',
-    code: 'A',
-    title: 'Công & phép',
-    subtitle: 'Chấm công, nghỉ và ca làm việc',
+    code: node.code,
+    title: node.title,
+    subtitle: node.subtitle,
     overview: {
-      purpose: 'Theo dõi thời gian làm việc, nghỉ phép và ca làm việc trong quá trình vận hành.',
-      description: 'Nghiệp vụ phát sinh xuyên suốt lifecycle, kết nối với cấu hình ca và loại nghỉ.',
+      purpose: node.contextTrigger,
+      description: node.subtitle,
       status: 'official',
       phase: 'Cross Functional'
     },
-    inputs: [
-      { name: 'Chấm công', source: 'Hệ thống', sourceType: 'system' },
-      { name: 'Đơn nghỉ phép', source: 'Nhân viên', sourceType: 'manual' }
-    ],
-    outputs: [
-      { name: 'Thời gian làm việc', source: 'Hệ thống', sourceType: 'system' }
-    ],
+    inputs: node.inputs.map(inp => ({ name: inp, source: 'SOP Operations', sourceType: 'manual' })),
+    outputs: node.outputs.map(out => ({ name: out, source: 'HRM Core Engine', sourceType: 'system' })),
     actors: [
-      { name: 'Nhân viên', role: 'Sử dụng ca/lễ', action: 'Gửi yêu cầu nghỉ hoặc đăng ký ca' },
-      { name: 'HR Admin', role: 'Quản lý', action: 'Theo dõi và xử lý' }
+      { name: node.actorsMatrix.proposer, role: 'Đề xuất', action: 'Kích hoạt' },
+      { name: node.actorsMatrix.approver, role: 'Phê duyệt', action: 'Thẩm định' },
+      { name: node.actorsMatrix.executor, role: 'Thực thi', action: 'Xử lý hệ thống' }
     ],
-    masterDataIds: ['MD-08'],
-    sopIds: [],
-    process: {
-      status: 'draft',
-      steps: ['Thu thập chấm công', 'Kiểm tra phép', 'Cập nhật hồ sơ', 'Phân tích hiệu lực'],
-      source: 'Dự thảo quy trình chấm công và nghỉ phép.'
-    },
+    masterDataIds: ['MD-05', 'MD-06', 'MD-08', 'MD-10'],
+    sopIds: node.sopIds,
+    process: node.process,
     wireframe: {
-      title: 'Công & phép',
-      fields: ['Ngày', 'Ca', 'Phép', 'Trạng thái'],
-      actions: ['Lưu', 'Duyệt']
+      title: node.title,
+      fields: node.uiFields,
+      actions: ['Hủy', 'Lưu', 'Duyệt']
     },
     source: {
-      note: 'Nghiệp vụ phát sinh xuyên suốt; chưa có mapping SOP chi tiết hoàn chỉnh.',
-      status: 'draft'
-    }
-  },
-  {
-    id: 'CROSS-02',
-    type: 'cross',
-    code: 'B',
-    title: 'Hợp đồng',
-    subtitle: 'Điều chỉnh quan hệ lao động',
-    overview: {
-      purpose: 'Quản lý tái ký, đổi loại hợp đồng, bổ sung hợp đồng hoặc thay đổi điều kiện lao động.',
-      description: 'Nghiệp vụ này có mối liên hệ chặt chẽ với MD-05 và MD-06.',
-      status: 'official',
-      phase: 'Cross Functional'
-    },
-    inputs: [
-      { name: 'Hợp đồng hiện tại', source: 'Hệ thống', sourceType: 'system' },
-      { name: 'Yêu cầu thay đổi', source: 'Quản lý / HR', sourceType: 'manual' }
-    ],
-    outputs: [
-      { name: 'Hợp đồng mới hoặc phụ lục', source: 'Hệ thống', sourceType: 'system' }
-    ],
-    actors: [
-      { name: 'HR', role: 'Quản lý hợp đồng', action: 'Xử lý cập nhật hợp đồng' },
-      { name: 'Nhân viên', role: 'Đối tác', action: 'Ký và xác nhận' }
-    ],
-    masterDataIds: ['MD-05', 'MD-06'],
-    sopIds: [],
-    process: {
-      status: 'designed',
-      steps: ['Phát hiện yêu cầu', 'Kiểm tra hợp đồng', 'Cập nhật điều kiện', 'Lưu và ký'],
-      source: 'Quy trình thay đổi hợp đồng đang được mô tả bằng logic nghiệp vụ.'
-    },
-    wireframe: {
-      title: 'Hợp đồng',
-      fields: ['Loại hợp đồng', 'Hiệu lực', 'Mức lương', 'Chức danh'],
-      actions: ['Lưu', 'Ký']
-    },
-    source: {
-      note: 'Nghiệp vụ có căn cứ từ quy trình hợp đồng và bố trí tổ chức.',
+      note: node.process.source,
       status: 'official'
     }
-  },
-  {
-    id: 'CROSS-03',
-    type: 'cross',
-    code: 'C',
-    title: 'Biến động nhân sự',
-    subtitle: 'Thay đổi thông tin công tác',
-    overview: {
-      purpose: 'Ghi nhận và quản lý các thay đổi phát sinh trong hồ sơ nhân sự.',
-      description: 'Bao gồm điều động, bổ nhiệm, miễm nhiệm, thay đổi vị trí hay địa điểm làm việc.',
-      status: 'official',
-      phase: 'Cross Functional'
-    },
-    inputs: [
-      { name: 'Yêu cầu thay đổi', source: 'Quản lý / HR', sourceType: 'manual' },
-      { name: 'Thông tin nhân sự', source: 'Hệ thống', sourceType: 'system' }
-    ],
-    outputs: [
-      { name: 'Biến động nhân sự', source: 'Hệ thống', sourceType: 'system' }
-    ],
-    actors: [
-      { name: 'HR Admin', role: 'Quản lý nhân sự', action: 'Thực hiện biến động' },
-      { name: 'Quản lý', role: 'Phê duyệt', action: 'Đồng ý yêu cầu' }
-    ],
-    masterDataIds: ['MD-05', 'MD-06'],
-    sopIds: [],
-    process: {
-      status: 'draft',
-      steps: ['Nhận yêu cầu', 'Kiểm tra dữ liệu', 'Duyệt thay đổi', 'Cập nhật quan hệ công tác'],
-      source: 'Quy trình dự thảo cho biến động nhân sự.'
-    },
-    wireframe: {
-      title: 'Biến động nhân sự',
-      fields: ['Nhân viên', 'Thay đổi', 'Đơn vị', 'Trạng thái'],
-      actions: ['Lưu', 'Phê duyệt']
-    },
-    source: {
-      note: 'Biến động nhân sự có gốc từ quy trình công tác nhưng chưa được mapping chuẩn hóa.',
-      status: 'draft'
-    }
-  },
-  {
-    id: 'CROSS-04',
-    type: 'cross',
-    code: 'D',
-    title: 'Ghi nhận thành tích',
-    subtitle: 'Theo dõi kết quả và kỷ luật',
-    overview: {
-      purpose: 'Ghi nhận các hoạt động khen thưởng, kỷ luật hoặc đánh giá thành tích trong quá trình làm việc.',
-      description: 'Nghiệp vụ này liên quan trực tiếp đến danh mục kỷ luật, thành tích và đánh giá nhân sự.',
-      status: 'official',
-      phase: 'Cross Functional'
-    },
-    inputs: [
-      { name: 'Kết quả làm việc', source: 'Quản lý', sourceType: 'manual' },
-      { name: 'Dữ liệu kỷ luật', source: 'MD-10', sourceType: 'master' }
-    ],
-    outputs: [
-      { name: 'Lịch sử thành tích / kỷ luật', source: 'Hệ thống', sourceType: 'system' }
-    ],
-    actors: [
-      { name: 'Quản lý', role: 'Đánh giá', action: 'Đề xuất thành tích hoặc kỷ luật' },
-      { name: 'HR', role: 'Hồ sơ', action: 'Xác nhận và lưu' }
-    ],
-    masterDataIds: ['MD-10'],
-    sopIds: [],
-    process: {
-      status: 'draft',
-      steps: ['Thu thập kết quả', 'Chọn danh mục', 'Xác nhận quyết định', 'Lưu lịch sử'],
-      source: 'Dự thảo quy trình khen thưởng và kỷ luật.'
-    },
-    wireframe: {
-      title: 'Thành tích / kỷ luật',
-      fields: ['Nhân viên', 'Loại', 'Mức độ', 'Trạng thái'],
-      actions: ['Lưu', 'Duyệt']
-    },
-    source: {
-      note: 'Quy trình có căn cứ từ chính sách nội bộ nhưng chưa được mapping đầy đủ.',
-      status: 'draft'
-    }
   }
-]
+})
 
 export const sharedServices: BusinessNode[] = [
   {

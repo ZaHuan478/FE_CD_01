@@ -15,7 +15,7 @@ const erdClusters: ERDCluster[] = [
     subtitle: 'Địa giới hành chính, trình độ, dân tộc, tôn giáo',
     targetField: 'SƠ YẾU LÝ LỊCH',
     color: 'from-sky-500 to-blue-600',
-    badgeBg: 'bg-sky-50 text-sky-700 border-sky-200',
+    badgeBg: 'bg-sky-500/15 text-sky-300 border-sky-500/30',
     sopIds: ['SOP-NS-04'],
     items: [
       { id: 'MD-04', code: 'MD-04', title: 'Đơn vị hành chính', subtitle: 'Tỉnh/Thành, Quận/Huyện, Xã/Phường', sopBadge: 'SOP-NS-01' },
@@ -30,7 +30,7 @@ const erdClusters: ERDCluster[] = [
     subtitle: 'Đơn vị, phòng ban, chức danh, chức vụ, level',
     targetField: 'VỊ TRÍ CÔNG TÁC',
     color: 'from-indigo-500 to-purple-600',
-    badgeBg: 'bg-indigo-50 text-indigo-700 border-indigo-200',
+    badgeBg: 'bg-indigo-500/15 text-indigo-300 border-indigo-500/30',
     sopIds: ['SOP-NS-01', 'SOP-NS-09'],
     items: [
       { id: 'MD-05', code: 'MD-05', title: 'Cơ cấu tổ chức', subtitle: 'Sơ đồ cây Đơn vị / Phòng ban', sopBadge: 'SOP-NS-01' },
@@ -43,7 +43,7 @@ const erdClusters: ERDCluster[] = [
     subtitle: 'Thang lương, ca làm việc, bảo hiểm & kỷ luật',
     targetField: 'HỢP ĐỒNG & CHẾ ĐỘ',
     color: 'from-emerald-500 to-teal-600',
-    badgeBg: 'bg-emerald-50 text-emerald-700 border-emerald-200',
+    badgeBg: 'bg-emerald-500/15 text-emerald-300 border-emerald-500/30',
     sopIds: ['SOP-L-02', 'SOP-CC-01', 'SOP-BH-01', 'SOP-NS-14'],
     items: [
       { id: 'MD-07', code: 'MD-07', title: 'Thang / Bậc lương', subtitle: 'Mức lương cơ bản & Hệ số', sopBadge: 'SOP-L-02' },
@@ -139,24 +139,27 @@ export const MasterDataRelationshipModal: React.FC<MasterDataRelationshipModalPr
                   className="bg-slate-900/90 rounded-2xl p-5 border border-slate-800 hover:border-slate-700 transition-all shadow-md relative group"
                 >
                   {/* Cluster Header */}
-                  <div className="flex items-center justify-between mb-3.5 pb-2 border-b border-slate-800/80">
-                    <div>
-                      <div className="flex items-center gap-2">
-                        <span className={`text-[11px] font-bold px-2.5 py-0.5 rounded border uppercase tracking-wider ${cluster.badgeBg}`}>
+                  <div className="flex flex-wrap items-center justify-between gap-3 mb-3.5 pb-3 border-b border-slate-800/80">
+                    <div className="min-w-0 flex-1">
+                      <div className="flex flex-wrap items-center gap-2">
+                        <span className={`text-[11px] font-bold px-2.5 py-1 rounded-lg border uppercase tracking-wider whitespace-nowrap shrink-0 shadow-2xs ${cluster.badgeBg}`}>
                           {cluster.title}
                         </span>
-                        {cluster.sopIds && cluster.sopIds.map((sop) => (
-                          <span key={sop} className="px-2 py-0.5 text-[10px] font-mono font-bold bg-emerald-950 text-emerald-400 rounded border border-emerald-800/60 flex items-center gap-1">
-                            <ScrollText className="w-3 h-3 text-emerald-400" />
-                            {sop}
-                          </span>
-                        ))}
+                        <div className="flex flex-wrap items-center gap-1.5">
+                          {cluster.sopIds && cluster.sopIds.map((sop) => (
+                            <span key={sop} className="px-2 py-0.5 text-[10px] font-mono font-bold bg-emerald-950/90 text-emerald-400 rounded-md border border-emerald-800/70 flex items-center gap-1 shrink-0 whitespace-nowrap">
+                              <ScrollText className="w-3 h-3 text-emerald-400" />
+                              {sop}
+                            </span>
+                          ))}
+                        </div>
                       </div>
-                      <p className="text-xs text-slate-400 mt-1">{cluster.subtitle}</p>
+                      <p className="text-xs text-slate-400 mt-1.5 font-medium">{cluster.subtitle}</p>
                     </div>
-                    <div className="flex items-center gap-1.5 text-xs text-slate-300 font-semibold bg-slate-800/80 px-3 py-1 rounded-lg border border-slate-700">
-                      <span>Nguồn cho:</span>
-                      <span className="text-blue-400 font-bold">{cluster.targetField}</span>
+
+                    <div className="flex items-center gap-1.5 text-xs text-slate-300 font-semibold bg-slate-800/90 px-3 py-1.5 rounded-xl border border-slate-700/80 shrink-0 shadow-xs">
+                      <span className="text-slate-400 font-normal">Nguồn cho:</span>
+                      <span className="text-blue-400 font-bold tracking-tight">{cluster.targetField}</span>
                     </div>
                   </div>
 
