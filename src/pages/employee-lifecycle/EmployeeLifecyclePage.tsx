@@ -1,6 +1,6 @@
 import React, { useMemo, useState } from 'react'
 import { useSearchParams } from 'react-router-dom'
-import { Sparkles, Layers, Database, FileText, X } from 'lucide-react'
+import { Sparkles, Layers, Database, FileText, X, Layout } from 'lucide-react'
 
 import { MasterDataCard } from '../../components/employee-lifecycle/MasterDataCard'
 import { MasterDataRelationshipModal } from '../../components/employee-lifecycle/MasterDataRelationshipModal'
@@ -8,6 +8,7 @@ import { LifecycleStepper } from '../../components/employee-lifecycle/LifecycleS
 import { OperationsGrid } from '../../components/employee-lifecycle/OperationsGrid'
 import { SystemSupportBar } from '../../components/employee-lifecycle/SystemSupportBar'
 import { SystemGuideBanner } from '../../components/employee-lifecycle/SystemGuideBanner'
+import { WireframeFormModal } from '../../components/employee-lifecycle/WireframeFormModal'
 
 import { masterData, lifecycleProcesses, crossFunctionalProcesses, sharedServices } from './data'
 import type { MasterDataCategory, LifecycleStep, OperationModule, DetailItem } from '../../types/employee-lifecycle'
@@ -58,6 +59,7 @@ const sopDictionary: Record<string, { badge: string; title: string }> = {
 export const EmployeeLifecyclePage: React.FC = () => {
   const [searchParams, setSearchParams] = useSearchParams()
   const [selectedItem, setSelectedItem] = useState<DetailItem | null>(null)
+  const [wireframeItem, setWireframeItem] = useState<DetailItem | null>(null)
 
   const isERDOpen = searchParams.get('view') === 'master-data-erd'
 
@@ -91,7 +93,6 @@ export const EmployeeLifecyclePage: React.FC = () => {
       }
     })
   }, [])
-
 
   // Transform Lifecycle steps (7 steps)
   const lifecycleSteps: LifecycleStep[] = useMemo(() => {
@@ -283,20 +284,32 @@ export const EmployeeLifecyclePage: React.FC = () => {
         onSelectNode={openItemDetails}
       />
 
-      {/* NODE DETAIL INSPECTOR MODAL */}
+      {/* NODE DETAIL INSPECTOR DRAWER MODAL */}
       {selectedItem && (
         <DetailDrawer
           item={selectedItem}
           onClose={() => setSelectedItem(null)}
+          onOpenWireframe={(itemToOpen) => setWireframeItem(itemToOpen)}
         />
       )}
+
+      {/* INTERACTIVE UI WIREFRAME FORM MODAL */}
+      <WireframeFormModal
+        isOpen={!!wireframeItem}
+        item={wireframeItem}
+        onClose={() => setWireframeItem(null)}
+      />
 
     </div>
   )
 }
 
 /* Detail Drawer Modal for Node Inspection */
-const DetailDrawer: React.FC<{ item: DetailItem; onClose: () => void }> = ({ item, onClose }) => {
+const DetailDrawer: React.FC<{
+  item: DetailItem
+  onClose: () => void
+  onOpenWireframe?: (item: DetailItem) => void
+}> = ({ item, onClose, onOpenWireframe }) => {
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-end bg-slate-900/60 backdrop-blur-xs">
       <div className="bg-white w-full max-w-xl h-full shadow-2xl flex flex-col border-l border-slate-200 animate-in slide-in-from-right duration-200">
@@ -414,10 +427,58 @@ const DetailDrawer: React.FC<{ item: DetailItem; onClose: () => void }> = ({ ite
             </div>
           )}
 
+          {/* 06 · UI Wireframe Form Fields Preview & Modal Launcher */}
+          <div>
+            <h4 className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">
+              06 · Giao diện Form & Trường dữ liệu Sơ khảo (UI Wireframe Preview)
+            </h4>
+            <div className="p-4 bg-slate-900 text-slate-100 rounded-2xl border border-slate-800 shadow-inner space-y-3">
+              <div className="flex items-center justify-between border-b border-slate-800 pb-2">
+                <div className="flex items-center gap-1.5 text-xs font-semibold text-blue-400">
+                  <Layout className="w-3.5 h-3.5 text-blue-400" />
+                  <span>Mẫu Form nhập liệu sơ khảo ({item.id})</span>
+                </div>
+                <span className="text-[10px] text-slate-400 bg-slate-800 px-2 py-0.5 rounded font-mono">Form UI Schema</span>
+              </div>
+
+              {item.uiFields && item.uiFields.length > 0 && (
+                <div className="grid grid-cols-2 gap-2 pt-1">
+                  {item.uiFields.map((field, idx) => (
+                    <div key={idx} className="p-2 bg-slate-800/80 rounded-xl border border-slate-700/60 flex items-center justify-between text-xs">
+                      <span className="text-slate-300 font-medium">{field}</span>
+                      <span className="text-[9px] text-blue-400 bg-blue-950/60 px-1.5 py-0.5 rounded border border-blue-800/40">Input</span>
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              {/* Action Button to Launch Full Form UI Modal */}
+              <div className="pt-2">
+                <button
+                  type="button"
+                  onClick={() => onOpenWireframe?.(item)}
+                  className="w-full flex items-center justify-center gap-2 py-2.5 px-4 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-semibold text-xs rounded-xl shadow-sm transition-all duration-200 transform hover:-translate-y-0.5 cursor-pointer"
+                >
+                  <Layout className="w-4 h-4" />
+                  <span>🖥️ Mở Xem & Thao tác Form UI Sơ Khảo (Interactive Form Modal)</span>
+                </button>
+              </div>
+            </div>
+          </div>
+
         </div>
 
         {/* Footer */}
-        <div className="p-4 border-t border-slate-200 bg-slate-50 flex justify-end">
+        <div className="p-4 border-t border-slate-200 bg-slate-50 flex items-center justify-between">
+          <button
+            type="button"
+            onClick={() => onOpenWireframe?.(item)}
+            className="inline-flex items-center gap-1.5 px-3 py-2 bg-blue-50 text-blue-700 hover:bg-blue-100 rounded-xl text-xs font-semibold border border-blue-200 transition-colors cursor-pointer"
+          >
+            <Layout className="w-3.5 h-3.5" />
+            <span>Mở Form UI Sơ khảo</span>
+          </button>
+
           <button
             type="button"
             onClick={onClose}
