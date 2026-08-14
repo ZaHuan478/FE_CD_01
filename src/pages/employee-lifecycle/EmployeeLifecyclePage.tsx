@@ -199,27 +199,27 @@ export const EmployeeLifecyclePage: React.FC = () => {
 
       {/* Top Navigation Header */}
       <header className="bg-slate-900 text-white border-b border-slate-800 sticky top-0 z-30 shadow-md">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex items-center justify-between">
+        <div className="max-w-7xl mx-auto px-3.5 sm:px-6 lg:px-8 py-3.5 sm:py-4 flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="p-2.5 bg-blue-600 rounded-xl text-white shadow-sm">
+            <div className="p-2 sm:p-2.5 bg-blue-600 rounded-xl text-white shadow-sm shrink-0">
               <Layers className="w-5 h-5" />
             </div>
             <div>
-              <div className="flex items-center gap-2">
-                <span className="text-[11px] font-bold text-blue-400 uppercase tracking-widest">
+              <div className="flex flex-wrap items-center gap-1.5 sm:gap-2">
+                <span className="text-[10px] sm:text-[11px] font-bold text-blue-400 uppercase tracking-widest">
                   Enterprise HR SaaS Architecture
                 </span>
-                <span className="px-2 py-0.5 text-[10px] font-semibold bg-emerald-500/20 text-emerald-300 rounded border border-emerald-500/30">
+                <span className="px-1.5 sm:px-2 py-0.5 text-[9px] sm:text-[10px] font-semibold bg-emerald-500/20 text-emerald-300 rounded border border-emerald-500/30">
                   Production Ready
                 </span>
               </div>
-              <h1 className="text-xl font-bold tracking-tight text-white mt-0.5">
+              <h1 className="text-base sm:text-xl font-bold tracking-tight text-white mt-0.5 leading-snug">
                 QUẢN LÝ HỒ SƠ & VÒNG ĐỜI NHÂN VIÊN
               </h1>
             </div>
           </div>
 
-          <div className="hidden md:flex items-center gap-3 text-xs">
+          <div className="hidden lg:flex items-center gap-3 text-xs shrink-0">
             <span className="text-slate-400">Model Standard:</span>
             <span className="font-semibold text-slate-200 bg-slate-800 px-3 py-1.5 rounded-lg border border-slate-700">
               Workday / SAP SuccessFactors Style
@@ -229,19 +229,19 @@ export const EmployeeLifecyclePage: React.FC = () => {
       </header>
 
       {/* Main Container Workspace */}
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
+      <main className="max-w-7xl mx-auto px-3.5 sm:px-6 lg:px-8 py-5 sm:py-8 space-y-6 sm:space-y-8">
 
         {/* Intro Eyebrow Banner */}
-        <div className="bg-white rounded-2xl p-5 border border-slate-200/80 shadow-xs flex flex-col md:flex-row md:items-center justify-between gap-4">
-          <div className="flex items-start gap-3.5">
-            <div className="p-2.5 bg-indigo-50 text-indigo-600 rounded-xl shrink-0 mt-0.5">
-              <Sparkles className="w-5 h-5" />
+        <div className="bg-white rounded-2xl p-4 sm:p-5 border border-slate-200/80 shadow-xs flex flex-col md:flex-row md:items-center justify-between gap-3 sm:gap-4">
+          <div className="flex items-start gap-3 sm:gap-3.5">
+            <div className="p-2 sm:p-2.5 bg-indigo-50 text-indigo-600 rounded-xl shrink-0 mt-0.5">
+              <Sparkles className="w-4 h-4 sm:w-5 sm:h-5" />
             </div>
             <div>
-              <h2 className="text-sm font-bold text-slate-900">
+              <h2 className="text-xs sm:text-sm font-bold text-slate-900 leading-snug">
                 Bức tranh Tổng thể Quy trình Quản trị Nhân sự (Business Process Blueprint)
               </h2>
-              <p className="text-xs text-slate-500 mt-0.5">
+              <p className="text-[11px] sm:text-xs text-slate-500 mt-0.5 leading-relaxed">
                 Cấu trúc phân tầng tiêu chuẩn: Tầng 1 Master Data ➔ Tầng 2 Vòng đời Nhân viên ➔ Tầng 3 Nghiệp vụ Phát sinh ➔ Thanh Hỗ trợ Hệ thống
               </p>
             </div>

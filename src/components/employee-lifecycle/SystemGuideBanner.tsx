@@ -147,7 +147,7 @@ export const SystemGuideBanner: React.FC = () => {
               </div>
 
               <div className="text-blue-400 font-bold flex items-center gap-1">
-                <ArrowRight className="w-5 h-5" />
+                <ArrowRight className="w-5 h-5 rotate-90 lg:rotate-0 transition-transform" />
               </div>
 
               {/* Step 2: Process */}
@@ -160,7 +160,7 @@ export const SystemGuideBanner: React.FC = () => {
               </div>
 
               <div className="text-purple-400 font-bold flex items-center gap-1">
-                <ArrowRight className="w-5 h-5" />
+                <ArrowRight className="w-5 h-5 rotate-90 lg:rotate-0 transition-transform" />
               </div>
 
               {/* Step 3: Life Output */}

@@ -74,22 +74,22 @@ export const SystemSupportBar: React.FC<SystemSupportBarProps> = ({
       <div className="absolute -right-16 -bottom-16 w-64 h-64 bg-blue-600/10 rounded-full blur-3xl pointer-events-none" />
 
       {/* Header */}
-      <div className="flex items-center justify-between border-b border-slate-800 pb-3">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 border-b border-slate-800 pb-3">
         <div className="flex items-center gap-2.5">
-          <div className="p-2 bg-blue-600/20 text-blue-400 rounded-lg border border-blue-500/30">
+          <div className="p-2 bg-blue-600/20 text-blue-400 rounded-lg border border-blue-500/30 shrink-0">
             <Settings className="w-4 h-4" />
           </div>
           <div>
-            <h3 className="text-xs font-bold uppercase tracking-wider text-slate-300">
+            <h3 className="text-xs font-bold uppercase tracking-wider text-slate-300 leading-snug">
               TẦNG HỖ TRỢ XUYÊN SUỐT HỆ THỐNG (SYSTEM SUPPORT BAR)
             </h3>
-            <span className="text-[11px] text-slate-400">
+            <span className="text-[11px] text-slate-400 leading-tight block">
               5 Tiện ích quản trị dùng chung áp dụng toàn bộ quy trình Lifecycle
             </span>
           </div>
         </div>
         
-        <span className="text-[11px] font-mono text-blue-400 bg-blue-950 px-2.5 py-1 rounded border border-blue-900">
+        <span className="text-[10px] sm:text-[11px] font-mono text-blue-400 bg-blue-950 px-2.5 py-1 rounded border border-blue-900 shrink-0 self-start sm:self-center">
           Enterprise Shared Services
         </span>
       </div>
