@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react'
+import React, { useMemo, useState, useEffect } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import { Sparkles, Layers, Database, FileText, X, Layout } from 'lucide-react'
 
@@ -8,8 +8,12 @@ import { LifecycleStepper } from '../../components/employee-lifecycle/LifecycleS
 import { OperationsGrid } from '../../components/employee-lifecycle/OperationsGrid'
 import { SystemSupportBar } from '../../components/employee-lifecycle/SystemSupportBar'
 import { SystemGuideBanner } from '../../components/employee-lifecycle/SystemGuideBanner'
+import { SystemOverviewDashboard } from '../../components/employee-lifecycle/SystemOverviewDashboard'
+import { LeftSidebarNav } from '../../components/employee-lifecycle/LeftSidebarNav'
 import { WireframeFormModal } from '../../components/employee-lifecycle/WireframeFormModal'
+import { WireframeFormDetailPage } from '../../components/employee-lifecycle/WireframeFormDetailPage'
 import { NodeDetailDrawer } from '../../components/employee-lifecycle/NodeDetailDrawer'
+import { WorkflowDetailPage } from '../../components/employee-lifecycle/WorkflowDetailPage'
 
 import { masterData, lifecycleProcesses, crossFunctionalProcesses, sharedServices } from './data'
 import type { MasterDataCategory, LifecycleStep, OperationModule, DetailItem } from '../../types/employee-lifecycle'
@@ -61,6 +65,8 @@ export const EmployeeLifecyclePage: React.FC = () => {
   const [searchParams, setSearchParams] = useSearchParams()
   const [selectedItem, setSelectedItem] = useState<DetailItem | null>(null)
   const [wireframeItem, setWireframeItem] = useState<DetailItem | null>(null)
+  const [activeSection, setActiveSection] = useState('overview-dashboard')
+  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false)
 
   const isERDOpen = searchParams.get('view') === 'master-data-erd'
 
@@ -73,6 +79,32 @@ export const EmployeeLifecyclePage: React.FC = () => {
     nextParams.delete('view')
     setSearchParams(nextParams)
   }
+
+  const handleNavigateSection = (sectionId: string) => {
+    setActiveSection(sectionId)
+    if (sectionId === 'overview-dashboard') {
+      window.scrollTo({ top: 0, behavior: 'smooth' })
+    } else {
+      const el = document.getElementById(sectionId)
+      if (el) {
+        const headerOffset = 90 // Sticky header offset height
+        const elementPosition = el.getBoundingClientRect().top
+        const offsetPosition = elementPosition + window.pageYOffset - headerOffset
+        window.scrollTo({
+          top: offsetPosition,
+          behavior: 'smooth'
+        })
+      }
+    }
+  }
+
+  // Handle URL sync for direct step links (e.g. ?step=LIFE-01)
+  useEffect(() => {
+    const stepParam = searchParams.get('step')
+    if (stepParam && !selectedItem) {
+      openItemDetails(stepParam)
+    }
+  }, [searchParams])
 
   // Transform Master Data categories
   const masterDataCategories: MasterDataCategory[] = useMemo(() => {
@@ -134,7 +166,7 @@ export const EmployeeLifecyclePage: React.FC = () => {
     })
   }, [])
 
-  // Handle Item Inspector
+  // Handle Item Inspector & Workflow Navigation
   const openItemDetails = (id: string) => {
     const rawNode =
       masterData.find((m) => m.id === id) ||
@@ -194,34 +226,73 @@ export const EmployeeLifecyclePage: React.FC = () => {
     }
   }
 
-  return (
-    <div className="min-h-screen bg-slate-50/50 text-slate-800 pb-20">
+  const handleCloseWorkflow = () => {
+    setSelectedItem(null)
+    const nextParams = new URLSearchParams(searchParams)
+    nextParams.delete('step')
+    setSearchParams(nextParams)
+  }
 
-      {/* Top Navigation Header */}
+  // IF WIREFRAME ITEM IS OPENED, RENDER FULL-PAGE FORM UI WORKSPACE!
+  if (wireframeItem) {
+    return (
+      <WireframeFormDetailPage
+        item={wireframeItem}
+        onBack={() => setWireframeItem(null)}
+      />
+    )
+  }
+
+  // IF AN ITEM IS SELECTED, RENDER FULL WORKFLOW DETAIL PAGE WITH BACK BUTTON!
+  if (selectedItem) {
+    return (
+      <WorkflowDetailPage
+        item={selectedItem}
+        onBack={handleCloseWorkflow}
+        onOpenWireframe={(itemToOpen) => setWireframeItem(itemToOpen)}
+      />
+    )
+  }
+
+  return (
+    <div className={`min-h-screen bg-slate-50/50 text-slate-800 pb-20 transition-all duration-300 ${
+      isSidebarCollapsed ? 'pl-16 sm:pl-20' : 'pl-16 sm:pl-20 md:pl-64'
+    }`}>
+
+      {/* LEFT FIXED SIDEBAR NAVIGATION */}
+      <LeftSidebarNav
+        activeSection={activeSection}
+        onNavigateSection={handleNavigateSection}
+        onOpenERD={handleOpenERD}
+        isCollapsed={isSidebarCollapsed}
+        onToggleCollapse={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
+      />
+
+      {/* Streamlined Compact Top Navigation Header */}
       <header className="bg-slate-900 text-white border-b border-slate-800 sticky top-0 z-30 shadow-md">
-        <div className="max-w-7xl mx-auto px-3.5 sm:px-6 lg:px-8 py-3.5 sm:py-4 flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div className="p-2 sm:p-2.5 bg-blue-600 rounded-xl text-white shadow-sm shrink-0">
-              <Layers className="w-5 h-5" />
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 py-2.5 sm:py-3 flex items-center justify-between">
+          <div className="flex items-center gap-2.5 sm:gap-3">
+            <div className="p-1.5 sm:p-2 bg-blue-600 rounded-lg text-white shadow-xs shrink-0">
+              <Layers className="w-4 h-4 sm:w-5 sm:h-5" />
             </div>
             <div>
-              <div className="flex flex-wrap items-center gap-1.5 sm:gap-2">
-                <span className="text-[10px] sm:text-[11px] font-bold text-blue-400 uppercase tracking-widest">
+              <div className="flex flex-wrap items-center gap-1.5">
+                <span className="text-[10px] font-bold text-blue-400 uppercase tracking-widest">
                   Enterprise HR SaaS Architecture
                 </span>
-                <span className="px-1.5 sm:px-2 py-0.5 text-[9px] sm:text-[10px] font-semibold bg-emerald-500/20 text-emerald-300 rounded border border-emerald-500/30">
+                <span className="px-1.5 py-0.2 text-[9px] font-semibold bg-emerald-500/20 text-emerald-300 rounded border border-emerald-500/30">
                   Production Ready
                 </span>
               </div>
-              <h1 className="text-base sm:text-xl font-bold tracking-tight text-white mt-0.5 leading-snug">
+              <h1 className="text-sm sm:text-base font-bold tracking-tight text-white mt-0.5 leading-snug">
                 QUẢN LÝ HỒ SƠ & VÒNG ĐỜI NHÂN VIÊN
               </h1>
             </div>
           </div>
 
-          <div className="hidden lg:flex items-center gap-3 text-xs shrink-0">
-            <span className="text-slate-400">Model Standard:</span>
-            <span className="font-semibold text-slate-200 bg-slate-800 px-3 py-1.5 rounded-lg border border-slate-700">
+          <div className="hidden lg:flex items-center gap-2.5 text-xs shrink-0">
+            <span className="text-slate-400 text-[11px]">Model Standard:</span>
+            <span className="font-semibold text-slate-200 bg-slate-800 px-2.5 py-1 rounded-md border border-slate-700 text-[11px]">
               Workday / SAP SuccessFactors Style
             </span>
           </div>
@@ -251,30 +322,46 @@ export const EmployeeLifecyclePage: React.FC = () => {
         {/* Onboarding Guide & Concept Explainer Banner for Newcomers */}
         <SystemGuideBanner />
 
+        {/* HRMS EXECUTIVE SYSTEM DASHBOARD & QUICK LAYER NAVIGATOR */}
+        <div id="overview-dashboard" className="scroll-mt-20">
+          <SystemOverviewDashboard
+            onSelectStep={openItemDetails}
+            onOpenERD={handleOpenERD}
+          />
+        </div>
+
         {/* TẦNG 1: MASTER DATA CARD (Single-Entry Card) */}
-        <MasterDataCard
-          categories={masterDataCategories}
-          onOpenERD={handleOpenERD}
-          onSelectCategory={openItemDetails}
-        />
+        <div id="layer-1-master-data" className="scroll-mt-20">
+          <MasterDataCard
+            categories={masterDataCategories}
+            onOpenERD={handleOpenERD}
+            onSelectCategory={openItemDetails}
+          />
+        </div>
 
         {/* TẦNG 2: VÒNG ĐỜI NHÂN VIÊN (7-Step Horizontal Stepper Pipeline) */}
-        <LifecycleStepper
-          steps={lifecycleSteps}
-          activeStepId={selectedItem?.id}
-          onSelectStep={openItemDetails}
-        />
+        <div id="layer-2-lifecycle" className="scroll-mt-20">
+          <LifecycleStepper
+            steps={lifecycleSteps}
+            activeStepId={selectedItem?.id}
+            onSelectStep={openItemDetails}
+          />
+        </div>
 
         {/* TẦNG 3: NGHIỆP VỤ PHÁT SINH (Minimalist Cards Grid 4x2) */}
-        <OperationsGrid
-          modules={operationModules}
-          onSelectModule={openItemDetails}
-        />
+        <div id="layer-3-operations" className="scroll-mt-20">
+          <OperationsGrid
+            modules={operationModules}
+            onSelectModule={openItemDetails}
+          />
+        </div>
 
         {/* TẦNG HỖ TRỢ XUYÊN SUỐT (System Support Sticky Bar) */}
-        <SystemSupportBar
-          onSelectUtility={openItemDetails}
-        />
+        <div id="system-support" className="scroll-mt-20">
+          <SystemSupportBar
+            onSelectUtility={openItemDetails}
+          />
+        </div>
 
       </main>
 
@@ -285,22 +372,7 @@ export const EmployeeLifecyclePage: React.FC = () => {
         onSelectNode={openItemDetails}
       />
 
-      {/* NODE DETAIL INSPECTOR DRAWER MODAL */}
-      {selectedItem && (
-        <NodeDetailDrawer
-          item={selectedItem}
-          onClose={() => setSelectedItem(null)}
-          onOpenWireframe={(itemToOpen) => setWireframeItem(itemToOpen)}
-        />
-      )}
-
-      {/* INTERACTIVE UI WIREFRAME FORM MODAL */}
-      <WireframeFormModal
-        isOpen={!!wireframeItem}
-        item={wireframeItem}
-        onClose={() => setWireframeItem(null)}
-      />
-
     </div>
   )
 }
+
