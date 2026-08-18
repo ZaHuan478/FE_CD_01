@@ -168,6 +168,7 @@ export const EmployeeLifecyclePage: React.FC = () => {
 
   // Handle Item Inspector & Workflow Navigation
   const openItemDetails = (id: string) => {
+    window.scrollTo({ top: 0, behavior: 'instant' })
     const rawNode =
       masterData.find((m) => m.id === id) ||
       lifecycleProcesses.find((l) => l.id === id) ||

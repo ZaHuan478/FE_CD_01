@@ -36,8 +36,9 @@ export const WireframeFormDetailPage: React.FC<WireframeFormDetailPageProps> = (
   const [isSubmittedAttempted, setIsSubmittedAttempted] = useState(false)
   const [validationErrors, setValidationErrors] = useState<Record<string, string>>({})
 
-  // Initialize form fields based on item
+  // Initialize form fields based on item & scroll to top
   useEffect(() => {
+    window.scrollTo({ top: 0, behavior: 'instant' })
     if (item) {
       const initial: Record<string, string> = {}
       const fields = item.uiFields && item.uiFields.length > 0

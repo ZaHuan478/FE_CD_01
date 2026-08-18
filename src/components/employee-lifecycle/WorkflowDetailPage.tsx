@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import {
   ArrowLeft,
   Sparkles,
@@ -730,6 +730,11 @@ export const WorkflowDetailPage: React.FC<WorkflowDetailPageProps> = ({
   onBack,
   onOpenWireframe
 }) => {
+  // Always scroll to top when opening or switching workflow detail
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: 'instant' })
+  }, [item.id])
+
   // Theme state: default false (Light mode matching main page, toggleable to Dark mode)
   const [isDarkMode, setIsDarkMode] = useState<boolean>(false)
 
@@ -856,12 +861,10 @@ export const WorkflowDetailPage: React.FC<WorkflowDetailPageProps> = ({
             {isDarkMode ? (
               <>
                 <Sun className="w-4 h-4 text-amber-400" />
-                <span>Giao diện Sáng</span>
               </>
             ) : (
               <>
                 <Moon className="w-4 h-4 text-indigo-600" />
-                <span>Giao diện Tối</span>
               </>
             )}
           </button>
@@ -1207,6 +1210,20 @@ export const WorkflowDetailPage: React.FC<WorkflowDetailPageProps> = ({
                 </span>
               </div>
 
+              {/* SOP Step Types Legend Bar */}
+              <div className="flex flex-wrap items-center gap-2.5 pt-2 pb-1 text-[11px] border-t border-slate-200/60 dark:border-slate-800">
+                <span className="font-semibold text-slate-500 dark:text-slate-400">Chú thích Phân loại Bước SOP:</span>
+                <span title="Bước người dùng/thành viên nhập thông tin, khai báo dữ liệu ban đầu" className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md bg-blue-500/10 text-blue-700 dark:text-blue-300 border border-blue-500/20 font-medium cursor-help">
+                  <span className="font-mono font-bold text-blue-800 dark:text-blue-200">N</span> Nhập liệu / Khai báo (Input)
+                </span>
+                <span title="Bước kiểm tra, thẩm định, xác minh hoặc ký duyệt thủ công bởi HR Admin / Manager" className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md bg-amber-500/10 text-amber-700 dark:text-amber-300 border border-amber-500/20 font-medium cursor-help">
+                  <span className="font-mono font-bold text-amber-800 dark:text-amber-200">M</span> Thẩm định thủ công / Duyệt (Manual Review)
+                </span>
+                <span title="Bước hệ thống tự động xử lý, tự động tính toán, lưu vết hoặc gửi thông báo" className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md bg-emerald-500/10 text-emerald-700 dark:text-emerald-300 border border-emerald-500/20 font-medium cursor-help">
+                  <span className="font-mono font-bold text-emerald-800 dark:text-emerald-200">A</span> Tự động / Hệ thống (Automated Action)
+                </span>
+              </div>
+
               {/* Pure Horizontal Sequential Steps Timeline Flow */}
               <div className="relative pt-2 pb-4 overflow-x-auto no-scrollbar">
                 <div className="flex items-center gap-3 min-w-max pb-2 px-1">
@@ -1219,58 +1236,65 @@ export const WorkflowDetailPage: React.FC<WorkflowDetailPageProps> = ({
                         {/* Step Card Node */}
                         <div
                           onClick={() => setSelectedStepIdx(idx)}
-                          className={`w-[260px] shrink-0 p-4 rounded-2xl border transition-all duration-200 cursor-pointer flex flex-col justify-between shadow-2xs ${
-                            isStepSelected
-                              ? isDarkMode
-                                ? 'bg-blue-950/90 border-blue-500 ring-2 ring-blue-500/40 transform -translate-y-1 shadow-md'
-                                : 'bg-blue-50/90 border-blue-500 ring-2 ring-blue-500/30 transform -translate-y-1 shadow-md'
-                              : isDarkMode
-                                ? 'bg-slate-900/90 border-slate-800 hover:border-blue-500/60 hover:bg-slate-800'
-                                : 'bg-slate-50 border-slate-200 hover:border-blue-400 hover:bg-white'
-                          }`}
+                          className={`w-[260px] shrink-0 p-4 rounded-2xl border transition-all duration-200 cursor-pointer flex flex-col justify-between shadow-2xs ${isStepSelected
+                            ? isDarkMode
+                              ? 'bg-blue-950/90 border-blue-500 ring-2 ring-blue-500/40 transform -translate-y-1 shadow-md'
+                              : 'bg-blue-50/90 border-blue-500 ring-2 ring-blue-500/30 transform -translate-y-1 shadow-md'
+                            : isDarkMode
+                              ? 'bg-slate-900/90 border-slate-800 hover:border-blue-500/60 hover:bg-slate-800'
+                              : 'bg-slate-50 border-slate-200 hover:border-blue-400 hover:bg-white'
+                            }`}
                         >
                           <div>
                             {/* Step Header with Step Number & Code */}
                             <div className="flex items-center justify-between mb-2.5">
                               <div className="flex items-center gap-2">
-                                <span className={`w-6 h-6 rounded-full flex items-center justify-center font-bold text-xs border ${
-                                  isStepSelected
-                                    ? 'bg-blue-600 text-white border-blue-500'
-                                    : isDarkMode
-                                      ? 'bg-slate-800 text-slate-300 border-slate-700'
-                                      : 'bg-white text-slate-700 border-slate-200'
-                                }`}>
+                                <span className={`w-6 h-6 rounded-full flex items-center justify-center font-bold text-xs border ${isStepSelected
+                                  ? 'bg-blue-600 text-white border-blue-500'
+                                  : isDarkMode
+                                    ? 'bg-slate-800 text-slate-300 border-slate-700'
+                                    : 'bg-white text-slate-700 border-slate-200'
+                                  }`}>
                                   {idx + 1}
                                 </span>
 
-                                <span className={`px-2 py-0.5 font-mono font-extrabold text-[11px] rounded-md border ${
-                                  isStepSelected
-                                    ? 'bg-blue-600 text-white border-blue-500'
-                                    : isDarkMode
-                                      ? 'bg-slate-800 text-blue-300 border-slate-700'
-                                      : 'bg-white text-blue-700 border-slate-200'
-                                }`}>
+                                <span className={`px-2 py-0.5 font-mono font-extrabold text-[11px] rounded-md border ${isStepSelected
+                                  ? 'bg-blue-600 text-white border-blue-500'
+                                  : isDarkMode
+                                    ? 'bg-slate-800 text-blue-300 border-slate-700'
+                                    : 'bg-white text-blue-700 border-slate-200'
+                                  }`}>
                                   {step.stepCode}
                                 </span>
                               </div>
 
-                              <span className={`text-[9px] font-mono font-bold px-1.5 py-0.5 rounded ${
-                                step.typeCode === 'N'
+                              <span
+                                title={
+                                  step.typeCode === 'N'
+                                    ? 'Loại N: Bước Nhập liệu / Khai báo'
+                                    : step.typeCode === 'M'
+                                      ? 'Loại M: Bước Thẩm định thủ công / Duyệt'
+                                      : step.typeCode === 'C'
+                                        ? 'Loại C: Bước Thẩm định điều kiện'
+                                        : 'Loại A: Bước Tự động hệ thống xử lý'
+                                }
+                                className={`text-[9px] font-mono font-bold px-1.5 py-0.5 rounded cursor-help ${step.typeCode === 'N'
                                   ? 'bg-blue-500/20 text-blue-700 dark:text-blue-300 border border-blue-500/30'
                                   : step.typeCode === 'M'
                                     ? 'bg-amber-500/20 text-amber-700 dark:text-amber-300 border border-amber-500/30'
-                                    : 'bg-emerald-500/20 text-emerald-700 dark:text-emerald-300 border border-emerald-500/30'
-                              }`}>
+                                    : step.typeCode === 'C'
+                                      ? 'bg-purple-500/20 text-purple-700 dark:text-purple-300 border border-purple-500/30'
+                                      : 'bg-emerald-500/20 text-emerald-700 dark:text-emerald-300 border border-emerald-500/30'
+                                  }`}>
                                 Loại {step.typeCode}
                               </span>
                             </div>
 
                             {/* Step Title */}
-                            <h4 className={`text-xs font-bold leading-snug mb-2.5 h-9 line-clamp-2 ${
-                              isStepSelected
-                                ? isDarkMode ? 'text-white' : 'text-blue-950'
-                                : isDarkMode ? 'text-slate-200' : 'text-slate-900'
-                            }`}>
+                            <h4 className={`text-xs font-bold leading-snug mb-2.5 h-9 line-clamp-2 ${isStepSelected
+                              ? isDarkMode ? 'text-white' : 'text-blue-950'
+                              : isDarkMode ? 'text-slate-200' : 'text-slate-900'
+                              }`}>
                               {step.title}
                             </h4>
                           </div>
@@ -1429,7 +1453,7 @@ export const WorkflowDetailPage: React.FC<WorkflowDetailPageProps> = ({
                 <ListCheck className="w-4 h-4 text-blue-600 dark:text-blue-400" />
                 <span>BẢNG CHI TIẾT CÁC BƯỚC SOP: {currentProcess.sopTitle}</span>
               </h3>
-              <span className="text-xs text-slate-500 dark:text-slate-400 italic">Ánh xạ chuẩn 100% từ 1.EMP.HRM.SOP.docx</span>
+              {/* <span className="text-xs text-slate-500 dark:text-slate-400 italic">Ánh xạ chuẩn 100% từ 1.EMP.HRM.SOP.docx</span> */}
             </div>
 
             <div className="overflow-x-auto">
@@ -1470,12 +1494,24 @@ export const WorkflowDetailPage: React.FC<WorkflowDetailPageProps> = ({
                         {step.timing}
                       </td>
                       <td className="p-3 text-center">
-                        <span className={`px-2 py-0.5 text-[10px] font-mono font-bold rounded ${step.typeCode === 'N'
-                          ? 'bg-blue-500/20 text-blue-700 dark:text-blue-300 border border-blue-500/30'
-                          : step.typeCode === 'M'
-                            ? 'bg-amber-500/20 text-amber-700 dark:text-amber-300 border border-amber-500/30'
-                            : 'bg-emerald-500/20 text-emerald-700 dark:text-emerald-300 border border-emerald-500/30'
-                          }`}>
+                        <span
+                          title={
+                            step.typeCode === 'N'
+                              ? 'Loại N: Bước Nhập liệu / Khai báo'
+                              : step.typeCode === 'M'
+                                ? 'Loại M: Bước Thẩm định thủ công / Duyệt'
+                                : step.typeCode === 'C'
+                                  ? 'Loại C: Bước Thẩm định điều kiện'
+                                  : 'Loại A: Bước Tự động hệ thống xử lý'
+                          }
+                          className={`px-2 py-0.5 text-[10px] font-mono font-bold rounded cursor-help ${step.typeCode === 'N'
+                            ? 'bg-blue-500/20 text-blue-700 dark:text-blue-300 border border-blue-500/30'
+                            : step.typeCode === 'M'
+                              ? 'bg-amber-500/20 text-amber-700 dark:text-amber-300 border border-amber-500/30'
+                              : step.typeCode === 'C'
+                                ? 'bg-purple-500/20 text-purple-700 dark:text-purple-300 border border-purple-500/30'
+                                : 'bg-emerald-500/20 text-emerald-700 dark:text-emerald-300 border border-emerald-500/30'
+                            }`}>
                           {step.typeCode}
                         </span>
                       </td>
