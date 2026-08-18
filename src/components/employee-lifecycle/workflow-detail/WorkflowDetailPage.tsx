@@ -8,7 +8,9 @@ import {
   ListCheck,
   UserCheck,
   Sun,
-  Moon
+  Moon,
+  ChevronDown,
+  ChevronUp
 } from 'lucide-react'
 import type { WorkflowDetailPageProps } from './types'
 import { SOP_DATABASE } from './data/sopDatabase'
@@ -29,15 +31,21 @@ export const WorkflowDetailPage: React.FC<WorkflowDetailPageProps> = ({
 
   // Theme state synced with global document dark mode
   const [isDarkMode, setIsDarkMode] = useState<boolean>(() => {
-    return document.documentElement.classList.contains('dark')
+    return document.documentElement.classList.contains('dark') ||
+      localStorage.getItem('employee_lifecycle_theme') === 'dark'
   })
 
   useEffect(() => {
     const handleClassChange = () => {
       setIsDarkMode(document.documentElement.classList.contains('dark'))
     }
+
     const observer = new MutationObserver(handleClassChange)
-    observer.observe(document.documentElement, { attributes: true, attributeFilter: ['class'] })
+    observer.observe(document.documentElement, {
+      attributes: true,
+      attributeFilter: ['class']
+    })
+
     return () => observer.disconnect()
   }, [])
 
@@ -52,6 +60,9 @@ export const WorkflowDetailPage: React.FC<WorkflowDetailPageProps> = ({
       localStorage.setItem('employee_lifecycle_theme', 'light')
     }
   }
+
+  const [activeRoleTab, setActiveRoleTab] = useState<'all' | 'candidate' | 'hr'>('all')
+  const [isActorsExpanded, setIsActorsExpanded] = useState<boolean>(true)
 
   // Role flow state
   const availableRoleFlows = ROLE_FLOW_DATABASE[item.id] || [
@@ -98,8 +109,6 @@ export const WorkflowDetailPage: React.FC<WorkflowDetailPageProps> = ({
       }
     }
   ]
-
-  const [activeRoleTab, setActiveRoleTab] = useState<'all' | 'candidate' | 'hr'>('all')
 
   // SOP processes
   const availableSopProcesses = SOP_DATABASE[item.id] || [
@@ -259,40 +268,59 @@ export const WorkflowDetailPage: React.FC<WorkflowDetailPageProps> = ({
         {item.actors && item.actors.length > 0 && (
           <div className={`rounded-2xl p-5 border space-y-3 shadow-2xs transition-colors duration-300 ${isDarkMode ? 'bg-slate-950 border-slate-800' : 'bg-white border-slate-200/90'
             }`}>
-            <div className="flex items-center gap-2 text-xs font-extrabold uppercase tracking-wider text-slate-700 dark:text-slate-300">
-              <UserCheck className="w-4 h-4 text-blue-600 dark:text-blue-400" />
-              <span>Ma trận Phân quyền & Vai trò Thực hiện (Actors Matrix)</span>
+            <div className="flex items-center justify-between border-b border-slate-200 dark:border-slate-800 pb-3">
+              <div className="flex items-center gap-2 text-xs font-extrabold uppercase tracking-wider text-slate-700 dark:text-slate-300">
+                <UserCheck className="w-4 h-4 text-blue-600 dark:text-blue-400" />
+                <span>Ma trận Phân quyền & Vai trò Thực hiện (Actors Matrix)</span>
+              </div>
+
+              {/* Collapse Dropdown Toggle Button */}
+              <button
+                type="button"
+                onClick={() => setIsActorsExpanded(!isActorsExpanded)}
+                className={`p-2 rounded-xl border flex items-center gap-1 text-xs font-bold transition-all cursor-pointer ${
+                  isDarkMode
+                    ? 'bg-slate-900 border-slate-800 text-slate-300 hover:bg-slate-800'
+                    : 'bg-slate-100 border-slate-200 text-slate-700 hover:bg-slate-200'
+                }`}
+                title={isActorsExpanded ? 'Thu gọn Actors Matrix' : 'Mở rộng Actors Matrix'}
+              >
+                <span>{isActorsExpanded ? 'Thu gọn' : 'Mở rộng'}</span>
+                {isActorsExpanded ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
+              </button>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-              {item.actors.map((actor, idx) => (
-                <div
-                  key={idx}
-                  className={`border rounded-xl p-3.5 flex items-start gap-3 transition-colors ${isDarkMode ? 'bg-slate-900/90 border-slate-800' : 'bg-slate-50 border-slate-200/80 hover:bg-white'
-                    }`}
-                >
-                  <div className={`w-8 h-8 rounded-lg flex items-center justify-center font-bold text-xs shrink-0 ${idx === 0
-                    ? 'bg-amber-500/20 text-amber-700 dark:text-amber-300 border border-amber-500/30'
-                    : idx === 1
-                      ? 'bg-blue-500/20 text-blue-700 dark:text-blue-300 border border-blue-500/30'
-                      : 'bg-emerald-500/20 text-emerald-700 dark:text-emerald-300 border border-emerald-500/30'
-                    }`}>
-                    {idx + 1}
+            {isActorsExpanded && (
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-3 animate-fadeIn pt-1">
+                {item.actors.map((actor, idx) => (
+                  <div
+                    key={idx}
+                    className={`border rounded-xl p-3.5 flex items-start gap-3 transition-colors ${isDarkMode ? 'bg-slate-900/90 border-slate-800' : 'bg-slate-50 border-slate-200/80 hover:bg-white'
+                      }`}
+                  >
+                    <div className={`w-8 h-8 rounded-lg flex items-center justify-center font-bold text-xs shrink-0 ${idx === 0
+                      ? 'bg-amber-500/20 text-amber-700 dark:text-amber-300 border border-amber-500/30'
+                      : idx === 1
+                        ? 'bg-blue-500/20 text-blue-700 dark:text-blue-300 border border-blue-500/30'
+                        : 'bg-emerald-500/20 text-emerald-700 dark:text-emerald-300 border border-emerald-500/30'
+                      }`}>
+                      {idx + 1}
+                    </div>
+                    <div>
+                      <span className="text-[10px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 block mb-0.5">
+                        {actor.role}
+                      </span>
+                      <h4 className="text-xs font-bold text-slate-900 dark:text-white leading-tight">
+                        {actor.name}
+                      </h4>
+                      <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-1 leading-snug">
+                        {actor.action}
+                      </p>
+                    </div>
                   </div>
-                  <div>
-                    <span className="text-[10px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 block mb-0.5">
-                      {actor.role}
-                    </span>
-                    <h4 className="text-xs font-bold text-slate-900 dark:text-white leading-tight">
-                      {actor.name}
-                    </h4>
-                    <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-1 leading-snug">
-                      {actor.action}
-                    </p>
-                  </div>
-                </div>
-              ))}
-            </div>
+                ))}
+              </div>
+            )}
           </div>
         )}
 

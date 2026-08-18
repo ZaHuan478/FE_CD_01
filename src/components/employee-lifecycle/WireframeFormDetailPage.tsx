@@ -269,7 +269,7 @@ export const WireframeFormDetailPage: React.FC<WireframeFormDetailPageProps> = (
               title="Chuyển đổi Chế độ Giao diện Sáng / Tối"
             >
               {isDarkMode ? <Sun className="w-4 h-4 text-amber-400" /> : <Moon className="w-4 h-4 text-slate-600" />}
-              <span className="hidden sm:inline">{isDarkMode ? 'Giao diện Sáng' : 'Giao diện Tối'}</span>
+              {/* <span className="hidden sm:inline">{isDarkMode ? 'Giao diện Sáng' : 'Giao diện Tối'}</span> */}
             </button>
 
             {/* Top Primary Submit Button */}

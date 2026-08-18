@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useState } from 'react'
 import {
   GitBranch,
   ArrowRight,
@@ -7,7 +7,9 @@ import {
   CheckCircle2,
   AlertCircle,
   Building2,
-  FileText
+  FileText,
+  ChevronDown,
+  ChevronUp
 } from 'lucide-react'
 import type { SopSubProcess } from '../types'
 import type { DetailItem } from '../../../../types/employee-lifecycle'
@@ -30,6 +32,7 @@ export const WorkflowDiagramView: React.FC<WorkflowDiagramViewProps> = ({
   item,
   onOpenWireframe
 }) => {
+  const [isDiagramExpanded, setIsDiagramExpanded] = useState<boolean>(true)
   const currentStep = currentProcess.steps[selectedStepIdx] || currentProcess.steps[0]
 
   return (
@@ -49,151 +52,166 @@ export const WorkflowDiagramView: React.FC<WorkflowDiagramViewProps> = ({
             </p>
           </div>
 
-          <span className={`text-xs font-mono font-bold px-3 py-1 rounded-xl border shrink-0 ${isDarkMode ? 'bg-emerald-950/80 text-emerald-400 border-emerald-800' : 'bg-emerald-50 text-emerald-800 border-emerald-200'
-            }`}>
-            {currentProcess.steps.length} Bước SOP Chuẩn
-          </span>
+          <div className="flex items-center gap-2.5 shrink-0 self-start sm:self-center">
+            <span className={`text-xs font-mono font-bold px-3 py-1 rounded-xl border shrink-0 ${isDarkMode ? 'bg-emerald-950/80 text-emerald-400 border-emerald-800' : 'bg-emerald-50 text-emerald-800 border-emerald-200'
+              }`}>
+              {currentProcess.steps.length} Bước SOP Chuẩn
+            </span>
+
+            {/* Collapse Dropdown Toggle Button */}
+            <button
+              type="button"
+              onClick={() => setIsDiagramExpanded(!isDiagramExpanded)}
+              className={`p-2 rounded-xl border flex items-center gap-1 text-xs font-bold transition-all cursor-pointer ${
+                isDarkMode
+                  ? 'bg-slate-900 border-slate-800 text-slate-300 hover:bg-slate-800'
+                  : 'bg-slate-100 border-slate-200 text-slate-700 hover:bg-slate-200'
+              }`}
+              title={isDiagramExpanded ? 'Thu gọn Sơ đồ Workflow' : 'Mở rộng Sơ đồ Workflow'}
+            >
+              <span>{isDiagramExpanded ? 'Thu gọn' : 'Mở rộng'}</span>
+              {isDiagramExpanded ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
+            </button>
+          </div>
         </div>
 
-        {/* SOP Step Types Legend Bar */}
-        <SopStepLegendBar />
+        {/* EXPANDABLE DIAGRAM WORKFLOW BODY */}
+        {isDiagramExpanded && (
+          <div className="space-y-6 animate-fadeIn">
+            {/* SOP Step Types Legend Bar */}
+            <SopStepLegendBar />
 
-        {/* Pure Horizontal Sequential Steps Timeline Flow */}
-        <div className="relative pt-2 pb-4 overflow-x-auto no-scrollbar">
-          <div className="flex items-center gap-3 min-w-max pb-2 px-1">
-            {currentProcess.steps.map((step, idx) => {
-              const isStepSelected = selectedStepIdx === idx
-              const isLastStep = idx === currentProcess.steps.length - 1
+            {/* Pure Horizontal Sequential Steps Timeline Flow */}
+            <div className="relative pt-2 pb-4 overflow-x-auto no-scrollbar">
+              <div className="flex items-center gap-3 min-w-max pb-2 px-1">
+                {currentProcess.steps.map((step, idx) => {
+                  const isStepSelected = selectedStepIdx === idx
+                  const isLastStep = idx === currentProcess.steps.length - 1
 
-              return (
-                <React.Fragment key={step.stepCode}>
-                  {/* Step Card Node */}
-                  <div
-                    onClick={() => setSelectedStepIdx(idx)}
-                    className={`w-[260px] shrink-0 p-4 rounded-2xl border transition-all duration-200 cursor-pointer flex flex-col justify-between shadow-2xs ${isStepSelected
-                      ? isDarkMode
-                        ? 'bg-blue-950/90 border-blue-500 ring-2 ring-blue-500/40 transform -translate-y-1 shadow-md'
-                        : 'bg-blue-50/90 border-blue-500 ring-2 ring-blue-500/30 transform -translate-y-1 shadow-md'
-                      : isDarkMode
-                        ? 'bg-slate-900/90 border-slate-800 hover:border-blue-500/60 hover:bg-slate-800'
-                        : 'bg-slate-50 border-slate-200 hover:border-blue-400 hover:bg-white'
-                      }`}
-                  >
-                    <div>
-                      {/* Step Header with Step Number & Code */}
-                      <div className="flex items-center justify-between mb-2.5">
-                        <div className="flex items-center gap-2">
-                          <span className={`w-6 h-6 rounded-full flex items-center justify-center font-bold text-xs border ${isStepSelected
-                            ? 'bg-blue-600 text-white border-blue-500'
-                            : isDarkMode
-                              ? 'bg-slate-800 text-slate-300 border-slate-700'
-                              : 'bg-white text-slate-700 border-slate-200'
-                            }`}>
-                            {idx + 1}
-                          </span>
+                  return (
+                    <React.Fragment key={step.stepCode}>
+                      {/* Step Card Node */}
+                      <div
+                        onClick={() => setSelectedStepIdx(idx)}
+                        className={`w-[260px] shrink-0 p-4 rounded-2xl border transition-all duration-200 cursor-pointer flex flex-col justify-between shadow-2xs ${isStepSelected
+                          ? isDarkMode
+                            ? 'bg-blue-950 border-blue-500 text-white ring-2 ring-blue-500/40 transform -translate-y-1 shadow-md'
+                            : 'bg-blue-600 border-blue-600 text-white ring-2 ring-blue-400 transform -translate-y-1 shadow-md'
+                          : isDarkMode
+                            ? 'bg-slate-900/90 border-slate-800 hover:border-blue-500/60 hover:bg-slate-800'
+                            : 'bg-slate-50 border-slate-200 hover:border-blue-400 hover:bg-white'
+                          }`}
+                      >
+                        <div>
+                          <div className="flex items-center justify-between mb-2">
+                            <span
+                              className={`text-[10px] font-mono font-black px-2 py-0.5 rounded border ${isStepSelected
+                                ? 'bg-white/20 text-white border-white/30'
+                                : 'bg-blue-50 dark:bg-blue-950 text-blue-700 dark:text-blue-300 border-blue-200/80 dark:border-blue-800'
+                                }`}
+                            >
+                              {step.stepCode}
+                            </span>
 
-                          <span className={`px-2 py-0.5 font-mono font-extrabold text-[11px] rounded-md border ${isStepSelected
-                            ? 'bg-blue-600 text-white border-blue-500'
-                            : isDarkMode
-                              ? 'bg-slate-800 text-blue-300 border-slate-700'
-                              : 'bg-white text-blue-700 border-slate-200'
-                            }`}>
-                            {step.stepCode}
-                          </span>
+                            <span
+                              className={`text-[9px] font-mono font-bold px-1.5 py-0.5 rounded border ${isStepSelected
+                                ? 'bg-white/20 text-white border-white/30'
+                                : step.typeCode === 'N'
+                                  ? 'bg-blue-100/80 dark:bg-blue-900/80 text-blue-800 dark:text-blue-200 border-blue-200'
+                                  : step.typeCode === 'M'
+                                    ? 'bg-emerald-100/80 dark:bg-emerald-900/80 text-emerald-800 dark:text-emerald-200 border-emerald-200'
+                                    : 'bg-purple-100/80 dark:bg-purple-900/80 text-purple-800 dark:text-purple-200 border-purple-200'
+                                }`}
+                            >
+                              [{step.typeCode}]
+                            </span>
+                          </div>
+
+                          <h4
+                            className={`text-xs font-bold leading-tight mb-1.5 line-clamp-2 ${isStepSelected
+                              ? 'text-white'
+                              : isDarkMode
+                                ? 'text-slate-100'
+                                : 'text-slate-900'
+                              }`}
+                          >
+                            {step.title}
+                          </h4>
+
+                          <p
+                            className={`text-[11px] leading-snug line-clamp-2 mb-2 ${isStepSelected
+                              ? isDarkMode ? 'text-blue-200' : 'text-blue-100'
+                              : isDarkMode
+                                ? 'text-slate-400'
+                                : 'text-slate-500'
+                              }`}
+                          >
+                            {step.description}
+                          </p>
                         </div>
 
-                        <span
-                          title={
-                            step.typeCode === 'N'
-                              ? 'Loại N: Bước Nhập liệu / Khai báo'
-                              : step.typeCode === 'M'
-                                ? 'Loại M: Bước Thẩm định thủ công / Duyệt'
-                                : step.typeCode === 'C'
-                                  ? 'Loại C: Bước Thẩm định điều kiện'
-                                  : 'Loại A: Bước Tự động hệ thống xử lý'
-                          }
-                          className={`text-[9px] font-mono font-bold px-1.5 py-0.5 rounded cursor-help ${step.typeCode === 'N'
-                            ? 'bg-blue-500/20 text-blue-700 dark:text-blue-300 border border-blue-500/30'
-                            : step.typeCode === 'M'
-                              ? 'bg-amber-500/20 text-amber-700 dark:text-amber-300 border border-amber-500/30'
-                              : step.typeCode === 'C'
-                                ? 'bg-purple-500/20 text-purple-700 dark:text-purple-300 border border-purple-500/30'
-                                : 'bg-emerald-500/20 text-emerald-700 dark:text-emerald-300 border border-emerald-500/30'
-                            }`}>
-                          Loại {step.typeCode}
-                        </span>
+                        <div
+                          className={`pt-2 border-t flex items-center justify-between text-[10px] ${isStepSelected
+                            ? isDarkMode ? 'border-blue-800 text-blue-200' : 'border-blue-500/60 text-blue-100'
+                            : 'border-slate-200/60 dark:border-slate-800 text-slate-500 dark:text-slate-400'
+                            }`}
+                        >
+                          <span className="font-semibold flex items-center gap-1">
+                            <UserCheck className="w-3 h-3" />
+                            {step.actor}
+                          </span>
+                          <span>{step.timing}</span>
+                        </div>
                       </div>
 
-                      {/* Step Title */}
-                      <h4 className={`text-xs font-bold leading-snug mb-2.5 h-9 line-clamp-2 ${isStepSelected
-                        ? isDarkMode ? 'text-white' : 'text-blue-950'
-                        : isDarkMode ? 'text-slate-200' : 'text-slate-900'
-                        }`}>
-                        {step.title}
-                      </h4>
-                    </div>
+                      {/* Directional Arrow Divider */}
+                      {!isLastStep && (
+                        <div className="flex items-center justify-center shrink-0 text-slate-300 dark:text-slate-700">
+                          <ArrowRight className="w-5 h-5 animate-pulse" />
+                        </div>
+                      )}
+                    </React.Fragment>
+                  )
+                })}
+              </div>
+            </div>
 
-                    {/* Step Actor & Location Footer */}
-                    <div className="space-y-1.5 text-[10px] text-slate-500 dark:text-slate-400 pt-2.5 border-t border-slate-200 dark:border-slate-800/80">
-                      <div className="flex items-center gap-1.5">
-                        <UserCheck className="w-3.5 h-3.5 text-amber-600 dark:text-amber-400 shrink-0" />
-                        <span className="truncate font-semibold">{step.actor}</span>
-                      </div>
-                      <div className="flex items-center justify-between text-[10px]">
-                        <span className="truncate">{step.location}</span>
-                        <ChevronRight className="w-3.5 h-3.5 text-slate-400 shrink-0" />
-                      </div>
-                    </div>
+            {/* Decision Gateway Card */}
+            <div className={`p-4 border rounded-xl space-y-3 ${isDarkMode
+              ? 'bg-gradient-to-r from-slate-900 via-indigo-950/40 to-slate-900 border-indigo-800/50'
+              : 'bg-gradient-to-r from-slate-50 via-indigo-50/50 to-slate-50 border-indigo-200'
+              }`}>
+              <div className="flex items-center gap-2 text-xs font-bold text-indigo-700 dark:text-indigo-300">
+                <GitBranch className="w-4 h-4 text-indigo-600 dark:text-indigo-400" />
+                <span>Cổng Rẽ Nhánh Điều Kiện & Luồng Thẩm Định (Decision Gateway)</span>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
+                <div className={`p-3 border rounded-lg flex items-start gap-2.5 ${isDarkMode ? 'bg-emerald-950/40 border-emerald-800/60' : 'bg-emerald-50/80 border-emerald-200'
+                  }`}>
+                  <CheckCircle2 className="w-4 h-4 text-emerald-600 dark:text-emerald-400 shrink-0 mt-0.5" />
+                  <div>
+                    <strong className="text-emerald-800 dark:text-emerald-300 font-bold block mb-0.5">Trường hợp 1: Phê duyệt / Thống nhất</strong>
+                    <p className="text-[11px] text-emerald-700 dark:text-emerald-200/80 leading-relaxed">
+                      Chuyển tự động sang bước tiếp theo, cập nhật bản ghi chính thức và gửi thông báo qua mail/portal.
+                    </p>
                   </div>
+                </div>
 
-                  {/* Visual Connecting Arrow between steps */}
-                  {!isLastStep && (
-                    <div className="flex items-center justify-center px-1 shrink-0">
-                      <div className="w-8 h-8 rounded-full bg-blue-100 dark:bg-blue-950/80 border border-blue-200 dark:border-blue-800 flex items-center justify-center text-blue-600 dark:text-blue-400 shadow-2xs">
-                        <ArrowRight className="w-4 h-4" />
-                      </div>
-                    </div>
-                  )}
-                </React.Fragment>
-              )
-            })}
-          </div>
-        </div>
-
-        {/* Decision Gateway Card */}
-        <div className={`p-4 border rounded-xl space-y-3 ${isDarkMode
-          ? 'bg-gradient-to-r from-slate-900 via-indigo-950/40 to-slate-900 border-indigo-800/50'
-          : 'bg-gradient-to-r from-slate-50 via-indigo-50/50 to-slate-50 border-indigo-200'
-          }`}>
-          <div className="flex items-center gap-2 text-xs font-bold text-indigo-700 dark:text-indigo-300">
-            <GitBranch className="w-4 h-4 text-indigo-600 dark:text-indigo-400" />
-            <span>Cổng Rẽ Nhánh Điều Kiện & Luồng Thẩm Định (Decision Gateway)</span>
-          </div>
-
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
-            <div className={`p-3 border rounded-lg flex items-start gap-2.5 ${isDarkMode ? 'bg-emerald-950/40 border-emerald-800/60' : 'bg-emerald-50/80 border-emerald-200'
-              }`}>
-              <CheckCircle2 className="w-4 h-4 text-emerald-600 dark:text-emerald-400 shrink-0 mt-0.5" />
-              <div>
-                <strong className="text-emerald-800 dark:text-emerald-300 font-bold block mb-0.5">Trường hợp 1: Phê duyệt / Thống nhất</strong>
-                <p className="text-[11px] text-emerald-700 dark:text-emerald-200/80 leading-relaxed">
-                  Chuyển tự động sang bước tiếp theo, cập nhật bản ghi chính thức và gửi thông báo qua mail/portal.
-                </p>
-              </div>
-            </div>
-
-            <div className={`p-3 border rounded-lg flex items-start gap-2.5 ${isDarkMode ? 'bg-amber-950/40 border-amber-800/60' : 'bg-amber-50/80 border-amber-200'
-              }`}>
-              <AlertCircle className="w-4 h-4 text-amber-600 dark:text-amber-400 shrink-0 mt-0.5" />
-              <div>
-                <strong className="text-amber-800 dark:text-amber-300 font-bold block mb-0.5">Trường hợp 2: Yêu cầu hiệu chỉnh / Trả lại</strong>
-                <p className="text-[11px] text-amber-700 dark:text-amber-200/80 leading-relaxed">
-                  Trả về cho Người thực hiện trước đó để bổ túc thông tin hoặc họp giải trình lại với cấp có thẩm quyền.
-                </p>
+                <div className={`p-3 border rounded-lg flex items-start gap-2.5 ${isDarkMode ? 'bg-amber-950/40 border-amber-800/60' : 'bg-amber-50/80 border-amber-200'
+                  }`}>
+                  <AlertCircle className="w-4 h-4 text-amber-600 dark:text-amber-400 shrink-0 mt-0.5" />
+                  <div>
+                    <strong className="text-amber-800 dark:text-amber-300 font-bold block mb-0.5">Trường hợp 2: Yêu cầu hiệu chỉnh / Trả lại</strong>
+                    <p className="text-[11px] text-amber-700 dark:text-amber-200/80 leading-relaxed">
+                      Trả về cho Người thực hiện trước đó để bổ túc thông tin hoặc họp giải trình lại với cấp có thẩm quyền.
+                    </p>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
-        </div>
+        )}
       </div>
 
       {/* Selected Step Spec Card Detail */}
