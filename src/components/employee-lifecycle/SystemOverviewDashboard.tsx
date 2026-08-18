@@ -11,7 +11,9 @@ import {
   PieChart,
   BarChart3,
   SlidersHorizontal,
-  ChevronRight
+  ChevronRight,
+  ChevronDown,
+  ChevronUp
 } from 'lucide-react'
 import { RadialEcosystemChart } from './RadialEcosystemChart'
 
@@ -25,6 +27,7 @@ export const SystemOverviewDashboard: React.FC<SystemOverviewDashboardProps> = (
   onOpenERD
 }) => {
   const [coverageViewMode, setCoverageViewMode] = useState<'wheel' | 'bar'>('wheel')
+  const [isCoverageExpanded, setIsCoverageExpanded] = useState<boolean>(true)
 
   return (
     <div className="space-y-6">
@@ -254,71 +257,87 @@ export const SystemOverviewDashboard: React.FC<SystemOverviewDashboardProps> = (
             <span className="hidden md:flex text-xs font-bold text-emerald-600 dark:text-emerald-400 items-center gap-1">
               <CheckCircle2 className="w-3.5 h-3.5" /> 45/45 SOPs Specs Integrated
             </span>
+
+            {/* Collapse / Expand Dropdown Button */}
+            <button
+              type="button"
+              onClick={() => setIsCoverageExpanded(!isCoverageExpanded)}
+              className="p-2 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 transition-colors flex items-center gap-1 text-xs font-bold cursor-pointer"
+              title={isCoverageExpanded ? 'Thu gọn Section Tỷ lệ phủ' : 'Mở rộng Section Tỷ lệ phủ'}
+            >
+              <span>{isCoverageExpanded ? 'Thu gọn' : 'Mở rộng'}</span>
+              {isCoverageExpanded ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
+            </button>
           </div>
         </div>
 
-        {/* VIEW MODE 1: RADIAL ECOSYSTEM WHEEL (MISA AMIS STYLE) */}
-        {coverageViewMode === 'wheel' && (
-          <RadialEcosystemChart />
-        )}
+        {/* EXPANDABLE BODY CONTENT */}
+        {isCoverageExpanded && (
+          <div className="animate-fadeIn space-y-4">
+            {/* VIEW MODE 1: RADIAL ECOSYSTEM WHEEL (MISA AMIS STYLE) */}
+            {coverageViewMode === 'wheel' && (
+              <RadialEcosystemChart />
+            )}
 
-        {/* VIEW MODE 2: ORIGINAL BAR CHARTS */}
-        {coverageViewMode === 'bar' && (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 pt-2">
-            {/* Module EMP */}
-            <div className="space-y-1.5 p-3 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-950/40">
-              <div className="flex justify-between text-xs font-bold">
-                <span>Core EMP (Hồ sơ)</span>
-                <span className="text-blue-600 dark:text-blue-400 font-mono">15/15 SOPs</span>
-              </div>
-              <div className="w-full h-2 bg-slate-200 dark:bg-slate-800 rounded-full overflow-hidden">
-                <div className="h-full bg-blue-600 rounded-full w-full" />
-              </div>
-            </div>
+            {/* VIEW MODE 2: ORIGINAL BAR CHARTS */}
+            {coverageViewMode === 'bar' && (
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 pt-2">
+                {/* Module EMP */}
+                <div className="space-y-1.5 p-3 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-950/40">
+                  <div className="flex justify-between text-xs font-bold">
+                    <span>Core EMP (Hồ sơ)</span>
+                    <span className="text-blue-600 dark:text-blue-400 font-mono">15/15 SOPs</span>
+                  </div>
+                  <div className="w-full h-2 bg-slate-200 dark:bg-slate-800 rounded-full overflow-hidden">
+                    <div className="h-full bg-blue-600 rounded-full w-full" />
+                  </div>
+                </div>
 
-            {/* Module ATT */}
-            <div className="space-y-1.5 p-3 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-950/40">
-              <div className="flex justify-between text-xs font-bold">
-                <span>ATT (Chấm công)</span>
-                <span className="text-emerald-600 dark:text-emerald-400 font-mono">15/15 SOPs</span>
-              </div>
-              <div className="w-full h-2 bg-slate-200 dark:bg-slate-800 rounded-full overflow-hidden">
-                <div className="h-full bg-emerald-500 rounded-full w-full" />
-              </div>
-            </div>
+                {/* Module ATT */}
+                <div className="space-y-1.5 p-3 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-950/40">
+                  <div className="flex justify-between text-xs font-bold">
+                    <span>ATT (Chấm công)</span>
+                    <span className="text-emerald-600 dark:text-emerald-400 font-mono">15/15 SOPs</span>
+                  </div>
+                  <div className="w-full h-2 bg-slate-200 dark:bg-slate-800 rounded-full overflow-hidden">
+                    <div className="h-full bg-emerald-500 rounded-full w-full" />
+                  </div>
+                </div>
 
-            {/* Module INS */}
-            <div className="space-y-1.5 p-3 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-950/40">
-              <div className="flex justify-between text-xs font-bold">
-                <span>INS (Bảo hiểm)</span>
-                <span className="text-purple-600 dark:text-purple-400 font-mono">8/8 SOPs</span>
-              </div>
-              <div className="w-full h-2 bg-slate-200 dark:bg-slate-800 rounded-full overflow-hidden">
-                <div className="h-full bg-purple-600 rounded-full w-full" />
-              </div>
-            </div>
+                {/* Module INS */}
+                <div className="space-y-1.5 p-3 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-950/40">
+                  <div className="flex justify-between text-xs font-bold">
+                    <span>INS (Bảo hiểm)</span>
+                    <span className="text-purple-600 dark:text-purple-400 font-mono">8/8 SOPs</span>
+                  </div>
+                  <div className="w-full h-2 bg-slate-200 dark:bg-slate-800 rounded-full overflow-hidden">
+                    <div className="h-full bg-purple-600 rounded-full w-full" />
+                  </div>
+                </div>
 
-            {/* Module PAY */}
-            <div className="space-y-1.5 p-3 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-950/40">
-              <div className="flex justify-between text-xs font-bold">
-                <span>PAY (Tiền lương)</span>
-                <span className="text-amber-600 dark:text-amber-400 font-mono">4/4 SOPs</span>
-              </div>
-              <div className="w-full h-2 bg-slate-200 dark:bg-slate-800 rounded-full overflow-hidden">
-                <div className="h-full bg-amber-500 rounded-full w-full" />
-              </div>
-            </div>
+                {/* Module PAY */}
+                <div className="space-y-1.5 p-3 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-950/40">
+                  <div className="flex justify-between text-xs font-bold">
+                    <span>PAY (Tiền lương)</span>
+                    <span className="text-amber-600 dark:text-amber-400 font-mono">4/4 SOPs</span>
+                  </div>
+                  <div className="w-full h-2 bg-slate-200 dark:bg-slate-800 rounded-full overflow-hidden">
+                    <div className="h-full bg-amber-500 rounded-full w-full" />
+                  </div>
+                </div>
 
-            {/* Module TAX */}
-            <div className="space-y-1.5 p-3 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-950/40">
-              <div className="flex justify-between text-xs font-bold">
-                <span>TAX (Thuế TNCN)</span>
-                <span className="text-indigo-600 dark:text-indigo-400 font-mono">3/3 SOPs</span>
+                {/* Module TAX */}
+                <div className="space-y-1.5 p-3 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-950/40">
+                  <div className="flex justify-between text-xs font-bold">
+                    <span>TAX (Thuế TNCN)</span>
+                    <span className="text-indigo-600 dark:text-indigo-400 font-mono">3/3 SOPs</span>
+                  </div>
+                  <div className="w-full h-2 bg-slate-200 dark:bg-slate-800 rounded-full overflow-hidden">
+                    <div className="h-full bg-indigo-600 rounded-full w-full" />
+                  </div>
+                </div>
               </div>
-              <div className="w-full h-2 bg-slate-200 dark:bg-slate-800 rounded-full overflow-hidden">
-                <div className="h-full bg-indigo-600 rounded-full w-full" />
-              </div>
-            </div>
+            )}
           </div>
         )}
       </div>
