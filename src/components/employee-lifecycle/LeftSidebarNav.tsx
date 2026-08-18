@@ -112,7 +112,7 @@ export const LeftSidebarNav: React.FC<LeftSidebarNavProps> = ({
 
   return (
     <aside
-      className={`fixed left-0 top-0 bottom-0 z-40 bg-slate-900 text-slate-100 border-r border-slate-800 transition-all duration-300 flex flex-col shadow-2xl ${isCollapsed ? 'w-16 sm:w-20' : 'w-64'
+      className={`fixed left-0 top-0 bottom-0 z-40 bg-slate-900 text-slate-100 border-r border-slate-800 transition-all duration-300 flex flex-col shadow-2xl ${isCollapsed ? 'w-12 sm:w-16' : 'w-56 sm:w-64'
         }`}
     >
 

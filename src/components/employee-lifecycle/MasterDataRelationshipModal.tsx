@@ -32,13 +32,13 @@ export const MasterDataRelationshipModal: React.FC<MasterDataRelationshipModalPr
   if (!isOpen) return null
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 md:p-8 bg-slate-950/70 backdrop-blur-md animate-in fade-in duration-200">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-6 md:p-8 bg-slate-950/70 backdrop-blur-md animate-in fade-in duration-200">
       <div
-        className="bg-slate-900 text-slate-100 rounded-3xl border border-slate-700/60 shadow-2xl w-full max-w-6xl max-h-[92vh] flex flex-col overflow-hidden relative"
+        className="bg-slate-900 text-slate-100 rounded-2xl sm:rounded-3xl border border-slate-700/60 shadow-2xl w-full max-w-6xl max-h-[95vh] sm:max-h-[92vh] flex flex-col overflow-hidden relative"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Modal Header */}
-        <div className="px-6 py-5 border-b border-slate-800 flex items-center justify-between bg-slate-900/90 sticky top-0 z-20">
+        <div className="px-4 sm:px-6 py-3.5 sm:py-5 border-b border-slate-800 flex items-center justify-between bg-slate-900/90 sticky top-0 z-20">
           <div className="flex items-center gap-3.5">
             <div className="p-2.5 bg-blue-600/20 text-blue-400 rounded-xl border border-blue-500/30">
               <Network className="w-6 h-6" />

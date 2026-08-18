@@ -32,25 +32,25 @@ export const RadialEcosystemChart: React.FC = () => {
       </div>
 
       {/* MAIN RADIAL WHEEL CONTAINER */}
-      <div className="relative w-[340px] h-[340px] sm:w-[460px] sm:h-[460px] md:w-[520px] md:h-[520px] flex items-center justify-center">
+      <div className="relative w-[300px] h-[300px] min-[400px]:w-[350px] min-[400px]:h-[350px] sm:w-[460px] sm:h-[460px] md:w-[520px] md:h-[520px] flex items-center justify-center">
 
         {/* OUTER CIRCULAR GUIDE LINES */}
         <div className="absolute inset-0 rounded-full border border-blue-500/20 dark:border-blue-400/10 animate-pulse pointer-events-none" />
         <div className="absolute inset-6 rounded-full border border-dashed border-slate-300 dark:border-slate-800 pointer-events-none" />
 
         {/* CENTER CORE ENGINE HUB */}
-        <div className="absolute z-20 w-36 h-36 sm:w-48 sm:h-48 md:w-56 md:h-56 rounded-full bg-white dark:bg-slate-900 border-4 border-slate-100 dark:border-slate-800 shadow-2xl flex flex-col items-center justify-center text-center p-3 transition-all duration-300 transform hover:scale-105">
+        <div className="absolute z-20 w-32 h-32 min-[400px]:w-36 min-[400px]:h-36 sm:w-48 sm:h-48 md:w-56 md:h-56 rounded-full bg-white dark:bg-slate-900 border-4 border-slate-100 dark:border-slate-800 shadow-2xl flex flex-col items-center justify-center text-center p-2.5 sm:p-3 transition-all duration-300 transform hover:scale-105">
           {/* Subtle Core Background Glow */}
           <div className="absolute -inset-1 rounded-full bg-gradient-to-tr from-blue-500 via-emerald-500 to-purple-500 opacity-20 blur-md pointer-events-none" />
 
-          <div className="p-2.5 bg-gradient-to-tr from-blue-600 to-indigo-600 text-white rounded-2xl shadow-md mb-1.5 shrink-0">
-            <Layers className="w-5 h-5 sm:w-6 sm:h-6" />
+          <div className="p-2 sm:p-2.5 bg-gradient-to-tr from-blue-600 to-indigo-600 text-white rounded-2xl shadow-md mb-1 sm:mb-1.5 shrink-0">
+            <Layers className="w-4 h-4 sm:w-6 sm:h-6" />
           </div>
 
-          <h3 className="text-xs sm:text-sm font-black tracking-tight text-slate-900 dark:text-white uppercase leading-none">
+          <h3 className="text-[10px] min-[400px]:text-xs sm:text-sm font-black tracking-tight text-slate-900 dark:text-white uppercase leading-none">
             HRMS 5 CORE MODULES
           </h3>
-          <span className="text-[9px] sm:text-[10px] font-bold text-blue-600 dark:text-blue-400 uppercase tracking-widest mt-1">
+          <span className="text-[8px] sm:text-[10px] font-bold text-blue-600 dark:text-blue-400 uppercase tracking-widest mt-0.5 sm:mt-1">
             45/45 SOP Specs
           </span>
 
@@ -59,7 +59,7 @@ export const RadialEcosystemChart: React.FC = () => {
           </p>
 
           {activeModule && (
-            <span className="mt-1 px-2.5 py-0.5 text-[10px] font-mono font-bold bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 rounded-full border border-emerald-500/30">
+            <span className="mt-0.5 sm:mt-1 px-2 py-0.5 text-[9px] sm:text-[10px] font-mono font-bold bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 rounded-full border border-emerald-500/30">
               {activeModule.sopCount}
             </span>
           )}
@@ -85,35 +85,32 @@ export const RadialEcosystemChart: React.FC = () => {
               }}
               onMouseEnter={() => setActiveHoveredId(mod.id)}
               onMouseLeave={() => setActiveHoveredId(null)}
-              className={`absolute z-30 transition-all duration-300 cursor-pointer group ${
-                isHovered ? 'scale-110 z-40' : 'hover:scale-105'
-              }`}
+              className={`absolute z-30 transition-all duration-300 cursor-pointer group ${isHovered ? 'scale-110 z-40' : 'hover:scale-105'
+                }`}
             >
               <div
-                className={`p-2.5 sm:p-3 rounded-2xl border shadow-md flex items-center gap-2.5 backdrop-blur-md transition-all duration-300 ${
-                  isHovered
+                className={`p-1.5 min-[400px]:p-2 sm:p-3 rounded-2xl border shadow-md flex items-center gap-1.5 sm:gap-2.5 backdrop-blur-md transition-all duration-300 ${isHovered
                     ? `bg-white dark:bg-slate-900 ${mod.border} ring-4 ring-blue-500/20 shadow-xl`
                     : `bg-white/95 dark:bg-slate-900/95 border-slate-200/90 dark:border-slate-800`
-                }`}
+                  }`}
               >
                 {/* Module Icon Badge */}
                 <div
-                  className={`w-8 h-8 sm:w-10 sm:h-10 rounded-xl flex items-center justify-center shrink-0 border transition-transform group-hover:scale-110 ${
-                    mod.bgLight
-                  } dark:${mod.bgDark} ${mod.border}`}
+                  className={`w-7 h-7 sm:w-10 sm:h-10 rounded-xl flex items-center justify-center shrink-0 border transition-transform group-hover:scale-110 ${mod.bgLight
+                    } dark:${mod.bgDark} ${mod.border}`}
                 >
                   {mod.icon}
                 </div>
 
                 {/* Module Details */}
-                <div className="text-left hidden sm:block max-w-[110px] md:max-w-[130px]">
-                  <span className="text-[9px] font-mono font-extrabold text-slate-400 dark:text-slate-500 uppercase tracking-wider block leading-none mb-0.5">
+                <div className="text-left max-w-[70px] min-[400px]:max-w-[85px] sm:max-w-[120px] md:max-w-[130px]">
+                  <span className="text-[8px] sm:text-[9px] font-mono font-extrabold text-slate-400 dark:text-slate-500 uppercase tracking-wider block leading-none mb-0.5 truncate">
                     {mod.code}
                   </span>
-                  <h4 className="text-[11px] sm:text-xs font-extrabold text-slate-800 dark:text-slate-100 truncate leading-tight">
+                  <h4 className="text-[10px] sm:text-xs font-extrabold text-slate-800 dark:text-slate-100 truncate leading-tight">
                     {mod.name.split(' (')[0]}
                   </h4>
-                  <span className="text-[10px] font-mono font-bold text-emerald-600 dark:text-emerald-400 block mt-0.5">
+                  <span className="text-[9px] sm:text-[10px] font-mono font-bold text-emerald-600 dark:text-emerald-400 hidden min-[400px]:block mt-0.5">
                     📋 {mod.sopCount}
                   </span>
                 </div>
@@ -145,9 +142,8 @@ export const RadialEcosystemChart: React.FC = () => {
                 stroke={isHovered ? mod.color : 'currentColor'}
                 strokeWidth={isHovered ? 3 : 1.5}
                 strokeDasharray={isHovered ? '0' : '5 3'}
-                className={`transition-all duration-300 ${
-                  isHovered ? 'opacity-100' : 'text-slate-300 dark:text-slate-800 opacity-70'
-                }`}
+                className={`transition-all duration-300 ${isHovered ? 'opacity-100' : 'text-slate-300 dark:text-slate-800 opacity-70'
+                  }`}
               />
             )
           })}
@@ -168,9 +164,9 @@ export const RadialEcosystemChart: React.FC = () => {
                   <span className={`text-[10px] font-mono font-extrabold uppercase px-2 py-0.5 rounded ${activeModule.bgLight} dark:${activeModule.bgDark} ${activeModule.textLight} dark:${activeModule.textDark} border ${activeModule.border}`}>
                     Mã Phân hệ: {activeModule.code}
                   </span>
-                  <span className="text-xs font-mono font-bold text-emerald-600 dark:text-emerald-400">
+                  {/* <span className="text-xs font-mono font-bold text-emerald-600 dark:text-emerald-400">
                     📋 Số lượng SOPs đặc tả: {activeModule.sopCount}
-                  </span>
+                  </span> */}
                 </div>
                 <h4 className="text-sm font-extrabold text-slate-900 dark:text-white mt-1">
                   {activeModule.name}

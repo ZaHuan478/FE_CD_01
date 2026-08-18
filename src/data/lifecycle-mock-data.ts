@@ -44,7 +44,7 @@ export const lifecycleMockNodes: Record<string, SOPFullNode> = {
     id: 'LIFE-01',
     type: 'lifecycle',
     code: 'EMP02.01',
-    title: 'Tiếp nhận nhân viên mới (Onboarding Prep)',
+    title: 'Tiếp nhận nhân viên mới',
     subtitle: 'Khởi tạo hành trình & Chuẩn bị tiếp nhận nhân sự mới',
     contextTrigger: 'Ứng viên trúng tuyển xác nhận nhận Thư mời nhận việc (Offer Letter), chuẩn bị đến làm việc chính thức tại doanh nghiệp.',
     actorsMatrix: {
@@ -102,7 +102,7 @@ export const lifecycleMockNodes: Record<string, SOPFullNode> = {
     id: 'LIFE-02',
     type: 'lifecycle',
     code: 'EMP04',
-    title: 'Tạo & Hoàn thiện hồ sơ nhân viên (Employee Profile)',
+    title: 'Tạo & Hoàn thiện hồ sơ nhân viên',
     subtitle: 'Số hóa & Lưu trữ thông tin pháp lý nhân sự',
     contextTrigger: 'Ngày đầu tiên nhận việc, nhân viên cập nhật & bổ túc đầy đủ hồ sơ giấy tờ pháp lý theo quy định của Luật lao động.',
     actorsMatrix: {
@@ -160,7 +160,7 @@ export const lifecycleMockNodes: Record<string, SOPFullNode> = {
     id: 'LIFE-03',
     type: 'lifecycle',
     code: 'EMP02.01 & MD-G04',
-    title: 'Bố trí công tác & Vị trí làm việc (Job Placement)',
+    title: 'Bố trí công tác & Vị trí làm việc',
     subtitle: 'Định vị nhân sự trong Cơ cấu tổ chức (Org Chart)',
     contextTrigger: 'Nhân viên hoàn thành tạo hồ sơ, cần gán chính thức vào một vị trí công tác cụ thể trên sơ đồ tổ chức của doanh nghiệp.',
     actorsMatrix: {
@@ -277,7 +277,7 @@ export const lifecycleMockNodes: Record<string, SOPFullNode> = {
     id: 'LIFE-05',
     type: 'lifecycle',
     code: 'PAY01, INS01',
-    title: 'Cấu hình Lương & Chế độ phúc lợi (Comp & Benefits)',
+    title: 'Cấu hình Lương & Chế độ phúc lợi',
     subtitle: 'Thiết lập tham số thu nhập & đóng nộp bảo hiểm',
     contextTrigger: 'Xác lập chính sách đãi ngộ gắn liền với Hợp đồng lao động và Chức vụ của nhân viên.',
     actorsMatrix: {
@@ -335,7 +335,7 @@ export const lifecycleMockNodes: Record<string, SOPFullNode> = {
     id: 'LIFE-06',
     type: 'lifecycle',
     code: 'EMP11, ATT08',
-    title: 'Ghi nhận Quá trình làm việc & Biến động (Lifecycle Tracking)',
+    title: 'Quá trình làm việc & Biến động',
     subtitle: 'Nhật ký biến động nhân sự xuyên suốt thời gian công tác',
     contextTrigger: 'Quản lý toàn bộ diễn tiến quá trình cống hiến của nhân sự: điều chuyển, nâng lương, thành tích, vi phạm.',
     actorsMatrix: {
@@ -392,7 +392,7 @@ export const lifecycleMockNodes: Record<string, SOPFullNode> = {
     id: 'LIFE-07',
     type: 'lifecycle',
     code: 'EMP15, PAY02, INS03',
-    title: 'Nghỉ việc, Bàn giao & Đóng hồ sơ (Offboarding & Clearance)',
+    title: 'Nghỉ việc, Bàn giao & Đóng hồ sơ',
     subtitle: 'Thanh lý hợp đồng & Kết thúc vòng đời nhân sự',
     contextTrigger: 'Nhân viên nộp đơn xin thôi việc hoặc Công ty chấm dứt Hợp đồng lao động theo quy định.',
     actorsMatrix: {

@@ -240,8 +240,8 @@ export const EmployeeLifecyclePage: React.FC = () => {
   }
 
   return (
-    <div className={`min-h-screen transition-colors duration-300 pb-20 ${isDarkMode ? 'bg-slate-950 text-slate-100' : 'bg-slate-50/50 text-slate-800'
-      } ${isSidebarCollapsed ? 'pl-16 sm:pl-20' : 'pl-16 sm:pl-20 md:pl-64'
+    <div className={`min-h-screen transition-all duration-300 pb-20 ${isDarkMode ? 'bg-slate-950 text-slate-100' : 'bg-slate-50/50 text-slate-800'
+      } ${isSidebarCollapsed ? 'pl-12 sm:pl-16' : 'pl-12 sm:pl-16 md:pl-64'
       }`}>
 
       {/* LEFT FIXED SIDEBAR NAVIGATION */}
