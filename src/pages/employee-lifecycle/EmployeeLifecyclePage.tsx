@@ -1,6 +1,6 @@
 import React, { useMemo, useState, useEffect } from 'react'
 import { useSearchParams } from 'react-router-dom'
-import { Sparkles, Layers, Database, FileText, X, Layout } from 'lucide-react'
+import { Sparkles, Layers, Database, FileText, X, Layout, Sun, Moon } from 'lucide-react'
 
 import { MasterDataCard } from '../../components/employee-lifecycle/MasterDataCard'
 import { MasterDataRelationshipModal } from '../../components/employee-lifecycle/MasterDataRelationshipModal'
@@ -67,6 +67,32 @@ export const EmployeeLifecyclePage: React.FC = () => {
   const [wireframeItem, setWireframeItem] = useState<DetailItem | null>(null)
   const [activeSection, setActiveSection] = useState('overview-dashboard')
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false)
+
+  // Theme state: dark / light mode toggle
+  const [isDarkMode, setIsDarkMode] = useState<boolean>(() => {
+    return document.documentElement.classList.contains('dark') || localStorage.getItem('employee_lifecycle_theme') === 'dark'
+  })
+
+  useEffect(() => {
+    if (isDarkMode) {
+      document.documentElement.classList.add('dark')
+      localStorage.setItem('employee_lifecycle_theme', 'dark')
+    } else {
+      document.documentElement.classList.remove('dark')
+      localStorage.setItem('employee_lifecycle_theme', 'light')
+    }
+  }, [isDarkMode])
+
+  // Sync state if class on html changes externally (e.g. from WorkflowDetailPage or WireframeFormDetailPage)
+  useEffect(() => {
+    const handleClassChange = () => {
+      const isDark = document.documentElement.classList.contains('dark')
+      setIsDarkMode(isDark)
+    }
+    const observer = new MutationObserver(handleClassChange)
+    observer.observe(document.documentElement, { attributes: true, attributeFilter: ['class'] })
+    return () => observer.disconnect()
+  }, [])
 
   const isERDOpen = searchParams.get('view') === 'master-data-erd'
 
@@ -256,9 +282,9 @@ export const EmployeeLifecyclePage: React.FC = () => {
   }
 
   return (
-    <div className={`min-h-screen bg-slate-50/50 text-slate-800 pb-20 transition-all duration-300 ${
-      isSidebarCollapsed ? 'pl-16 sm:pl-20' : 'pl-16 sm:pl-20 md:pl-64'
-    }`}>
+    <div className={`min-h-screen transition-colors duration-300 pb-20 ${isDarkMode ? 'bg-slate-950 text-slate-100' : 'bg-slate-50/50 text-slate-800'
+      } ${isSidebarCollapsed ? 'pl-16 sm:pl-20' : 'pl-16 sm:pl-20 md:pl-64'
+      }`}>
 
       {/* LEFT FIXED SIDEBAR NAVIGATION */}
       <LeftSidebarNav
@@ -291,11 +317,36 @@ export const EmployeeLifecyclePage: React.FC = () => {
             </div>
           </div>
 
-          <div className="hidden lg:flex items-center gap-2.5 text-xs shrink-0">
-            <span className="text-slate-400 text-[11px]">Model Standard:</span>
-            <span className="font-semibold text-slate-200 bg-slate-800 px-2.5 py-1 rounded-md border border-slate-700 text-[11px]">
-              Workday / SAP SuccessFactors Style
-            </span>
+          <div className="flex items-center gap-2.5 text-xs shrink-0">
+            {/* Theme Toggle Button */}
+            <button
+              type="button"
+              onClick={() => setIsDarkMode(!isDarkMode)}
+              className={`px-3 py-1.5 rounded-xl border transition-all flex items-center gap-2 text-xs font-bold cursor-pointer ${isDarkMode
+                ? 'bg-slate-800 hover:bg-slate-700 border-slate-700 text-amber-400'
+                : 'bg-slate-800 hover:bg-slate-700 border-slate-700 text-slate-200'
+                }`}
+              title={isDarkMode ? 'Bật Giao diện Sáng (Light Mode)' : 'Bật Giao diện Tối (Dark Mode)'}
+            >
+              {isDarkMode ? (
+                <>
+                  <Sun className="w-4 h-4 text-amber-400" />
+                  {/* <span className="hidden sm:inline text-amber-300">Giao diện Sáng</span> */}
+                </>
+              ) : (
+                <>
+                  <Moon className="w-4 h-4 text-slate-300" />
+                  {/* <span className="hidden sm:inline text-slate-300">Giao diện Tối</span> */}
+                </>
+              )}
+            </button>
+
+            <div className="hidden lg:flex items-center gap-2.5 text-xs shrink-0">
+              <span className="text-slate-400 text-[11px]">Model Standard:</span>
+              <span className="font-semibold text-slate-200 bg-slate-800 px-2.5 py-1 rounded-md border border-slate-700 text-[11px]">
+                Workday / SAP SuccessFactors Style
+              </span>
+            </div>
           </div>
         </div>
       </header>
@@ -304,16 +355,17 @@ export const EmployeeLifecyclePage: React.FC = () => {
       <main className="max-w-7xl mx-auto px-3.5 sm:px-6 lg:px-8 py-5 sm:py-8 space-y-6 sm:space-y-8">
 
         {/* Intro Eyebrow Banner */}
-        <div className="bg-white rounded-2xl p-4 sm:p-5 border border-slate-200/80 shadow-xs flex flex-col md:flex-row md:items-center justify-between gap-3 sm:gap-4">
+        <div className={`rounded-2xl p-4 sm:p-5 border shadow-xs flex flex-col md:flex-row md:items-center justify-between gap-3 sm:gap-4 transition-colors duration-300 ${isDarkMode ? 'bg-slate-900 border-slate-800 text-slate-100' : 'bg-white border-slate-200/80 text-slate-900'
+          }`}>
           <div className="flex items-start gap-3 sm:gap-3.5">
-            <div className="p-2 sm:p-2.5 bg-indigo-50 text-indigo-600 rounded-xl shrink-0 mt-0.5">
+            <div className="p-2 sm:p-2.5 bg-indigo-50 dark:bg-indigo-950/60 text-indigo-600 dark:text-indigo-400 rounded-xl shrink-0 mt-0.5 border border-indigo-100 dark:border-indigo-900/50">
               <Sparkles className="w-4 h-4 sm:w-5 sm:h-5" />
             </div>
             <div>
-              <h2 className="text-xs sm:text-sm font-bold text-slate-900 leading-snug">
+              <h2 className="text-xs sm:text-sm font-bold leading-snug">
                 Bức tranh Tổng thể Quy trình Quản trị Nhân sự (Business Process Blueprint)
               </h2>
-              <p className="text-[11px] sm:text-xs text-slate-500 mt-0.5 leading-relaxed">
+              <p className="text-[11px] sm:text-xs text-slate-500 dark:text-slate-400 mt-0.5 leading-relaxed">
                 Cấu trúc phân tầng tiêu chuẩn: Tầng 1 Master Data ➔ Tầng 2 Vòng đời Nhân viên ➔ Tầng 3 Nghiệp vụ Phát sinh ➔ Thanh Hỗ trợ Hệ thống
               </p>
             </div>

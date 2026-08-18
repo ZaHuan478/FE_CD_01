@@ -112,9 +112,8 @@ export const LeftSidebarNav: React.FC<LeftSidebarNavProps> = ({
 
   return (
     <aside
-      className={`fixed left-0 top-0 bottom-0 z-40 bg-slate-900 text-slate-100 border-r border-slate-800 transition-all duration-300 flex flex-col shadow-2xl ${
-        isCollapsed ? 'w-16 sm:w-20' : 'w-64'
-      }`}
+      className={`fixed left-0 top-0 bottom-0 z-40 bg-slate-900 text-slate-100 border-r border-slate-800 transition-all duration-300 flex flex-col shadow-2xl ${isCollapsed ? 'w-16 sm:w-20' : 'w-64'
+        }`}
     >
 
       {/* SIDEBAR HEADER LOGO */}
@@ -178,17 +177,15 @@ export const LeftSidebarNav: React.FC<LeftSidebarNavProps> = ({
                         onNavigateSection(item.id)
                       }
                     }}
-                    className={`w-full flex items-center justify-between p-2.5 rounded-xl text-xs font-bold transition-all duration-200 cursor-pointer group relative ${
-                      isActive
-                        ? 'bg-blue-600 text-white shadow-md shadow-blue-900/30'
-                        : 'text-slate-300 hover:bg-slate-800/90 hover:text-white'
-                    }`}
+                    className={`w-full flex items-center justify-between p-2.5 rounded-xl text-xs font-bold transition-all duration-200 cursor-pointer group relative ${isActive
+                      ? 'bg-blue-600 text-white shadow-md shadow-blue-900/30'
+                      : 'text-slate-300 hover:bg-slate-800/90 hover:text-white'
+                      }`}
                     title={isCollapsed ? item.label : undefined}
                   >
                     <div className="flex items-center gap-3 truncate">
-                      <IconComponent className={`w-4 h-4 shrink-0 transition-transform group-hover:scale-110 ${
-                        isActive ? 'text-white' : item.color
-                      }`} />
+                      <IconComponent className={`w-4 h-4 shrink-0 transition-transform group-hover:scale-110 ${isActive ? 'text-white' : item.color
+                        }`} />
 
                       {!isCollapsed && (
                         <span className="truncate leading-tight">{item.label}</span>
@@ -196,11 +193,10 @@ export const LeftSidebarNav: React.FC<LeftSidebarNavProps> = ({
                     </div>
 
                     {!isCollapsed && item.badge && (
-                      <span className={`text-[9px] font-mono px-2 py-0.5 rounded-md font-extrabold shrink-0 border ${
-                        isActive
-                          ? 'bg-blue-700/80 text-blue-100 border-blue-500'
-                          : 'bg-slate-800 text-slate-400 border-slate-700'
-                      }`}>
+                      <span className={`text-[9px] font-mono px-2 py-0.5 rounded-md font-extrabold shrink-0 border ${isActive
+                        ? 'bg-blue-700/80 text-blue-100 border-blue-500'
+                        : 'bg-slate-800 text-slate-400 border-slate-700'
+                        }`}>
                         {item.badge}
                       </span>
                     )}
@@ -228,7 +224,7 @@ export const LeftSidebarNav: React.FC<LeftSidebarNavProps> = ({
             </div>
             <div className="truncate">
               <h4 className="text-xs font-extrabold text-white truncate leading-tight">Lead HR Architect</h4>
-              <p className="text-[10px] text-slate-400 font-mono truncate">Audit & Design v2.5</p>
+              {/* <p className="text-[10px] text-slate-400 font-mono truncate">Audit & Design v2.5</p> */}
             </div>
           </div>
         ) : (

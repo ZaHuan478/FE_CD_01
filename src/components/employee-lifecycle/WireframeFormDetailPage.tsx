@@ -29,7 +29,32 @@ export const WireframeFormDetailPage: React.FC<WireframeFormDetailPageProps> = (
   item,
   onBack
 }) => {
-  const [isDarkMode, setIsDarkMode] = useState(false)
+  // Theme state synced with global document dark mode
+  const [isDarkMode, setIsDarkMode] = useState<boolean>(() => {
+    return document.documentElement.classList.contains('dark')
+  })
+
+  useEffect(() => {
+    const handleClassChange = () => {
+      setIsDarkMode(document.documentElement.classList.contains('dark'))
+    }
+    const observer = new MutationObserver(handleClassChange)
+    observer.observe(document.documentElement, { attributes: true, attributeFilter: ['class'] })
+    return () => observer.disconnect()
+  }, [])
+
+  const toggleTheme = () => {
+    const nextDark = !isDarkMode
+    setIsDarkMode(nextDark)
+    if (nextDark) {
+      document.documentElement.classList.add('dark')
+      localStorage.setItem('employee_lifecycle_theme', 'dark')
+    } else {
+      document.documentElement.classList.remove('dark')
+      localStorage.setItem('employee_lifecycle_theme', 'light')
+    }
+  }
+
   const [formData, setFormData] = useState<Record<string, string>>({})
   const [attachedFiles, setAttachedFiles] = useState<Array<{ name: string; size: string }>>([])
   const [isSaved, setIsSaved] = useState(false)
@@ -188,7 +213,7 @@ export const WireframeFormDetailPage: React.FC<WireframeFormDetailPageProps> = (
   const filledRequiredCount = requiredFields.filter(f => !!formData[f]).length
 
   return (
-    <div className={`min-h-screen transition-colors duration-300 font-sans ${isDarkMode ? 'bg-slate-950 text-slate-100' : 'bg-slate-50 text-slate-900'
+    <div className={`min-h-screen transition-colors duration-300 font-sans ${isDarkMode ? 'bg-slate-950 text-slate-100' : 'bg-slate-50/50 text-slate-900'
       }`}>
 
       {/* TOP FIXED NAVIGATION HEADER */}
@@ -200,8 +225,8 @@ export const WireframeFormDetailPage: React.FC<WireframeFormDetailPageProps> = (
               type="button"
               onClick={onBack}
               className={`flex items-center gap-2 px-3.5 py-2 text-xs font-bold rounded-xl border transition-all duration-200 group shadow-xs cursor-pointer ${isDarkMode
-                  ? 'bg-slate-800/90 hover:bg-blue-600 text-slate-200 hover:text-white border-slate-700 hover:border-blue-500'
-                  : 'bg-slate-100 hover:bg-blue-600 text-slate-700 hover:text-white border-slate-300 hover:border-blue-600'
+                ? 'bg-slate-800/90 hover:bg-blue-600 text-slate-200 hover:text-white border-slate-700 hover:border-blue-500'
+                : 'bg-slate-100 hover:bg-blue-600 text-slate-700 hover:text-white border-slate-300 hover:border-blue-600'
                 }`}
             >
               <ArrowLeft className="w-4 h-4 transition-transform group-hover:-translate-x-1" />
@@ -236,10 +261,10 @@ export const WireframeFormDetailPage: React.FC<WireframeFormDetailPageProps> = (
             {/* Theme Toggle Button */}
             <button
               type="button"
-              onClick={() => setIsDarkMode(!isDarkMode)}
+              onClick={toggleTheme}
               className={`flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold rounded-xl border transition-all duration-200 cursor-pointer ${isDarkMode
-                  ? 'bg-slate-800 text-amber-300 border-slate-700 hover:bg-slate-700'
-                  : 'bg-slate-100 text-slate-700 border-slate-300 hover:bg-slate-200'
+                ? 'bg-slate-800 text-amber-300 border-slate-700 hover:bg-slate-700'
+                : 'bg-slate-100 text-slate-700 border-slate-300 hover:bg-slate-200'
                 }`}
               title="Chuyển đổi Chế độ Giao diện Sáng / Tối"
             >
@@ -265,8 +290,8 @@ export const WireframeFormDetailPage: React.FC<WireframeFormDetailPageProps> = (
 
         {/* GOVERNANCE SOP CONTEXT BANNER */}
         <div className={`p-4 rounded-2xl border shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-3 ${isDarkMode
-            ? 'bg-gradient-to-r from-slate-900 via-indigo-950/40 to-slate-900 border-indigo-900/60 text-slate-200'
-            : 'bg-gradient-to-r from-slate-900 via-slate-800 to-indigo-950 border-slate-800 text-white'
+          ? 'bg-gradient-to-r from-slate-900 via-indigo-950/40 to-slate-900 border-indigo-900/60 text-slate-200'
+          : 'bg-gradient-to-r from-slate-900 via-slate-800 to-indigo-950 border-slate-800 text-white'
           }`}>
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-xl bg-emerald-500/20 border border-emerald-500/40 flex items-center justify-center text-emerald-400 shrink-0">
@@ -385,10 +410,10 @@ export const WireframeFormDetailPage: React.FC<WireframeFormDetailPageProps> = (
                           value={value}
                           onChange={(e) => handleInputChange(fieldName, e.target.value)}
                           className={`w-full text-xs font-medium px-3.5 py-2.5 rounded-xl border transition-all focus:outline-none focus:ring-2 ${hasError
-                              ? 'border-rose-500 ring-2 ring-rose-500/30 bg-rose-50/50 dark:bg-rose-950/30 text-rose-900 dark:text-rose-100'
-                              : isDarkMode
-                                ? 'bg-slate-950 border-slate-800 text-slate-200 focus:border-blue-500 focus:ring-blue-500/30'
-                                : 'bg-slate-50 border-slate-200 text-slate-800 focus:bg-white focus:border-blue-500 focus:ring-blue-500/30'
+                            ? 'border-rose-500 ring-2 ring-rose-500/30 bg-rose-50/50 dark:bg-rose-950/30 text-rose-900 dark:text-rose-100'
+                            : isDarkMode
+                              ? 'bg-slate-950 border-slate-800 text-slate-200 focus:border-blue-500 focus:ring-blue-500/30'
+                              : 'bg-slate-50 border-slate-200 text-slate-800 focus:bg-white focus:border-blue-500 focus:ring-blue-500/30'
                             }`}
                         >
                           <option value="">-- Chọn {fieldName} --</option>
@@ -405,10 +430,10 @@ export const WireframeFormDetailPage: React.FC<WireframeFormDetailPageProps> = (
                           onChange={(e) => handleInputChange(fieldName, e.target.value)}
                           placeholder={`Nhập ${fieldName.toLowerCase()}...`}
                           className={`w-full text-xs font-medium px-3.5 py-2.5 rounded-xl border transition-all focus:outline-none focus:ring-2 ${hasError
-                              ? 'border-rose-500 ring-2 ring-rose-500/30 bg-rose-50/50 dark:bg-rose-950/30 text-rose-900 dark:text-rose-100'
-                              : isDarkMode
-                                ? 'bg-slate-950 border-slate-800 text-slate-200 focus:border-blue-500 focus:ring-blue-500/30'
-                                : 'bg-slate-50 border-slate-200 text-slate-800 focus:bg-white focus:border-blue-500 focus:ring-blue-500/30'
+                            ? 'border-rose-500 ring-2 ring-rose-500/30 bg-rose-50/50 dark:bg-rose-950/30 text-rose-900 dark:text-rose-100'
+                            : isDarkMode
+                              ? 'bg-slate-950 border-slate-800 text-slate-200 focus:border-blue-500 focus:ring-blue-500/30'
+                              : 'bg-slate-50 border-slate-200 text-slate-800 focus:bg-white focus:border-blue-500 focus:ring-blue-500/30'
                             }`}
                         />
                       ) : (
@@ -418,10 +443,10 @@ export const WireframeFormDetailPage: React.FC<WireframeFormDetailPageProps> = (
                           onChange={(e) => handleInputChange(fieldName, e.target.value)}
                           placeholder={`Nhập ${fieldName.toLowerCase()}...`}
                           className={`w-full text-xs font-medium px-3.5 py-2.5 rounded-xl border transition-all focus:outline-none focus:ring-2 ${hasError
-                              ? 'border-rose-500 ring-2 ring-rose-500/30 bg-rose-50/50 dark:bg-rose-950/30 text-rose-900 dark:text-rose-100'
-                              : isDarkMode
-                                ? 'bg-slate-950 border-slate-800 text-slate-200 focus:border-blue-500 focus:ring-blue-500/30'
-                                : 'bg-slate-50 border-slate-200 text-slate-800 focus:bg-white focus:border-blue-500 focus:ring-blue-500/30'
+                            ? 'border-rose-500 ring-2 ring-rose-500/30 bg-rose-50/50 dark:bg-rose-950/30 text-rose-900 dark:text-rose-100'
+                            : isDarkMode
+                              ? 'bg-slate-950 border-slate-800 text-slate-200 focus:border-blue-500 focus:ring-blue-500/30'
+                              : 'bg-slate-50 border-slate-200 text-slate-800 focus:bg-white focus:border-blue-500 focus:ring-blue-500/30'
                             }`}
                         />
                       )}
@@ -447,8 +472,8 @@ export const WireframeFormDetailPage: React.FC<WireframeFormDetailPageProps> = (
                 <div
                   onClick={handleAddMockFile}
                   className={`border-2 border-dashed rounded-2xl p-6 text-center cursor-pointer transition-all duration-200 group ${isDarkMode
-                      ? 'border-slate-800 hover:border-blue-500 bg-slate-950/60 hover:bg-slate-950'
-                      : 'border-slate-300 hover:border-blue-500 bg-slate-50/80 hover:bg-blue-50/40'
+                    ? 'border-slate-800 hover:border-blue-500 bg-slate-950/60 hover:bg-slate-950'
+                    : 'border-slate-300 hover:border-blue-500 bg-slate-50/80 hover:bg-blue-50/40'
                     }`}
                 >
                   <div className="w-12 h-12 rounded-2xl bg-blue-500/10 border border-blue-500/20 text-blue-600 dark:text-blue-400 flex items-center justify-center mx-auto mb-2 group-hover:scale-110 transition-transform">
@@ -526,8 +551,8 @@ export const WireframeFormDetailPage: React.FC<WireframeFormDetailPageProps> = (
                     <div
                       key={rIdx}
                       className={`p-2.5 rounded-xl border flex items-center justify-between text-xs ${isFilled
-                          ? isDarkMode ? 'bg-emerald-950/40 border-emerald-800/60 text-emerald-300' : 'bg-emerald-50 border-emerald-200 text-emerald-800'
-                          : isDarkMode ? 'bg-slate-950 border-slate-800 text-slate-400' : 'bg-slate-50 border-slate-200 text-slate-600'
+                        ? isDarkMode ? 'bg-emerald-950/40 border-emerald-800/60 text-emerald-300' : 'bg-emerald-50 border-emerald-200 text-emerald-800'
+                        : isDarkMode ? 'bg-slate-950 border-slate-800 text-slate-400' : 'bg-slate-50 border-slate-200 text-slate-600'
                         }`}
                     >
                       <span className="font-semibold truncate">{f}</span>
@@ -593,7 +618,7 @@ export const WireframeFormDetailPage: React.FC<WireframeFormDetailPageProps> = (
               <h3 className={`text-xs font-extrabold uppercase tracking-wider flex items-center gap-2 border-b border-slate-200 dark:border-slate-800 pb-3 ${isDarkMode ? 'text-white' : 'text-slate-900'
                 }`}>
                 <Clock className="w-4 h-4 text-blue-600 dark:text-blue-400" />
-                <span>NẬT KÝ THAO TÁC (AUDIT LOG)</span>
+                <span>NHẬT KÝ THAO TÁC</span>
               </h3>
 
               <div className="space-y-2 text-[11px] text-slate-500 dark:text-slate-400 font-mono">
