@@ -19,6 +19,7 @@ import { ROLE_FLOW_DATABASE } from './data/roleFlowDatabase'
 import { RoleFlowSection } from './components/RoleFlowSection'
 import { WorkflowDiagramView } from './components/WorkflowDiagramView'
 import { WorkflowTableView } from './components/WorkflowTableView'
+import { SopInfographicFlowView } from './components/SopInfographicFlowView'
 import { useLanguage } from '../../../context/LanguageContext'
 import type { Language } from '../../../data/translations'
 import { LanguageSelector } from '../../common/LanguageSelector'
@@ -146,7 +147,10 @@ export const WorkflowDetailPage: React.FC<WorkflowDetailPageProps> = ({
 
   const [selectedStepIdx, setSelectedStepIdx] = useState<number>(0)
 
-  const [viewMode, setViewMode] = useState<'diagram' | 'table'>('diagram')
+  const [viewMode, setViewMode] = useState<'infographic' | 'diagram' | 'table'>(() => {
+    if (['LIFE-01', 'LIFE-04', 'LIFE-05', 'LIFE-06', 'LIFE-07', 'CF-01', 'CROSS-01', 'MD-04', 'MD-05', 'MD-08'].includes(item.id)) return 'infographic'
+    return 'diagram'
+  })
 
   return (
     <div className={`min-h-screen transition-colors duration-300 pb-20 animate-fadeIn ${isDarkMode ? 'bg-slate-950 text-slate-100' : 'bg-slate-50/50 text-slate-800'
@@ -382,30 +386,46 @@ export const WorkflowDetailPage: React.FC<WorkflowDetailPageProps> = ({
         )}
 
         {/* WORKFLOW VIEW CONTROLLER */}
-        <div className="flex items-center justify-between border-b border-slate-200 dark:border-slate-800 pb-3">
-          <div className="flex items-center gap-2">
+        <div className="flex flex-wrap items-center justify-between border-b border-slate-200 dark:border-slate-800 pb-3 gap-2">
+          <div className="flex flex-wrap items-center gap-2">
+            <button
+              type="button"
+              onClick={() => setViewMode('infographic')}
+              className={`flex items-center gap-1.5 px-4 py-2 text-xs sm:text-sm font-extrabold rounded-xl transition-all cursor-pointer ${viewMode === 'infographic'
+                ? 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-md'
+                : isDarkMode ? 'bg-slate-900 text-slate-400 hover:bg-slate-800 border border-slate-800' : 'bg-slate-100 text-slate-700 hover:bg-slate-200 border border-slate-200'
+                }`}
+            >
+              <Sparkles className="w-4 h-4 text-amber-300 animate-pulse" />
+              <span>
+                {language === 'vi'
+                  ? '🎨 Sơ đồ Infographic 5 Giai đoạn (Chuẩn Enterprise)'
+                  : '🎨 5-Stage Infographic Blueprint'}
+              </span>
+            </button>
+
             <button
               type="button"
               onClick={() => setViewMode('diagram')}
-              className={`flex items-center gap-1.5 px-4 py-2 text-xs font-bold rounded-xl transition-all cursor-pointer ${viewMode === 'diagram'
+              className={`flex items-center gap-1.5 px-4 py-2 text-xs sm:text-sm font-bold rounded-xl transition-all cursor-pointer ${viewMode === 'diagram'
                 ? 'bg-blue-600 text-white shadow-sm'
-                : isDarkMode ? 'text-slate-400 hover:bg-slate-800' : 'text-slate-600 hover:bg-slate-200'
+                : isDarkMode ? 'bg-slate-900 text-slate-400 hover:bg-slate-800 border border-slate-800' : 'bg-slate-100 text-slate-700 hover:bg-slate-200 border border-slate-200'
                 }`}
             >
               <GitBranch className="w-4 h-4" />
               <span>
                 {language === 'vi'
-                  ? `Sơ đồ Flowchart Trực quan (${currentProcess.steps.length} Bước SOP)`
-                  : `Visual Flowchart Diagram (${currentProcess.steps.length} SOP Steps)`}
+                  ? `Sơ đồ Flowchart Trực quan (${currentProcess.steps.length} Bước)`
+                  : `Visual Flowchart Diagram (${currentProcess.steps.length} Steps)`}
               </span>
             </button>
 
             <button
               type="button"
               onClick={() => setViewMode('table')}
-              className={`flex items-center gap-1.5 px-4 py-2 text-xs font-bold rounded-xl transition-all cursor-pointer ${viewMode === 'table'
+              className={`flex items-center gap-1.5 px-4 py-2 text-xs sm:text-sm font-bold rounded-xl transition-all cursor-pointer ${viewMode === 'table'
                 ? 'bg-blue-600 text-white shadow-sm'
-                : isDarkMode ? 'text-slate-400 hover:bg-slate-800' : 'text-slate-600 hover:bg-slate-200'
+                : isDarkMode ? 'bg-slate-900 text-slate-400 hover:bg-slate-800 border border-slate-800' : 'bg-slate-100 text-slate-700 hover:bg-slate-200 border border-slate-200'
                 }`}
             >
               <ListCheck className="w-4 h-4" />
@@ -423,7 +443,16 @@ export const WorkflowDetailPage: React.FC<WorkflowDetailPageProps> = ({
         </div>
 
 
-        {/* VIEW MODE 1: VISUAL FLOWCHART DIAGRAM */}
+        {/* VIEW MODE 1: INFOGRAPHIC 5-STAGE BLUEPRINT VIEW */}
+        {viewMode === 'infographic' && (
+          <SopInfographicFlowView
+            sopCode={currentProcess.sopCode}
+            isDarkMode={isDarkMode}
+            onOpenWireframe={onOpenWireframe ? () => onOpenWireframe(item) : undefined}
+          />
+        )}
+
+        {/* VIEW MODE 2: VISUAL FLOWCHART DIAGRAM */}
         {viewMode === 'diagram' && (
           <WorkflowDiagramView
             currentProcess={currentProcess}
@@ -435,7 +464,7 @@ export const WorkflowDetailPage: React.FC<WorkflowDetailPageProps> = ({
           />
         )}
 
-        {/* VIEW MODE 2: FULL SOP SPECIFICATIONS TABLE */}
+        {/* VIEW MODE 3: FULL SOP SPECIFICATIONS TABLE */}
         {viewMode === 'table' && (
           <WorkflowTableView
             currentProcess={currentProcess}

@@ -1,5 +1,5 @@
-import React, { useMemo, useState, useEffect } from 'react'
-import { useSearchParams } from 'react-router-dom'
+import React, { useMemo, useState, useEffect, useCallback } from 'react'
+import { useSearchParams, useParams, useLocation, useNavigate } from 'react-router-dom'
 import { Sparkles, Layers, Database, FileText, X, Layout, Sun, Moon, Globe } from 'lucide-react'
 
 import { MasterDataCard } from '../../components/employee-lifecycle/MasterDataCard'
@@ -24,9 +24,10 @@ import type { Language } from '../../data/translations'
 
 export const EmployeeLifecyclePage: React.FC = () => {
   const { language, setLanguage, t } = useLanguage()
-  const [searchParams, setSearchParams] = useSearchParams()
-  const [selectedItem, setSelectedItem] = useState<DetailItem | null>(null)
-  const [wireframeItem, setWireframeItem] = useState<DetailItem | null>(null)
+  const { id: routeId } = useParams<{ id?: string }>()
+  const location = useLocation()
+  const navigate = useNavigate()
+
   const [activeSection, setActiveSection] = useState('overview-dashboard')
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false)
 
@@ -56,16 +57,17 @@ export const EmployeeLifecyclePage: React.FC = () => {
     return () => observer.disconnect()
   }, [])
 
-  const isERDOpen = searchParams.get('view') === 'master-data-erd'
+  // Check route types
+  const isWorkflowRoute = location.pathname.startsWith('/employee-lifecycle/workflow/')
+  const isWireframeRoute = location.pathname.startsWith('/employee-lifecycle/wireframe/')
+  const isERDOpen = location.pathname === '/employee-lifecycle/erd'
 
   const handleOpenERD = () => {
-    setSearchParams({ view: 'master-data-erd' })
+    navigate('/employee-lifecycle/erd')
   }
 
   const handleCloseERD = () => {
-    const nextParams = new URLSearchParams(searchParams)
-    nextParams.delete('view')
-    setSearchParams(nextParams)
+    navigate('/employee-lifecycle')
   }
 
   const handleNavigateSection = (sectionId: string) => {
@@ -85,14 +87,6 @@ export const EmployeeLifecyclePage: React.FC = () => {
       }
     }
   }
-
-  // Handle URL sync for direct step links (e.g. ?step=LIFE-01)
-  useEffect(() => {
-    const stepParam = searchParams.get('step')
-    if (stepParam && !selectedItem) {
-      openItemDetails(stepParam)
-    }
-  }, [searchParams])
 
   // Transform Master Data categories
   const masterDataCategories: MasterDataCategory[] = useMemo(() => {
@@ -154,9 +148,8 @@ export const EmployeeLifecyclePage: React.FC = () => {
     })
   }, [])
 
-  // Handle Item Inspector & Workflow Navigation
-  const openItemDetails = (id: string) => {
-    window.scrollTo({ top: 0, behavior: 'instant' })
+  // Build DetailItem from id
+  const getItemById = useCallback((id: string): DetailItem | null => {
     const rawNode =
       masterData.find((m) => m.id === id) ||
       lifecycleProcesses.find((l) => l.id === id) ||
@@ -165,7 +158,7 @@ export const EmployeeLifecyclePage: React.FC = () => {
 
     if (rawNode) {
       const sopInfo = sopDictionary[rawNode.id] || sopDictionary[id]
-      setSelectedItem({
+      return {
         id: rawNode.id,
         title: rawNode.title,
         subtitle: rawNode.subtitle,
@@ -179,66 +172,97 @@ export const EmployeeLifecyclePage: React.FC = () => {
         sopIds: sopInfo ? [sopInfo.badge] : rawNode.sopIds,
         sopTitles: sopInfo ? [sopInfo.title] : [],
         uiFields: rawNode.wireframe.fields
-      })
-    } else {
-      // Fallback for Operation Modules (e.g. CF-01, CF-02...)
-      const opMod = operationModules.find((m) => m.id === id)
-      const sopInfo = sopDictionary[id]
-      if (opMod || sopInfo) {
-        setSelectedItem({
-          id: id,
-          title: opMod?.title || sopInfo?.title || id,
-          subtitle: opMod?.description || 'Nghiệp vụ phát sinh định kỳ hoặc đột xuất trong quá trình vận hành.',
-          category: 'cross',
-          sourceStatus: 'official',
-          inputs: opMod?.inputs || ['Thông tin phát sinh', 'Yêu cầu nghiệp vụ'],
-          outputs: opMod?.outputs || ['Dữ liệu ghi nhận hệ thống', 'Quyết định / Báo cáo'],
-          actors: [
-            { name: 'HR Admin / Quản lý', role: 'Vận hành', action: 'Tiếp nhận, xử lý và cập nhật thông tin' }
-          ],
-          rules: [],
-          process: {
-            steps: [
-              'Phát sinh nhu cầu / sự kiện nghiệp vụ',
-              'Kiểm tra tính hợp lệ & danh mục quy chuẩn',
-              'Thực hiện xử lý & gửi phê duyệt (nếu có)',
-              'Lưu vết lịch sử & cập nhật hồ sơ nhân sự'
-            ],
-            source: 'Quy trình vận hành HR Enterprise Standard',
-            status: 'official'
-          },
-          sopIds: sopInfo ? [sopInfo.badge] : opMod?.sopIds || ['SOP-CF-01'],
-          sopTitles: sopInfo ? [sopInfo.title] : [],
-          uiFields: ['Mã phát sinh', 'Thời gian áp dụng', 'Người thực hiện', 'Trạng thái phê duyệt']
-        })
       }
     }
+
+    // Fallback for Operation Modules (e.g. CF-01, CF-02...)
+    const opMod = operationModules.find((m) => m.id === id)
+    const sopInfo = sopDictionary[id]
+    if (opMod || sopInfo) {
+      return {
+        id: id,
+        title: opMod?.title || sopInfo?.title || id,
+        subtitle: opMod?.description || 'Nghiệp vụ phát sinh định kỳ hoặc đột xuất trong quá trình vận hành.',
+        category: 'cross',
+        sourceStatus: 'official',
+        inputs: opMod?.inputs || ['Thông tin phát sinh', 'Yêu cầu nghiệp vụ'],
+        outputs: opMod?.outputs || ['Dữ liệu ghi nhận hệ thống', 'Quyết định / Báo cáo'],
+        actors: [
+          { name: 'HR Admin / Quản lý', role: 'Vận hành', action: 'Tiếp nhận, xử lý và cập nhật thông tin' }
+        ],
+        rules: [],
+        process: {
+          steps: [
+            'Phát sinh nhu cầu / sự kiện nghiệp vụ',
+            'Kiểm tra tính hợp lệ & danh mục quy chuẩn',
+            'Thực hiện xử lý & gửi phê duyệt (nếu có)',
+            'Lưu vết lịch sử & cập nhật hồ sơ nhân sự'
+          ],
+          source: 'Quy trình vận hành HR Enterprise Standard',
+          status: 'official'
+        },
+        sopIds: sopInfo ? [sopInfo.badge] : opMod?.sopIds || ['SOP-CF-01'],
+        sopTitles: sopInfo ? [sopInfo.title] : [],
+        uiFields: ['Mã phát sinh', 'Thời gian áp dụng', 'Người thực hiện', 'Trạng thái phê duyệt']
+      }
+    }
+
+    return null
+  }, [operationModules])
+
+  // Active items derived from URL
+  const selectedItem = useMemo(() => {
+    if (isWorkflowRoute && routeId) {
+      return getItemById(routeId)
+    }
+    return null
+  }, [isWorkflowRoute, routeId, getItemById])
+
+  const wireframeItem = useMemo(() => {
+    if (isWireframeRoute && routeId) {
+      return getItemById(routeId)
+    }
+    return null
+  }, [isWireframeRoute, routeId, getItemById])
+
+  // Navigation handlers
+  const handleOpenItemDetails = (id: string) => {
+    navigate(`/employee-lifecycle/workflow/${id}`)
+  }
+
+  const handleOpenWireframe = (itemToOpen: DetailItem) => {
+    navigate(`/employee-lifecycle/wireframe/${itemToOpen.id}`)
   }
 
   const handleCloseWorkflow = () => {
-    setSelectedItem(null)
-    const nextParams = new URLSearchParams(searchParams)
-    nextParams.delete('step')
-    setSearchParams(nextParams)
+    navigate('/employee-lifecycle')
+  }
+
+  const handleCloseWireframe = () => {
+    if (routeId) {
+      navigate(`/employee-lifecycle/workflow/${routeId}`)
+    } else {
+      navigate('/employee-lifecycle')
+    }
   }
 
   // IF WIREFRAME ITEM IS OPENED, RENDER FULL-PAGE FORM UI WORKSPACE!
-  if (wireframeItem) {
+  if (isWireframeRoute && wireframeItem) {
     return (
       <WireframeFormDetailPage
         item={wireframeItem}
-        onBack={() => setWireframeItem(null)}
+        onBack={handleCloseWireframe}
       />
     )
   }
 
   // IF AN ITEM IS SELECTED, RENDER FULL WORKFLOW DETAIL PAGE WITH BACK BUTTON!
-  if (selectedItem) {
+  if (isWorkflowRoute && selectedItem) {
     return (
       <WorkflowDetailPage
         item={selectedItem}
         onBack={handleCloseWorkflow}
-        onOpenWireframe={(itemToOpen) => setWireframeItem(itemToOpen)}
+        onOpenWireframe={handleOpenWireframe}
       />
     )
   }
@@ -343,7 +367,7 @@ export const EmployeeLifecyclePage: React.FC = () => {
         {/* HRMS EXECUTIVE SYSTEM DASHBOARD & QUICK LAYER NAVIGATOR */}
         <div id="overview-dashboard" className="scroll-mt-20">
           <SystemOverviewDashboard
-            onSelectStep={openItemDetails}
+            onSelectStep={handleOpenItemDetails}
             onOpenERD={handleOpenERD}
           />
         </div>
@@ -353,7 +377,7 @@ export const EmployeeLifecyclePage: React.FC = () => {
           <MasterDataCard
             categories={masterDataCategories}
             onOpenERD={handleOpenERD}
-            onSelectCategory={openItemDetails}
+            onSelectCategory={handleOpenItemDetails}
           />
         </div>
 
@@ -362,7 +386,7 @@ export const EmployeeLifecyclePage: React.FC = () => {
           <LifecycleStepper
             steps={lifecycleSteps}
             activeStepId={selectedItem?.id}
-            onSelectStep={openItemDetails}
+            onSelectStep={handleOpenItemDetails}
           />
         </div>
 
@@ -370,14 +394,14 @@ export const EmployeeLifecyclePage: React.FC = () => {
         <div id="layer-3-operations" className="scroll-mt-20">
           <OperationsGrid
             modules={operationModules}
-            onSelectModule={openItemDetails}
+            onSelectModule={handleOpenItemDetails}
           />
         </div>
 
         {/* TẦNG HỖ TRỢ XUYÊN SUỐT (System Support Sticky Bar) */}
         <div id="system-support" className="scroll-mt-20">
           <SystemSupportBar
-            onSelectUtility={openItemDetails}
+            onSelectUtility={handleOpenItemDetails}
           />
         </div>
 
@@ -387,7 +411,7 @@ export const EmployeeLifecyclePage: React.FC = () => {
       <MasterDataRelationshipModal
         isOpen={isERDOpen}
         onClose={handleCloseERD}
-        onSelectNode={openItemDetails}
+        onSelectNode={handleOpenItemDetails}
       />
 
     </div>

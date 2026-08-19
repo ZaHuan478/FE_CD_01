@@ -2,8 +2,66 @@ import type { SopSubProcess } from '../types'
 
 // 100% Complete SOP Database mapped for ALL 7 Lifecycle Steps & Cross-Functional Operations from 1.EMP.HRM.SOP.docx
 export const SOP_DATABASE: Record<string, SopSubProcess[]> = {
-  // LIFE-01: TIẾP NHẬN & HỒ SƠ
+  // LIFE-01: TIẾP NHẬN & TUYỂN DỤNG (RECRUITMENT & ONBOARDING)
   'LIFE-01': [
+    {
+      sopCode: 'SOP REC01',
+      sopTitle: 'Quy trình Yêu cầu & Phê duyệt Tuyển dụng (Recruitment Requisition)',
+      sopCategory: 'Tuyển dụng & Định biên',
+      description: 'Quy trình tạo yêu cầu tuyển dụng, đối soát hạn mức định biên phòng ban, thẩm định ngân sách People Cost và phê duyệt đăng tuyển.',
+      steps: [
+        {
+          stepCode: 'REC01.01',
+          title: 'Trưởng bộ phận (TBP) lập Yêu cầu tuyển dụng trên Portal',
+          actor: 'Trưởng bộ phận (TBP)',
+          location: 'Manager Portal',
+          timing: 'Khi phát sinh nhu cầu tuyển dụng',
+          typeCode: 'N',
+          description: 'TBP chọn chức danh từ Job Catalog (MD-06), số lượng cần tuyển, lý do tuyển (Mới/Thay thế/Dự án), ngày cần nhận việc và dải lương đề xuất.',
+          fieldsChecklist: ['Mã phòng ban', 'Chức danh tuyển dụng (Từ Job Catalog)', 'Số lượng tuyển', 'Lý do tuyển', 'Ngày mục tiêu nhận việc', 'Dải lương đề xuất']
+        },
+        {
+          stepCode: 'REC01.02',
+          title: 'Cổng Màng Lọc Tự Động: Đối soát Hạn mức Định biên & Ngân sách',
+          actor: 'Hệ thống HRM Engine (AI Auto-Gate)',
+          location: 'Bên trong (Hệ thống HRM)',
+          timing: 'Tự động kiểm tra ngay khi nộp',
+          typeCode: 'A',
+          description: 'Hệ thống tự động so khớp với Bản kế hoạch định biên (EMP01) và Khung ngạch bậc lương (MD-07). Tự động phân loại: Trong định biên (Luồng nhanh) hoặc Vượt định biên (Trình BOM).',
+          fieldsChecklist: ['Chỉ tiêu định biên khả dụng', 'Trần ngân sách lương vị trí', 'Tỷ lệ biến động nhân sự phòng ban', 'Phân loại luồng rẽ nhánh duyệt']
+        },
+        {
+          stepCode: 'REC01.03',
+          title: 'Thẩm định của Trưởng phòng Nhân sự (HRM / HRD)',
+          actor: 'HRM / HRD',
+          location: 'Portal',
+          timing: 'Trong 24h - 48h làm việc',
+          typeCode: 'M',
+          description: 'HRM thẩm định tính khả thi của nguồn ứng viên trên thị trường, rà soát lại JD tiêu chuẩn và xác nhận nguồn ngân sách tuyển dụng.',
+          fieldsChecklist: ['Bản mô tả công việc (JD chuẩn)', 'Nguồn ngân sách tuyển dụng', 'Kênh đăng tuyển dự kiến (Job Site/Headhunt)']
+        },
+        {
+          stepCode: 'REC01.04',
+          title: 'Phê duyệt Yêu cầu Tuyển dụng & Ngân sách People Cost',
+          actor: 'Ban Giám Đốc (BOM) / HRD',
+          location: 'Portal & Họp BOM',
+          timing: 'Sau khi HRM thẩm định',
+          typeCode: 'M',
+          description: 'Ban Giám đốc (hoặc HRD theo ủy quyền) xem xét tờ trình tuyển dụng và đưa ra quyết định phê duyệt chính thức.',
+          fieldsChecklist: ['Quyết định phê duyệt tuyển dụng', 'Hạn mức chi phí tuyển dụng', 'Chữ ký số phê duyệt BOM']
+        },
+        {
+          stepCode: 'REC01.05',
+          title: 'Phát hành Ticket Tuyển dụng & Kích hoạt Đăng tuyển (Job Posting)',
+          actor: 'Hệ thống HRM - Tuyển dụng (Auto Execution)',
+          location: 'Bên trong / Career Portal',
+          timing: 'Sau khi được duyệt 100%',
+          typeCode: 'A',
+          description: 'Tự động sinh Mã Requisition ID, phân công Chuyên viên tuyển dụng (Recruiter PIC) và tự động đồng bộ tin tuyển dụng lên Career Portal và các Job Sites.',
+          fieldsChecklist: ['Mã Requisition ID', 'Chuyên viên tuyển dụng phụ trách (PIC)', 'Trạng thái: Đang mở tuyển dụng (Open)', 'Đồng bộ Career Portal & LinkedIn/TopCV']
+        }
+      ]
+    },
     {
       sopCode: 'SOP EMP01',
       sopTitle: 'Quy trình Thiết lập Định biên Nhân sự (Headcount Planning)',
@@ -254,8 +312,66 @@ export const SOP_DATABASE: Record<string, SopSubProcess[]> = {
     }
   ],
 
-  // LIFE-04: HỢP ĐỒNG LAO ĐỘNG CHÍNH THỨC
+  // LIFE-04: HỢP ĐỒNG LAO ĐỘNG & ĐÁNH GIÁ THỬ VIỆC
   'LIFE-04': [
+    {
+      sopCode: 'SOP PROB01',
+      sopTitle: 'Quy trình Đánh giá Thử việc & Tái ký Hợp đồng (Probation & Renewal)',
+      sopCategory: 'Hợp đồng & Đánh giá (EVAL)',
+      description: 'Hệ thống tự động cảnh báo trước 30 ngày, phân luồng rẽ nhánh KPI: Đạt (Tái ký chính thức 12/24M & Báo tăng BHXH), Gia hạn tối đa 30 ngày hoặc Dừng thử việc.',
+      steps: [
+        {
+          stepCode: 'PROB01.01',
+          title: 'Hệ thống tự động quét & Gửi cảnh báo trước 30 ngày',
+          actor: 'Hệ thống HRM Engine (AI Auto-Scan)',
+          location: 'Bên trong (Hệ thống HRM)',
+          timing: '30 ngày trước khi hết hạn HĐ Thử việc / HĐLĐ',
+          typeCode: 'A',
+          description: 'Hệ thống tự động quét và kích hoạt phiếu Đánh giá thử việc 360 trên Portal, gửi thông báo nhắc tới Nhân viên và Trưởng bộ phận.',
+          fieldsChecklist: ['Mã NV & Tên NV', 'Số HĐ Thử việc hiện tại', 'Ngày hết hạn hợp đồng', 'Biểu mẫu đánh giá năng lực & KPI']
+        },
+        {
+          stepCode: 'PROB01.02',
+          title: 'Nhân viên tự đánh giá & Trưởng bộ phận chấm điểm KPI',
+          actor: 'Nhân viên & Trưởng bộ phận (TBP)',
+          location: 'Employee / Manager Portal',
+          timing: 'Trước khi hết hạn 15 ngày',
+          typeCode: 'N',
+          description: 'Nhân viên tự đánh giá kết quả công việc. TBP chấm điểm KPI theo thang điểm chuẩn, đưa ra nhận xét năng lực và đề xuất xử lý.',
+          fieldsChecklist: ['Điểm KPI tự đánh giá', 'Điểm KPI TBP chấm', 'Nhận xét ưu/nhược điểm', 'Đề xuất: Đạt / Gia hạn / Không đạt']
+        },
+        {
+          stepCode: 'PROB01.03',
+          title: 'Cổng Màng Lọc Tự Động: Rẽ nhánh Quyết định theo Điểm KPI',
+          actor: 'Hệ thống HRM Engine (AI Decision Matrix)',
+          location: 'Bên trong (Hệ thống HRM)',
+          timing: 'Tự động ngay khi có điểm KPI',
+          typeCode: 'A',
+          description: 'Phân luồng quyết định: Nhánh 1 (KPI >= 85%: Tái ký HĐ chính thức 12/24M), Nhánh 2 (KPI 70-84%: Gia hạn tối đa 30 ngày), Nhánh 3 (KPI < 70%: Dừng thử việc).',
+          fieldsChecklist: ['Điểm KPI tổng hợp', 'Nhánh điều kiện phân luồng', 'Loại hợp đồng kế tiếp (12M/24M/Không thời hạn)', 'Khung lương chính thức 100%']
+        },
+        {
+          stepCode: 'PROB01.04',
+          title: 'Phê duyệt Tái ký của Trưởng phòng Nhân sự & Ban Giám Đốc',
+          actor: 'HRM / Ban Giám Đốc (BOM)',
+          location: 'Portal / Ký số vẹn toàn',
+          timing: 'Trước khi hết hạn 7 ngày',
+          typeCode: 'M',
+          description: 'HRM thẩm định hồ sơ, Ban Giám đốc phê duyệt ký số Hợp đồng lao động chính thức hoặc Thông báo chấm dứt thử việc.',
+          fieldsChecklist: ['Quyết định phê duyệt tái ký', 'Hạn mức lương chính thức', 'Chữ ký số BOM']
+        },
+        {
+          stepCode: 'PROB01.05',
+          title: 'Phát hành HĐLĐ Chính thức & Tự động Báo tăng BHXH (INS02)',
+          actor: 'Hệ thống HRM Engine (Auto Execution)',
+          location: 'Bên trong / C&B Module',
+          timing: 'Vào ngày bắt đầu HĐ chính thức',
+          typeCode: 'A',
+          description: 'Tự động phát hành HĐLĐ chính thức, cập nhật trạng thái nhân viên sang "Chính thức", trích xuất dữ liệu tự động Báo tăng BHXH.',
+          fieldsChecklist: ['Số HĐLĐ mới', 'Trạng thái: Nhân viên chính thức', 'Mức lương đóng BHXH', 'Đồng bộ danh sách Báo tăng BHXH (INS02)']
+        }
+      ]
+    },
     {
       sopCode: 'SOP EMP06',
       sopTitle: 'Quy trình Ký Hợp đồng Lao động với Nhân viên Mới',
@@ -306,8 +422,66 @@ export const SOP_DATABASE: Record<string, SopSubProcess[]> = {
     }
   ],
 
-  // LIFE-05: ĐIỀU CHỈNH LƯƠNG & CHẾ ĐỘ
+  // LIFE-05: ĐIỀU CHỈNH LƯƠNG & BỔ NHIỆM THĂNG CHỨC
   'LIFE-05': [
+    {
+      sopCode: 'SOP PROM01',
+      sopTitle: 'Quy trình Điều chỉnh Lương & Bổ nhiệm Thăng chức (Salary & Promotion)',
+      sopCategory: 'Lương & Đãi ngộ (C&B)',
+      description: 'Quy trình tăng lương định kỳ/vượt khung và bổ nhiệm quản lý: Thẩm định khung ngạch bậc, ngân sách quỹ lương và phê duyệt của BOM.',
+      steps: [
+        {
+          stepCode: 'PROM01.01',
+          title: 'Trưởng bộ phận lập Đề xuất Tăng lương / Bổ nhiệm Thăng chức',
+          actor: 'Trưởng bộ phận (TBP)',
+          location: 'Manager Portal',
+          timing: 'Kỳ đánh giá định kỳ hoặc đột xuất',
+          typeCode: 'N',
+          description: 'TBP khai báo mức lương hiện tại, mức lương đề xuất mới, % tăng, chức danh bổ nhiệm mới và lý do thành tích đóng góp.',
+          fieldsChecklist: ['Mã NV & Chức danh', 'Mức lương hiện tại', 'Mức lương đề xuất mới', 'Tỷ lệ % tăng', 'Chức vụ bổ nhiệm mới', 'Lý do & Thành tích KPI']
+        },
+        {
+          stepCode: 'PROM01.02',
+          title: 'Cổng Màng Lọc Tự Động: Đối soát Thang Bảng Lương & Quỹ Lương',
+          actor: 'Hệ thống HRM Engine (AI Auto-Gate)',
+          location: 'Bên trong (Hệ thống HRM)',
+          timing: 'Tự động kiểm tra ngay khi nộp',
+          typeCode: 'A',
+          description: 'Hệ thống đối soát mức lương đề xuất với Khung Ngạch Bậc (MD-07), kiểm tra số dư Quỹ lương khả dụng của phòng ban và thâm niên nhân sự.',
+          fieldsChecklist: ['Khung ngạch bậc tương ứng (MD-07)', 'Hạn mức ngân sách quỹ lương khả dụng', 'Điều kiện thâm niên & Lịch sử KPI', 'Phân loại luồng rẽ nhánh duyệt']
+        },
+        {
+          stepCode: 'PROM01.03',
+          title: 'Thẩm định của Chuyên viên C&B và Trưởng phòng Nhân sự',
+          actor: 'HRM - C&B & HRD',
+          location: 'Portal',
+          timing: 'Trong 2-3 ngày làm việc',
+          typeCode: 'M',
+          description: 'C&B thẩm định tính công bằng nội bộ, rà soát lại phụ cấp trách nhiệm và xác nhận tính hợp lệ của nguồn ngân sách.',
+          fieldsChecklist: ['Bảng so sánh mặt bằng lương nội bộ', 'Cơ cấu phụ cấp trách nhiệm mới', 'Ý kiến thẩm định của C&B / HRD']
+        },
+        {
+          stepCode: 'PROM01.04',
+          title: 'Phê duyệt Điều chỉnh Lương / Bổ nhiệm của Ban Giám Đốc (BOM)',
+          actor: 'Ban Giám Đốc (BOM)',
+          location: 'Portal / Ký số vẹn toàn',
+          timing: 'Sau khi HRD thẩm định',
+          typeCode: 'M',
+          description: 'Ban Giám đốc xem xét phê duyệt Quyết định tăng lương hoặc Quyết định bổ nhiệm thăng chức cán bộ quản lý.',
+          fieldsChecklist: ['Quyết định tăng lương / Bổ nhiệm', 'Ngày hiệu lực áp dụng', 'Chữ ký số BOM']
+        },
+        {
+          stepCode: 'PROM01.05',
+          title: 'Tự động Cập nhật Org Chart, Bảng lương PAY01 & Sinh Phụ lục HĐLĐ',
+          actor: 'Hệ thống HRM Engine (Auto Execution)',
+          location: 'Bên trong / C&B Module',
+          timing: 'Trước kỳ tính lương mới',
+          typeCode: 'A',
+          description: 'Tự động cập nhật mức lương mới vào Bảng lương PAY01, cập nhật Sơ đồ tổ chức Org Chart (nếu bổ nhiệm) và phát hành Phụ lục HĐLĐ.',
+          fieldsChecklist: ['Phụ lục HĐLĐ điều chỉnh lương', 'Cập nhật Bảng lương PAY01 tự động', 'Cập nhật Sơ đồ tổ chức Org Chart', 'Thông báo gửi nhân viên qua App']
+        }
+      ]
+    },
     {
       sopCode: 'SOP EMP08',
       sopTitle: 'Quy trình Điều chỉnh Thu nhập Cố định & Phụ cấp',
@@ -358,8 +532,124 @@ export const SOP_DATABASE: Record<string, SopSubProcess[]> = {
     }
   ],
 
-  // LIFE-06: BIẾN ĐỘNG & ĐIỀU CHUYỂN
+  // LIFE-06: CHẤM CÔNG & QUẢN LÝ LÀM VIỆC (ATTENDANCE & TIME TRACKING)
   'LIFE-06': [
+    {
+      sopCode: 'SOP ATT01',
+      sopTitle: 'Quy trình Đăng ký & Phê duyệt Làm Thêm Giờ (Overtime - OT Management)',
+      sopCategory: 'Chấm công & Tăng ca',
+      description: 'Quy trình đăng ký kế hoạch làm thêm giờ, đối soát hạn mức luật lao động, kiểm tra dữ liệu chấm công in/out thực tế và tính lương/nghỉ bù.',
+      steps: [
+        {
+          stepCode: 'ATT01.01',
+          title: 'Nhân viên / Trưởng nhóm nộp Đăng ký Làm thêm giờ (OT) trước ca',
+          actor: 'Nhân viên / Team Lead',
+          location: 'Employee Portal / Mobile App',
+          timing: 'Trước khi bắt đầu ca OT ít nhất 2 giờ',
+          typeCode: 'N',
+          description: 'Khai báo loại ngày làm thêm (Ngày thường / Cuối tuần / Lễ tết), giờ bắt đầu - kết thúc, tổng số giờ OT dự kiến, lý do công việc và danh sách nhân sự tham gia.',
+          fieldsChecklist: ['Mã NV / Danh sách nhóm', 'Loại ngày OT (Thường/CN/Lễ)', 'Khung giờ bắt đầu - kết thúc', 'Tổng số giờ OT dự kiến', 'Lý do & Nhiệm vụ cần làm', 'Hình thức: Nhận lương OT / Nghỉ bù']
+        },
+        {
+          stepCode: 'ATT01.02',
+          title: 'Cổng Màng Lọc Tự Động: Rà soát Trần Giờ OT theo Luật Lao Động',
+          actor: 'Hệ thống HRM Engine (AI Auto-Gate)',
+          location: 'Bên trong (Hệ thống HRM)',
+          timing: 'Tự động kiểm tra ngay khi nộp',
+          typeCode: 'A',
+          description: 'Hệ thống tự động kiểm tra tổng số giờ OT lũy kế trong tháng (Hạn mức 40h/tháng) và trong năm (Hạn mức 200h/năm). Chặn nộp nếu vi phạm luật lao động hoặc chưa có đơn duyệt trước.',
+          fieldsChecklist: ['Số giờ OT lũy kế trong tháng', 'Số giờ OT lũy kế trong năm', 'Cảnh báo vi phạm trần 40h/tháng', 'Trạng thái màng lọc: Hợp lệ / Cảnh báo / Khóa']
+        },
+        {
+          stepCode: 'ATT01.03',
+          title: 'Thẩm định & Phê duyệt của Trưởng bộ phận (TBP)',
+          actor: 'Trưởng bộ phận (Line Manager)',
+          location: 'Manager Portal / App',
+          timing: 'Trước khi bắt đầu làm thêm',
+          typeCode: 'M',
+          description: 'TBP xem xét tính cấp thiết của công việc, kiểm tra ngân sách chi phí làm thêm giờ của bộ phận và phê duyệt đơn OT.',
+          fieldsChecklist: ['Ý kiến phê duyệt TBP', 'Hạn mức ngân sách OT phòng ban', 'Xác nhận khối lượng công việc hoàn thành']
+        },
+        {
+          stepCode: 'ATT01.04',
+          title: 'Đối soát Dữ liệu Quẹt Thẻ / Chấm Công Thực Tế (In/Out Auto-Match)',
+          actor: 'Hệ thống HRM Engine (Attendance Matcher)',
+          location: 'Hệ thống Chấm công',
+          timing: 'Sau khi kết thúc ca làm thêm',
+          typeCode: 'A',
+          description: 'Tự động đối soát thời gian quét vân tay / Face ID thực tế với khung giờ đăng ký trên đơn OT. Hệ thống chỉ ghi nhận giờ OT thực tế nhỏ hơn hoặc bằng giờ được duyệt.',
+          fieldsChecklist: ['Giờ quẹt thẻ vào (In)', 'Giờ quẹt thẻ ra (Out)', 'Số giờ OT thực tế được công nhận', 'Sai số thời gian (<= 15 phút)']
+        },
+        {
+          stepCode: 'ATT01.05',
+          title: 'Đồng bộ Dữ liệu vào Bảng Lương C&B hoặc Quỹ Nghỉ Bù',
+          actor: 'Hệ thống HRM - C&B (Auto Sync)',
+          location: 'Bên trong (Hệ thống HRM)',
+          timing: 'Kỳ chốt công hàng tháng',
+          typeCode: 'A',
+          description: 'Tự động áp hệ số tính lương làm thêm giờ (150% ngày thường, 200% ngày nghỉ tuần, 300% ngày lễ) vào Bảng lương PAY01 hoặc cộng dồn vào Quỹ ngày nghỉ bù (Comp-time).',
+          fieldsChecklist: ['Tổng giờ OT 150%', 'Tổng giờ OT 200%', 'Tổng giờ OT 300%', 'Lương làm thêm giờ thực nhận', 'Số giờ chuyển đổi nghỉ bù']
+        }
+      ]
+    },
+    {
+      sopCode: 'SOP ATT02',
+      sopTitle: 'Quy trình Đăng ký & Phê duyệt Đơn Nghỉ Phép (Leave Management)',
+      sopCategory: 'Chấm công & Quản lý Nghỉ phép',
+      description: 'Quy trình tạo đơn xin nghỉ phép, thẩm định điều kiện quỹ phép tồn, kiểm tra thời gian báo trước và chuỗi 5 cấp phê duyệt.',
+      steps: [
+        {
+          stepCode: 'ATT02.01',
+          title: 'Nhân viên nộp Đơn xin nghỉ phép trên Mobile App / Portal',
+          actor: 'Nhân viên',
+          location: 'Employee Portal / Mobile App',
+          timing: 'Trước khi nghỉ phép theo quy định',
+          typeCode: 'N',
+          description: 'Nhân viên chọn loại phép (Phép năm, Phép việc riêng, Nghỉ bù, Nghỉ không lương), nhập thời gian bắt đầu - kết thúc & lý do nghỉ phép.',
+          fieldsChecklist: ['Mã NV', 'Loại phép nghỉ', 'Từ ngày - Đến ngày', 'Tổng số ngày nghỉ', 'Lý do nghỉ', 'File chứng từ đính kèm (nếu có)']
+        },
+        {
+          stepCode: 'ATT02.02',
+          title: 'Cổng kiểm tra Điều kiện 1: Thời gian báo trước & Quỹ phép tồn',
+          actor: 'Hệ thống HRM Engine (Auto Gate 1)',
+          location: 'Bên trong (Hệ thống HRM)',
+          timing: 'Tự động kiểm tra ngay khi nộp',
+          typeCode: 'A',
+          description: 'Hệ thống tự động tính số ngày nghỉ, kiểm tra thời gian nộp đơn theo ma trận báo trước (24h / 5-7 ngày / 15 ngày) và đối soát số dư Quỹ phép năm.',
+          fieldsChecklist: ['Số ngày nghỉ khả dụng', 'Số dư quỹ phép năm', 'Thời gian nộp trước hạn', 'Phân loại luồng duyệt']
+        },
+        {
+          stepCode: 'ATT02.03',
+          title: 'Người nhận bàn giao & Trưởng bộ phận thẩm định',
+          actor: 'Người nhận bàn giao & TBP',
+          location: 'Manager Portal / App',
+          timing: 'Trong 24h làm việc',
+          typeCode: 'M',
+          description: 'Người nhận bàn giao xác nhận tiếp nhận việc, Trưởng bộ phận xem xét kế hoạch công việc phòng ban và phê duyệt đơn.',
+          fieldsChecklist: ['Xác nhận Người nhận bàn giao', 'Trạng thái duyệt TBP', 'Ghi chú thẩm định']
+        },
+        {
+          stepCode: 'ATT02.04',
+          title: 'Phê duyệt bổ sung của HR Manager / Giám Đốc (Nếu > 3 ngày)',
+          actor: 'HR Manager / Ban Giám Đốc (Auto Gate 2)',
+          location: 'Portal',
+          timing: 'Khi nghỉ từ 3 ngày trở lên',
+          typeCode: 'M',
+          description: 'Nếu nghỉ từ 3 ngày trở lên hoặc trường hợp đặc biệt, hệ thống tự động chuyển tiếp đơn lên HR Manager hoặc Ban Giám đốc xem xét phê duyệt.',
+          fieldsChecklist: ['Phê duyệt HR Manager', 'Quyết định Giám đốc (Nghỉ > 3 ngày)', 'Biên bản thống nhất nhân sự thay thế']
+        },
+        {
+          stepCode: 'ATT02.05',
+          title: 'Trừ quỹ phép năm & Đồng bộ Bảng chấm công C&B',
+          actor: 'Hệ thống HRM Engine (Auto Execution)',
+          location: 'Bên trong (Hệ thống HRM)',
+          timing: 'Sau khi đơn được duyệt 100%',
+          typeCode: 'A',
+          description: 'Tự động trừ số ngày phép vào Quỹ phép năm (hoặc ghi nhận Nghỉ không hưởng lương), cập nhật ký hiệu công phép vào Bảng chấm công C&B (ATT01).',
+          fieldsChecklist: ['Số ngày phép đã trừ', 'Số phép còn lại', 'Ký hiệu công: P (Phép năm) / KL (Không lương)', 'Đồng bộ Bảng lương C&B']
+        }
+      ]
+    },
     {
       sopCode: 'SOP EMP11',
       sopTitle: 'Quy trình Bổ nhiệm, Miễn nhiệm & Điều chuyển Nhân sự',
@@ -410,8 +700,66 @@ export const SOP_DATABASE: Record<string, SopSubProcess[]> = {
     }
   ],
 
-  // LIFE-07: BIẾN ĐỘNG & KẾT THÚC (OFFBOARDING)
+  // LIFE-07: BIẾN ĐỘNG, THÔI VIỆC & BÀN GIAO 4 BÊN (OFFBOARDING)
   'LIFE-07': [
+    {
+      sopCode: 'SOP OFF01',
+      sopTitle: 'Quy trình Thủ tục Thôi việc & Bàn giao 4 Bên (Offboarding & Handover)',
+      sopCategory: 'Biến động & Thôi việc (EMP/INS)',
+      description: 'Quy trình thôi việc chuẩn hóa: Bàn giao công việc, thu hồi tài sản IT, quyết toán tài chính hành chính và chốt sổ bảo hiểm xã hội.',
+      steps: [
+        {
+          stepCode: 'OFF01.01',
+          title: 'Nhân viên nộp Đơn thôi việc & Thực hiện Exit Interview',
+          actor: 'Nhân viên & HR Admin',
+          location: 'Employee Portal',
+          timing: 'Trước 30 - 45 ngày theo quy định HĐLĐ',
+          typeCode: 'N',
+          description: 'Nhân viên nộp đơn thôi việc trên Portal, chọn lý do nghỉ việc, ngày làm việc cuối cùng và thực hiện khảo sát phỏng vấn nghỉ việc (Exit Interview).',
+          fieldsChecklist: ['Mã NV & Chức danh', 'Lý do thôi việc', 'Ngày nộp đơn', 'Ngày làm việc cuối cùng', 'Khảo sát Exit Interview']
+        },
+        {
+          stepCode: 'OFF01.02',
+          title: 'Cổng Màng Lọc Tự Động: Rà soát Cam kết Đào tạo & Thời hạn Báo trước',
+          actor: 'Hệ thống HRM Engine (AI Auto-Gate)',
+          location: 'Bên trong (Hệ thống HRM)',
+          timing: 'Tự động kiểm tra ngay khi nộp',
+          typeCode: 'A',
+          description: 'Hệ thống đối soát thời hạn báo trước theo luật định (30d/45d), kiểm tra các hợp đồng đào tạo có cam kết hoàn phí và công nợ tạm ứng.',
+          fieldsChecklist: ['Số ngày báo trước thực tế', 'Hợp đồng cam kết đào tạo (nếu có)', 'Công nợ tạm ứng tài chính', 'Phân loại luồng bàn giao']
+        },
+        {
+          stepCode: 'OFF01.03',
+          title: 'Chuỗi Bàn Giao 4 Bên Liên Phòng Ban (Liên phòng ban xác nhận)',
+          actor: '4 Bên: TBP / IT / Hành chính / Kế toán',
+          location: 'Manager Portal / Task Center',
+          timing: 'Trong 7 ngày trước khi nghỉ',
+          typeCode: 'M',
+          description: '❶ Bàn giao công việc (TBP xác nhận) ➔ ❷ Thu hồi Laptop/Quyền truy cập IT ➔ ❸ Thu hồi thẻ/Đồng phục ➔ ❹ Quyết toán công nợ tài chính.',
+          fieldsChecklist: ['Xác nhận Bàn giao công việc', 'Xác nhận Thu hồi thiết bị IT & Khóa tài khoản', 'Xác nhận Thu hồi thẻ NV & Hành chính', 'Xác nhận Hoàn ứng tài chính']
+        },
+        {
+          stepCode: 'OFF01.04',
+          title: 'Phê duyệt Quyết định Thôi việc của Ban Giám Đốc (BOM)',
+          actor: 'Ban Giám Đốc (BOM)',
+          location: 'Portal / Ký số vẹn toàn',
+          timing: 'Trước ngày làm việc cuối cùng',
+          typeCode: 'M',
+          description: 'Ban Giám đốc phê duyệt ký số Quyết định chấm dứt hợp đồng lao động và thanh lý hợp đồng.',
+          fieldsChecklist: ['Quyết định chấm dứt HĐLĐ', 'Ngày hiệu lực thanh lý', 'Chữ ký số BOM']
+        },
+        {
+          stepCode: 'OFF01.05',
+          title: 'Quyết toán Lương/Phép, Báo giảm BHXH (INS04) & Chốt sổ',
+          actor: 'Hệ thống HRM Engine & C&B',
+          location: 'Bên trong / C&B Module',
+          timing: 'Kỳ thanh toán quyết toán thôi việc',
+          typeCode: 'A',
+          description: 'Tự động tính tiền phép tồn chưa nghỉ, tính trợ cấp thôi việc (nếu có), xuất dữ liệu Báo giảm BHXH và khóa tài khoản vĩnh viễn.',
+          fieldsChecklist: ['Bảng tính quyết toán thôi việc (Final Pay)', 'Thanh toán tiền ngày phép tồn', 'Hồ sơ Báo giảm BHXH (INS04)', 'Khóa tài khoản vĩnh viễn lúc 18h00']
+        }
+      ]
+    },
     {
       sopCode: 'SOP EMP15',
       sopTitle: 'Quy trình Giảm Lao động & Thanh lý HĐLĐ (Offboarding)',
