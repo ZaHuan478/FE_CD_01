@@ -209,5 +209,4 @@ export const RoleFlowSection: React.FC<RoleFlowSectionProps> = ({
     </div>
   )
 }
-}
 
