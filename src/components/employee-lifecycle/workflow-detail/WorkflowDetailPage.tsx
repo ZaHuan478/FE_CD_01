@@ -154,12 +154,12 @@ export const WorkflowDetailPage: React.FC<WorkflowDetailPageProps> = ({
       {/* Top Fixed Header with Back Button & Theme Toggle */}
       <header className={`sticky top-0 z-30 border-b backdrop-blur-md transition-colors duration-300 ${isDarkMode ? 'bg-slate-950/90 border-slate-800 text-white' : 'bg-white/90 border-slate-200 text-slate-900 shadow-2xs'
         }`}>
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 py-3 flex items-center justify-between">
+        <div className="w-[92%] max-w-[1920px] mx-auto px-2 sm:px-4 py-3 flex items-center justify-between">
           <div className="flex items-center gap-3">
             <button
               type="button"
               onClick={onBack}
-              className={`p-2 rounded-xl border transition-all flex items-center gap-2 text-xs font-extrabold cursor-pointer ${isDarkMode
+              className={`p-2 rounded-xl border transition-all flex items-center gap-2 text-xs sm:text-sm font-extrabold cursor-pointer ${isDarkMode
                 ? 'bg-slate-900 hover:bg-slate-800 border-slate-800 text-slate-200'
                 : 'bg-slate-100 hover:bg-slate-200 border-slate-200 text-slate-800'
                 }`}
@@ -174,10 +174,10 @@ export const WorkflowDetailPage: React.FC<WorkflowDetailPageProps> = ({
             <div className="h-5 w-px bg-slate-300 dark:bg-slate-800 hidden sm:block" />
 
             <div className="flex items-center gap-2">
-              <span className="px-2.5 py-1 text-[11px] font-mono font-bold bg-blue-600/10 text-blue-700 dark:text-blue-400 rounded-lg border border-blue-600/20">
+              <span className="px-2.5 py-1 text-xs font-mono font-bold bg-blue-600/10 text-blue-700 dark:text-blue-400 rounded-lg border border-blue-600/20">
                 SOP SPECIFICATION
               </span>
-              <span className="text-xs font-bold text-slate-500 dark:text-slate-400 hidden md:inline">
+              <span className="text-xs sm:text-sm font-bold text-slate-500 dark:text-slate-400 hidden md:inline">
                 {language === 'vi' ? 'Mã:' : 'ID:'} <strong className="text-slate-900 dark:text-white font-mono">{item.id}</strong>
               </span>
             </div>
@@ -206,7 +206,7 @@ export const WorkflowDetailPage: React.FC<WorkflowDetailPageProps> = ({
 
 
             {item.sopIds && item.sopIds.length > 0 && (
-              <span className="hidden sm:inline-flex px-3 py-1 text-xs font-mono font-extrabold bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 rounded-xl border border-emerald-500/20">
+              <span className="hidden sm:inline-flex px-3 py-1 text-xs sm:text-sm font-mono font-extrabold bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 rounded-xl border border-emerald-500/20">
                 📋 {item.sopIds.join(', ')}
               </span>
             )}
@@ -215,9 +215,9 @@ export const WorkflowDetailPage: React.FC<WorkflowDetailPageProps> = ({
               <button
                 type="button"
                 onClick={() => onOpenWireframe(item)}
-                className="hidden md:flex items-center gap-1.5 px-3.5 py-1.5 text-xs font-bold text-white bg-blue-600 hover:bg-blue-500 rounded-xl border border-blue-400 transition-all shadow-sm cursor-pointer"
+                className="hidden md:flex items-center gap-1.5 px-3.5 py-1.5 text-xs sm:text-sm font-bold text-white bg-blue-600 hover:bg-blue-500 rounded-xl border border-blue-400 transition-all shadow-sm cursor-pointer"
               >
-                <FileText className="w-3.5 h-3.5" />
+                <FileText className="w-4 h-4" />
                 <span>{t('common.viewWireframe', 'Xem Giao Diện Form UI')}</span>
               </button>
             )}
@@ -226,28 +226,28 @@ export const WorkflowDetailPage: React.FC<WorkflowDetailPageProps> = ({
       </header>
 
 
-      {/* Main Workflow Workspace Content */}
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
+      {/* Main Workflow Workspace Content (92% Screen Width) */}
+      <main className="w-[92%] max-w-[1920px] mx-auto px-2 sm:px-4 py-6 space-y-6">
 
         {/* Hero Banner Header */}
-        <div className={`rounded-2xl p-6 border shadow-xl relative overflow-hidden transition-colors duration-300 ${isDarkMode
+        <div className={`rounded-2xl p-6 sm:p-7 border shadow-xl relative overflow-hidden transition-colors duration-300 ${isDarkMode
           ? 'bg-gradient-to-r from-slate-950 via-slate-900 to-slate-950 border-slate-800'
           : 'bg-gradient-to-r from-blue-900 via-indigo-900 to-slate-900 border-blue-800 text-white'
           }`}>
           <div className="absolute -right-10 -bottom-10 w-64 h-64 bg-blue-500/10 rounded-full blur-3xl pointer-events-none" />
 
           <div className="flex flex-col md:flex-row md:items-start justify-between gap-4 relative z-10">
-            <div className="space-y-2 max-w-3xl">
+            <div className="space-y-2.5 max-w-4xl">
               <div className="flex flex-wrap items-center gap-2">
-                <span className="px-2.5 py-0.5 text-[10px] font-mono font-extrabold uppercase bg-blue-500/20 text-blue-300 rounded border border-blue-400/30">
+                <span className="px-2.5 py-0.5 text-xs font-mono font-extrabold uppercase bg-blue-500/20 text-blue-300 rounded border border-blue-400/30">
                   Document Spec: 1.EMP.HRM.SOP.docx
                 </span>
-                <span className="px-2 py-0.5 text-[10px] font-semibold bg-emerald-500/20 text-emerald-300 rounded border border-emerald-400/30">
+                <span className="px-2.5 py-0.5 text-xs font-semibold bg-emerald-500/20 text-emerald-300 rounded border border-emerald-400/30">
                   Role Mapping: Candidate vs. HR Engine
                 </span>
               </div>
 
-              <h1 className="text-xl sm:text-2xl font-extrabold text-white tracking-tight leading-snug">
+              <h1 className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight leading-snug">
                 {language === 'vi' ? 'SƠ ĐỒ WORKFLOW QUY TRÌNH:' : 'WORKFLOW PROCESS DIAGRAM:'} {item.title.toUpperCase()}
               </h1>
 

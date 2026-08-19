@@ -98,7 +98,7 @@ export const WorkflowDiagramView: React.FC<WorkflowDiagramViewProps> = ({
                       {/* Step Card Node */}
                       <div
                         onClick={() => setSelectedStepIdx(idx)}
-                        className={`w-[260px] shrink-0 p-4 rounded-2xl border transition-all duration-200 cursor-pointer flex flex-col justify-between shadow-2xs ${isStepSelected
+                        className={`w-[280px] shrink-0 p-4 sm:p-5 rounded-2xl border transition-all duration-200 cursor-pointer flex flex-col justify-between shadow-2xs ${isStepSelected
                           ? isDarkMode
                             ? 'bg-blue-950 border-blue-500 text-white ring-2 ring-blue-500/40 transform -translate-y-1 shadow-md'
                             : 'bg-blue-600 border-blue-600 text-white ring-2 ring-blue-400 transform -translate-y-1 shadow-md'
@@ -110,7 +110,7 @@ export const WorkflowDiagramView: React.FC<WorkflowDiagramViewProps> = ({
                         <div>
                           <div className="flex items-center justify-between mb-2">
                             <span
-                              className={`text-[10px] font-mono font-black px-2 py-0.5 rounded border ${isStepSelected
+                              className={`text-xs font-mono font-black px-2 py-0.5 rounded border ${isStepSelected
                                 ? 'bg-white/20 text-white border-white/30'
                                 : 'bg-blue-50 dark:bg-blue-950 text-blue-700 dark:text-blue-300 border-blue-200/80 dark:border-blue-800'
                                 }`}
@@ -119,7 +119,7 @@ export const WorkflowDiagramView: React.FC<WorkflowDiagramViewProps> = ({
                             </span>
 
                             <span
-                              className={`text-[9px] font-mono font-bold px-1.5 py-0.5 rounded border ${isStepSelected
+                              className={`text-[10px] font-mono font-bold px-1.5 py-0.5 rounded border ${isStepSelected
                                 ? 'bg-white/20 text-white border-white/30'
                                 : step.typeCode === 'N'
                                   ? 'bg-blue-100/80 dark:bg-blue-900/80 text-blue-800 dark:text-blue-200 border-blue-200'
@@ -133,7 +133,7 @@ export const WorkflowDiagramView: React.FC<WorkflowDiagramViewProps> = ({
                           </div>
 
                           <h4
-                            className={`text-xs font-bold leading-tight mb-1.5 line-clamp-2 ${isStepSelected
+                            className={`text-sm font-extrabold leading-tight mb-2 line-clamp-2 ${isStepSelected
                               ? 'text-white'
                               : isDarkMode
                                 ? 'text-slate-100'
@@ -144,7 +144,7 @@ export const WorkflowDiagramView: React.FC<WorkflowDiagramViewProps> = ({
                           </h4>
 
                           <p
-                            className={`text-[11px] leading-snug line-clamp-2 mb-2 ${isStepSelected
+                            className={`text-xs leading-relaxed line-clamp-3 mb-3 ${isStepSelected
                               ? isDarkMode ? 'text-blue-200' : 'text-blue-100'
                               : isDarkMode
                                 ? 'text-slate-400'
@@ -156,13 +156,13 @@ export const WorkflowDiagramView: React.FC<WorkflowDiagramViewProps> = ({
                         </div>
 
                         <div
-                          className={`pt-2 border-t flex items-center justify-between text-[10px] ${isStepSelected
+                          className={`pt-2.5 border-t flex items-center justify-between text-xs ${isStepSelected
                             ? isDarkMode ? 'border-blue-800 text-blue-200' : 'border-blue-500/60 text-blue-100'
                             : 'border-slate-200/60 dark:border-slate-800 text-slate-500 dark:text-slate-400'
                             }`}
                         >
                           <span className="font-semibold flex items-center gap-1">
-                            <UserCheck className="w-3 h-3" />
+                            <UserCheck className="w-3.5 h-3.5" />
                             {step.actor}
                           </span>
                           <span>{step.timing}</span>

@@ -315,8 +315,8 @@ export const EmployeeLifecyclePage: React.FC = () => {
       </header>
 
 
-      {/* Main Container Workspace */}
-      <main className="max-w-7xl mx-auto px-3.5 sm:px-6 lg:px-8 py-5 sm:py-8 space-y-6 sm:space-y-8">
+      {/* Main Container Workspace (92% Screen Width for maximum viewability) */}
+      <main className="w-[92%] max-w-[1920px] mx-auto px-2 sm:px-4 lg:px-6 py-5 sm:py-8 space-y-6 sm:space-y-8">
 
         {/* Intro Eyebrow Banner */}
         <div className={`rounded-2xl p-4 sm:p-5 border shadow-xs flex flex-col md:flex-row md:items-center justify-between gap-3 sm:gap-4 transition-colors duration-300 ${isDarkMode ? 'bg-slate-900 border-slate-800 text-slate-100' : 'bg-white border-slate-200/80 text-slate-900'

@@ -218,7 +218,7 @@ export const WireframeFormDetailPage: React.FC<WireframeFormDetailPageProps> = (
       {/* TOP FIXED NAVIGATION HEADER */}
       <header className={`sticky top-0 z-40 backdrop-blur-md border-b px-4 sm:px-6 py-3 transition-colors duration-300 ${isDarkMode ? 'bg-slate-900/90 border-slate-800' : 'bg-white/90 border-slate-200 shadow-2xs'
         }`}>
-        <div className="max-w-7xl mx-auto flex items-center justify-between gap-4">
+        <div className="w-[92%] max-w-[1920px] mx-auto flex items-center justify-between gap-4">
           <div className="flex items-center gap-3">
             <button
               type="button"
@@ -286,8 +286,8 @@ export const WireframeFormDetailPage: React.FC<WireframeFormDetailPageProps> = (
         </div>
       </header>
 
-      {/* MAIN CONTAINER */}
-      <main className="max-w-7xl mx-auto p-4 sm:p-6 lg:p-8 space-y-6">
+      {/* MAIN CONTAINER (92% Screen Width) */}
+      <main className="w-[92%] max-w-[1920px] mx-auto p-4 sm:p-6 lg:p-8 space-y-6">
 
         {/* GOVERNANCE SOP CONTEXT BANNER */}
         <div className={`p-4 rounded-2xl border shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-3 ${isDarkMode
