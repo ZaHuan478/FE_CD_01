@@ -10,7 +10,8 @@ import {
   Sun,
   Moon,
   ChevronDown,
-  ChevronUp
+  ChevronUp,
+  Globe
 } from 'lucide-react'
 import type { WorkflowDetailPageProps } from './types'
 import { SOP_DATABASE } from './data/sopDatabase'
@@ -18,12 +19,17 @@ import { ROLE_FLOW_DATABASE } from './data/roleFlowDatabase'
 import { RoleFlowSection } from './components/RoleFlowSection'
 import { WorkflowDiagramView } from './components/WorkflowDiagramView'
 import { WorkflowTableView } from './components/WorkflowTableView'
+import { useLanguage } from '../../../context/LanguageContext'
+import type { Language } from '../../../data/translations'
+import { LanguageSelector } from '../../common/LanguageSelector'
 
 export const WorkflowDetailPage: React.FC<WorkflowDetailPageProps> = ({
   item,
   onBack,
   onOpenWireframe
 }) => {
+  const { language, setLanguage, t } = useLanguage()
+
   // Always scroll to top when opening or switching workflow detail
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: 'instant' })
@@ -159,8 +165,10 @@ export const WorkflowDetailPage: React.FC<WorkflowDetailPageProps> = ({
                 }`}
             >
               <ArrowLeft className="w-4 h-4" />
-              <span className="hidden sm:inline">Quay lại Bức tranh Tổng thể Quy trình</span>
-              <span className="sm:hidden">Quay lại</span>
+              <span className="hidden sm:inline">
+                {language === 'vi' ? 'Quay lại Bức tranh Tổng thể Quy trình' : 'Back to Overall Process Blueprint'}
+              </span>
+              <span className="sm:hidden">{t('common.back', 'Quay lại')}</span>
             </button>
 
             <div className="h-5 w-px bg-slate-300 dark:bg-slate-800 hidden sm:block" />
@@ -170,21 +178,24 @@ export const WorkflowDetailPage: React.FC<WorkflowDetailPageProps> = ({
                 SOP SPECIFICATION
               </span>
               <span className="text-xs font-bold text-slate-500 dark:text-slate-400 hidden md:inline">
-                Mã: <strong className="text-slate-900 dark:text-white font-mono">{item.id}</strong>
+                {language === 'vi' ? 'Mã:' : 'ID:'} <strong className="text-slate-900 dark:text-white font-mono">{item.id}</strong>
               </span>
             </div>
           </div>
 
           <div className="flex items-center gap-2.5">
+            {/* Custom Language Selection Popover */}
+            <LanguageSelector isDarkTheme={isDarkMode} />
+
             {/* Theme Toggle Button */}
             <button
               type="button"
               onClick={toggleTheme}
-              className={`p-2 rounded-xl border transition-all flex items-center gap-2 text-xs font-bold cursor-pointer ${isDarkMode
+              className={`p-2 rounded-2xl border transition-all flex items-center gap-2 text-xs font-bold cursor-pointer ${isDarkMode
                 ? 'bg-slate-900 hover:bg-slate-800 border-slate-800 text-amber-400'
                 : 'bg-slate-100 hover:bg-slate-200 border-slate-200 text-slate-700'
                 }`}
-              title={isDarkMode ? 'Bật Giao diện Sáng' : 'Bật Giao diện Tối'}
+              title={isDarkMode ? t('header.themeLight', 'Bật Giao diện Sáng') : t('header.themeDark', 'Bật Giao diện Tối')}
             >
               {isDarkMode ? (
                 <Sun className="w-4 h-4 text-amber-400" />
@@ -192,6 +203,7 @@ export const WorkflowDetailPage: React.FC<WorkflowDetailPageProps> = ({
                 <Moon className="w-4 h-4 text-slate-700" />
               )}
             </button>
+
 
             {item.sopIds && item.sopIds.length > 0 && (
               <span className="hidden sm:inline-flex px-3 py-1 text-xs font-mono font-extrabold bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 rounded-xl border border-emerald-500/20">
@@ -206,12 +218,13 @@ export const WorkflowDetailPage: React.FC<WorkflowDetailPageProps> = ({
                 className="hidden md:flex items-center gap-1.5 px-3.5 py-1.5 text-xs font-bold text-white bg-blue-600 hover:bg-blue-500 rounded-xl border border-blue-400 transition-all shadow-sm cursor-pointer"
               >
                 <FileText className="w-3.5 h-3.5" />
-                <span>Mở Form UI Wireframe</span>
+                <span>{t('common.viewWireframe', 'Xem Giao Diện Form UI')}</span>
               </button>
             )}
           </div>
         </div>
       </header>
+
 
       {/* Main Workflow Workspace Content */}
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
@@ -235,7 +248,7 @@ export const WorkflowDetailPage: React.FC<WorkflowDetailPageProps> = ({
               </div>
 
               <h1 className="text-xl sm:text-2xl font-extrabold text-white tracking-tight leading-snug">
-                SƠ ĐỒ WORKFLOW QUY TRÌNH: {item.title.toUpperCase()}
+                {language === 'vi' ? 'SƠ ĐỒ WORKFLOW QUY TRÌNH:' : 'WORKFLOW PROCESS DIAGRAM:'} {item.title.toUpperCase()}
               </h1>
 
               <p className="text-xs sm:text-sm text-slate-200 leading-relaxed">
@@ -250,7 +263,7 @@ export const WorkflowDetailPage: React.FC<WorkflowDetailPageProps> = ({
                 className="self-start flex items-center gap-2 px-4 py-2.5 text-xs font-bold text-white bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 rounded-xl border border-blue-400 shadow-md transition-all shrink-0 cursor-pointer"
               >
                 <FileText className="w-4 h-4" />
-                <span>Xem UI Form Thao tác</span>
+                <span>{language === 'vi' ? 'Xem UI Form Thao tác' : 'View Form UI Wireframe'}</span>
               </button>
             )}
           </div>
@@ -271,7 +284,11 @@ export const WorkflowDetailPage: React.FC<WorkflowDetailPageProps> = ({
             <div className="flex items-center justify-between border-b border-slate-200 dark:border-slate-800 pb-3">
               <div className="flex items-center gap-2 text-xs font-extrabold uppercase tracking-wider text-slate-700 dark:text-slate-300">
                 <UserCheck className="w-4 h-4 text-blue-600 dark:text-blue-400" />
-                <span>Ma trận Phân quyền & Vai trò Thực hiện (Actors Matrix)</span>
+                <span>
+                  {language === 'vi'
+                    ? 'Ma trận Phân quyền & Vai trò Thực hiện (Actors Matrix)'
+                    : 'Roles & Permissions Matrix (Actors Matrix)'}
+                </span>
               </div>
 
               {/* Collapse Dropdown Toggle Button */}
@@ -283,9 +300,9 @@ export const WorkflowDetailPage: React.FC<WorkflowDetailPageProps> = ({
                     ? 'bg-slate-900 border-slate-800 text-slate-300 hover:bg-slate-800'
                     : 'bg-slate-100 border-slate-200 text-slate-700 hover:bg-slate-200'
                 }`}
-                title={isActorsExpanded ? 'Thu gọn Actors Matrix' : 'Mở rộng Actors Matrix'}
+                title={isActorsExpanded ? (language === 'vi' ? 'Thu gọn' : 'Collapse') : (language === 'vi' ? 'Mở rộng' : 'Expand')}
               >
-                <span>{isActorsExpanded ? 'Thu gọn' : 'Mở rộng'}</span>
+                <span>{isActorsExpanded ? (language === 'vi' ? 'Thu gọn' : 'Collapse') : (language === 'vi' ? 'Mở rộng' : 'Expand')}</span>
                 {isActorsExpanded ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
               </button>
             </div>
@@ -329,7 +346,9 @@ export const WorkflowDetailPage: React.FC<WorkflowDetailPageProps> = ({
           <div className={`p-4 rounded-2xl border space-y-3 shadow-2xs transition-colors duration-300 ${isDarkMode ? 'bg-slate-950 border-slate-800' : 'bg-white border-slate-200/90'
             }`}>
             <span className="text-[11px] font-extrabold uppercase tracking-wider text-slate-700 dark:text-slate-300 block">
-              Các Quy trình SOP Chi tiết trong file Word tương ứng với bước này:
+              {language === 'vi'
+                ? 'Các Quy trình SOP Chi tiết tương ứng với bước này:'
+                : 'Detailed SOP Processes for this step:'}
             </span>
 
             <div className="flex flex-wrap gap-2.5">
@@ -353,7 +372,7 @@ export const WorkflowDetailPage: React.FC<WorkflowDetailPageProps> = ({
                     <Building2 className="w-4 h-4" />
                     <span>{proc.sopCode}: {proc.sopTitle}</span>
                     <span className="text-[10px] font-mono opacity-80 bg-black/20 px-2 py-0.5 rounded-md">
-                      {proc.steps.length} bước
+                      {proc.steps.length} {language === 'vi' ? 'bước' : 'steps'}
                     </span>
                   </button>
                 )
@@ -374,7 +393,11 @@ export const WorkflowDetailPage: React.FC<WorkflowDetailPageProps> = ({
                 }`}
             >
               <GitBranch className="w-4 h-4" />
-              <span>Sơ đồ Flowchart Trực quan ({currentProcess.steps.length} Bước SOP)</span>
+              <span>
+                {language === 'vi'
+                  ? `Sơ đồ Flowchart Trực quan (${currentProcess.steps.length} Bước SOP)`
+                  : `Visual Flowchart Diagram (${currentProcess.steps.length} SOP Steps)`}
+              </span>
             </button>
 
             <button
@@ -386,14 +409,19 @@ export const WorkflowDetailPage: React.FC<WorkflowDetailPageProps> = ({
                 }`}
             >
               <ListCheck className="w-4 h-4" />
-              <span>Bảng Chi tiết Các bước (SOP Specs Table)</span>
+              <span>
+                {language === 'vi'
+                  ? 'Bảng Chi tiết Các bước (SOP Specs Table)'
+                  : 'SOP Specifications Table'}
+              </span>
             </button>
           </div>
 
           <span className="text-xs text-slate-500 dark:text-slate-400 font-mono hidden sm:inline">
-            Đang xem: <strong className="text-blue-600 dark:text-blue-300">{currentProcess.sopCode}</strong>
+            {language === 'vi' ? 'Đang xem:' : 'Viewing:'} <strong className="text-blue-600 dark:text-blue-300">{currentProcess.sopCode}</strong>
           </span>
         </div>
+
 
         {/* VIEW MODE 1: VISUAL FLOWCHART DIAGRAM */}
         {viewMode === 'diagram' && (

@@ -1,6 +1,7 @@
 import React, { useState } from 'react'
 import { Clock, FileEdit, UserSquare2, Award, GraduationCap, Target, HeartHandshake, Receipt, ArrowUpRight, ChevronDown, ChevronUp } from 'lucide-react'
 import type { OperationModule } from '../../types/employee-lifecycle'
+import { useLanguage } from '../../context/LanguageContext'
 
 interface OperationsGridProps {
   modules: OperationModule[]
@@ -27,6 +28,7 @@ export const OperationsGrid: React.FC<OperationsGridProps> = ({
   modules = defaultModules,
   onSelectModule
 }) => {
+  const { language, t } = useLanguage()
   const [isExpanded, setIsExpanded] = useState<boolean>(true)
   const displayModules = modules.length >= 8 ? modules : defaultModules
 
@@ -39,13 +41,15 @@ export const OperationsGrid: React.FC<OperationsGridProps> = ({
             <span className="px-2.5 py-0.5 text-[10px] sm:text-[11px] font-bold uppercase tracking-wider text-indigo-700 dark:text-indigo-300 bg-indigo-50 dark:bg-indigo-950/80 rounded-md border border-indigo-200/60 dark:border-indigo-800">
               Layer 3 · Operations Grid
             </span>
-            <span className="text-[11px] sm:text-xs text-slate-500 dark:text-slate-400 font-medium">8 Module Nghiệp vụ Phát sinh</span>
+            <span className="text-[11px] sm:text-xs text-slate-500 dark:text-slate-400 font-medium">
+              {language === 'vi' ? '8 Module Nghiệp vụ Phát sinh' : '8 Operational Modules'}
+            </span>
           </div>
           <h2 className="text-base sm:text-lg font-bold text-slate-900 dark:text-white tracking-tight leading-snug">
-            TẦNG 3: NGHIỆP VỤ PHÁT SINH XUYÊN SUỐT (OPERATIONS)
+            {t('layer3.title', 'TẦNG 3: NGHIỆP VỤ PHÁT SINH XUYÊN SUỐT (OPERATIONS)')}
           </h2>
           <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-0.5 leading-relaxed">
-            Các hoạt động nhân sự diễn ra định kỳ hoặc đột xuất trong quá trình làm việc của nhân viên
+            {t('layer3.subtitle', '8 Module Nghiệp vụ Xử lý Định kỳ & Đột xuất Trong Quá trình Vận hành')}
           </p>
         </div>
 
@@ -54,12 +58,13 @@ export const OperationsGrid: React.FC<OperationsGridProps> = ({
           type="button"
           onClick={() => setIsExpanded(!isExpanded)}
           className="p-2 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 transition-colors flex items-center gap-1 text-xs font-bold cursor-pointer shrink-0 self-start sm:self-center"
-          title={isExpanded ? 'Thu gọn Tầng 3 Nghiệp vụ' : 'Mở rộng Tầng 3 Nghiệp vụ'}
+          title={isExpanded ? (language === 'vi' ? 'Thu gọn' : 'Collapse') : (language === 'vi' ? 'Mở rộng' : 'Expand')}
         >
-          <span>{isExpanded ? 'Thu gọn' : 'Mở rộng'}</span>
+          <span>{isExpanded ? (language === 'vi' ? 'Thu gọn' : 'Collapse') : (language === 'vi' ? 'Mở rộng' : 'Expand')}</span>
           {isExpanded ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
         </button>
       </div>
+
 
       {/* EXPANDABLE BODY CONTENT */}
       {isExpanded && (
@@ -101,9 +106,12 @@ export const OperationsGrid: React.FC<OperationsGridProps> = ({
 
                 <div className="mt-3.5 pt-2 border-t border-slate-200/50 dark:border-slate-800 flex items-center justify-between text-[11px] text-slate-400 dark:text-slate-500">
                   <span>{mod.category || 'Operation'}</span>
-                  <span className="font-semibold text-blue-600 dark:text-blue-400 opacity-100 sm:opacity-0 group-hover:opacity-100 transition-opacity">Chi tiết →</span>
+                  <span className="font-semibold text-blue-600 dark:text-blue-400 opacity-100 sm:opacity-0 group-hover:opacity-100 transition-opacity">
+                    {language === 'vi' ? 'Chi tiết →' : 'Details →'}
+                  </span>
                 </div>
               </button>
+
             )
           })}
         </div>

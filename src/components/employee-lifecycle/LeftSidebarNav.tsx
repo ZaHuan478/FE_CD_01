@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState } from 'react'
 import {
   LayoutDashboard,
   Database,
@@ -14,6 +14,7 @@ import {
   Activity,
   Award
 } from 'lucide-react'
+import { useLanguage } from '../../context/LanguageContext'
 
 interface LeftSidebarNavProps {
   activeSection: string
@@ -30,6 +31,7 @@ export const LeftSidebarNav: React.FC<LeftSidebarNavProps> = ({
   isCollapsed: externalIsCollapsed,
   onToggleCollapse
 }) => {
+  const { t } = useLanguage()
   const [internalIsCollapsed, setInternalIsCollapsed] = useState(false)
 
   const isCollapsed = externalIsCollapsed !== undefined ? externalIsCollapsed : internalIsCollapsed
@@ -44,56 +46,56 @@ export const LeftSidebarNav: React.FC<LeftSidebarNavProps> = ({
 
   const menuGroups = [
     {
-      groupTitle: 'TỔNG QUAN',
+      groupTitle: t('sidebar.group.overview', 'TỔNG QUAN'),
       items: [
         {
           id: 'overview-dashboard',
-          label: 'Dashboard Chỉ số KPI',
+          label: t('sidebar.item.dashboard', 'Dashboard Chỉ số KPI'),
           icon: LayoutDashboard,
-          badge: 'Overview',
+          badge: t('sidebar.item.dashboardBadge', 'Overview'),
           color: 'text-blue-500'
         }
       ]
     },
     {
-      groupTitle: 'KIẾN TRÚC PHÂN TẦNG',
+      groupTitle: t('sidebar.group.architecture', 'KIẾN TRÚC PHÂN TẦNG'),
       items: [
         {
           id: 'layer-1-master-data',
-          label: 'Tầng 1: Master Data',
+          label: t('sidebar.item.layer1', 'Tầng 1: Master Data'),
           icon: Database,
-          badge: '10 Catalog',
+          badge: t('sidebar.item.layer1Badge', '10 Catalog'),
           color: 'text-purple-500'
         },
         {
           id: 'layer-2-lifecycle',
-          label: 'Tầng 2: Vòng đời NV',
+          label: t('sidebar.item.layer2', 'Tầng 2: Vòng đời NV'),
           icon: Layers,
-          badge: '7 Bước',
+          badge: t('sidebar.item.layer2Badge', '7 Bước'),
           color: 'text-emerald-500'
         },
         {
           id: 'layer-3-operations',
-          label: 'Tầng 3: Operational Grid',
+          label: t('sidebar.item.layer3', 'Tầng 3: Operational Grid'),
           icon: GitBranch,
-          badge: '8 Module',
+          badge: t('sidebar.item.layer3Badge', '8 Module'),
           color: 'text-amber-500'
         },
         {
           id: 'system-support',
-          label: 'Hỗ trợ Hệ thống',
+          label: t('sidebar.item.support', 'Hỗ trợ Hệ thống'),
           icon: HelpCircle,
-          badge: 'Support',
+          badge: t('sidebar.item.supportBadge', 'Support'),
           color: 'text-indigo-500'
         }
       ]
     },
     {
-      groupTitle: 'TÀI LIỆU QUY CHUẨN',
+      groupTitle: t('sidebar.group.specs', 'TÀI LIỆU QUY CHUẨN'),
       items: [
         {
           id: 'open-erd-modal',
-          label: 'Sơ đồ ERD Master Data',
+          label: t('sidebar.item.erd', 'Sơ đồ ERD Master Data'),
           icon: Sparkles,
           badge: 'ERD View',
           color: 'text-pink-500',
@@ -101,7 +103,7 @@ export const LeftSidebarNav: React.FC<LeftSidebarNavProps> = ({
         },
         {
           id: 'sop-specs-matrix',
-          label: 'Ma trận 45 SOP Specs',
+          label: t('sidebar.item.sopMatrix', 'Ma trận 45 SOP Specs'),
           icon: ShieldCheck,
           badge: '45 SOPs',
           color: 'text-cyan-500'
@@ -223,8 +225,7 @@ export const LeftSidebarNav: React.FC<LeftSidebarNavProps> = ({
               HA
             </div>
             <div className="truncate">
-              <h4 className="text-xs font-extrabold text-white truncate leading-tight">Lead HR Architect</h4>
-              {/* <p className="text-[10px] text-slate-400 font-mono truncate">Audit & Design v2.5</p> */}
+              <h4 className="text-xs font-extrabold text-white truncate leading-tight">{t('sidebar.role', 'Lead HR Architect')}</h4>
             </div>
           </div>
         ) : (
@@ -237,3 +238,4 @@ export const LeftSidebarNav: React.FC<LeftSidebarNavProps> = ({
     </aside>
   )
 }
+

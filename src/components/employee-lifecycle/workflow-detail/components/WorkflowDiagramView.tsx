@@ -14,6 +14,7 @@ import {
 import type { SopSubProcess } from '../types'
 import type { DetailItem } from '../../../../types/employee-lifecycle'
 import { SopStepLegendBar } from './SopStepLegendBar'
+import { useLanguage } from '../../../../context/LanguageContext'
 
 interface WorkflowDiagramViewProps {
   currentProcess: SopSubProcess
@@ -32,6 +33,7 @@ export const WorkflowDiagramView: React.FC<WorkflowDiagramViewProps> = ({
   item,
   onOpenWireframe
 }) => {
+  const { language } = useLanguage()
   const [isDiagramExpanded, setIsDiagramExpanded] = useState<boolean>(true)
   const currentStep = currentProcess.steps[selectedStepIdx] || currentProcess.steps[0]
 
@@ -45,7 +47,9 @@ export const WorkflowDiagramView: React.FC<WorkflowDiagramViewProps> = ({
             <h3 className={`text-sm font-bold flex items-center gap-2 ${isDarkMode ? 'text-white' : 'text-slate-900'
               }`}>
               <GitBranch className="w-4 h-4 text-blue-600 dark:text-blue-400" />
-              <span>LƯU ĐỒ SƠ ĐỒ WORKFLOW: {currentProcess.sopTitle}</span>
+              <span>
+                {language === 'vi' ? 'LƯU ĐỒ SƠ ĐỒ WORKFLOW:' : 'WORKFLOW FLOWCHART:'} {currentProcess.sopTitle}
+              </span>
             </h3>
             <p className="text-xs text-slate-500 dark:text-slate-400 mt-1 leading-relaxed">
               {currentProcess.description}
@@ -55,7 +59,7 @@ export const WorkflowDiagramView: React.FC<WorkflowDiagramViewProps> = ({
           <div className="flex items-center gap-2.5 shrink-0 self-start sm:self-center">
             <span className={`text-xs font-mono font-bold px-3 py-1 rounded-xl border shrink-0 ${isDarkMode ? 'bg-emerald-950/80 text-emerald-400 border-emerald-800' : 'bg-emerald-50 text-emerald-800 border-emerald-200'
               }`}>
-              {currentProcess.steps.length} Bước SOP Chuẩn
+              {currentProcess.steps.length} {language === 'vi' ? 'Bước SOP Chuẩn' : 'Standard SOP Steps'}
             </span>
 
             {/* Collapse Dropdown Toggle Button */}
@@ -67,13 +71,14 @@ export const WorkflowDiagramView: React.FC<WorkflowDiagramViewProps> = ({
                   ? 'bg-slate-900 border-slate-800 text-slate-300 hover:bg-slate-800'
                   : 'bg-slate-100 border-slate-200 text-slate-700 hover:bg-slate-200'
               }`}
-              title={isDiagramExpanded ? 'Thu gọn Sơ đồ Workflow' : 'Mở rộng Sơ đồ Workflow'}
+              title={isDiagramExpanded ? (language === 'vi' ? 'Thu gọn Sơ đồ' : 'Collapse Diagram') : (language === 'vi' ? 'Mở rộng Sơ đồ' : 'Expand Diagram')}
             >
-              <span>{isDiagramExpanded ? 'Thu gọn' : 'Mở rộng'}</span>
+              <span>{isDiagramExpanded ? (language === 'vi' ? 'Thu gọn' : 'Collapse') : (language === 'vi' ? 'Mở rộng' : 'Expand')}</span>
               {isDiagramExpanded ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
             </button>
           </div>
         </div>
+
 
         {/* EXPANDABLE DIAGRAM WORKFLOW BODY */}
         {isDiagramExpanded && (
@@ -229,7 +234,7 @@ export const WorkflowDiagramView: React.FC<WorkflowDiagramViewProps> = ({
             </div>
 
             <div className="flex items-center gap-2 text-xs">
-              <span className="text-slate-500 dark:text-slate-400">Thời gian:</span>
+              <span className="text-slate-500 dark:text-slate-400">{language === 'vi' ? 'Thời gian:' : 'Timing:'}</span>
               <span className={`font-semibold px-2.5 py-1 rounded-lg border ${isDarkMode ? 'bg-slate-900 text-slate-200 border-slate-800' : 'bg-slate-100 text-slate-700 border-slate-200'
                 }`}>
                 {currentStep.timing}
@@ -242,7 +247,7 @@ export const WorkflowDiagramView: React.FC<WorkflowDiagramViewProps> = ({
             <div className={`p-4 rounded-xl border space-y-2 ${isDarkMode ? 'bg-slate-900/90 border-slate-800' : 'bg-slate-50 border-slate-200'
               }`}>
               <span className="font-bold text-amber-600 dark:text-amber-400 uppercase tracking-wider text-[10px] block">
-                Người thực hiện & Nơi thực hiện
+                {language === 'vi' ? 'Người thực hiện & Nơi thực hiện' : 'Actor & Execution Channel'}
               </span>
               <div className="space-y-1.5 text-slate-800 dark:text-slate-200">
                 <div className="flex items-center gap-2">
@@ -251,7 +256,7 @@ export const WorkflowDiagramView: React.FC<WorkflowDiagramViewProps> = ({
                 </div>
                 <div className="flex items-center gap-2 text-slate-500 dark:text-slate-400">
                   <Building2 className="w-4 h-4 text-slate-400 shrink-0" />
-                  <span>Nơi thực hiện: {currentStep.location}</span>
+                  <span>{language === 'vi' ? 'Nơi thực hiện:' : 'Channel:'} {currentStep.location}</span>
                 </div>
               </div>
             </div>
@@ -260,7 +265,7 @@ export const WorkflowDiagramView: React.FC<WorkflowDiagramViewProps> = ({
             <div className={`md:col-span-2 p-4 rounded-xl border space-y-2 ${isDarkMode ? 'bg-slate-900/90 border-slate-800' : 'bg-slate-50 border-slate-200'
               }`}>
               <span className="font-bold text-blue-600 dark:text-blue-400 uppercase tracking-wider text-[10px] block">
-                Mô tả Yêu cầu Nghiệp vụ Chi tiết
+                {language === 'vi' ? 'Mô tả Yêu cầu Nghiệp vụ Chi tiết' : 'Detailed Business Requirement Description'}
               </span>
               <p className="text-slate-700 dark:text-slate-300 leading-relaxed">
                 {currentStep.description}
@@ -273,7 +278,9 @@ export const WorkflowDiagramView: React.FC<WorkflowDiagramViewProps> = ({
             <div className={`p-4 rounded-xl border space-y-2.5 ${isDarkMode ? 'bg-slate-900/60 border-slate-800/80' : 'bg-slate-50 border-slate-200/80'
               }`}>
               <span className="font-bold text-emerald-600 dark:text-emerald-400 uppercase tracking-wider text-[10px] block">
-                Checklist Các Trường Thông tin & Nhóm Dữ liệu Khai báo
+                {language === 'vi'
+                  ? 'Checklist Các Trường Thông tin & Nhóm Dữ liệu Khai báo'
+                  : 'Form Fields & Data Group Checklist'}
               </span>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2">
@@ -300,10 +307,15 @@ export const WorkflowDiagramView: React.FC<WorkflowDiagramViewProps> = ({
                 className="inline-flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold text-white bg-blue-600 hover:bg-blue-500 shadow-sm transition-all cursor-pointer"
               >
                 <FileText className="w-4 h-4" />
-                <span>Mở Form UI Wireframe cho bước {currentStep.stepCode}</span>
+                <span>
+                  {language === 'vi'
+                    ? `Mở Form UI Wireframe cho bước ${currentStep.stepCode}`
+                    : `Open Form UI Wireframe for step ${currentStep.stepCode}`}
+                </span>
               </button>
             </div>
           )}
+
         </div>
       )}
     </div>

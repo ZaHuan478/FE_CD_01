@@ -1,6 +1,7 @@
 import React, { useEffect } from 'react'
 import { X, Network, UserCheck, Briefcase, FileText, ArrowRight, ShieldCheck, Database, Layers, ScrollText } from 'lucide-react'
 import type { ERDCluster } from '../../types/employee-lifecycle'
+import { useLanguage } from '../../context/LanguageContext'
 
 interface MasterDataRelationshipModalProps {
   isOpen: boolean
@@ -15,6 +16,8 @@ export const MasterDataRelationshipModal: React.FC<MasterDataRelationshipModalPr
   onClose,
   onSelectNode
 }) => {
+  const { language } = useLanguage()
+
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === 'Escape') onClose()
@@ -51,7 +54,9 @@ export const MasterDataRelationshipModal: React.FC<MasterDataRelationshipModalPr
                 <span className="text-xs text-slate-400">ERD Diagram</span>
               </div>
               <h2 className="text-xl font-bold text-white tracking-tight mt-0.5">
-                SƠ ĐỒ MỐI QUAN HỆ & PHỤ THUỘC DỮ LIỆU MASTER DATA · SOP
+                {language === 'vi'
+                  ? 'SƠ ĐỒ MỐI QUAN HỆ & PHỤ THUỘC DỮ LIỆU MASTER DATA · SOP'
+                  : 'MASTER DATA & SOP DEPENDENCY RELATIONSHIP DIAGRAM'}
               </h2>
             </div>
           </div>
@@ -59,14 +64,12 @@ export const MasterDataRelationshipModal: React.FC<MasterDataRelationshipModalPr
           <button
             type="button"
             onClick={onClose}
-            className="p-2 text-slate-400 hover:text-white bg-slate-800 hover:bg-slate-700 rounded-xl transition-colors cursor-pointer"
-            aria-label="Close modal"
+            className="p-2 rounded-xl text-slate-400 hover:text-white hover:bg-slate-800 transition-colors cursor-pointer"
+            aria-label="Close"
           >
             <X className="w-5 h-5" />
           </button>
-        </div>
-
-        {/* Modal Body / ERD Content */}
+        </div>        {/* Modal Body / ERD Content */}
         <div className="p-6 md:p-8 overflow-y-auto flex-1 bg-slate-950/60 space-y-8">
 
           {/* Top Banner Explainer */}
@@ -74,15 +77,18 @@ export const MasterDataRelationshipModal: React.FC<MasterDataRelationshipModalPr
             <div className="flex items-center gap-3">
               <Database className="w-5 h-5 text-blue-400 shrink-0" />
               <span>
-                Tất cả 10 danh mục <strong>Master Data (Tầng 1)</strong> chuẩn hóa theo <strong>SOP Quy trình</strong> chảy trực tiếp qua các Visual Connectors để hội tụ vào <strong>Bảng Hồ sơ Nhân viên Trung tâm</strong>.
+                {language === 'vi'
+                  ? <>Tất cả 10 danh mục <strong>Master Data (Tầng 1)</strong> chuẩn hóa theo <strong>SOP Quy trình</strong> chảy trực tiếp qua các Visual Connectors để hội tụ vào <strong>Bảng Hồ sơ Nhân viên Trung tâm</strong>.</>
+                  : <>All 10 <strong>Master Data (Layer 1)</strong> catalogs standardized by <strong>SOP Workflows</strong> flow directly via Visual Connectors into the <strong>Central Employee Profile Table</strong>.</>}
               </span>
             </div>
 
             <div className="flex items-center gap-2 shrink-0 bg-emerald-950/60 px-3 py-1.5 rounded-lg border border-emerald-700/60 text-emerald-300 font-medium">
               <ScrollText className="w-4 h-4 text-emerald-400" />
-              <span>Gắn thẻ Quy trình SOP chuẩn</span>
+              <span>{language === 'vi' ? 'Gắn thẻ Quy trình SOP chuẩn' : 'Tagged with Standard SOPs'}</span>
             </div>
           </div>
+
 
           {/* Interactive ERD Diagram Grid */}
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-stretch">

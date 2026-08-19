@@ -13,6 +13,7 @@ import {
   ChevronUp
 } from 'lucide-react'
 import type { MasterDataCategory } from '../../types/employee-lifecycle'
+import { useLanguage } from '../../context/LanguageContext'
 
 interface MasterDataCardProps {
   categories: MasterDataCategory[]
@@ -25,6 +26,7 @@ export const MasterDataCard: React.FC<MasterDataCardProps> = ({
   onOpenERD,
   onSelectCategory
 }) => {
+  const { language, t } = useLanguage()
   const [isExpanded, setIsExpanded] = useState<boolean>(true)
 
   // Separate into Sub-Layer 1A (System CRUD & Geography) and Sub-Layer 1B (Business Domains)
@@ -61,14 +63,14 @@ export const MasterDataCard: React.FC<MasterDataCardProps> = ({
                 Layer 1 · Ground Foundation
               </span>
               <span className="text-[11px] sm:text-xs text-slate-500 dark:text-slate-400 flex items-center gap-1 font-medium">
-                <CheckCircle2 className="w-3.5 h-3.5 text-emerald-500" /> Mô hình Phân tầng 2 Nhóm (Sub-Layers)
+                <CheckCircle2 className="w-3.5 h-3.5 text-emerald-500" /> {language === 'vi' ? 'Mô hình Phân tầng 2 Nhóm (Sub-Layers)' : '2-Sublayer Architecture'}
               </span>
             </div>
             <h2 className="text-base sm:text-lg font-bold text-slate-900 dark:text-white tracking-tight leading-snug">
-              TẦNG 1: DỮ LIỆU NỀN & THIẾT LẬP HỆ THỐNG (MASTER DATA)
+              {t('layer1.title', 'TẦNG 1: DỮ LIỆU NỀN & THIẾT LẬP HỆ THỐNG (MASTER DATA)')}
             </h2>
             <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-0.5 leading-relaxed">
-              Phân tách rõ ràng giữa <b>Công cụ Quản trị Hệ thống (System Operations)</b> và các <b>Miền Thiết lập Nghiệp vụ Cốt lõi (Business Domains)</b>
+              {t('layer1.subtitle', '10 Danh mục Dữ liệu Dùng chung - Nền tảng Chuẩn hóa Toàn Hệ thống')}
             </p>
           </div>
         </div>
@@ -81,18 +83,19 @@ export const MasterDataCard: React.FC<MasterDataCardProps> = ({
             className="inline-flex items-center justify-center gap-2.5 px-4 py-2.5 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-semibold text-xs sm:text-sm shadow-sm hover:from-blue-700 hover:to-indigo-700 transition-all duration-200 shrink-0 cursor-pointer group"
           >
             <Network className="w-4 h-4 transition-transform group-hover:rotate-12" />
-            <span>Xem Sơ đồ ERD</span>
+            <span>{t('layer1.erdButton', 'Xem Sơ đồ ERD')}</span>
             <ArrowRight className="w-4 h-4 text-blue-200 transition-transform group-hover:translate-x-1" />
           </button>
+
 
           {/* Collapse Dropdown Toggle Button */}
           <button
             type="button"
             onClick={() => setIsExpanded(!isExpanded)}
             className="p-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 transition-colors flex items-center gap-1 text-xs font-bold cursor-pointer shrink-0"
-            title={isExpanded ? 'Thu gọn Tầng 1 Master Data' : 'Mở rộng Tầng 1 Master Data'}
+            title={isExpanded ? (language === 'vi' ? 'Thu gọn Tầng 1 Master Data' : 'Collapse Layer 1 Master Data') : (language === 'vi' ? 'Mở rộng Tầng 1 Master Data' : 'Expand Layer 1 Master Data')}
           >
-            <span>{isExpanded ? 'Thu gọn' : 'Mở rộng'}</span>
+            <span>{isExpanded ? (language === 'vi' ? 'Thu gọn' : 'Collapse') : (language === 'vi' ? 'Mở rộng' : 'Expand')}</span>
             {isExpanded ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
           </button>
         </div>
@@ -110,10 +113,14 @@ export const MasterDataCard: React.FC<MasterDataCardProps> = ({
                 </span>
                 <div>
                   <h3 className="text-xs font-bold text-slate-800 dark:text-white uppercase tracking-wide">
-                    SUB-LAYER 1A: CÔNG CỤ QUẢN TRỊ & DANH MỤC DÙNG CHUNG
+                    {language === 'vi'
+                      ? 'SUB-LAYER 1A: CÔNG CỤ QUẢN TRỊ & DANH MỤC DÙNG CHUNG'
+                      : 'SUB-LAYER 1A: ADMIN TOOLS & COMMON CATALOGS'}
                   </h3>
                   <p className="text-[11px] text-slate-500 dark:text-slate-400">
-                    Thao tác CRUD danh mục động (Thêm/Sửa/Khóa) & Địa giới hành chính
+                    {language === 'vi'
+                      ? 'Thao tác CRUD danh mục động (Thêm/Sửa/Khóa) & Địa giới hành chính'
+                      : 'Dynamic catalog CRUD operations (Add/Edit/Lock) & Administrative boundaries'}
                   </p>
                 </div>
               </div>
@@ -157,10 +164,14 @@ export const MasterDataCard: React.FC<MasterDataCardProps> = ({
                 </span>
                 <div>
                   <h3 className="text-xs font-bold text-slate-800 dark:text-white uppercase tracking-wide">
-                    SUB-LAYER 1B: THIẾT LẬP NGHIỆP VỤ NỀN TẢNG (3 CỤM MIỀN)
+                    {language === 'vi'
+                      ? 'SUB-LAYER 1B: THIẾT LẬP NGHIỆP VỤ NỀN TẢNG (3 CỤM MIỀN)'
+                      : 'SUB-LAYER 1B: FOUNDATION BUSINESS SETUPS (3 DOMAIN CLUSTERS)'}
                   </h3>
                   <p className="text-[11px] text-slate-500 dark:text-slate-400">
-                    Các thực thể Master Data quyết định luồng vận hành toàn hệ thống HR
+                    {language === 'vi'
+                      ? 'Các thực thể Master Data quyết định luồng vận hành toàn hệ thống HR'
+                      : 'Core Master Data entities controlling HR system workflows'}
                   </p>
                 </div>
               </div>
@@ -175,7 +186,7 @@ export const MasterDataCard: React.FC<MasterDataCardProps> = ({
                 <div className="flex items-center justify-between border-b border-blue-100 dark:border-blue-900/50 pb-2">
                   <span className="text-xs font-bold text-blue-900 dark:text-blue-200 flex items-center gap-1.5">
                     <Building2 className="w-4 h-4 text-blue-600 dark:text-blue-400" />
-                    Cơ cấu & Chức danh
+                    {language === 'vi' ? 'Cơ cấu & Chức danh' : 'Org Structure & Job Titles'}
                   </span>
                   <span className="text-[10px] font-semibold text-blue-600 dark:text-blue-300 bg-blue-100/80 dark:bg-blue-900/60 px-2 py-0.5 rounded-full">
                     MD-05 & MD-06
@@ -212,7 +223,7 @@ export const MasterDataCard: React.FC<MasterDataCardProps> = ({
                 <div className="flex items-center justify-between border-b border-amber-100 dark:border-amber-900/50 pb-2">
                   <span className="text-xs font-bold text-amber-900 dark:text-amber-200 flex items-center gap-1.5">
                     <Coins className="w-4 h-4 text-amber-600 dark:text-amber-400" />
-                    Lương, Phụ cấp & BHXH
+                    {language === 'vi' ? 'Lương, Phụ cấp & BHXH' : 'Salary, Allowances & Insurance'}
                   </span>
                   <span className="text-[10px] font-semibold text-amber-700 dark:text-amber-300 bg-amber-100/80 dark:bg-amber-900/60 px-2 py-0.5 rounded-full">
                     MD-07 & MD-09
@@ -249,7 +260,7 @@ export const MasterDataCard: React.FC<MasterDataCardProps> = ({
                 <div className="flex items-center justify-between border-b border-purple-100 dark:border-purple-900/50 pb-2">
                   <span className="text-xs font-bold text-purple-900 dark:text-purple-200 flex items-center gap-1.5">
                     <Clock className="w-4 h-4 text-purple-600 dark:text-purple-400" />
-                    Ca, Phép & Quy định
+                    {language === 'vi' ? 'Ca, Phép & Quy định' : 'Shifts, Leave & Policies'}
                   </span>
                   <span className="text-[10px] font-semibold text-purple-700 dark:text-purple-300 bg-purple-100/80 dark:bg-purple-900/60 px-2 py-0.5 rounded-full">
                     MD-08 & MD-10
@@ -284,6 +295,7 @@ export const MasterDataCard: React.FC<MasterDataCardProps> = ({
           </div>
         </div>
       )}
+
     </div>
   )
 }

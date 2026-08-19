@@ -1,13 +1,15 @@
 import React, { useState } from 'react'
 import { BookOpen, ChevronDown, ChevronUp, Database, FileText, Workflow, RefreshCw, ArrowRight, HelpCircle, Lightbulb } from 'lucide-react'
+import { useLanguage } from '../../context/LanguageContext'
 
 export const SystemGuideBanner: React.FC = () => {
   const [isExpanded, setIsExpanded] = useState<boolean>(true)
+  const { language, t } = useLanguage()
 
   return (
     <div className="bg-white dark:bg-slate-900 rounded-2xl border border-blue-200/80 dark:border-slate-800 shadow-xs overflow-hidden transition-all duration-300">
       {/* Banner Header / Bar */}
-      <div 
+      <div
         onClick={() => setIsExpanded(!isExpanded)}
         className="p-4 bg-gradient-to-r from-slate-900 via-blue-950 to-slate-900 text-white flex items-center justify-between cursor-pointer hover:bg-slate-800 transition-colors select-none"
       >
@@ -20,17 +22,23 @@ export const SystemGuideBanner: React.FC = () => {
               <span className="px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-blue-300 bg-blue-900/80 rounded border border-blue-700/60">
                 Onboarding Guide
               </span>
-              <span className="text-xs text-slate-300 font-medium">Dành cho Người mới bắt đầu</span>
+              <span className="text-xs text-slate-300 font-medium">
+                {language === 'vi' ? 'Dành cho Người mới bắt đầu' : 'For New Users'}
+              </span>
             </div>
             <h2 className="text-base font-bold text-white tracking-tight mt-0.5">
-              HƯỚNG DẪN KHÁI NIỆM & MỐI QUAN HỆ KIẾN TRÚC (MASTER DATA · SOP · PROCESS · LIFE)
+              {language === 'vi'
+                ? 'HƯỚNG DẪN KHÁI NIỆM & MỐI QUAN HỆ KIẾN TRÚC (MASTER DATA · SOP · PROCESS · LIFE)'
+                : 'CONCEPT & ARCHITECTURAL RELATIONSHIP GUIDE (MASTER DATA · SOP · PROCESS · LIFECYCLE)'}
             </h2>
           </div>
         </div>
 
         <div className="flex items-center gap-2">
           <span className="text-xs text-slate-300 font-medium hidden sm:inline-block">
-            {isExpanded ? 'Thu gọn hướng dẫn' : 'Xem giải thích chi tiết'}
+            {isExpanded
+              ? (language === 'vi' ? 'Thu gọn hướng dẫn' : 'Collapse guide')
+              : (language === 'vi' ? 'Xem giải thích chi tiết' : 'Expand detailed guide')}
           </span>
           <div className="p-1.5 bg-slate-800 rounded-lg text-slate-300">
             {isExpanded ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
@@ -41,16 +49,16 @@ export const SystemGuideBanner: React.FC = () => {
       {/* Expanded Guide Content */}
       {isExpanded && (
         <div className="p-6 bg-slate-50/60 dark:bg-slate-950/60 space-y-6 animate-in fade-in duration-200">
-          
+
           {/* Section 1: 4 Core Definitions */}
           <div>
             <h3 className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-3 flex items-center gap-2">
               <HelpCircle className="w-4 h-4 text-blue-600 dark:text-blue-400" />
-              1. Bốn Khái niệm Cốt lõi trong Hệ thống HR Enterprise
+              {language === 'vi' ? '1. Bốn Khái niệm Cốt lõi trong Hệ thống HR Enterprise' : '1. Four Core Concepts in Enterprise HR System'}
             </h3>
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-              
+
               {/* Master Data */}
               <div className="bg-white dark:bg-slate-900 p-4 rounded-xl border border-slate-200 dark:border-slate-800 shadow-2xs hover:border-blue-300 dark:hover:border-blue-700 transition-colors">
                 <div className="flex items-center gap-2 text-blue-700 dark:text-blue-300 font-bold text-sm mb-2">
@@ -60,10 +68,10 @@ export const SystemGuideBanner: React.FC = () => {
                   <span>Master Data (MD)</span>
                 </div>
                 <p className="text-xs text-slate-600 dark:text-slate-300 leading-relaxed">
-                  <strong className="text-slate-900 dark:text-white">Dữ liệu Nền tảng:</strong> Tập hợp các danh mục dùng chung cố định (như Đơn vị hành chính, Cơ cấu tổ chức, Chức danh, Thang/bậc lương, Bảo hiểm...).
+                  <strong className="text-slate-900 dark:text-white">{language === 'vi' ? 'Dữ liệu Nền tảng:' : 'Foundation Data:'}</strong> {language === 'vi' ? 'Tập hợp các danh mục dùng chung cố định (như Đơn vị hành chính, Cơ cấu tổ chức, Chức danh, Thang/bậc lương...).' : 'Set of core shared catalogs (such as Org Units, Jobs, Pay Grades, Insurance...).'}
                 </p>
                 <div className="mt-3 pt-2 border-t border-slate-100 dark:border-slate-800 text-[11px] text-blue-600 dark:text-blue-400 font-semibold">
-                  👉 Đóng vai trò: Cung cấp ô chọn & quy tắc nền
+                  👉 {language === 'vi' ? 'Đóng vai trò: Cung cấp ô chọn & quy tắc nền' : 'Role: Provides picklists & baseline rules'}
                 </div>
               </div>
 
@@ -76,10 +84,10 @@ export const SystemGuideBanner: React.FC = () => {
                   <span>SOP (Standard Procedure)</span>
                 </div>
                 <p className="text-xs text-slate-600 dark:text-slate-300 leading-relaxed">
-                  <strong className="text-slate-900 dark:text-white">Quy trình Thao tác Chuẩn:</strong> Bộ văn bản/quy định chuẩn hóa hướng dẫn con người thực hiện công việc đúng luật lao động và chính sách công ty.
+                  <strong className="text-slate-900 dark:text-white">{language === 'vi' ? 'Quy trình Thao tác Chuẩn:' : 'Standard Operating Procedure:'}</strong> {language === 'vi' ? 'Bộ văn bản/quy định chuẩn hóa hướng dẫn con người thực hiện công việc đúng luật lao động và chính sách công ty.' : 'Standardized policy docs guiding compliance with labor laws and company regulations.'}
                 </p>
                 <div className="mt-3 pt-2 border-t border-slate-100 dark:border-slate-800 text-[11px] text-emerald-600 dark:text-emerald-400 font-semibold">
-                  👉 Đóng vai trò: Căn cứ pháp lý & Chuẩn vận hành
+                  👉 {language === 'vi' ? 'Đóng vai trò: Căn cứ pháp lý & Chuẩn vận hành' : 'Role: Legal basis & Governance standard'}
                 </div>
               </div>
 
@@ -92,10 +100,10 @@ export const SystemGuideBanner: React.FC = () => {
                   <span>Process / Workflow</span>
                 </div>
                 <p className="text-xs text-slate-600 dark:text-slate-300 leading-relaxed">
-                  <strong className="text-slate-900 dark:text-white">Quy trình Nghiệp vụ:</strong> Chuỗi các bước thao tác trên phần mềm (ai nhập thông tin gì, kiểm tra điều kiện gì, ai phê duyệt và chuyển tiếp cho ai).
+                  <strong className="text-slate-900 dark:text-white">{language === 'vi' ? 'Quy trình Nghiệp vụ:' : 'Business Workflow:'}</strong> {language === 'vi' ? 'Chuỗi các bước thao tác trên phần mềm (ai nhập thông tin gì, kiểm tra điều kiện gì, ai phê duyệt và chuyển tiếp).' : 'Sequential step-by-step software actions (data entry, validation rules, multi-stage approvals).'}
                 </p>
                 <div className="mt-3 pt-2 border-t border-slate-100 dark:border-slate-800 text-[11px] text-indigo-600 dark:text-indigo-400 font-semibold">
-                  👉 Đóng vai trò: Động cơ xử lý dữ liệu
+                  👉 {language === 'vi' ? 'Đóng vai trò: Động cơ xử lý dữ liệu' : 'Role: Data processing execution engine'}
                 </div>
               </div>
 
@@ -105,13 +113,13 @@ export const SystemGuideBanner: React.FC = () => {
                   <div className="p-1.5 bg-purple-50 dark:bg-purple-950/80 rounded-lg">
                     <RefreshCw className="w-4 h-4 text-purple-600 dark:text-purple-400" />
                   </div>
-                  <span>LIFE (Vòng đời Nhân viên)</span>
+                  <span>LIFE ({language === 'vi' ? 'Vòng đời Nhân viên' : 'Employee Lifecycle'})</span>
                 </div>
                 <p className="text-xs text-slate-600 dark:text-slate-300 leading-relaxed">
-                  <strong className="text-slate-900 dark:text-white">Hành trình Nhân sự (7 Bước):</strong> Chuỗi giai đoạn tuần tự từ khi nhân viên Tiếp nhận (LIFE-01) ➔ Bố trí ➔ Hợp đồng ➔ Lương ➔ Nghỉ việc (LIFE-07).
+                  <strong className="text-slate-900 dark:text-white">{language === 'vi' ? 'Hành trình Nhân sự (7 Bước):' : 'HR Lifecycle Journey (7 Steps):'}</strong> {language === 'vi' ? 'Chuỗi giai đoạn tuần tự từ khi nhân viên Tiếp nhận (LIFE-01) ➔ Bố trí ➔ Hợp đồng ➔ Lương ➔ Nghỉ việc (LIFE-07).' : 'End-to-end employee stages from Onboarding (LIFE-01) ➔ Placement ➔ Contract ➔ Payroll ➔ Offboarding (LIFE-07).'}
                 </p>
                 <div className="mt-3 pt-2 border-t border-slate-100 dark:border-slate-800 text-[11px] text-purple-600 dark:text-purple-400 font-semibold">
-                  👉 Đóng vai trò: Trục thời gian chính của nhân sự
+                  👉 {language === 'vi' ? 'Đóng vai trò: Trục thời gian chính của nhân sự' : 'Role: Master HR timeline & milestone axis'}
                 </div>
               </div>
 
@@ -122,17 +130,17 @@ export const SystemGuideBanner: React.FC = () => {
           <div className="bg-white dark:bg-slate-900 p-5 rounded-xl border border-slate-200 dark:border-slate-800 space-y-3">
             <h3 className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider flex items-center gap-2">
               <Lightbulb className="w-4 h-4 text-amber-500" />
-              2. Sơ đồ Mối quan hệ Luồng Dữ liệu (System Relationship Flow)
+              {language === 'vi' ? '2. Sơ đồ Mối quan hệ Luồng Dữ liệu' : '2. System Data Flow Relationship Diagram'}
             </h3>
 
             <div className="p-4 bg-slate-900 dark:bg-slate-950 rounded-xl text-white flex flex-col lg:flex-row items-center justify-between gap-4 border border-slate-800">
-              
+
               {/* Step 1: Inputs */}
               <div className="flex items-center gap-3 bg-slate-800 p-3 rounded-lg border border-slate-700 w-full lg:w-auto">
                 <Database className="w-5 h-5 text-blue-400 shrink-0" />
                 <div>
                   <div className="text-xs font-bold text-blue-300">MASTER DATA (MD-01..10)</div>
-                  <div className="text-[11px] text-slate-400">Danh mục & Cấu trúc tổ chức</div>
+                  <div className="text-[11px] text-slate-400">{language === 'vi' ? 'Danh mục & Cấu trúc tổ chức' : 'Catalogs & Org Structure'}</div>
                 </div>
               </div>
 
@@ -141,8 +149,8 @@ export const SystemGuideBanner: React.FC = () => {
               <div className="flex items-center gap-3 bg-slate-800 p-3 rounded-lg border border-slate-700 w-full lg:w-auto">
                 <FileText className="w-5 h-5 text-emerald-400 shrink-0" />
                 <div>
-                  <div className="text-xs font-bold text-emerald-300">SOP (Quy định & Luật)</div>
-                  <div className="text-[11px] text-slate-400">Quy chuẩn thao tác nhân sự</div>
+                  <div className="text-xs font-bold text-emerald-300">SOP ({language === 'vi' ? 'Quy định & Luật' : 'Policies & Rules'})</div>
+                  <div className="text-[11px] text-slate-400">{language === 'vi' ? 'Quy chuẩn thao tác nhân sự' : 'Standard HR procedures'}</div>
                 </div>
               </div>
 
@@ -154,8 +162,8 @@ export const SystemGuideBanner: React.FC = () => {
               <div className="flex items-center gap-3 bg-slate-800 p-3 rounded-lg border border-slate-700 w-full lg:w-auto">
                 <Workflow className="w-5 h-5 text-indigo-400 shrink-0" />
                 <div>
-                  <div className="text-xs font-bold text-indigo-300">PROCESS (Quy trình)</div>
-                  <div className="text-[11px] text-slate-400">Nhập dữ liệu, Kiểm tra & Phê duyệt</div>
+                  <div className="text-xs font-bold text-indigo-300">PROCESS ({language === 'vi' ? 'Quy trình' : 'Workflow'})</div>
+                  <div className="text-[11px] text-slate-400">{language === 'vi' ? 'Nhập dữ liệu, Kiểm tra & Phê duyệt' : 'Data Entry, Validation & Approval'}</div>
                 </div>
               </div>
 
@@ -167,15 +175,15 @@ export const SystemGuideBanner: React.FC = () => {
               <div className="flex items-center gap-3 bg-gradient-to-r from-purple-900 to-indigo-900 p-3 rounded-lg border border-purple-500/50 w-full lg:w-auto">
                 <RefreshCw className="w-5 h-5 text-purple-300 shrink-0" />
                 <div>
-                  <div className="text-xs font-bold text-purple-200">VÒNG ĐỜI NHÂN VIÊN (LIFE-01..07)</div>
-                  <div className="text-[11px] text-purple-300">Cập nhật vào Hồ sơ Nhân viên Trung tâm</div>
+                  <div className="text-xs font-bold text-purple-200">{language === 'vi' ? 'VÒNG ĐỜI NHÂN VIÊN' : 'EMPLOYEE LIFECYCLE'} (LIFE-01..07)</div>
+                  <div className="text-[11px] text-purple-300">{language === 'vi' ? 'Cập nhật vào Hồ sơ Nhân viên Trung tâm' : 'Updates Central Employee Master Profile'}</div>
                 </div>
               </div>
 
             </div>
 
             <p className="text-xs text-slate-500 dark:text-slate-400 italic mt-2">
-              💡 <strong>Tóm tắt dễ hiểu:</strong> Khi thực hiện 1 bước trong Vòng đời nhân viên (ví dụ: <code>LIFE-03 Bố trí công tác</code>), phần mềm sẽ lấy <strong>Master Data</strong> (như <code>MD-05 Phòng ban</code>, <code>MD-06 Chức danh</code>) dựa theo quy tắc của <strong>SOP</strong> để xử lý thành <strong>Process</strong> chuẩn chỉnh.
+              💡 <strong>{language === 'vi' ? 'Tóm tắt dễ hiểu:' : 'Summary:'}</strong> {language === 'vi' ? 'Khi thực hiện 1 bước trong Vòng đời nhân viên (ví dụ: LIFE-03 Bố trí công tác), phần mềm sẽ lấy Master Data (như MD-05 Phòng ban, MD-06 Chức danh) dựa theo quy tắc của SOP để xử lý thành Process chuẩn chỉnh.' : 'When carrying out a lifecycle step (e.g. LIFE-03 Job Placement), the software references Master Data (e.g. MD-05 Dept, MD-06 Job Title) guided by SOP policy rules to execute a standardized Process.'}
             </p>
           </div>
 
@@ -184,3 +192,4 @@ export const SystemGuideBanner: React.FC = () => {
     </div>
   )
 }
+

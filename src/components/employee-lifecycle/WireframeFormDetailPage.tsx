@@ -16,9 +16,13 @@ import {
   UserCheck,
   Database,
   Building2,
-  GitBranch
+  GitBranch,
+  Globe
 } from 'lucide-react'
 import type { DetailItem } from '../../types/employee-lifecycle'
+import { useLanguage } from '../../context/LanguageContext'
+import type { Language } from '../../data/translations'
+import { LanguageSelector } from '../common/LanguageSelector'
 
 interface WireframeFormDetailPageProps {
   item: DetailItem
@@ -29,6 +33,8 @@ export const WireframeFormDetailPage: React.FC<WireframeFormDetailPageProps> = (
   item,
   onBack
 }) => {
+  const { language, setLanguage, t } = useLanguage()
+
   // Theme state synced with global document dark mode
   const [isDarkMode, setIsDarkMode] = useState<boolean>(() => {
     return document.documentElement.classList.contains('dark')
@@ -91,11 +97,6 @@ export const WireframeFormDetailPage: React.FC<WireframeFormDetailPageProps> = (
     ? item.uiFields
     : ['Họ và tên', 'Mã nhân viên', 'Đơn vị / Phòng ban', 'Vị trí công tác', 'Ngày áp dụng hiệu lực', 'Mức lương điều chỉnh', 'Ghi chú nghiệp vụ']
 
-  // const isFieldRequired = (fieldName: string) => {
-  //   const lower = fieldName.toLowerCase()
-  //   return lower.includes('mã') || lower.includes('họ và tên') || lower.includes('đề xuất') || lower.includes('ngày') || lower.includes('hiệu lực') || lower.includes('lương') || lower.includes('vị trí') || lower.includes('đơn vị') || lower.includes('hợp đồng') || lower.includes('nguồn')
-  // }
-
   // Validate form fields
   const validateForm = () => {
     const errors: Record<string, string> = {}
@@ -150,9 +151,7 @@ export const WireframeFormDetailPage: React.FC<WireframeFormDetailPageProps> = (
     }
 
     setIsSaved(true)
-    setTimeout(() => {
-      setIsSaved(false)
-    }, 4000)
+    window.scrollTo({ top: 0, behavior: 'smooth' })
   }
 
   const handleAddMockFile = () => {
@@ -230,7 +229,7 @@ export const WireframeFormDetailPage: React.FC<WireframeFormDetailPageProps> = (
                 }`}
             >
               <ArrowLeft className="w-4 h-4 transition-transform group-hover:-translate-x-1" />
-              <span>Quay lại Workflow</span>
+              <span>{language === 'vi' ? 'Quay lại Workflow' : 'Back to Workflow'}</span>
             </button>
 
             <div className="h-6 w-px bg-slate-300 dark:bg-slate-800 hidden sm:block" />
@@ -251,13 +250,16 @@ export const WireframeFormDetailPage: React.FC<WireframeFormDetailPageProps> = (
                   )}
                 </div>
                 <h1 className={`text-sm sm:text-base font-extrabold truncate max-w-md ${isDarkMode ? 'text-white' : 'text-slate-900'}`}>
-                  Mô phỏng Giao diện Form Thực tế: {item.title}
+                  {language === 'vi' ? `Mô phỏng Giao diện Form Thực tế: ${item.title}` : `Interactive Form Simulation: ${item.title}`}
                 </h1>
               </div>
             </div>
           </div>
 
           <div className="flex items-center gap-3">
+            {/* Custom Language Selector Popover */}
+            <LanguageSelector isDarkTheme={isDarkMode} />
+
             {/* Theme Toggle Button */}
             <button
               type="button"
@@ -266,10 +268,9 @@ export const WireframeFormDetailPage: React.FC<WireframeFormDetailPageProps> = (
                 ? 'bg-slate-800 text-amber-300 border-slate-700 hover:bg-slate-700'
                 : 'bg-slate-100 text-slate-700 border-slate-300 hover:bg-slate-200'
                 }`}
-              title="Chuyển đổi Chế độ Giao diện Sáng / Tối"
+              title={isDarkMode ? t('header.themeLight', 'Bật Giao diện Sáng') : t('header.themeDark', 'Bật Giao diện Tối')}
             >
               {isDarkMode ? <Sun className="w-4 h-4 text-amber-400" /> : <Moon className="w-4 h-4 text-slate-600" />}
-              {/* <span className="hidden sm:inline">{isDarkMode ? 'Giao diện Sáng' : 'Giao diện Tối'}</span> */}
             </button>
 
             {/* Top Primary Submit Button */}
@@ -279,7 +280,7 @@ export const WireframeFormDetailPage: React.FC<WireframeFormDetailPageProps> = (
               className="flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs rounded-xl shadow-sm transition-all cursor-pointer"
             >
               <Save className="w-4 h-4" />
-              <span>Lưu & Phê duyệt Form</span>
+              <span>{language === 'vi' ? 'Lưu & Phê duyệt Form' : 'Save & Approve Form'}</span>
             </button>
           </div>
         </div>
@@ -299,10 +300,10 @@ export const WireframeFormDetailPage: React.FC<WireframeFormDetailPageProps> = (
             </div>
             <div>
               <div className="flex items-center gap-2">
-                <span className="text-xs font-bold text-emerald-400 uppercase tracking-wider">CHUẨN BIỂU MẪU QUY TRÌNH (FORM COMPLIANCE SCHEMA)</span>
+                <span className="text-xs font-bold text-emerald-400 uppercase tracking-wider">FORM COMPLIANCE SCHEMA</span>
               </div>
               <p className="text-xs sm:text-sm text-slate-200 font-semibold mt-0.5">
-                Quy chuẩn Form tuân theo: <span className="text-white font-extrabold">{item.sopTitles?.[0] || 'Quy trình Chuẩn HR SaaS Enterprise'}</span>
+                {language === 'vi' ? 'Quy chuẩn Form tuân theo:' : 'Form standard compliant with:'} <span className="text-white font-extrabold">{item.sopTitles?.[0] || 'Quy trình Chuẩn HR SaaS Enterprise'}</span>
               </p>
             </div>
           </div>
@@ -323,9 +324,13 @@ export const WireframeFormDetailPage: React.FC<WireframeFormDetailPageProps> = (
             <div className="flex items-center gap-3">
               <AlertCircle className="w-6 h-6 text-rose-500 shrink-0" />
               <div>
-                <h4 className="font-extrabold text-sm">Không thể Lưu & Phê duyệt Form!</h4>
+                <h4 className="font-extrabold text-sm">{language === 'vi' ? 'Không thể Lưu & Phê duyệt Form!' : 'Unable to Save & Approve Form!'}</h4>
                 <p className="text-xs opacity-90">
-                  Còn <strong>{Object.keys(validationErrors).length}</strong> trường thông tin bắt buộc chưa được điền. Vui lòng kiểm tra các ô có viền đỏ bên dưới!
+                  {language === 'vi' ? (
+                    <>Còn <strong>{Object.keys(validationErrors).length}</strong> trường thông tin bắt buộc chưa được điền. Vui lòng kiểm tra các ô có viền đỏ bên dưới!</>
+                  ) : (
+                    <>There are <strong>{Object.keys(validationErrors).length}</strong> required fields missing. Please check the highlighted red inputs below!</>
+                  )}
                 </p>
               </div>
             </div>
@@ -334,7 +339,7 @@ export const WireframeFormDetailPage: React.FC<WireframeFormDetailPageProps> = (
               onClick={() => setValidationErrors({})}
               className="text-xs font-bold px-3 py-1 bg-rose-500/20 hover:bg-rose-500/30 text-rose-800 dark:text-rose-200 rounded-lg transition-colors cursor-pointer"
             >
-              Đã hiểu
+              {language === 'vi' ? 'Đã hiểu' : 'Got it'}
             </button>
           </div>
         )}
@@ -345,8 +350,8 @@ export const WireframeFormDetailPage: React.FC<WireframeFormDetailPageProps> = (
             <div className="flex items-center gap-3">
               <CheckCircle2 className="w-6 h-6 text-emerald-500 shrink-0" />
               <div>
-                <h4 className="font-extrabold text-sm">Lưu Dữ liệu & Phê duyệt Form Thành công!</h4>
-                <p className="text-xs opacity-90">Bản ghi đã được hệ thống mã hóa và đồng bộ trực tiếp vào cơ sở dữ liệu Master Data HRMS.</p>
+                <h4 className="font-extrabold text-sm">{language === 'vi' ? 'Lưu Dữ liệu & Phê duyệt Form Thành công!' : 'Form Saved & Approved Successfully!'}</h4>
+                <p className="text-xs opacity-90">{language === 'vi' ? 'Bản ghi đã được hệ thống mã hóa và đồng bộ trực tiếp vào cơ sở dữ liệu Master Data HRMS.' : 'Record encrypted and synced directly to HRMS Master Data.'}</p>
               </div>
             </div>
             <button
