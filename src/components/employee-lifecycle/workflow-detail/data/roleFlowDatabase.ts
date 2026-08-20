@@ -188,3 +188,245 @@ export const ROLE_FLOW_DATABASE: Record<string, RoleDataFlow[]> = {
     }
   ]
 }
+
+import type { SwimlaneSequenceData } from '../types'
+
+export const SWIMLANE_DATABASE: Record<string, SwimlaneSequenceData> = {
+  'LIFE-01': {
+    summary: 'Quy trình phối hợp 3 giai đoạn giữa Ứng viên khai báo hồ sơ và Hệ thống HR tự động cấp phát tài nguyên.',
+    summaryEn: '3-stage collaborative sequence flow between Candidate self-service and HR automated system provisioning.',
+    candidateSteps: [
+      {
+        id: 'CAND-01',
+        lane: 'candidate',
+        stageIndex: 1,
+        title: 'Khai báo Hồ sơ & Upload Chứng từ',
+        titleEn: 'Submit Profile & Upload Documents',
+        description: 'Nhập thông tin cá nhân, CCCD, số tài khoản ngân hàng & upload file bằng cấp trên Offer Portal.',
+        descriptionEn: 'Enter personal info, National ID, bank account & upload degree certificates via portal.',
+        actionTag: 'Tự khai báo (Self-service)',
+        actionTagEn: 'Self-service',
+        interactionType: 'upload_portal',
+        interactionLabel: 'Gửi dữ liệu qua Candidate Portal ➔',
+        interactionLabelEn: 'Submit data to HR Portal ➔',
+        details: [
+          'Thông tin cá nhân: Họ tên, Ngày sinh, Giới tính, Quê quán',
+          'Số CCCD / Hộ chiếu & Ngày cấp',
+          'Số tài khoản ngân hàng nhận lương',
+          'File đính kèm: Bằng đại học, Chứng chỉ chuyên môn'
+        ]
+      },
+      {
+        id: 'CAND-02',
+        lane: 'candidate',
+        stageIndex: 2,
+        title: 'Nhận Thư mời & Ký xác nhận Offer',
+        titleEn: 'Receive & Electronically Sign Offer',
+        description: 'Kiểm tra mức lương, phụ cấp, ngày nhận việc và ký số xác nhận đồng ý nhận việc.',
+        descriptionEn: 'Review compensation, allowances, start date and electronically sign acceptance.',
+        actionTag: 'Ký số điện tử (E-Sign)',
+        actionTagEn: 'E-Sign',
+        interactionType: 'confirm_accept',
+        interactionLabel: 'Xác nhận đồng ý nhận việc ➔',
+        interactionLabelEn: 'Confirm acceptance to HR ➔',
+        details: [
+          'Thư mời nhận việc chính thức (Offer Letter PDF)',
+          'Chi tiết mức lương, phụ cấp & thời gian thử việc',
+          'Chữ ký số xác thực thời gian thực (OTP / E-Signature)'
+        ]
+      },
+      {
+        id: 'CAND-03',
+        lane: 'candidate',
+        stageIndex: 3,
+        title: 'Nhận Tài khoản IT & Lịch Onboarding',
+        titleEn: 'Receive IT Credentials & Onboarding Plan',
+        description: 'Nhận thông tin đăng nhập Email công ty, Mã nhân viên (EMP ID) & lịch đào tạo tuần đầu tiên.',
+        descriptionEn: 'Receive corporate email credentials, Employee ID & first week orientation schedule.',
+        actionTag: 'Kích hoạt tài khoản',
+        actionTagEn: 'Account Activated',
+        details: [
+          'Mã số nhân viên (EMP ID)',
+          'Tài khoản Email công ty & Domain login',
+          'Lịch trình đào tạo hội nhập tuần 1 & Buddy hướng dẫn'
+        ]
+      }
+    ],
+    hrSteps: [
+      {
+        id: 'HR-01',
+        lane: 'hr',
+        stageIndex: 1,
+        title: 'Kiểm tra Định biên & Cấu hình Vị trí',
+        titleEn: 'Check Headcount & Configure Position',
+        description: 'Kiểm tra slot định biên EMP01, chọn Chức danh, Level Job Grade và mức lương đề xuất.',
+        descriptionEn: 'Validate headcount slot EMP01, assign Job Grade, department and compensation package.',
+        actionTag: 'Thẩm định định biên',
+        actionTagEn: 'Headcount Validation',
+        details: [
+          'Kiểm tra định biên phòng ban khả dụng (EMP01)',
+          'Gán ngạch bậc lương & Cost Center quản lý',
+          'Chỉ định Trưởng bộ phận duyệt & Buddy kèm cặp'
+        ]
+      },
+      {
+        id: 'HR-02',
+        lane: 'hr',
+        stageIndex: 2,
+        title: 'Duyệt Hồ sơ & Phát hành Offer Letter',
+        titleEn: 'Approve & Issue Formal Offer Letter',
+        description: 'HR Manager phê duyệt và hệ thống tự động sinh Thư mời nhận việc gửi đến email ứng viên.',
+        descriptionEn: 'HR Manager approves and system generates formal Offer Letter sent to candidate email.',
+        actionTag: 'Phát hành tự động',
+        actionTagEn: 'Auto-Issue',
+        interactionType: 'send_offer',
+        interactionLabel: 'Gửi Email Offer kèm Link Portal ➔',
+        interactionLabelEn: 'Send Offer email with portal link ➔',
+        details: [
+          'Duyệt luồng phê duyệt 2 cấp (Tuyển dụng ➔ HR Manager)',
+          'Template Offer Letter tự động điền dữ liệu',
+          'Sinh mã token bảo mật cho link ký nhận việc'
+        ]
+      },
+      {
+        id: 'HR-03',
+        lane: 'hr',
+        stageIndex: 3,
+        title: 'Tự động Sinh Mã NV & Bắn Ticket IT / BHXH',
+        titleEn: 'Auto Generate EMP ID & Trigger IT / Ins Tickets',
+        description: 'Core EMP tự động sinh Mã NV, bắn ticket sang IT cấp máy tính & đồng bộ báo tăng BHXH/Thuế.',
+        descriptionEn: 'Core EMP issues EMP ID, fires IT provisioning ticket & syncs insurance and tax records.',
+        actionTag: 'Liên thông đa hệ thống',
+        actionTagEn: 'Cross-System Sync',
+        interactionType: 'auto_ticket',
+        interactionLabel: 'Bắn Ticket IT & Báo tăng BHXH ➔',
+        interactionLabelEn: 'Dispatch IT Ticket & Insurance Sync ➔',
+        details: [
+          'Sinh mã nhân viên (Employee ID) duy nhất',
+          'Ticket tự động gửi IT (Email công ty, Laptop, VPN)',
+          'Ticket gửi Hành chính (Thẻ từ, Chỗ ngồi, Đồng phục)',
+          'Đồng bộ Báo tăng Bảo hiểm xã hội (INS02)'
+        ]
+      }
+    ]
+  },
+
+  'LIFE-02': {
+    summary: 'Nhân viên cập nhật số hóa hồ sơ thân nhân và HR thẩm định, khóa sổ dữ liệu lưu trữ vĩnh viễn.',
+    summaryEn: 'Employee digitizes profile data and HR verifies, locks master record permanently.',
+    candidateSteps: [
+      {
+        id: 'CAND-01',
+        lane: 'candidate',
+        stageIndex: 1,
+        title: 'Khai báo Thân nhân & Người phụ thuộc',
+        titleEn: 'Declare Dependants & Family Info',
+        description: 'Cập nhật danh sách người phụ thuộc kèm giấy khai sinh và thông tin hộ khẩu.',
+        descriptionEn: 'Update family background, dependants list with birth certificates.',
+        actionTag: 'Khai báo Portal',
+        actionTagEn: 'Portal Declaration',
+        interactionLabel: 'Gửi hồ sơ đối soát ➔',
+        interactionLabelEn: 'Submit for review ➔',
+        details: ['Thông tin Người phụ thuộc giảm trừ gia cảnh', 'Hộ khẩu thường trú, Tạm trú', 'Chứng chỉ chuyên môn bổ sung']
+      },
+      {
+        id: 'CAND-02',
+        lane: 'candidate',
+        stageIndex: 2,
+        title: 'Nhận Thẻ Nhân viên Số & Trạng thái Khóa sổ',
+        titleEn: 'Receive Digital ID Card & Master Lock State',
+        description: 'Nhận Thẻ ID Card điện tử trên App Mobile và xác nhận hồ sơ đã được đối soát 100%.',
+        descriptionEn: 'View Digital Employee ID on mobile app and get confirmed 100% master verification.',
+        actionTag: 'Hồ sơ hoàn tất',
+        actionTagEn: 'Profile Complete',
+        details: ['Thẻ ID Card điện tử', 'Xác nhận Mã số thuế cá nhân & Số người phụ thuộc', 'Trạng thái: "Đã khóa duyệt 100%"']
+      }
+    ],
+    hrSteps: [
+      {
+        id: 'HR-01',
+        lane: 'hr',
+        stageIndex: 1,
+        title: 'Đối soát Chứng từ & Đăng ký Thuế TNCN',
+        titleEn: 'Verify Documents & Register PIT Dependants',
+        description: 'HR kiểm tra tính hợp lệ bản scan và đăng ký người phụ thuộc lên cổng Cơ quan Thuế.',
+        descriptionEn: 'HR audits digital attachments and registers dependants to Tax Authority portal.',
+        actionTag: 'Kiểm tra & Đối soát',
+        actionTagEn: 'Audit & Review',
+        details: ['Đối chiếu CCCD và Giấy khai sinh', 'Đăng ký giảm trừ gia cảnh thuế TNCN', 'Kiểm tra tính trùng khớp dữ liệu']
+      },
+      {
+        id: 'HR-02',
+        lane: 'hr',
+        stageIndex: 2,
+        title: 'Khóa Sổ Hồ sơ & Lưu trữ Kho Dữ liệu Điện tử',
+        titleEn: 'Lock Master Record & Digital Archiving',
+        description: 'Khóa sổ hồ sơ nhân viên trong Core EMP và kích hoạt cây sơ đồ tổ chức toàn công ty.',
+        descriptionEn: 'Lock employee record in Core EMP and update enterprise organizational chart.',
+        actionTag: 'Khóa sổ Core EMP',
+        actionTagEn: 'Core EMP Lock',
+        details: ['Khóa chỉnh sửa thông tin nhạy cảm', 'Tạo bản snapshot lưu trữ lịch sử', 'Đồng bộ cây sơ đồ phòng ban']
+      }
+    ]
+  },
+
+  'LIFE-04': {
+    summary: 'Quy trình ký kết Hợp đồng Lao động điện tử 3 bên: Nhân viên, HR C&B và Ban Giám Đốc.',
+    summaryEn: '3-party E-signing contract workflow among Employee, HR C&B and Board of Directors.',
+    candidateSteps: [
+      {
+        id: 'CAND-01',
+        lane: 'candidate',
+        stageIndex: 1,
+        title: 'Xem Dự thảo HĐLĐ & Điều khoản',
+        titleEn: 'Review Draft Contract & Clauses',
+        description: 'Nhân viên xem chi tiết loại hợp đồng, mức lương đóng BHXH và các điều khoản cam kết.',
+        descriptionEn: 'Review contract type, insurance salary base and non-disclosure clauses.',
+        actionTag: 'Kiểm tra dự thảo',
+        actionTagEn: 'Review Draft',
+        details: ['Loại hợp đồng (Thử việc / 12 tháng / Không xác định)', 'Mức lương cơ bản & Phụ cấp', 'Quy định nội bộ & NDA']
+      },
+      {
+        id: 'CAND-02',
+        lane: 'candidate',
+        stageIndex: 2,
+        title: 'Ký số Hợp đồng & Nhận Bản sao PDF',
+        titleEn: 'E-Sign Contract & Receive PDF Copy',
+        description: 'Ký số điện tử và tải về 01 bản HĐLĐ có đầy đủ chữ ký 2 bên và dấu mộc số công ty.',
+        descriptionEn: 'E-sign contract and download legally binding PDF copy with digital certificate.',
+        actionTag: 'Ký hợp đồng hoàn tất',
+        actionTagEn: 'Signed & Archived',
+        details: ['Chữ ký số xác thực pháp lý', 'Bản PDF HĐLĐ có mã tra cứu', 'Quyền lợi BHXH được kích hoạt']
+      }
+    ],
+    hrSteps: [
+      {
+        id: 'HR-01',
+        lane: 'hr',
+        stageIndex: 1,
+        title: 'Tạo Dự thảo HĐLĐ & Trình ký Ban Giám Đốc',
+        titleEn: 'Generate Draft Contract & Submit to BOD',
+        description: 'Hệ thống tự động điền dữ liệu nhân sự vào template HĐLĐ và gửi BOD duyệt ký số.',
+        descriptionEn: 'System auto-populates contract template and routes to CEO/BOD for digital signing.',
+        actionTag: 'Tự động tạo HĐLĐ',
+        actionTagEn: 'Auto Generate Contract',
+        interactionLabel: 'Trình ký Giám đốc & Gửi Nhân viên ➔',
+        interactionLabelEn: 'Submit to BOD & Employee ➔',
+        details: ['Sinh mã số hợp đồng tự động', 'Tự động gán thang bảng lương chuẩn', 'Trình duyệt chữ ký số Ban Giám Đốc']
+      },
+      {
+        id: 'HR-02',
+        lane: 'hr',
+        stageIndex: 2,
+        title: 'Kích hoạt Lịch Cảnh báo Hạn HĐLĐ & Báo tăng BHXH',
+        titleEn: 'Activate Expiry Alerts & Insurance Registry',
+        description: 'Lưu hợp đồng vào két số, kích hoạt cảnh báo đáo hạn trước 30 ngày và đưa vào kỳ báo tăng BHXH.',
+        descriptionEn: 'Archive to secure e-vault, set 30-day expiry alert & push to monthly insurance declaration.',
+        actionTag: 'Kích hoạt cảnh báo tự động',
+        actionTagEn: 'Automated Lifecycle Alert',
+        details: ['Lưu vết két hồ sơ số (E-Vault)', 'Cảnh báo tái ký trước 30/45 ngày', 'Tự động đẩy vào kỳ Báo tăng INS02']
+      }
+    ]
+  }
+}
+

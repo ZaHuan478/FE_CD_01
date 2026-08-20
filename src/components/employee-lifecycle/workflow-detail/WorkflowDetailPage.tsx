@@ -423,6 +423,7 @@ export const WorkflowDetailPage: React.FC<WorkflowDetailPageProps> = ({
               activeRoleTab={activeRoleTab}
               setActiveRoleTab={setActiveRoleTab}
               isDarkMode={isDarkMode}
+              itemId={item.id}
             />
 
             {/* ACTORS MATRIX BANNER */}
