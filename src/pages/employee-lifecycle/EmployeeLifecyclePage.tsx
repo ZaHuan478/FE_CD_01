@@ -2,8 +2,8 @@ import React, { useMemo, useState, useEffect, useCallback } from 'react'
 import { useSearchParams, useParams, useLocation, useNavigate } from 'react-router-dom'
 import { Sparkles, Layers, Database, Sun, Moon } from 'lucide-react'
 
-import { MasterDataCard } from '../../components/employee-lifecycle/MasterDataCard'
 import { MasterDataRelationshipModal } from '../../components/employee-lifecycle/MasterDataRelationshipModal'
+import { MasterDataHub } from '../../components/employee-lifecycle/master-data-hub/MasterDataHub'
 import { LifecycleStepper } from '../../components/employee-lifecycle/LifecycleStepper'
 import { OperationsGrid } from '../../components/employee-lifecycle/OperationsGrid'
 import { SystemSupportBar } from '../../components/employee-lifecycle/SystemSupportBar'
@@ -16,7 +16,7 @@ import { LanguageSelector } from '../../components/common/LanguageSelector'
 
 import { masterData, lifecycleProcesses, crossFunctionalProcesses, sharedServices } from './data'
 import { sopDictionary } from '../../components/employee-lifecycle/data/sopDictionary'
-import type { MasterDataCategory, LifecycleStep, OperationModule, DetailItem } from '../../types/employee-lifecycle'
+import type { LifecycleStep, OperationModule, DetailItem } from '../../types/employee-lifecycle'
 import { useLanguage } from '../../context/LanguageContext'
 
 export const EmployeeLifecyclePage: React.FC = () => {
@@ -112,26 +112,7 @@ export const EmployeeLifecyclePage: React.FC = () => {
     }
   }
 
-  // Transform Master Data categories
-  const masterDataCategories: MasterDataCategory[] = useMemo(() => {
-    return masterData.map((item) => {
-      const sopInfo = sopDictionary[item.id]
-      return {
-        id: item.id,
-        code: item.id,
-        title: item.title,
-        subtitle: item.subtitle,
-        clusterId: item.id === 'MD-04' || item.id === 'MD-01' || item.id === 'MD-02' || item.id === 'MD-03'
-          ? 'personal'
-          : item.id === 'MD-05' || item.id === 'MD-06'
-            ? 'structure'
-            : 'policy',
-        inputsCount: item.inputs.length,
-        outputsCount: item.outputs.length,
-        sopBadge: sopInfo?.badge || 'SOP-NS-01'
-      }
-    })
-  }, [])
+
 
   // Transform Lifecycle steps (7 steps)
   const lifecycleSteps: LifecycleStep[] = useMemo(() => {
@@ -306,7 +287,7 @@ export const EmployeeLifecyclePage: React.FC = () => {
       />
 
       {/* Streamlined Compact Top Navigation Header */}
-      <header className="bg-slate-900 text-white border-b border-slate-800 sticky top-0 z-30 shadow-md">
+      <header className="bg-slate-900 text-white border-b border-slate-800 sticky top-0 z-50 shadow-md">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 py-2.5 sm:py-3 flex items-center justify-between">
           <div className="flex items-center gap-2.5 sm:gap-3">
             <div className="p-1.5 sm:p-2 bg-blue-600 rounded-lg text-white shadow-xs shrink-0">
@@ -469,15 +450,14 @@ export const EmployeeLifecyclePage: React.FC = () => {
           </div>
         )}
 
-        {/* TAB 2: MASTER DATA & SƠ ĐỒ ERD */}
+        {/* TAB 2: MASTER DATA SETTINGS HUB & SƠ ĐỒ ERD */}
         {activeTab === 'masterdata' && (
           <div className="space-y-6 animate-fadeIn">
-            {/* TẦNG 1: MASTER DATA CARD */}
+            {/* ENTERPRISE MASTER DATA HUB WITH 3 TIERS, SEARCH & MODULE FILTERS */}
             <div id="layer-1-master-data" className="scroll-mt-28">
-              <MasterDataCard
-                categories={masterDataCategories}
+              <MasterDataHub
                 onOpenERD={handleOpenERD}
-                onSelectCategory={handleOpenItemDetails}
+                isDarkMode={isDarkMode}
               />
             </div>
           </div>

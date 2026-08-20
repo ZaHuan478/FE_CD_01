@@ -148,8 +148,11 @@ export const WorkflowDetailPage: React.FC<WorkflowDetailPageProps> = ({
 
   const [selectedStepIdx, setSelectedStepIdx] = useState<number>(0)
 
+  // Check if current process has a dedicated 5-stage Infographic Blueprint
+  const hasInfographic = ['LIFE-01', 'LIFE-04', 'LIFE-05', 'LIFE-06', 'LIFE-07'].includes(item.id)
+
   const [viewMode, setViewMode] = useState<'infographic' | 'diagram' | 'table'>(() => {
-    if (['LIFE-01', 'LIFE-04', 'LIFE-05', 'LIFE-06', 'LIFE-07', 'CF-01', 'CROSS-01', 'MD-04', 'MD-05', 'MD-08'].includes(item.id)) return 'infographic'
+    if (['LIFE-01', 'LIFE-04', 'LIFE-05', 'LIFE-06', 'LIFE-07'].includes(item.id)) return 'infographic'
     return 'diagram'
   })
 
@@ -158,7 +161,7 @@ export const WorkflowDetailPage: React.FC<WorkflowDetailPageProps> = ({
       }`}>
       
       {/* COMPACT TOP FIXED HEADER */}
-      <header className={`sticky top-0 z-30 border-b backdrop-blur-md transition-colors duration-300 ${isDarkMode ? 'bg-slate-950/95 border-slate-800 text-white' : 'bg-white/95 border-slate-200 text-slate-900 shadow-2xs'
+      <header className={`sticky top-0 z-50 border-b backdrop-blur-md transition-colors duration-300 ${isDarkMode ? 'bg-slate-950/95 border-slate-800 text-white' : 'bg-white/95 border-slate-200 text-slate-900 shadow-2xs'
         }`}>
         
         {/* Main Header Bar */}
@@ -333,19 +336,21 @@ export const WorkflowDetailPage: React.FC<WorkflowDetailPageProps> = ({
             <div className={`p-3 rounded-2xl border flex flex-wrap items-center justify-between gap-3 shadow-2xs transition-colors ${isDarkMode ? 'bg-slate-900 border-slate-800' : 'bg-white border-slate-200/90'
               }`}>
               <div className="flex flex-wrap items-center gap-1.5">
-                <button
-                  type="button"
-                  onClick={() => setViewMode('infographic')}
-                  className={`flex items-center gap-1.5 px-3.5 py-1.5 text-xs font-bold rounded-xl transition-all cursor-pointer ${viewMode === 'infographic'
-                    ? 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-xs'
-                    : isDarkMode ? 'bg-slate-950 text-slate-400 hover:bg-slate-800 border border-slate-800' : 'bg-slate-100 text-slate-700 hover:bg-slate-200 border border-slate-200'
-                    }`}
-                >
-                  <Sparkles className="w-3.5 h-3.5 text-amber-300" />
-                  <span>
-                    {language === 'vi' ? '🎨 Sơ đồ Infographic 5 Giai đoạn' : '🎨 5-Stage Infographic'}
-                  </span>
-                </button>
+                {hasInfographic && (
+                  <button
+                    type="button"
+                    onClick={() => setViewMode('infographic')}
+                    className={`flex items-center gap-1.5 px-3.5 py-1.5 text-xs font-bold rounded-xl transition-all cursor-pointer ${viewMode === 'infographic'
+                      ? 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-xs'
+                      : isDarkMode ? 'bg-slate-950 text-slate-400 hover:bg-slate-800 border border-slate-800' : 'bg-slate-100 text-slate-700 hover:bg-slate-200 border border-slate-200'
+                      }`}
+                  >
+                    <Sparkles className="w-3.5 h-3.5 text-amber-300" />
+                    <span>
+                      {language === 'vi' ? '🎨 Sơ đồ Infographic 5 Giai đoạn' : '🎨 5-Stage Infographic'}
+                    </span>
+                  </button>
+                )}
 
                 <button
                   type="button"

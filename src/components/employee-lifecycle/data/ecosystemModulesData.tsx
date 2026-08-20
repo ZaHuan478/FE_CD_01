@@ -1,11 +1,33 @@
 import React from 'react'
 import { Users, Clock, CircleDollarSign, Receipt, ShieldCheck } from 'lucide-react'
 
+export interface ModuleStage {
+  stageId: string
+  stageNumber: number
+  stageTitle: string
+  stageTitleEn: string
+  description: string
+  descriptionEn: string
+  sopCodes: string[]
+}
+
 export interface SopDetailItem {
   code: string
   title: string
   titleEn: string
   type: 'N' | 'M' | 'A'
+  stageNumber?: number
+  actor?: string
+  actorEn?: string
+  scopeNote?: string
+  scopeNoteEn?: string
+  inputs?: string[]
+  inputsEn?: string[]
+  outputs?: string[]
+  outputsEn?: string[]
+  workflowId?: string
+  wireframeId?: string
+  isInheritedFromATS?: boolean
 }
 
 export interface ModuleEcosystemItem {
@@ -17,6 +39,7 @@ export interface ModuleEcosystemItem {
   percentage: string
   subFeatures: string[]
   subFeaturesEn: string[]
+  stages?: ModuleStage[]
   sopList: SopDetailItem[]
   color: string
   gradient: string
@@ -40,22 +63,257 @@ export const FIVE_CORE_MODULES: ModuleEcosystemItem[] = [
     percentage: '100%',
     subFeatures: ['Hồ sơ sơ yếu lý lịch nhân viên', 'Quản lý thông tin hợp đồng & hồ sơ', 'Báo cáo biến động nhân sự'],
     subFeaturesEn: ['Employee master profiles & resumes', 'Contract & document management', 'Headcount & movement reporting'],
+    stages: [
+      {
+        stageId: 'EMP_STG_1',
+        stageNumber: 1,
+        stageTitle: 'Chặng 1: Hoạch định & Tiếp nhận mới (Onboarding)',
+        stageTitleEn: 'Stage 1: Planning & New Hire Onboarding',
+        description: 'Kế thừa hồ sơ từ Tuyển dụng (ATS), kiểm tra định biên và khởi tạo hồ sơ nhân viên mới lần đầu.',
+        descriptionEn: 'Inherit profile from Recruitment (ATS), check headcount and initialize new employee master record.',
+        sopCodes: ['SOP-EMP-01', 'SOP-EMP-02', 'SOP-EMP-03']
+      },
+      {
+        stageId: 'EMP_STG_2',
+        stageNumber: 2,
+        stageTitle: 'Chặng 2: Hợp đồng & Điều chuyển (Contracts & Mobility)',
+        stageTitleEn: 'Stage 2: Contracts & Organizational Mobility',
+        description: 'Xác lập quan hệ lao động pháp lý, tái ký hợp đồng, bổ nhiệm chức vụ và điều động phòng ban.',
+        descriptionEn: 'Establish legal employment contracts, renewals, appointments and inter-department transfers.',
+        sopCodes: ['SOP-EMP-04', 'SOP-EMP-05', 'SOP-EMP-06', 'SOP-EMP-07']
+      },
+      {
+        stageId: 'EMP_STG_3',
+        stageNumber: 3,
+        stageTitle: 'Chặng 3: Đánh giá, Đào tạo & Phúc lợi (Growth & Welfare)',
+        stageTitleEn: 'Stage 3: Evaluation, Training & Welfare Benefits',
+        description: 'Đánh giá thử việc KPI, khen thưởng/kỷ luật, quy hoạch đào tạo kỹ năng và chế độ sức khỏe.',
+        descriptionEn: 'Probation KPI review, rewards & discipline, training plans and healthcare benefits.',
+        sopCodes: ['SOP-EMP-08', 'SOP-EMP-09', 'SOP-EMP-10', 'SOP-EMP-11', 'SOP-EMP-12']
+      },
+      {
+        stageId: 'EMP_STG_4',
+        stageNumber: 4,
+        stageTitle: 'Chặng 4: Biến động giảm & Thôi việc (Offboarding)',
+        stageTitleEn: 'Stage 4: Resignation & Offboarding Clearance',
+        description: 'Xử lý thỏa thuận thôi việc, thu hồi tài sản IT 4 bên, quyết toán tài chính và khóa sổ hồ sơ.',
+        descriptionEn: 'Process resignation agreements, 4-party IT asset recovery, final pay and master record lock.',
+        sopCodes: ['SOP-EMP-13', 'SOP-EMP-14', 'SOP-EMP-15']
+      }
+    ],
     sopList: [
-      { code: 'SOP-EMP-01', title: 'Định biên nhân sự & Kế hoạch tuyển dụng', titleEn: 'Headcount Budget & Recruitment Planning', type: 'M' },
-      { code: 'SOP-EMP-02', title: 'Tiếp nhận hồ sơ nhân viên mới (Onboarding)', titleEn: 'New Employee Onboarding & File Intake', type: 'N' },
-      { code: 'SOP-EMP-03', title: 'Quản lý thông tin lý lịch Master Data', titleEn: 'Employee Master Profile Data Management', type: 'N' },
-      { code: 'SOP-EMP-04', title: 'Ký hợp đồng lao động & Phụ lục HĐLĐ', titleEn: 'Employment Contract & Annex Signing', type: 'M' },
-      { code: 'SOP-EMP-05', title: 'Tái ký hợp đồng & Chuyển loại HĐLĐ', titleEn: 'Contract Renewal & Type Transition', type: 'M' },
-      { code: 'SOP-EMP-06', title: 'Bổ nhiệm, Kiêm nhiệm & Miễn nhiệm', titleEn: 'Appointment, Concurrent Role & Discharge', type: 'M' },
-      { code: 'SOP-EMP-07', title: 'Điều động & Điều chuyển nội bộ', titleEn: 'Internal Reassignment & Mobility', type: 'M' },
-      { code: 'SOP-EMP-08', title: 'Khen thưởng & Xử lý Kỷ luật lao động', titleEn: 'Employee Rewards & Discipline Action', type: 'M' },
-      { code: 'SOP-EMP-09', title: 'Quản lý đào tạo & Phát triển kỹ năng', titleEn: 'Training Plan & Skill Development', type: 'N' },
-      { code: 'SOP-EMP-10', title: 'Đánh giá thử việc & Tiêu chí KPI', titleEn: 'Probation Assessment & KPI Evaluation', type: 'M' },
-      { code: 'SOP-EMP-11', title: 'Quản lý lịch công tác & Chi phí', titleEn: 'Business Trip & Expense Reimbursement', type: 'N' },
-      { code: 'SOP-EMP-12', title: 'Khám sức khỏe & Chăm sóc phúc lợi', titleEn: 'Health Checkup & Welfare Benefit Care', type: 'A' },
-      { code: 'SOP-EMP-13', title: 'Biến động giảm & Thỏa thuận nghỉ việc', titleEn: 'Resignation & Resignation Agreement', type: 'M' },
-      { code: 'SOP-EMP-14', title: 'Bàn giao công việc & Quyền tài sản IT', titleEn: 'Work Handover & IT Asset Clearance', type: 'M' },
-      { code: 'SOP-EMP-15', title: 'Quyết toán thôi việc & Khóa sổ hồ sơ', titleEn: 'Offboarding Settlement & Profile Lock', type: 'A' }
+      {
+        code: 'SOP-EMP-01',
+        title: 'Định biên nhân sự & Kế hoạch tuyển dụng',
+        titleEn: 'Headcount Budget & Recruitment Planning',
+        type: 'M',
+        stageNumber: 1,
+        actor: 'Trưởng bộ phận & HR Manager',
+        actorEn: 'Department Head & HR Manager',
+        scopeNote: 'Hoạch định chỉ tiêu nhân sự, slot vị trí khả dụng và trần ngân sách People Cost 12 tháng.',
+        scopeNoteEn: 'Headcount quota planning, available slot validation and 12-month People Cost budget cap.',
+        inputs: ['Kế hoạch sản xuất kinh doanh năm', 'Cơ cấu tổ chức phòng ban (MD-05)', 'Ngạch bậc lương đề xuất (MD-07)'],
+        outputs: ['Bản Kế hoạch định biên được duyệt', 'Hạn mức tuyển dụng cho phân hệ ATS', 'Cảnh báo tự động khi vượt trần'],
+        workflowId: 'LIFE-01'
+      },
+      {
+        code: 'SOP-EMP-02',
+        title: 'Tiếp nhận hồ sơ nhân viên mới (Onboarding)',
+        titleEn: 'New Employee Onboarding & File Intake',
+        type: 'N',
+        stageNumber: 1,
+        isInheritedFromATS: true,
+        actor: 'Ứng viên trúng tuyển & Chuyên viên Tuyển dụng / HR',
+        actorEn: 'Passed Candidate & Recruiter / HR Specialist',
+        scopeNote: '⚡ THAO TÁC KHỞI TẠO 1 LẦN: Kế thừa 100% dữ liệu hồ sơ từ Phân hệ Tuyển dụng (ATS), đối soát bản scan CCCD/Bằng cấp và cấp Mã NV (EMP ID) lần đầu.',
+        scopeNoteEn: '⚡ ONE-TIME INITIALIZATION: Inherits 100% candidate profile from Recruitment ATS, audits ID/Degree scans and issues Employee ID.',
+        inputs: ['Hồ sơ ứng viên kế thừa từ ATS (CV, Họ tên, Ngày sinh, CCCD)', 'Thư mời nhận việc (Offer Letter) đã ký số', 'Số tài khoản ngân hàng nhận lương', 'File scan Bằng cấp & Chứng chỉ gốc'],
+        outputs: ['Mã số nhân viên (Employee ID) duy nhất', 'Tài khoản đăng nhập Portal & Email công ty', 'Ticket tự động sang IT cấp máy tính & Hành chính cấp thẻ', 'Đồng bộ sang Phân hệ Bảo hiểm (Báo tăng INS02)'],
+        workflowId: 'LIFE-01',
+        wireframeId: 'LIFE-01'
+      },
+      {
+        code: 'SOP-EMP-03',
+        title: 'Quản lý thông tin lý lịch Master Data',
+        titleEn: 'Employee Master Profile Data Management',
+        type: 'N',
+        stageNumber: 1,
+        actor: 'Nhân viên (Self-Service) & HR Admin',
+        actorEn: 'Employee (Self-Service) & HR Admin',
+        scopeNote: '🔄 DUY TRÌ & CẬP NHẬT BIẾN ĐỘNG XUYÊN SUỐT: Dùng khi nhân viên đã đi làm có thay đổi thông tin (đổi CCCD mới, kết hôn, sinh con thêm người phụ thuộc, đổi số tài khoản ngân hàng).',
+        scopeNoteEn: '🔄 LIFECYCLE PROFILE MAINTENANCE: Ongoing updates during employment (new ID card, dependants, banking details, advanced degrees).',
+        inputs: ['Mã nhân viên (EMP ID)', 'Giấy tờ chứng thực biến động (Giấy khai sinh con, CCCD gắn chip mới)', 'Bằng cấp học vấn bổ sung'],
+        outputs: ['Hồ sơ Master Data được cập nhật phiên bản mới', 'Đăng ký giảm trừ gia cảnh thuế TNCN (TAX01)', 'Lịch sử thay đổi (Audit Log) ghi nhận hệ thống'],
+        workflowId: 'LIFE-02'
+      },
+      {
+        code: 'SOP-EMP-04',
+        title: 'Ký hợp đồng lao động & Phụ lục HĐLĐ',
+        titleEn: 'Employment Contract & Annex Signing',
+        type: 'M',
+        stageNumber: 2,
+        actor: 'HR C&B & Ban Giám Đốc (BOM)',
+        actorEn: 'HR C&B & Board of Management',
+        scopeNote: 'Dự thảo HĐLĐ chuẩn pháp lý, trình ký số 3 bên và xác lập quyền lợi bảo hiểm chính thức.',
+        scopeNoteEn: 'Draft compliant labor contract, 3-party digital signing and establish social insurance base.',
+        inputs: ['Hồ sơ nhân viên đã duyệt (EMP02)', 'Thang bảng lương áp dụng (MD-07)', 'Mẫu hợp đồng chuẩn Word Template'],
+        outputs: ['Mã số HĐLĐ chính thức có chữ ký số 2 bên', 'Bản PDF HĐLĐ lưu trữ két số (E-Vault)', 'Cập nhật mức đóng BHXH theo hợp đồng'],
+        workflowId: 'LIFE-04'
+      },
+      {
+        code: 'SOP-EMP-05',
+        title: 'Tái ký hợp đồng & Chuyển loại HĐLĐ',
+        titleEn: 'Contract Renewal & Type Transition',
+        type: 'M',
+        stageNumber: 2,
+        actor: 'HR C&B & Trưởng bộ phận',
+        actorEn: 'HR C&B & Line Manager',
+        scopeNote: 'Tự động cảnh báo trước 30/45 ngày khi HĐLĐ sắp hết hạn, đánh giá tái ký và chuyển đổi loại HĐ.',
+        scopeNoteEn: 'Automated 30/45-day contract expiry alert, renewal evaluation and contract type transition.',
+        inputs: ['Danh sách hợp đồng sắp đáo hạn', 'Đánh giá hiệu quả công việc từ TBP', 'Nguyện vọng tiếp tục làm việc'],
+        outputs: ['HĐLĐ tái ký mới (12/24 tháng hoặc Không xác định thời hạn)', 'Ghi nhận lịch sử gia hạn hợp đồng'],
+        workflowId: 'LIFE-04'
+      },
+      {
+        code: 'SOP-EMP-06',
+        title: 'Bổ nhiệm, Kiêm nhiệm & Miễn nhiệm',
+        titleEn: 'Appointment, Concurrent Role & Discharge',
+        type: 'M',
+        stageNumber: 2,
+        actor: 'Ban Giám Đốc & HRD',
+        actorEn: 'Board of Directors & HRD',
+        scopeNote: 'Quy trình thăng chức, bổ nhiệm vị trí quản lý mới, phân công kiêm nhiệm hoặc miễn nhiệm.',
+        scopeNoteEn: 'Promotion, managerial appointment, concurrent role assignment or discharge workflow.',
+        inputs: ['Tờ trình bổ nhiệm của Khối/Phòng', 'Hạn mức định biên vị trí quản lý', 'Báo cáo năng lực nhân sự'],
+        outputs: ['Quyết định Bổ nhiệm chính thức có chữ ký BOD', 'Tự động cập nhật Sơ đồ tổ chức (Org Chart MD-05)', 'Cập nhật phụ cấp trách nhiệm vào Bảng lương PAY'],
+        workflowId: 'LIFE-05'
+      },
+      {
+        code: 'SOP-EMP-07',
+        title: 'Điều động & Điều chuyển nội bộ',
+        titleEn: 'Internal Reassignment & Mobility',
+        type: 'M',
+        stageNumber: 2,
+        actor: 'HR Admin & 2 Trưởng bộ phận liên quan',
+        actorEn: 'HR Admin & 2 Department Heads',
+        scopeNote: 'Điều chuyển nhân sự giữa các chi nhánh, phòng ban hoặc chuyển đổi dự án công tác.',
+        scopeNoteEn: 'Inter-departmental, branch transfers or assignment changes across company units.',
+        inputs: ['Đơn đề xuất điều chuyển', 'Ý kiến đồng thuận của 2 Trưởng bộ phận', 'Ngày hiệu lực công tác mới'],
+        outputs: ['Quyết định Điều chuyển nội bộ', 'Chuyển đổi phân quyền phê duyệt Portal', 'Cập nhật Cost Center quản lý mới'],
+        workflowId: 'LIFE-05'
+      },
+      {
+        code: 'SOP-EMP-08',
+        title: 'Khen thưởng & Xử lý Kỷ luật lao động',
+        titleEn: 'Employee Rewards & Discipline Action',
+        type: 'M',
+        stageNumber: 3,
+        actor: 'Hội đồng Khen thưởng / Kỷ luật & HR',
+        actorEn: 'Rewards / Disciplinary Board & HR',
+        scopeNote: 'Ghi nhận thành tích khen thưởng đột xuất/năm hoặc xử lý vi phạm nội quy lao động đúng luật.',
+        scopeNoteEn: 'Record merit awards or execute disciplinary actions fully compliant with labor code.',
+        inputs: ['Biên bản thành tích / Biên bản vi phạm', 'Họp hội đồng xét duyệt', 'Quy chế thưởng phạt nội bộ'],
+        outputs: ['Quyết định Khen thưởng / Kỷ luật', 'Tự động đẩy tiền thưởng/phạt vào kỳ tính lương PAY', 'Lưu vết hồ sơ nhân sự'],
+        workflowId: 'LIFE-05'
+      },
+      {
+        code: 'SOP-EMP-09',
+        title: 'Quản lý đào tạo & Phát triển kỹ năng',
+        titleEn: 'Training Plan & Skill Development',
+        type: 'N',
+        stageNumber: 3,
+        actor: 'Chuyên viên Đào tạo & Nhân viên',
+        actorEn: 'L&D Specialist & Employee',
+        scopeNote: 'Lập kế hoạch đào tạo hội nhập, khóa học nâng cao nghiệp vụ và cam kết hoàn phí đào tạo.',
+        scopeNoteEn: 'Manage onboarding training, advanced skill programs and training bond commitments.',
+        inputs: ['Nhu cầu đào tạo theo chức danh (MD-06)', 'Danh sách nhân sự tham gia', 'Ngân sách khóa học'],
+        outputs: ['Chứng chỉ hoàn thành khóa học', 'Đánh giá kết quả sau đào tạo', 'Hợp đồng cam kết đào tạo (nếu có)'],
+        workflowId: 'LIFE-03'
+      },
+      {
+        code: 'SOP-EMP-10',
+        title: 'Đánh giá thử việc & Tiêu chí KPI',
+        titleEn: 'Probation Assessment & KPI Evaluation',
+        type: 'M',
+        stageNumber: 3,
+        actor: 'Nhân viên, Quản lý trực tiếp & HR',
+        actorEn: 'Employee, Line Manager & HR',
+        scopeNote: 'Đánh giá kết quả 60 ngày thử việc theo KPI gán ban đầu, quyết định ký HĐLĐ chính thức.',
+        scopeNoteEn: 'Evaluate 60-day probation performance against KPIs to determine official employment.',
+        inputs: ['Bản mục tiêu KPI thử việc (probation sheet)', 'Báo cáo tự đánh giá của nhân viên', 'Phiếu chấm điểm của Quản lý'],
+        outputs: ['Kết quả đánh giá: Đạt / Gia hạn / Không đạt', 'Kích hoạt quy trình Ký HĐLĐ chính thức (SOP-EMP-04)'],
+        workflowId: 'LIFE-04'
+      },
+      {
+        code: 'SOP-EMP-11',
+        title: 'Quản lý lịch công tác & Chi phí',
+        titleEn: 'Business Trip & Expense Reimbursement',
+        type: 'N',
+        stageNumber: 3,
+        actor: 'Nhân viên nộp đơn & Trưởng phòng duyệt',
+        actorEn: 'Employee & Approving Manager',
+        scopeNote: 'Đăng ký kế hoạch công tác trong/ngoài nước, tạm ứng chi phí và hoàn ứng công tác phí.',
+        scopeNoteEn: 'Register domestic/international business trips, expense advances and reimbursements.',
+        inputs: ['Kế hoạch công tác & Mục tiêu', 'Dự toán chi phí vé máy bay/khách sạn', 'Danh sách nhân sự tham gia'],
+        outputs: ['Giấy đi đường & Quyết định cử công tác', 'Lệnh tạm ứng tài chính', 'Đồng bộ ngày công tác vào Chấm công ATT'],
+        workflowId: 'LIFE-03'
+      },
+      {
+        code: 'SOP-EMP-12',
+        title: 'Khám sức khỏe & Chăm sóc phúc lợi',
+        titleEn: 'Health Checkup & Welfare Benefit Care',
+        type: 'A',
+        stageNumber: 3,
+        actor: 'HR Phúc lợi & Cơ sở Y tế',
+        actorEn: 'Benefits HR & Healthcare Provider',
+        scopeNote: 'Tổ chức khám sức khỏe định kỳ hàng năm, phân loại sức khỏe và cấp gói bảo hiểm tự nguyện.',
+        scopeNoteEn: 'Annual health checkup coordination, classification and voluntary healthcare packages.',
+        inputs: ['Danh sách nhân viên đủ điều kiện', 'Hợp đồng bệnh viện / phòng khám', 'Gói khám tiêu chuẩn'],
+        outputs: ['Hồ sơ bệnh án điện tử phân loại sức khỏe', 'Cấp thẻ Bảo hiểm sức khỏe PVI/Bảo Việt', 'Báo cáo quản trị an toàn lao động'],
+        workflowId: 'LIFE-03'
+      },
+      {
+        code: 'SOP-EMP-13',
+        title: 'Biến động giảm & Thỏa thuận nghỉ việc',
+        titleEn: 'Resignation & Resignation Agreement',
+        type: 'M',
+        stageNumber: 4,
+        actor: 'Nhân viên nộp đơn, TBP & HRD',
+        actorEn: 'Employee, Department Head & HRD',
+        scopeNote: 'Tiếp nhận đơn thôi việc, kiểm tra thời hạn báo trước theo luật định và phỏng vấn Exit Interview.',
+        scopeNoteEn: 'Receive resignation request, verify notice period compliance and conduct Exit Interview.',
+        inputs: ['Đơn xin thôi việc trên Portal', 'Lý do nghỉ việc & Ngày làm việc cuối', 'Biên bản phỏng vấn Exit Interview'],
+        outputs: ['Thỏa thuận chấm dứt HĐLĐ được phê duyệt', 'Phát hành Check-list bàn giao tài sản 4 bên', 'Thông báo kế hoạch tuyển thay thế sang ATS'],
+        workflowId: 'LIFE-07'
+      },
+      {
+        code: 'SOP-EMP-14',
+        title: 'Bàn giao công việc & Quyền tài sản IT',
+        titleEn: 'Work Handover & IT Asset Clearance',
+        type: 'M',
+        stageNumber: 4,
+        actor: '4 Bên: Nhân viên, Quản lý, IT, Hành chính, Kế toán',
+        actorEn: '4 Parties: Employee, Manager, IT, Admin, Finance',
+        scopeNote: 'Kiểm soát bàn giao công việc dở dang, thu hồi Laptop/VPN/Quyền hệ thống, trả thẻ và thanh toán nợ.',
+        scopeNoteEn: 'Task handover clearance, IT asset/VPN recovery, access card return and debt settlement.',
+        inputs: ['Biên bản bàn giao công việc cho người thay thế', 'Xác nhận thu hồi máy tính & khóa account IT', 'Xác nhận thu hồi thẻ & tài sản hành chính'],
+        outputs: ['Phiếu thanh toán thôi việc hoàn tất 100%', 'Khóa tài khoản hệ thống đúng 18h00 ngày cuối'],
+        workflowId: 'LIFE-07'
+      },
+      {
+        code: 'SOP-EMP-15',
+        title: 'Quyết toán thôi việc & Khóa sổ hồ sơ',
+        titleEn: 'Offboarding Settlement & Profile Lock',
+        type: 'A',
+        stageNumber: 4,
+        actor: 'Hệ thống HR Core & C&B',
+        actorEn: 'HR Core Engine & C&B Specialist',
+        scopeNote: 'Tự động tính thanh toán ngày phép tồn, trợ cấp thôi việc, báo giảm BHXH và khóa sổ hồ sơ.',
+        scopeNoteEn: 'Automated remaining leave payout, severance calculation, social insurance cut and profile archiving.',
+        inputs: ['Phiếu bàn giao 4 bên đã duyệt', 'Số ngày phép tồn lũy kế chưa nghỉ', 'Mức lương đóng BHXH bình quân'],
+        outputs: ['Bảng lương quyết toán thôi việc (Final Pay)', 'Hồ sơ Báo giảm BHXH (INS03) & Chốt sổ bảo hiểm', 'Khóa sổ hồ sơ nhân viên sang kho lưu trữ vĩnh viễn'],
+        workflowId: 'LIFE-07'
+      }
     ],
     color: '#2563eb',
     gradient: 'from-blue-600 to-indigo-600',
@@ -76,22 +334,216 @@ export const FIVE_CORE_MODULES: ModuleEcosystemItem[] = [
     percentage: '100%',
     subFeatures: ['Chấm công tự động (Vân tay/GPS/Khuôn mặt)', 'Quản lý ca làm việc & đăng ký nghỉ phép', 'Bảng tổng hợp công hàng tháng'],
     subFeaturesEn: ['Automated timekeeping (Biometric/GPS/Face ID)', 'Shift management & leave requests', 'Monthly timesheet summaries'],
+    stages: [
+      {
+        stageId: 'ATT_STG_1',
+        stageNumber: 1,
+        stageTitle: 'Chặng 1: Cấu hình Ca & Thu thập Dữ liệu Chấm công',
+        stageTitleEn: 'Stage 1: Shift Configuration & Clock-in Data Collection',
+        description: 'Thiết lập ca kíp, phân lịch làm việc và tự động đồng bộ dữ liệu từ máy chấm công vân tay / Face ID.',
+        descriptionEn: 'Configure shift schedules, work calendars and auto-sync biometric/Face ID clock-in data.',
+        sopCodes: ['SOP-ATT-01', 'SOP-ATT-02', 'SOP-ATT-03', 'SOP-ATT-10', 'SOP-ATT-14']
+      },
+      {
+        stageId: 'ATT_STG_2',
+        stageNumber: 2,
+        stageTitle: 'Chặng 2: Đơn từ & Phê duyệt Nghỉ phép / Làm thêm giờ (OT)',
+        stageTitleEn: 'Stage 2: Leave Applications & Overtime (OT) Approvals',
+        description: 'Xử lý đơn xin nghỉ phép năm, giải trình đi trễ về sớm, phê duyệt làm thêm giờ và quản lý quỹ phép.',
+        descriptionEn: 'Process annual leave requests, attendance explanations, OT approval and leave balance management.',
+        sopCodes: ['SOP-ATT-04', 'SOP-ATT-05', 'SOP-ATT-06', 'SOP-ATT-07', 'SOP-ATT-08', 'SOP-ATT-09']
+      },
+      {
+        stageId: 'ATT_STG_3',
+        stageNumber: 3,
+        stageTitle: 'Chặng 3: Tổng hợp Bảng công & Khóa sổ Chuyển tính Lương',
+        stageTitleEn: 'Stage 3: Timesheet Compilation & Salary Handoff Lock',
+        description: 'Tự động tính tổng công tháng, xử lý cảnh báo vi phạm, chốt sổ bảng công và chuyển sang phân hệ Lương PAY.',
+        descriptionEn: 'Compile monthly workdays, process violation alerts, lock timesheet and handoff to Payroll PAY.',
+        sopCodes: ['SOP-ATT-11', 'SOP-ATT-12', 'SOP-ATT-13', 'SOP-ATT-15']
+      }
+    ],
     sopList: [
-      { code: 'SOP-ATT-01', title: 'Cấu hình danh mục Ca làm việc & Lịch làm việc', titleEn: 'Shift & Work Calendar Configuration', type: 'M' },
-      { code: 'SOP-ATT-02', title: 'Phân ca & Xoay ca kíp kĩ thuật', titleEn: 'Shift Scheduling & Roster Rotation', type: 'M' },
-      { code: 'SOP-ATT-03', title: 'Đồng bộ dữ liệu máy chấm công tự động', titleEn: 'Biometric Clock-in Data Auto-Sync', type: 'A' },
-      { code: 'SOP-ATT-04', title: 'Đăng ký & Phê duyệt Nghỉ phép năm', titleEn: 'Annual Leave Application & Approval', type: 'N' },
-      { code: 'SOP-ATT-05', title: 'Đơn giải trình đi trễ, về sớm', titleEn: 'Late-in / Early-out Explanation Request', type: 'N' },
-      { code: 'SOP-ATT-06', title: 'Đơn đăng ký làm thêm giờ (OT) & Duyệt', titleEn: 'Overtime (OT) Request & Approval', type: 'M' },
-      { code: 'SOP-ATT-07', title: 'Quản lý nghỉ bù & Quỹ phép tích lũy', titleEn: 'Compensatory Leave & Balance Audit', type: 'A' },
-      { code: 'SOP-ATT-08', title: 'Theo dõi lịch công tác ngoài doanh nghiệp', titleEn: 'Out-of-Office Work Tracking', type: 'N' },
-      { code: 'SOP-ATT-09', title: 'Quản lý nghỉ chế độ thai sản / ốm đau', titleEn: 'Maternity & Sick Leave Management', type: 'M' },
-      { code: 'SOP-ATT-10', title: 'Chấm công GPS Mobile & Face ID', titleEn: 'GPS Mobile & Face ID Attendance', type: 'A' },
-      { code: 'SOP-ATT-11', title: 'Tổng hợp bảng chấm công tháng tự động', titleEn: 'Monthly Timesheet Compilation', type: 'A' },
-      { code: 'SOP-ATT-12', title: 'Xử lý cảnh báo vi phạm giờ công', titleEn: 'Workday Violation Alert Processing', type: 'A' },
-      { code: 'SOP-ATT-13', title: 'Chốt sổ bảng công & Chuyển tính lương', titleEn: 'Timesheet Lock & Salary Handoff', type: 'M' },
-      { code: 'SOP-ATT-14', title: 'Chấm công theo Dự án & Task công việc', titleEn: 'Project & Task Time Tracking', type: 'N' },
-      { code: 'SOP-ATT-15', title: 'Báo cáo quản trị tuân thủ giờ công', titleEn: 'Attendance Compliance Analytics', type: 'A' }
+      {
+        code: 'SOP-ATT-01',
+        title: 'Cấu hình danh mục Ca làm việc & Lịch làm việc',
+        titleEn: 'Shift & Work Calendar Configuration',
+        type: 'M',
+        stageNumber: 1,
+        actor: 'HR Chấm công',
+        actorEn: 'Timekeeping HR',
+        scopeNote: 'Thiết lập khung giờ vào/ra, ca gãy, ca đêm và lịch nghỉ lễ chuẩn công ty.',
+        inputs: ['Quy chế làm việc công ty', 'Lịch nghỉ lễ nhà nước'],
+        outputs: ['Danh mục Ca làm việc (MD-08)', 'Khung giờ cho phép quẹt thẻ']
+      },
+      {
+        code: 'SOP-ATT-02',
+        title: 'Phân ca & Xoay ca kíp kĩ thuật',
+        titleEn: 'Shift Scheduling & Roster Rotation',
+        type: 'M',
+        stageNumber: 1,
+        actor: 'Quản lý ca / Trưởng nhóm',
+        actorEn: 'Shift Manager / Lead',
+        scopeNote: 'Gán ca tuần/tháng cho nhân viên sản xuất, nhà máy hoặc cửa hàng bán lẻ.',
+        inputs: ['Kế hoạch nhân sự ca kíp', 'Danh sách nhân viên'],
+        outputs: ['Bảng phân ca làm việc chi tiết', 'Thông báo lịch ca lên Mobile App']
+      },
+      {
+        code: 'SOP-ATT-03',
+        title: 'Đồng bộ dữ liệu máy chấm công tự động',
+        titleEn: 'Biometric Clock-in Data Auto-Sync',
+        type: 'A',
+        stageNumber: 1,
+        actor: 'Hệ thống tự động hóa (Auto Engine)',
+        actorEn: 'Automated Sync Engine',
+        scopeNote: 'Real-time sync dữ liệu quẹt thẻ vân tay, nhận diện khuôn mặt về cơ sở dữ liệu.',
+        inputs: ['Dữ liệu IP máy chấm công', 'Log quẹt thẻ thời gian thực'],
+        outputs: ['Dữ liệu In/Out thô được chuẩn hóa', 'Khớp nối với Mã nhân viên']
+      },
+      {
+        code: 'SOP-ATT-04',
+        title: 'Đăng ký & Phê duyệt Nghỉ phép năm',
+        titleEn: 'Annual Leave Application & Approval',
+        type: 'N',
+        stageNumber: 2,
+        actor: 'Nhân viên nộp & Quản lý duyệt',
+        actorEn: 'Employee & Manager',
+        scopeNote: 'Nộp đơn xin nghỉ phép năm, kiểm tra quỹ phép tồn và chuỗi phê duyệt theo cấp bậc.',
+        inputs: ['Loại phép (Phép năm, Không lương)', 'Số ngày nghỉ & Ngày bắt đầu', 'Người bàn giao công việc'],
+        outputs: ['Đơn phép được duyệt', 'Tự động trừ Quỹ phép tồn', 'Ghi nhận ngày công hợp lệ']
+      },
+      {
+        code: 'SOP-ATT-05',
+        title: 'Đơn giải trình đi trễ, về sớm',
+        titleEn: 'Late-in / Early-out Explanation Request',
+        type: 'N',
+        stageNumber: 2,
+        actor: 'Nhân viên nộp & TBP duyệt',
+        actorEn: 'Employee & Line Manager',
+        scopeNote: 'Giải trình quên quẹt thẻ, đi công tác đột xuất hoặc lý do chính đáng.',
+        inputs: ['Ngày có lỗi quẹt thẻ', 'Lý do giải trình', 'Bằng chứng kèm theo (nếu có)'],
+        outputs: ['Bổ sung giờ quẹt thẻ hợp lệ', 'Xóa cảnh báo đi trễ trên bảng công']
+      },
+      {
+        code: 'SOP-ATT-06',
+        title: 'Đơn đăng ký làm thêm giờ (OT) & Duyệt',
+        titleEn: 'Overtime (OT) Request & Approval',
+        type: 'M',
+        stageNumber: 2,
+        actor: 'Trưởng nhóm lập & TBP duyệt',
+        actorEn: 'Team Lead & Department Head',
+        scopeNote: 'Đăng ký làm thêm giờ trước ca, kiểm tra trần OT 40h/tháng theo luật lao động.',
+        inputs: ['Khung giờ OT dự kiến', 'Danh sách nhân sự tham gia', 'Lý do công việc'],
+        outputs: ['Kế hoạch OT được phê duyệt', 'Cơ sở đối soát giờ quẹt thẻ thực tế']
+      },
+      {
+        code: 'SOP-ATT-07',
+        title: 'Quản lý nghỉ bù & Quỹ phép tích lũy',
+        titleEn: 'Compensatory Leave & Balance Audit',
+        type: 'A',
+        stageNumber: 2,
+        actor: 'Hệ thống tự động & HR',
+        actorEn: 'System Engine & HR',
+        scopeNote: 'Tự động cộng dồn giờ OT chuyển đổi thành ngày nghỉ bù hoặc tính lũy kế phép thâm niên.',
+        inputs: ['Số giờ OT được duyệt chuyển đổi', 'Thâm niên làm việc'],
+        outputs: ['Quỹ nghỉ bù khả dụng', 'Báo cáo số dư phép tồn toàn công ty']
+      },
+      {
+        code: 'SOP-ATT-08',
+        title: 'Theo dõi lịch công tác ngoài doanh nghiệp',
+        titleEn: 'Out-of-Office Work Tracking',
+        type: 'N',
+        stageNumber: 2,
+        actor: 'Nhân viên nộp & TBP duyệt',
+        actorEn: 'Employee & Manager',
+        scopeNote: 'Ghi nhận ngày làm việc tại địa điểm khách hàng, dự án hoặc công tác bên ngoài.',
+        inputs: ['Đơn công tác ngoài', 'Vị trí check-in GPS'],
+        outputs: ['Xác nhận đủ ngày công làm việc thực tế']
+      },
+      {
+        code: 'SOP-ATT-09',
+        title: 'Quản lý nghỉ chế độ thai sản / ốm đau',
+        titleEn: 'Maternity & Sick Leave Management',
+        type: 'M',
+        stageNumber: 2,
+        actor: 'Nhân viên & HR Bảo hiểm',
+        actorEn: 'Employee & Insurance HR',
+        scopeNote: 'Ghi nhận nghỉ chế độ bảo hiểm xã hội, làm căn cứ thanh toán chế độ ốm đau thai sản.',
+        inputs: ['Giấy ra viện / Giấy chứng nhận nghỉ việc hưởng BHXH', 'Thời gian nghỉ theo chỉ định'],
+        outputs: ['Ghi nhận nghỉ chế độ trên bảng công', 'Đồng bộ hồ sơ sang Phân hệ Bảo hiểm (INS05)']
+      },
+      {
+        code: 'SOP-ATT-10',
+        title: 'Chấm công GPS Mobile & Face ID',
+        titleEn: 'GPS Mobile & Face ID Attendance',
+        type: 'A',
+        stageNumber: 1,
+        actor: 'Nhân viên & Hệ thống Mobile',
+        actorEn: 'Employee & Mobile App',
+        scopeNote: 'Chấm công di động qua định vị GPS bán kính văn phòng và nhận diện khuôn mặt AI.',
+        inputs: ['Tọa độ GPS điện thoại', 'Ảnh chụp Face ID thời gian thực'],
+        outputs: ['Log chấm công hợp lệ kèm ảnh chụp và tọa độ']
+      },
+      {
+        code: 'SOP-ATT-11',
+        title: 'Tổng hợp bảng chấm công tháng tự động',
+        titleEn: 'Monthly Timesheet Compilation',
+        type: 'A',
+        stageNumber: 3,
+        actor: 'Hệ thống tự động hóa',
+        actorEn: 'Automated Engine',
+        scopeNote: 'Tự động gom log quẹt thẻ, đơn phép, đơn OT và tính ra tổng số ngày công chuẩn trong tháng.',
+        inputs: ['Dữ liệu quẹt thẻ 30 ngày', 'Danh sách đơn phép đã duyệt', 'Lịch phân ca'],
+        outputs: ['Bảng tổng hợp công chi tiết từng nhân viên (Ngày công, Giờ OT, Số lần đi trễ)']
+      },
+      {
+        code: 'SOP-ATT-12',
+        title: 'Xử lý cảnh báo vi phạm giờ công',
+        titleEn: 'Workday Violation Alert Processing',
+        type: 'A',
+        stageNumber: 3,
+        actor: 'HR Chấm công & Quản lý',
+        actorEn: 'Attendance HR & Manager',
+        scopeNote: 'Cảnh báo nhân viên vi phạm quá số lần đi trễ, quên quẹt thẻ hoặc nghỉ không phép.',
+        inputs: ['Bảng công chưa hoàn thiện', 'Ngưỡng vi phạm nội quy'],
+        outputs: ['Danh sách cảnh báo vi phạm', 'Thông báo nhắc nhở gửi nhân viên']
+      },
+      {
+        code: 'SOP-ATT-13',
+        title: 'Chốt sổ bảng công & Chuyển tính lương',
+        titleEn: 'Timesheet Lock & Salary Handoff',
+        type: 'M',
+        stageNumber: 3,
+        actor: 'HR Manager & C&B',
+        actorEn: 'HR Manager & C&B Specialist',
+        scopeNote: 'Khóa dữ liệu bảng công không cho chỉnh sửa và đẩy dữ liệu sang Phân hệ Lương PAY.',
+        inputs: ['Bảng công đã giải trình 100%', 'Chữ ký số duyệt của HR Manager'],
+        outputs: ['Bảng công chính thức bị khóa sổ (Locked)', 'File dữ liệu công nạp tự động vào Bảng lương PAY']
+      },
+      {
+        code: 'SOP-ATT-14',
+        title: 'Chấm công theo Dự án & Task công việc',
+        titleEn: 'Project & Task Time Tracking',
+        type: 'N',
+        stageNumber: 1,
+        actor: 'Nhân viên & Quản lý Dự án (PM)',
+        actorEn: 'Employee & Project Manager',
+        scopeNote: 'Phân bổ số giờ làm việc theo từng dự án hoặc trung tâm chi phí để hạch toán chi phí.',
+        inputs: ['Mã dự án (Project Code)', 'Số giờ làm việc thực tế'],
+        outputs: ['Báo cáo Man-hours theo dự án']
+      },
+      {
+        code: 'SOP-ATT-15',
+        title: 'Báo cáo quản trị tuân thủ giờ công',
+        titleEn: 'Attendance Compliance Analytics',
+        type: 'A',
+        stageNumber: 3,
+        actor: 'Ban Giám Đốc & HRD',
+        actorEn: 'Board & HRD',
+        scopeNote: 'Thống kê tỷ lệ đi làm đúng giờ, tỷ lệ nghỉ phép và chi phí làm thêm giờ toàn công ty.',
+        inputs: ['Dữ liệu bảng công lịch sử 12 tháng'],
+        outputs: ['Dashboard phân tích tuân thủ giờ công', 'Báo cáo chi phí OT theo phòng ban']
+      }
     ],
     color: '#059669',
     gradient: 'from-emerald-500 to-teal-600',
@@ -112,11 +564,75 @@ export const FIVE_CORE_MODULES: ModuleEcosystemItem[] = [
     percentage: '100%',
     subFeatures: ['Cấu hình thang bảng lương & phụ cấp', 'Tính lương tự động theo công & doanh số', 'Chuyển khoản & phiếu lương điện tử'],
     subFeaturesEn: ['Pay grade & allowance configuration', 'Automated salary calculation by workdays & KPI', 'Direct bank transfer & e-payslips'],
+    stages: [
+      {
+        stageId: 'PAY_STG_1',
+        stageNumber: 1,
+        stageTitle: 'Chặng 1: Cấu hình Công thức & Thang Bảng Lương',
+        stageTitleEn: 'Stage 1: Salary Scale & Formula Setup',
+        description: 'Thiết lập ngạch bậc lương, công thức tính lương theo ca, phụ cấp cố định và các khoản giảm trừ.',
+        descriptionEn: 'Configure pay grades, shift salary formulas, fixed allowances and standard deduction rules.',
+        sopCodes: ['SOP-PAY-01']
+      },
+      {
+        stageId: 'PAY_STG_2',
+        stageNumber: 2,
+        stageTitle: 'Chặng 2: Tính toán, Phê duyệt Chi trả & Phiếu Lương',
+        stageTitleEn: 'Stage 2: Calculation, Approval, Bank Transfer & E-Payslips',
+        description: 'Tự động tính lương theo bảng công, trình duyệt BOM, sinh file chi lương ngân hàng và gửi phiếu lương điện tử.',
+        descriptionEn: 'Compute net pay from timesheet, BOM approval, generate bank transfer file and distribute e-payslips.',
+        sopCodes: ['SOP-PAY-02', 'SOP-PAY-03', 'SOP-PAY-04']
+      }
+    ],
     sopList: [
-      { code: 'SOP-PAY-01', title: 'Cấu hình Thang bảng lương & Công thức tính lương', titleEn: 'Pay Grade Scale & Formula Setup', type: 'M' },
-      { code: 'SOP-PAY-02', title: 'Tính lương tự động theo Bảng công & Doanh số', titleEn: 'Automated Salary Calculation Engine', type: 'A' },
-      { code: 'SOP-PAY-03', title: 'Phê duyệt bảng lương & Sinh file ngân hàng', titleEn: 'Payroll Approval & Bank Transfer File', type: 'M' },
-      { code: 'SOP-PAY-04', title: 'Phát hành Phiếu lương điện tử E-payslip', titleEn: 'E-payslip Distribution & Query Ticket', type: 'A' }
+      {
+        code: 'SOP-PAY-01',
+        title: 'Cấu hình Thang bảng lương & Công thức tính lương',
+        titleEn: 'Pay Grade Scale & Formula Setup',
+        type: 'M',
+        stageNumber: 1,
+        actor: 'Chuyên viên C&B & HR Manager',
+        actorEn: 'C&B Specialist & HR Manager',
+        scopeNote: 'Cấu hình công thức tính lương Gross/Net, trần đóng BHXH, biểu thuế lũy tiến và các khoản phụ cấp.',
+        inputs: ['Quy chế lương thưởng công ty', 'Quy định mức lương tối thiểu vùng'],
+        outputs: ['Bộ công thức tính lương tự động', 'Danh mục Ngạch bậc lương (MD-07)']
+      },
+      {
+        code: 'SOP-PAY-02',
+        title: 'Tính lương tự động theo Bảng công & Doanh số',
+        titleEn: 'Automated Salary Calculation Engine',
+        type: 'A',
+        stageNumber: 2,
+        actor: 'Hệ thống tự động (Payroll Engine)',
+        actorEn: 'Automated Payroll Engine',
+        scopeNote: 'Kết nối Bảng công khóa sổ (ATT13), dữ liệu KPI/Doanh số và tự động chạy tính lương toàn công ty.',
+        inputs: ['Bảng chấm công đã khóa từ ATT', 'Hợp đồng lao động & Mức lương từ Core EMP', 'Dữ liệu trích nộp BHXH/Thuế'],
+        outputs: ['Bảng tính lương chi tiết từng nhân sự (Gross, Giảm trừ BHXH, Thuế TNCN, Lương thực nhận Net)']
+      },
+      {
+        code: 'SOP-PAY-03',
+        title: 'Phê duyệt bảng lương & Sinh file ngân hàng',
+        titleEn: 'Payroll Approval & Bank Transfer File',
+        type: 'M',
+        stageNumber: 2,
+        actor: 'HRD, Kế toán trưởng & Giám đốc (CEO)',
+        actorEn: 'HRD, Chief Accountant & CEO',
+        scopeNote: 'Thẩm định bảng lương 3 cấp, ký số phê duyệt và sinh file mã hóa gửi Ngân hàng giải ngân.',
+        inputs: ['Tờ trình chi lương tháng', 'Bảng lương tổng hợp'],
+        outputs: ['Quyết định chi lương đã duyệt', 'File chi lương định dạng ngân hàng (Vietcombank/BIDV/Techcombank)']
+      },
+      {
+        code: 'SOP-PAY-04',
+        title: 'Phát hành Phiếu lương điện tử E-payslip',
+        titleEn: 'E-payslip Distribution & Query Ticket',
+        type: 'A',
+        stageNumber: 2,
+        actor: 'Hệ thống tự động & Nhân viên',
+        actorEn: 'Automated System & Employee',
+        scopeNote: 'Mã hóa và gửi phiếu lương bảo mật qua Mobile App/Email cá nhân, tiếp nhận thắc mắc trực tuyến.',
+        inputs: ['Bảng lương đã chi trả thành công'],
+        outputs: ['Phiếu lương điện tử (E-payslip) bảo mật OTP trên App', 'Kênh tiếp nhận giải đáp thắc mắc lương']
+      }
     ],
     color: '#f59e0b',
     gradient: 'from-amber-500 to-orange-600',
@@ -137,10 +653,63 @@ export const FIVE_CORE_MODULES: ModuleEcosystemItem[] = [
     percentage: '100%',
     subFeatures: ['Đăng ký mã số thuế & người phụ thuộc', 'Tính giảm trừ & Kê khai thuế TNCN', 'Quyết toán thuế TNCN cuối năm'],
     subFeaturesEn: ['Tax ID & dependant registration', 'Deduction calculations & tax filings', 'Year-end PIT settlement'],
+    stages: [
+      {
+        stageId: 'TAX_STG_1',
+        stageNumber: 1,
+        stageTitle: 'Chặng 1: Đăng ký Mã Số Thuế & Người Phụ Thuộc',
+        stageTitleEn: 'Stage 1: Tax ID & Dependant Registration',
+        description: 'Đăng ký MST cá nhân lần đầu cho nhân viên mới và khai báo người phụ thuộc giảm trừ gia cảnh.',
+        descriptionEn: 'Register initial personal tax ID and declare dependants for family tax relief.',
+        sopCodes: ['SOP-TAX-01']
+      },
+      {
+        stageId: 'TAX_STG_2',
+        stageNumber: 2,
+        stageTitle: 'Chặng 2: Khấu trừ Hàng Tháng & Quyết toán Năm',
+        stageTitleEn: 'Stage 2: Monthly Withholding & Year-End PIT Settlement',
+        description: 'Tự động tính thuế lũy tiến từng tháng, nộp tờ khai thuế và lập hồ sơ quyết toán thuế cuối năm.',
+        descriptionEn: 'Automated progressive tax withholding, monthly tax declarations and year-end PIT settlement.',
+        sopCodes: ['SOP-TAX-02', 'SOP-TAX-03']
+      }
+    ],
     sopList: [
-      { code: 'SOP-TAX-01', title: 'Kê khai Mã số thuế & Đăng ký Người phụ thuộc', titleEn: 'Tax ID & Dependant Registration', type: 'N' },
-      { code: 'SOP-TAX-02', title: 'Khấu trừ Thuế TNCN hàng tháng & Kê khai Thuế', titleEn: 'Monthly PIT Deductions & Filings', type: 'A' },
-      { code: 'SOP-TAX-03', title: 'Quyết toán Thuế TNCN cuối năm & Chứng từ khấu trừ', titleEn: 'Year-end PIT Settlement & Certificates', type: 'M' }
+      {
+        code: 'SOP-TAX-01',
+        title: 'Kê khai Mã số thuế & Đăng ký Người phụ thuộc',
+        titleEn: 'Tax ID & Dependant Registration',
+        type: 'N',
+        stageNumber: 1,
+        actor: 'Nhân viên khai báo & HR C&B',
+        actorEn: 'Employee & Tax Specialist',
+        scopeNote: 'Khai báo hồ sơ giảm trừ gia cảnh, đối soát giấy khai sinh và nộp Cơ quan Thuế.',
+        inputs: ['CCCD nhân viên', 'Giấy khai sinh con / Giấy tờ thân nhân phụ thuộc'],
+        outputs: ['Mã số thuế cá nhân (MST)', 'Mã số người phụ thuộc được cơ quan thuế chấp thuận']
+      },
+      {
+        code: 'SOP-TAX-02',
+        title: 'Khấu trừ Thuế TNCN hàng tháng & Kê khai Thuế',
+        titleEn: 'Monthly PIT Deductions & Filings',
+        type: 'A',
+        stageNumber: 2,
+        actor: 'Hệ thống tự động & Kế toán thuế',
+        actorEn: 'Automated Engine & Tax Accountant',
+        scopeNote: 'Tự động áp biểu thuế lũy tiến từng phần (5% - 35%) theo thu nhập tính thuế hàng tháng.',
+        inputs: ['Thu nhập chịu thuế từ Bảng lương PAY', 'Mức giảm trừ bản thân (11tr) & người phụ thuộc (4.4tr)'],
+        outputs: ['Số thuế TNCN phải khấu trừ', 'Tờ khai thuế TNCN định kỳ Mẫu 05/KK-TNCN']
+      },
+      {
+        code: 'SOP-TAX-03',
+        title: 'Quyết toán Thuế TNCN cuối năm & Chứng từ khấu trừ',
+        titleEn: 'Year-end PIT Settlement & Certificates',
+        type: 'M',
+        stageNumber: 2,
+        actor: 'Kế toán thuế, HR & Cơ quan Thuế',
+        actorEn: 'Tax Accountant, HR & Tax Authority',
+        scopeNote: 'Tổng hợp thu nhập 12 tháng, tiếp nhận giấy ủy quyền quyết toán và xuất chứng từ khấu trừ thuế điện tử.',
+        inputs: ['Bản cam kết ủy quyền quyết toán thuế', 'Tổng thu nhập chịu thuế cả năm'],
+        outputs: ['Hồ sơ quyết toán thuế TNCN Mẫu 05/QTT-TNCN', 'Chứng từ khấu trừ thuế TNCN điện tử cấp cho nhân viên']
+      }
     ],
     color: '#6366f1',
     gradient: 'from-indigo-600 to-blue-600',
@@ -161,15 +730,123 @@ export const FIVE_CORE_MODULES: ModuleEcosystemItem[] = [
     percentage: '100%',
     subFeatures: ['Thiết lập đối tượng & tỷ lệ đóng BHXH', 'Kê khai BHXH điện tử (Báo tăng/giảm)', 'Giải quyết chế độ ốm đau/thai sản/dưỡng sức'],
     subFeaturesEn: ['Insurance rate & policy setup', 'Electronic e-insurance declarations', 'Sick leave, maternity & recovery claims'],
+    stages: [
+      {
+        stageId: 'INS_STG_1',
+        stageNumber: 1,
+        stageTitle: 'Chặng 1: Thiết lập Tỷ Lệ & Kê Khai Biến Động (Tăng / Giảm / Lương)',
+        stageTitleEn: 'Stage 1: Rate Setup & Movement Declarations (Increase / Decrease)',
+        description: 'Cấu hình mức đóng BHXH/BHYT/BHTN, lập hồ sơ báo tăng nhân viên mới, báo giảm thôi việc và điều chỉnh lương đóng.',
+        descriptionEn: 'Configure rates, submit new hire increase, offboarding decrease and salary base adjustments.',
+        sopCodes: ['SOP-INS-01', 'SOP-INS-02', 'SOP-INS-03', 'SOP-INS-04']
+      },
+      {
+        stageId: 'INS_STG_2',
+        stageNumber: 2,
+        stageTitle: 'Chặng 2: Giải Quyết Chế Độ & Quyết Toán Sổ Bảo Hiểm',
+        stageTitleEn: 'Stage 2: Benefit Claims & Social Insurance Book Settlement',
+        description: 'Lập hồ sơ thanh toán chế độ ốm đau, thai sản, đối chiếu số liệu đóng với cơ quan BHXH và chốt sổ điện tử.',
+        descriptionEn: 'Submit sick leave & maternity claims, monthly reconciliation with Social Insurance authority and e-book closure.',
+        sopCodes: ['SOP-INS-05', 'SOP-INS-06', 'SOP-INS-07', 'SOP-INS-08']
+      }
+    ],
     sopList: [
-      { code: 'SOP-INS-01', title: 'Thiết lập đối tượng & Tỷ lệ đóng BHXH/BHYT/BHTN', titleEn: 'Insurance Policy & Rate Setup', type: 'M' },
-      { code: 'SOP-INS-02', title: 'Kê khai Báo tăng lao động BHXH Mẫu D02-LT', titleEn: 'New Employee Insurance Declaration', type: 'N' },
-      { code: 'SOP-INS-03', title: 'Kê khai Báo giảm lao động BHXH', titleEn: 'Employee Insurance Termination Filing', type: 'M' },
-      { code: 'SOP-INS-04', title: 'Điều chỉnh mức lương đóng BHXH', titleEn: 'Insurance Base Salary Adjustment', type: 'M' },
-      { code: 'SOP-INS-05', title: 'Giải quyết chế độ Ốm đau / Thai sản / Phục hồi', titleEn: 'Sick Leave & Maternity Benefit Claims', type: 'N' },
-      { code: 'SOP-INS-06', title: 'Đối chiếu phát sinh nộp BHXH với Cơ quan BHXH', titleEn: 'Monthly Insurance Reconciliation', type: 'A' },
-      { code: 'SOP-INS-07', title: 'Cấp, chốt sổ BHXH & Thẻ BHYT điện tử', titleEn: 'E-Insurance Book Settlement & Cards', type: 'A' },
-      { code: 'SOP-INS-08', title: 'Báo cáo quản trị chi phí Bảo hiểm Doanh nghiệp', titleEn: 'Corporate Insurance Cost Audit Report', type: 'A' }
+      {
+        code: 'SOP-INS-01',
+        title: 'Thiết lập đối tượng & Tỷ lệ đóng BHXH/BHYT/BHTN',
+        titleEn: 'Insurance Policy & Rate Setup',
+        type: 'M',
+        stageNumber: 1,
+        actor: 'Chuyên viên Bảo hiểm & HR Manager',
+        actorEn: 'Insurance Specialist & HR Manager',
+        scopeNote: 'Cấu hình tỷ lệ trích nộp theo luật (DN: 21.5%, NLĐ: 10.5%) và trần đóng BHXH/BHYT.',
+        inputs: ['Nghị định quy định mức lương cơ sở', 'Khung mức lương đóng tối đa'],
+        outputs: ['Bảng tỷ lệ trích đóng BHXH tự động áp dụng']
+      },
+      {
+        code: 'SOP-INS-02',
+        title: 'Kê khai Báo tăng lao động BHXH Mẫu D02-LT',
+        titleEn: 'New Employee Insurance Declaration',
+        type: 'N',
+        stageNumber: 1,
+        actor: 'Chuyên viên Bảo hiểm & Phần mềm BHXH Điện tử',
+        actorEn: 'Insurance Specialist & E-Insurance Software',
+        scopeNote: 'Kế thừa hồ sơ nhân viên mới trúng tuyển (SOP-EMP-02), lập hồ sơ báo tăng gửi Cơ quan BHXH.',
+        inputs: ['Hồ sơ nhân viên mới từ Core EMP', 'Hợp đồng lao động chính thức ký kết (EMP04)', 'Mã số sổ BHXH cũ (nếu có)'],
+        outputs: ['Hồ sơ Báo tăng Mẫu D02-LT', 'Mã số BHXH mới hoặc xác nhận chuyển nơi đóng']
+      },
+      {
+        code: 'SOP-INS-03',
+        title: 'Kê khai Báo giảm lao động BHXH',
+        titleEn: 'Employee Insurance Termination Filing',
+        type: 'M',
+        stageNumber: 1,
+        actor: 'Chuyên viên Bảo hiểm & Cơ quan BHXH',
+        actorEn: 'Insurance Specialist & Insurance Agency',
+        scopeNote: 'Kế thừa quyết định thôi việc từ Core EMP (SOP-EMP-15), lập hồ sơ báo giảm kịp thời tránh phát sinh tiền nộp thừa.',
+        inputs: ['Quyết định chấm dứt HĐLĐ', 'Thẻ BHYT điện tử'],
+        outputs: ['Xác nhận Báo giảm của Cơ quan BHXH', 'Thủ tục chốt sổ BHXH']
+      },
+      {
+        code: 'SOP-INS-04',
+        title: 'Điều chỉnh mức lương đóng BHXH',
+        titleEn: 'Insurance Base Salary Adjustment',
+        type: 'M',
+        stageNumber: 1,
+        actor: 'Chuyên viên Bảo hiểm',
+        actorEn: 'Insurance Specialist',
+        scopeNote: 'Điều chỉnh mức lương đóng bảo hiểm khi có quyết định tăng lương hoặc điều chỉnh phụ cấp.',
+        inputs: ['Phụ lục HĐLĐ tăng lương', 'Danh sách nhân sự điều chỉnh'],
+        outputs: ['Hồ sơ điều chỉnh mức đóng gửi Cơ quan BHXH']
+      },
+      {
+        code: 'SOP-INS-05',
+        title: 'Giải quyết chế độ Ốm đau / Thai sản / Phục hồi',
+        titleEn: 'Sick Leave & Maternity Benefit Claims',
+        type: 'N',
+        stageNumber: 2,
+        actor: 'Nhân viên nộp hồ sơ & Chuyên viên Bảo hiểm',
+        actorEn: 'Employee & Insurance Specialist',
+        scopeNote: 'Tiếp nhận chứng từ y tế, lập hồ sơ hưởng chế độ ốm đau, thai sản Mẫu 01B-HSB gửi BHXH chi trả trợ cấp.',
+        inputs: ['Giấy chứng sinh / Giấy ra viện', 'Thời gian nghỉ trên bảng công ATT09', 'Số tài khoản nhận tiền trợ cấp'],
+        outputs: ['Quyết định duyệt chi tiền trợ cấp từ Cơ quan BHXH', 'Tiền trợ cấp chuyển trực tiếp vào tài khoản nhân viên']
+      },
+      {
+        code: 'SOP-INS-06',
+        title: 'Đối chiếu phát sinh nộp BHXH với Cơ quan BHXH',
+        titleEn: 'Monthly Insurance Reconciliation',
+        type: 'A',
+        stageNumber: 2,
+        actor: 'Kế toán & Chuyên viên Bảo hiểm',
+        actorEn: 'Accountant & Insurance Specialist',
+        scopeNote: 'Đối chiếu Thông báo kết quả đóng BHXH Mẫu C12-TS từ Cơ quan BHXH với số liệu trích nộp nội bộ.',
+        inputs: ['Thông báo Mẫu C12-TS của Cơ quan BHXH', 'Bảng trích nộp nội bộ từ Bảng lương PAY'],
+        outputs: ['Biên bản đối chiếu khớp 100%', 'Lệnh ủy nhiệm chi chuyển tiền đóng BHXH']
+      },
+      {
+        code: 'SOP-INS-07',
+        title: 'Cấp, chốt sổ BHXH & Thẻ BHYT điện tử',
+        titleEn: 'E-Insurance Book Settlement & Cards',
+        type: 'A',
+        stageNumber: 2,
+        actor: 'Chuyên viên Bảo hiểm & Cơ quan BHXH',
+        actorEn: 'Insurance Specialist & Agency',
+        scopeNote: 'Hoàn tất thủ tục chốt sổ in tờ rời xác nhận thời gian đóng bảo hiểm khi nhân viên nghỉ việc.',
+        inputs: ['Hồ sơ báo giảm đã duyệt', 'Sổ BHXH'],
+        outputs: ['Tờ rời chốt sổ BHXH bàn giao cho nhân viên', 'Xác nhận chấm dứt nghĩa vụ đóng']
+      },
+      {
+        code: 'SOP-INS-08',
+        title: 'Báo cáo quản trị chi phí Bảo hiểm Doanh nghiệp',
+        titleEn: 'Corporate Insurance Cost Audit Report',
+        type: 'A',
+        stageNumber: 2,
+        actor: 'HRD & Ban Giám Đốc',
+        actorEn: 'HRD & Board of Management',
+        scopeNote: 'Báo cáo phân tích tổng chi phí bảo hiểm doanh nghiệp phải nộp 12 tháng và dự toán năm sau.',
+        inputs: ['Dữ liệu đóng bảo hiểm lũy kế cả năm'],
+        outputs: ['Báo cáo phân tích chi phí bảo hiểm theo Cost Center']
+      }
     ],
     color: '#9333ea',
     gradient: 'from-purple-600 to-pink-600',
@@ -182,5 +859,6 @@ export const FIVE_CORE_MODULES: ModuleEcosystemItem[] = [
     angleDeg: 198 // Top Left
   }
 ]
+
 
 

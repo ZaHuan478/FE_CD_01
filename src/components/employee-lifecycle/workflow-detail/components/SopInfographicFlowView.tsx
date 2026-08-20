@@ -233,7 +233,7 @@ export const SopInfographicFlowView: React.FC<SopInfographicFlowViewProps> = ({
                     <tr className="hover:bg-slate-50 dark:hover:bg-slate-900/50 transition-colors">
                       <td className="p-3 font-bold text-emerald-600 dark:text-emerald-400">1. Tuyển dụng Trong Định Biên (Within Headcount)</td>
                       <td className="p-3"><span className="px-2.5 py-1 rounded-lg font-bold text-xs bg-emerald-50 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800">Còn chỉ tiêu Available Headcount &gt; 0</span></td>
-                      <td className="p-3 text-slate-700 dark:text-slate-300 font-semibold">Luồng duyệt nhanh (TBP $\rightarrow$ HRM duyệt trong 24h $\rightarrow$ Mở đăng tuyển)</td>
+                      <td className="p-3 text-slate-700 dark:text-slate-300 font-semibold">Luồng duyệt nhanh (TBP -&gt; HRM duyệt trong 24h -&gt; Mở đăng tuyển)</td>
                     </tr>
                     <tr className="hover:bg-slate-50 dark:hover:bg-slate-900/50 transition-colors">
                       <td className="p-3 font-bold text-blue-600 dark:text-blue-400">2. Tuyển Thay Thế Nhân Sự Nghỉ Việc (Replacement)</td>
@@ -243,7 +243,7 @@ export const SopInfographicFlowView: React.FC<SopInfographicFlowViewProps> = ({
                     <tr className="hover:bg-slate-50 dark:hover:bg-slate-900/50 transition-colors">
                       <td className="p-3 font-bold text-amber-600 dark:text-amber-400">3. Tuyển Vượt Định Biên / Mở Rộng Dự Án Mới (Over Budget)</td>
                       <td className="p-3"><span className="px-2.5 py-1 rounded-lg font-bold text-xs bg-amber-50 dark:bg-amber-950 text-amber-700 dark:text-amber-300 border border-amber-200 dark:border-amber-800">Vượt hạn mức định biên đầu năm</span></td>
-                      <td className="p-3 text-amber-700 dark:text-amber-300 font-semibold">Bắt buộc nộp Tờ trình People Cost $\rightarrow$ Trình Ban Giám Đốc (BOM) phê duyệt</td>
+                      <td className="p-3 text-amber-700 dark:text-amber-300 font-semibold">Bắt buộc nộp Tờ trình People Cost -&gt; Trình Ban Giám Đốc (BOM) phê duyệt</td>
                     </tr>
                   </tbody>
                 </table>
@@ -313,10 +313,10 @@ export const SopInfographicFlowView: React.FC<SopInfographicFlowViewProps> = ({
                 <div className="space-y-2">
                   <span className="font-bold uppercase text-[11px] sm:text-xs text-teal-600 dark:text-teal-400 block">{language === 'vi' ? '4 Bước Thao tác trên Portal:' : '4 Portal Operating Steps:'}</span>
                   <div className="space-y-1.5 font-medium">
-                    <div className={`p-2.5 rounded-lg border flex items-center gap-2.5 ${isDarkMode ? 'bg-slate-900 border-slate-800' : 'bg-slate-50 border-slate-200'}`}><span className="w-5 h-5 rounded-full bg-teal-600 text-white flex items-center justify-center font-bold text-[10px] shrink-0">1</span><span>Mở Manager Portal $\rightarrow$ Menu "Yêu cầu Tuyển dụng"</span></div>
+                    <div className={`p-2.5 rounded-lg border flex items-center gap-2.5 ${isDarkMode ? 'bg-slate-900 border-slate-800' : 'bg-slate-50 border-slate-200'}`}><span className="w-5 h-5 rounded-full bg-teal-600 text-white flex items-center justify-center font-bold text-[10px] shrink-0">1</span><span>Mở Manager Portal -&gt; Menu "Yêu cầu Tuyển dụng"</span></div>
                     <div className={`p-2.5 rounded-lg border flex items-center gap-2.5 ${isDarkMode ? 'bg-slate-900 border-slate-800' : 'bg-slate-50 border-slate-200'}`}><span className="w-5 h-5 rounded-full bg-teal-600 text-white flex items-center justify-center font-bold text-[10px] shrink-0">2</span><span>Chọn chức danh từ Job Catalog (Hệ thống load sẵn JD chuẩn)</span></div>
                     <div className={`p-2.5 rounded-lg border flex items-center gap-2.5 ${isDarkMode ? 'bg-slate-900 border-slate-800' : 'bg-slate-50 border-slate-200'}`}><span className="w-5 h-5 rounded-full bg-teal-600 text-white flex items-center justify-center font-bold text-[10px] shrink-0">3</span><span>Nhập số lượng, ngày cần nhận việc & dải ngân sách lương đề xuất</span></div>
-                    <div className={`p-2.5 rounded-lg border flex items-center gap-2.5 ${isDarkMode ? 'bg-slate-900 border-slate-800' : 'bg-slate-50 border-slate-200'}`}><span className="w-5 h-5 rounded-full bg-teal-600 text-white flex items-center justify-center font-bold text-[10px] shrink-0">4</span><span>Kiểm tra đối soát định biên tự động $\rightarrow$ Bấm Gửi Trình Duyệt</span></div>
+                    <div className={`p-2.5 rounded-lg border flex items-center gap-2.5 ${isDarkMode ? 'bg-slate-900 border-slate-800' : 'bg-slate-50 border-slate-200'}`}><span className="w-5 h-5 rounded-full bg-teal-600 text-white flex items-center justify-center font-bold text-[10px] shrink-0">4</span><span>Kiểm tra đối soát định biên tự động -&gt; Bấm Gửi Trình Duyệt</span></div>
                   </div>
                 </div>
 
@@ -396,7 +396,7 @@ export const SopInfographicFlowView: React.FC<SopInfographicFlowViewProps> = ({
                 </div>
                 <div className="p-4 rounded-xl bg-amber-500/10 border border-amber-500/30 space-y-2">
                   <div className="flex items-center gap-2 text-amber-600 dark:text-amber-400 font-extrabold uppercase"><AlertTriangle className="w-4.5 h-4.5" /><span>Trạng thái [Từ Chối / Yêu Cầu Tờ Trình People Cost]</span></div>
-                  <p className="text-slate-700 dark:text-slate-200 font-medium leading-relaxed">Yêu cầu tuyển dụng vượt định biên hoặc ngân sách chưa được chấp thuận $\rightarrow$ TBP cần bổ sung giải trình hiệu quả kinh doanh trước khi trình BOM duyệt lại.</p>
+                  <p className="text-slate-700 dark:text-slate-200 font-medium leading-relaxed">Yêu cầu tuyển dụng vượt định biên hoặc ngân sách chưa được chấp thuận -&gt; TBP cần bổ sung giải trình hiệu quả kinh doanh trước khi trình BOM duyệt lại.</p>
                 </div>
               </div>
 
@@ -528,7 +528,7 @@ export const SopInfographicFlowView: React.FC<SopInfographicFlowViewProps> = ({
                 <div className="space-y-2">
                   <span className="font-bold uppercase text-[11px] sm:text-xs text-teal-600 dark:text-teal-400 block">{language === 'vi' ? '4 Bước Thực hiện Đánh giá:' : '4 Steps in Evaluation Process:'}</span>
                   <div className="space-y-1.5 font-medium">
-                    <div className={`p-2.5 rounded-lg border flex items-center gap-2.5 ${isDarkMode ? 'bg-slate-900 border-slate-800' : 'bg-slate-50 border-slate-200'}`}><span className="w-5 h-5 rounded-full bg-teal-600 text-white flex items-center justify-center font-bold text-[10px] shrink-0">1</span><span>Nhân viên mở Employee Portal $\rightarrow$ Điền Phiếu tự đánh giá thử việc</span></div>
+                    <div className={`p-2.5 rounded-lg border flex items-center gap-2.5 ${isDarkMode ? 'bg-slate-900 border-slate-800' : 'bg-slate-50 border-slate-200'}`}><span className="w-5 h-5 rounded-full bg-teal-600 text-white flex items-center justify-center font-bold text-[10px] shrink-0">1</span><span>Nhân viên mở Employee Portal -&gt; Điền Phiếu tự đánh giá thử việc</span></div>
                     <div className={`p-2.5 rounded-lg border flex items-center gap-2.5 ${isDarkMode ? 'bg-slate-900 border-slate-800' : 'bg-slate-50 border-slate-200'}`}><span className="w-5 h-5 rounded-full bg-teal-600 text-white flex items-center justify-center font-bold text-[10px] shrink-0">2</span><span>Trưởng bộ phận (TBP) chấm điểm KPI theo thang điểm 100</span></div>
                     <div className={`p-2.5 rounded-lg border flex items-center gap-2.5 ${isDarkMode ? 'bg-slate-900 border-slate-800' : 'bg-slate-50 border-slate-200'}`}><span className="w-5 h-5 rounded-full bg-teal-600 text-white flex items-center justify-center font-bold text-[10px] shrink-0">3</span><span>TBP chọn đề xuất: Đạt (Tái ký HĐLĐ) / Gia hạn / Không đạt</span></div>
                     <div className={`p-2.5 rounded-lg border flex items-center gap-2.5 ${isDarkMode ? 'bg-slate-900 border-slate-800' : 'bg-slate-50 border-slate-200'}`}><span className="w-5 h-5 rounded-full bg-teal-600 text-white flex items-center justify-center font-bold text-[10px] shrink-0">4</span><span>Hệ thống tự động phân luồng rẽ nhánh trình duyệt HRD & BOM</span></div>
@@ -575,7 +575,7 @@ export const SopInfographicFlowView: React.FC<SopInfographicFlowViewProps> = ({
                     <span className="font-extrabold text-emerald-600 dark:text-emerald-400">ĐẠT XUẤT SẮC / TỐT</span>
                   </div>
                   <p className="text-slate-700 dark:text-slate-200 font-medium leading-relaxed">
-                    Tự động sinh <strong>HĐLĐ chính thức 12 hoặc 24 tháng</strong> $\rightarrow$ Ban Giám Đốc ký số $\rightarrow$ Tự động trích xuất thông tin <strong>Báo tăng BHXH (INS02)</strong> và áp lương 100%.
+                    Tự động sinh <strong>HĐLĐ chính thức 12 hoặc 24 tháng</strong> -&gt; Ban Giám Đốc ký số -&gt; Tự động trích xuất thông tin <strong>Báo tăng BHXH (INS02)</strong> và áp lương 100%.
                   </p>
                 </div>
 
@@ -586,7 +586,7 @@ export const SopInfographicFlowView: React.FC<SopInfographicFlowViewProps> = ({
                     <span className="font-extrabold text-amber-600 dark:text-amber-400">CẦN CẢI THIỆN</span>
                   </div>
                   <p className="text-slate-700 dark:text-slate-200 font-medium leading-relaxed">
-                    Gia hạn thử việc thêm <strong>tối đa 30 ngày</strong> (nếu chức danh cho phép) $\rightarrow$ TBP lập Kế hoạch cải thiện hiệu suất (PIP) và tái đánh giá lần 2.
+                    Gia hạn thử việc thêm <strong>tối đa 30 ngày</strong> (nếu chức danh cho phép) -&gt; TBP lập Kế hoạch cải thiện hiệu suất (PIP) và tái đánh giá lần 2.
                   </p>
                 </div>
 
@@ -597,7 +597,7 @@ export const SopInfographicFlowView: React.FC<SopInfographicFlowViewProps> = ({
                     <span className="font-extrabold text-rose-600 dark:text-rose-400">KHÔNG ĐẠT</span>
                   </div>
                   <p className="text-slate-700 dark:text-slate-200 font-medium leading-relaxed">
-                    Ban hành <strong>Thông báo chấm dứt thử việc</strong> trước ngày hết hạn 03 ngày $\rightarrow$ Thanh toán 85% lương ngày công thực tế và đóng hồ sơ nhân viên.
+                    Ban hành <strong>Thông báo chấm dứt thử việc</strong> trước ngày hết hạn 03 ngày -&gt; Thanh toán 85% lương ngày công thực tế và đóng hồ sơ nhân viên.
                   </p>
                 </div>
               </div>
@@ -653,7 +653,7 @@ export const SopInfographicFlowView: React.FC<SopInfographicFlowViewProps> = ({
                   <span>LƯU Ý TỐI QUAN TRỌNG VỀ QUY ĐỊNH THỬ VIỆC (LUẬT LAO ĐỘNG):</span>
                 </div>
                 <p className="text-xs sm:text-sm font-bold leading-relaxed text-rose-100">
-                  Phải hoàn tất đánh giá và ký HĐLĐ chính thức TRƯỚC KHI HẾT HẠN THỬ VIỆC. Nếu để nhân viên tiếp tục làm việc mà không ký HĐ mới $\rightarrow$ HĐ mặc nhiên chuyển thành Hợp đồng lao động chính thức theo quy định pháp luật.
+                  Phải hoàn tất đánh giá và ký HĐLĐ chính thức TRƯỚC KHI HẾT HẠN THỬ VIỆC. Nếu để nhân viên tiếp tục làm việc mà không ký HĐ mới -&gt; HĐ mặc nhiên chuyển thành Hợp đồng lao động chính thức theo quy định pháp luật.
                 </p>
               </div>
             </div>
@@ -695,17 +695,17 @@ export const SopInfographicFlowView: React.FC<SopInfographicFlowViewProps> = ({
                     <tr className="hover:bg-slate-50 dark:hover:bg-slate-900/50 transition-colors">
                       <td className="p-3 font-bold text-emerald-600 dark:text-emerald-400">1. Tăng Lương Định Kỳ theo Khung Bậc (Merit Increase)</td>
                       <td className="p-3"><span className="px-2.5 py-1 rounded-lg font-bold text-xs bg-emerald-50 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800">Nằm trong khung ngạch bậc hiện tại & KPI $\ge$ B</span></td>
-                      <td className="p-3 text-slate-700 dark:text-slate-300 font-semibold">TBP $\rightarrow$ C&B thẩm định $\rightarrow$ HRD phê duyệt</td>
+                      <td className="p-3 text-slate-700 dark:text-slate-300 font-semibold">TBP -&gt; C&B thẩm định -&gt; HRD phê duyệt</td>
                     </tr>
                     <tr className="hover:bg-slate-50 dark:hover:bg-slate-900/50 transition-colors">
                       <td className="p-3 font-bold text-amber-600 dark:text-amber-400">2. Tăng Lương Vượt Khung / Đột Xuất (Out-of-Grade)</td>
                       <td className="p-3"><span className="px-2.5 py-1 rounded-lg font-bold text-xs bg-amber-50 dark:bg-amber-950 text-amber-700 dark:text-amber-300 border border-amber-200 dark:border-amber-800">Mức đề xuất vượt trần ngạch bậc hiện tại</span></td>
-                      <td className="p-3 text-amber-700 dark:text-amber-300 font-semibold">Bắt buộc có Tờ trình People Cost $\rightarrow$ Ban Giám Đốc (BOM) phê duyệt</td>
+                      <td className="p-3 text-amber-700 dark:text-amber-300 font-semibold">Bắt buộc có Tờ trình People Cost -&gt; Ban Giám Đốc (BOM) phê duyệt</td>
                     </tr>
                     <tr className="hover:bg-slate-50 dark:hover:bg-slate-900/50 transition-colors">
                       <td className="p-3 font-bold text-purple-600 dark:text-purple-400">3. Bổ Nhiệm Thăng Chức Quản Lý (Promotion)</td>
                       <td className="p-3"><span className="px-2.5 py-1 rounded-lg font-bold text-xs bg-purple-50 dark:bg-purple-950 text-purple-700 dark:text-purple-300 border border-purple-200 dark:border-purple-800">Chuyển nhóm Job Grade & Thêm Phụ cấp trách nhiệm</span></td>
-                      <td className="p-3 text-purple-700 dark:text-purple-300 font-semibold">BOM phê duyệt Quyết định Bổ nhiệm $\rightarrow$ Tự động cập nhật Org Chart</td>
+                      <td className="p-3 text-purple-700 dark:text-purple-300 font-semibold">BOM phê duyệt Quyết định Bổ nhiệm -&gt; Tự động cập nhật Org Chart</td>
                     </tr>
                   </tbody>
                 </table>
@@ -775,10 +775,10 @@ export const SopInfographicFlowView: React.FC<SopInfographicFlowViewProps> = ({
                 <div className="space-y-2">
                   <span className="font-bold uppercase text-[11px] sm:text-xs text-teal-600 dark:text-teal-400 block">{language === 'vi' ? '4 Bước Lập Đề Xuất:' : '4 Steps to Submit Request:'}</span>
                   <div className="space-y-1.5 font-medium">
-                    <div className={`p-2.5 rounded-lg border flex items-center gap-2.5 ${isDarkMode ? 'bg-slate-900 border-slate-800' : 'bg-slate-50 border-slate-200'}`}><span className="w-5 h-5 rounded-full bg-teal-600 text-white flex items-center justify-center font-bold text-[10px] shrink-0">1</span><span>Mở Manager Portal $\rightarrow$ Menu "Đề xuất Tăng lương / Bổ nhiệm"</span></div>
-                    <div className={`p-2.5 rounded-lg border flex items-center gap-2.5 ${isDarkMode ? 'bg-slate-900 border-slate-800' : 'bg-slate-50 border-slate-200'}`}><span className="w-5 h-5 rounded-full bg-teal-600 text-white flex items-center justify-center font-bold text-[10px] shrink-0">2</span><span>Chọn nhân viên $\rightarrow$ Hệ thống tự load Mức lương hiện tại & Lịch sử KPI</span></div>
+                    <div className={`p-2.5 rounded-lg border flex items-center gap-2.5 ${isDarkMode ? 'bg-slate-900 border-slate-800' : 'bg-slate-50 border-slate-200'}`}><span className="w-5 h-5 rounded-full bg-teal-600 text-white flex items-center justify-center font-bold text-[10px] shrink-0">1</span><span>Mở Manager Portal -&gt; Menu "Đề xuất Tăng lương / Bổ nhiệm"</span></div>
+                    <div className={`p-2.5 rounded-lg border flex items-center gap-2.5 ${isDarkMode ? 'bg-slate-900 border-slate-800' : 'bg-slate-50 border-slate-200'}`}><span className="w-5 h-5 rounded-full bg-teal-600 text-white flex items-center justify-center font-bold text-[10px] shrink-0">2</span><span>Chọn nhân viên -&gt; Hệ thống tự load Mức lương hiện tại & Lịch sử KPI</span></div>
                     <div className={`p-2.5 rounded-lg border flex items-center gap-2.5 ${isDarkMode ? 'bg-slate-900 border-slate-800' : 'bg-slate-50 border-slate-200'}`}><span className="w-5 h-5 rounded-full bg-teal-600 text-white flex items-center justify-center font-bold text-[10px] shrink-0">3</span><span>Nhập mức lương mới đề xuất, chọn chức vụ mới và ghi rõ thành tích</span></div>
-                    <div className={`p-2.5 rounded-lg border flex items-center gap-2.5 ${isDarkMode ? 'bg-slate-900 border-slate-800' : 'bg-slate-50 border-slate-200'}`}><span className="w-5 h-5 rounded-full bg-teal-600 text-white flex items-center justify-center font-bold text-[10px] shrink-0">4</span><span>Kiểm tra đối soát ngân sách quỹ lương $\rightarrow$ Bấm Gửi Trình Duyệt</span></div>
+                    <div className={`p-2.5 rounded-lg border flex items-center gap-2.5 ${isDarkMode ? 'bg-slate-900 border-slate-800' : 'bg-slate-50 border-slate-200'}`}><span className="w-5 h-5 rounded-full bg-teal-600 text-white flex items-center justify-center font-bold text-[10px] shrink-0">4</span><span>Kiểm tra đối soát ngân sách quỹ lương -&gt; Bấm Gửi Trình Duyệt</span></div>
                   </div>
                 </div>
 
@@ -821,7 +821,7 @@ export const SopInfographicFlowView: React.FC<SopInfographicFlowViewProps> = ({
                     <span className="font-extrabold text-emerald-600 dark:text-emerald-400">LUỒNG NHANH</span>
                   </div>
                   <p className="text-slate-700 dark:text-slate-200 font-medium leading-relaxed">
-                    C&B thẩm định $\rightarrow$ <strong>Trưởng phòng Nhân sự (HRD) ký duyệt</strong> $\rightarrow$ Tự động sinh Phụ lục HĐLĐ và cập nhật mức lương mới vào Bảng lương PAY01 kỳ kế tiếp.
+                    C&B thẩm định -&gt; <strong>Trưởng phòng Nhân sự (HRD) ký duyệt</strong> -&gt; Tự động sinh Phụ lục HĐLĐ và cập nhật mức lương mới vào Bảng lương PAY01 kỳ kế tiếp.
                   </p>
                 </div>
 
@@ -831,7 +831,7 @@ export const SopInfographicFlowView: React.FC<SopInfographicFlowViewProps> = ({
                     <span className="font-extrabold text-amber-600 dark:text-amber-400">TRÌNH DUYỆT BOM</span>
                   </div>
                   <p className="text-slate-700 dark:text-slate-200 font-medium leading-relaxed">
-                    TBP $\rightarrow$ C&B thẩm định $\rightarrow$ <strong>Ban Giám Đốc (BOM) ký Quyết định</strong> $\rightarrow$ Tự động cập nhật Sơ đồ tổ chức (Org Chart), phân quyền duyệt và áp lương mới.
+                    TBP -&gt; C&B thẩm định -&gt; <strong>Ban Giám Đốc (BOM) ký Quyết định</strong> -&gt; Tự động cập nhật Sơ đồ tổ chức (Org Chart), phân quyền duyệt và áp lương mới.
                   </p>
                 </div>
               </div>
@@ -877,7 +877,7 @@ export const SopInfographicFlowView: React.FC<SopInfographicFlowViewProps> = ({
                 </div>
                 <div className="p-4 rounded-xl bg-amber-500/10 border border-amber-500/30 space-y-2">
                   <div className="flex items-center gap-2 text-amber-600 dark:text-amber-400 font-extrabold uppercase"><AlertTriangle className="w-4.5 h-4.5" /><span>Trạng thái [Từ Chối / Vượt Ngân Sách]</span></div>
-                  <p className="text-slate-700 dark:text-slate-200 font-medium leading-relaxed">Đề xuất chưa được chấp thuận do vượt ngân sách hoặc chưa đủ điều kiện thâm niên $\rightarrow$ Giữ nguyên mức thu nhập cũ.</p>
+                  <p className="text-slate-700 dark:text-slate-200 font-medium leading-relaxed">Đề xuất chưa được chấp thuận do vượt ngân sách hoặc chưa đủ điều kiện thâm niên -&gt; Giữ nguyên mức thu nhập cũ.</p>
                 </div>
               </div>
 
@@ -1009,7 +1009,7 @@ export const SopInfographicFlowView: React.FC<SopInfographicFlowViewProps> = ({
                 <div className="space-y-2">
                   <span className="font-bold uppercase text-[11px] sm:text-xs text-teal-600 dark:text-teal-400 block">{language === 'vi' ? '4 Bước Nộp Đơn & Khởi Động Bàn Giao:' : '4 Steps in Offboarding Process:'}</span>
                   <div className="space-y-1.5 font-medium">
-                    <div className={`p-2.5 rounded-lg border flex items-center gap-2.5 ${isDarkMode ? 'bg-slate-900 border-slate-800' : 'bg-slate-50 border-slate-200'}`}><span className="w-5 h-5 rounded-full bg-teal-600 text-white flex items-center justify-center font-bold text-[10px] shrink-0">1</span><span>Nhân viên mở App/Portal $\rightarrow$ Menu "Đăng ký Thôi việc"</span></div>
+                    <div className={`p-2.5 rounded-lg border flex items-center gap-2.5 ${isDarkMode ? 'bg-slate-900 border-slate-800' : 'bg-slate-50 border-slate-200'}`}><span className="w-5 h-5 rounded-full bg-teal-600 text-white flex items-center justify-center font-bold text-[10px] shrink-0">1</span><span>Nhân viên mở App/Portal -&gt; Menu "Đăng ký Thôi việc"</span></div>
                     <div className={`p-2.5 rounded-lg border flex items-center gap-2.5 ${isDarkMode ? 'bg-slate-900 border-slate-800' : 'bg-slate-50 border-slate-200'}`}><span className="w-5 h-5 rounded-full bg-teal-600 text-white flex items-center justify-center font-bold text-[10px] shrink-0">2</span><span>Chọn lý do nghỉ & chọn Ngày làm việc cuối cùng theo luật định</span></div>
                     <div className={`p-2.5 rounded-lg border flex items-center gap-2.5 ${isDarkMode ? 'bg-slate-900 border-slate-800' : 'bg-slate-50 border-slate-200'}`}><span className="w-5 h-5 rounded-full bg-teal-600 text-white flex items-center justify-center font-bold text-[10px] shrink-0">3</span><span>Hoàn thành bài Khảo sát phỏng vấn nghỉ việc (Exit Interview)</span></div>
                     <div className={`p-2.5 rounded-lg border flex items-center gap-2.5 ${isDarkMode ? 'bg-slate-900 border-slate-800' : 'bg-slate-50 border-slate-200'}`}><span className="w-5 h-5 rounded-full bg-teal-600 text-white flex items-center justify-center font-bold text-[10px] shrink-0">4</span><span>Hệ thống tự động kích hoạt Checklist Bàn giao 4 Bên</span></div>
@@ -1093,7 +1093,7 @@ export const SopInfographicFlowView: React.FC<SopInfographicFlowViewProps> = ({
                 </div>
                 <div className="p-4 rounded-xl bg-amber-500/10 border border-amber-500/30 space-y-2">
                   <div className="flex items-center gap-2 text-amber-600 dark:text-amber-400 font-extrabold uppercase"><AlertTriangle className="w-4.5 h-4.5" /><span>Trạng thái [Treo Bàn Giao / Chưa Hoàn Tài Sản]</span></div>
-                  <p className="text-slate-700 dark:text-slate-200 font-medium leading-relaxed">Nếu chưa bàn giao máy tính IT hoặc chưa hoàn ứng công nợ $\rightarrow$ Hệ thống tạm giữ khoản tiền quyết toán thôi việc cho đến khi có xác nhận bổ sung.</p>
+                  <p className="text-slate-700 dark:text-slate-200 font-medium leading-relaxed">Nếu chưa bàn giao máy tính IT hoặc chưa hoàn ứng công nợ -&gt; Hệ thống tạm giữ khoản tiền quyết toán thôi việc cho đến khi có xác nhận bổ sung.</p>
                 </div>
               </div>
 
@@ -1218,10 +1218,10 @@ export const SopInfographicFlowView: React.FC<SopInfographicFlowViewProps> = ({
                 <div className="space-y-2">
                   <span className="font-bold uppercase text-[11px] sm:text-xs text-teal-600 dark:text-teal-400 block">{language === 'vi' ? '4 Bước Thao tác trên App:' : '4 App Operating Steps:'}</span>
                   <div className="space-y-1.5 font-medium">
-                    <div className={`p-2.5 rounded-lg border flex items-center gap-2.5 ${isDarkMode ? 'bg-slate-900 border-slate-800' : 'bg-slate-50 border-slate-200'}`}><span className="w-5 h-5 rounded-full bg-teal-600 text-white flex items-center justify-center font-bold text-[10px] shrink-0">1</span><span>Mở App HRMS $\rightarrow$ Đăng nhập tài khoản cá nhân</span></div>
+                    <div className={`p-2.5 rounded-lg border flex items-center gap-2.5 ${isDarkMode ? 'bg-slate-900 border-slate-800' : 'bg-slate-50 border-slate-200'}`}><span className="w-5 h-5 rounded-full bg-teal-600 text-white flex items-center justify-center font-bold text-[10px] shrink-0">1</span><span>Mở App HRMS -&gt; Đăng nhập tài khoản cá nhân</span></div>
                     <div className={`p-2.5 rounded-lg border flex items-center gap-2.5 ${isDarkMode ? 'bg-slate-900 border-slate-800' : 'bg-slate-50 border-slate-200'}`}><span className="w-5 h-5 rounded-full bg-teal-600 text-white flex items-center justify-center font-bold text-[10px] shrink-0">2</span><span>Chọn tính năng "Đăng ký Làm thêm giờ / Tăng ca (OT)"</span></div>
                     <div className={`p-2.5 rounded-lg border flex items-center gap-2.5 ${isDarkMode ? 'bg-slate-900 border-slate-800' : 'bg-slate-50 border-slate-200'}`}><span className="w-5 h-5 rounded-full bg-teal-600 text-white flex items-center justify-center font-bold text-[10px] shrink-0">3</span><span>Khai báo 6 trường bắt buộc (Khung giờ, hình thức nhận)</span></div>
-                    <div className={`p-2.5 rounded-lg border flex items-center gap-2.5 ${isDarkMode ? 'bg-slate-900 border-slate-800' : 'bg-slate-50 border-slate-200'}`}><span className="w-5 h-5 rounded-full bg-teal-600 text-white flex items-center justify-center font-bold text-[10px] shrink-0">4</span><span>Kiểm tra lại thông tin $\rightarrow$ Bấm Gửi Đơn</span></div>
+                    <div className={`p-2.5 rounded-lg border flex items-center gap-2.5 ${isDarkMode ? 'bg-slate-900 border-slate-800' : 'bg-slate-50 border-slate-200'}`}><span className="w-5 h-5 rounded-full bg-teal-600 text-white flex items-center justify-center font-bold text-[10px] shrink-0">4</span><span>Kiểm tra lại thông tin -&gt; Bấm Gửi Đơn</span></div>
                   </div>
                 </div>
 
@@ -1295,7 +1295,7 @@ export const SopInfographicFlowView: React.FC<SopInfographicFlowViewProps> = ({
                 </div>
                 <div className="p-4 rounded-xl bg-amber-500/10 border border-amber-500/30 space-y-2">
                   <div className="flex items-center gap-2 text-amber-600 dark:text-amber-400 font-extrabold uppercase"><AlertTriangle className="w-4.5 h-4.5" /><span>Trạng thái [Không Khớp Giờ Quét Thẻ / Từ Chối]</span></div>
-                  <p className="text-slate-700 dark:text-slate-200 font-medium leading-relaxed">Nếu giờ quét vân tay thực tế không đủ hoặc bị Quản lý từ chối $\rightarrow$ Đơn không hợp lệ, không phát sinh chi phí làm thêm giờ.</p>
+                  <p className="text-slate-700 dark:text-slate-200 font-medium leading-relaxed">Nếu giờ quét vân tay thực tế không đủ hoặc bị Quản lý từ chối -&gt; Đơn không hợp lệ, không phát sinh chi phí làm thêm giờ.</p>
                 </div>
               </div>
 
@@ -1406,10 +1406,10 @@ export const SopInfographicFlowView: React.FC<SopInfographicFlowViewProps> = ({
                 <div className="space-y-2">
                   <span className="font-bold uppercase text-[11px] sm:text-xs text-teal-600 dark:text-teal-400 block">{language === 'vi' ? '4 Bước Thao tác trên App:' : '4 App Operating Steps:'}</span>
                   <div className="space-y-1.5 font-medium">
-                    <div className={`p-2.5 rounded-lg border flex items-center gap-2.5 ${isDarkMode ? 'bg-slate-900 border-slate-800' : 'bg-slate-50 border-slate-200'}`}><span className="w-5 h-5 rounded-full bg-teal-600 text-white flex items-center justify-center font-bold text-[10px] shrink-0">1</span><span>Mở App HRMS $\rightarrow$ Đăng nhập tài khoản</span></div>
+                    <div className={`p-2.5 rounded-lg border flex items-center gap-2.5 ${isDarkMode ? 'bg-slate-900 border-slate-800' : 'bg-slate-50 border-slate-200'}`}><span className="w-5 h-5 rounded-full bg-teal-600 text-white flex items-center justify-center font-bold text-[10px] shrink-0">1</span><span>Mở App HRMS -&gt; Đăng nhập tài khoản</span></div>
                     <div className={`p-2.5 rounded-lg border flex items-center gap-2.5 ${isDarkMode ? 'bg-slate-900 border-slate-800' : 'bg-slate-50 border-slate-200'}`}><span className="w-5 h-5 rounded-full bg-teal-600 text-white flex items-center justify-center font-bold text-[10px] shrink-0">2</span><span>Chọn tính năng "Đăng ký nghỉ phép"</span></div>
                     <div className={`p-2.5 rounded-lg border flex items-center gap-2.5 ${isDarkMode ? 'bg-slate-900 border-slate-800' : 'bg-slate-50 border-slate-200'}`}><span className="w-5 h-5 rounded-full bg-teal-600 text-white flex items-center justify-center font-bold text-[10px] shrink-0">3</span><span>Khai báo 6 trường bắt buộc (xem cột bên phải)</span></div>
-                    <div className={`p-2.5 rounded-lg border flex items-center gap-2.5 ${isDarkMode ? 'bg-slate-900 border-slate-800' : 'bg-slate-50 border-slate-200'}`}><span className="w-5 h-5 rounded-full bg-teal-600 text-white flex items-center justify-center font-bold text-[10px] shrink-0">4</span><span>Kiểm tra lại thông tin $\rightarrow$ Bấm Gửi Đơn</span></div>
+                    <div className={`p-2.5 rounded-lg border flex items-center gap-2.5 ${isDarkMode ? 'bg-slate-900 border-slate-800' : 'bg-slate-50 border-slate-200'}`}><span className="w-5 h-5 rounded-full bg-teal-600 text-white flex items-center justify-center font-bold text-[10px] shrink-0">4</span><span>Kiểm tra lại thông tin -&gt; Bấm Gửi Đơn</span></div>
                   </div>
                 </div>
 
@@ -1483,7 +1483,7 @@ export const SopInfographicFlowView: React.FC<SopInfographicFlowViewProps> = ({
                 </div>
                 <div className="p-4 rounded-xl bg-amber-500/10 border border-amber-500/30 space-y-2">
                   <div className="flex items-center gap-2 text-amber-600 dark:text-amber-400 font-extrabold uppercase"><AlertTriangle className="w-4.5 h-4.5" /><span>Trạng thái [Từ Chối / Yêu Cầu Chỉnh Sửa]</span></div>
-                  <p className="text-slate-700 dark:text-slate-200 font-medium leading-relaxed">Xem chi tiết lý do từ chối trên App $\rightarrow$ Chỉnh sửa thông tin $\rightarrow$ Gửi lại chuỗi phê duyệt từ đầu.</p>
+                  <p className="text-slate-700 dark:text-slate-200 font-medium leading-relaxed">Xem chi tiết lý do từ chối trên App -&gt; Chỉnh sửa thông tin -&gt; Gửi lại chuỗi phê duyệt từ đầu.</p>
                 </div>
               </div>
 
