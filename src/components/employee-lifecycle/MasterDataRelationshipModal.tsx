@@ -1,6 +1,5 @@
 import React, { useEffect } from 'react'
 import { X, Network, UserCheck, Briefcase, FileText, ArrowRight, ShieldCheck, Database, Layers, ScrollText } from 'lucide-react'
-import type { ERDCluster } from '../../types/employee-lifecycle'
 import { useLanguage } from '../../context/LanguageContext'
 
 interface MasterDataRelationshipModalProps {

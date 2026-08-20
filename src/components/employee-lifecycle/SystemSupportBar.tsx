@@ -7,54 +7,6 @@ interface SystemSupportBarProps {
   onSelectUtility?: (id: string) => void
 }
 
-const defaultUtilities: SystemSupportUtility[] = [
-  {
-    id: 'SUPPORT-01',
-    code: 'SUP-01',
-    title: 'Phân quyền người dùng',
-    subtitle: 'RBAC & Phân vai trò',
-    iconName: 'Lock',
-    description: 'Kiểm soát quyền truy cập chi tiết từng trường dữ liệu & chức năng',
-    features: ['Ma trận phân quyền', 'Phân nhóm role', 'Bảo mật dữ liệu']
-  },
-  {
-    id: 'SUPPORT-02',
-    code: 'SUP-02',
-    title: 'Phê duyệt nghiệp vụ',
-    subtitle: 'Multi-level Workflow',
-    iconName: 'ShieldCheck',
-    description: 'Luồng phê duyệt nhiều cấp cho hợp đồng, lương & biến động',
-    features: ['Duyệt song song', 'Duyệt nối tiếp', 'Ủy quyền phê duyệt']
-  },
-  {
-    id: 'SUPPORT-03',
-    code: 'SUP-03',
-    title: 'Cảnh báo & Nhắc việc',
-    subtitle: 'Automated Alerts',
-    iconName: 'Bell',
-    description: 'Cảnh báo hết hạn hợp đồng, thời hạn thử việc & sinh nhật nhân viên',
-    features: ['Thông báo Email', 'In-app Alert', 'Lịch nhắc tự động']
-  },
-  {
-    id: 'SUPPORT-04',
-    code: 'SUP-04',
-    title: 'Tra cứu & Import',
-    subtitle: 'Bulk Data Tools',
-    iconName: 'FileSpreadsheet',
-    description: 'Tìm kiếm nhân viên nâng cao, import/export dữ liệu Excel hàng loạt',
-    features: ['Smart Search', 'Excel Mapping', 'Kiểm tra trùng lặp']
-  },
-  {
-    id: 'SUPPORT-05',
-    code: 'SUP-05',
-    title: 'Báo cáo & Audit Log',
-    subtitle: 'Analytics & Audit',
-    iconName: 'BarChart3',
-    description: 'Báo cáo quản trị nhân sự tổng hợp & vết lịch sử thay đổi hệ thống',
-    features: ['Báo cáo biến động', 'Nhật ký truy cập', 'Vết lịch sử dữ liệu']
-  }
-]
-
 const getUtilityIcon = (id: string) => {
   switch (id) {
     case 'SUPPORT-01': return <Lock className="w-4 h-4" />

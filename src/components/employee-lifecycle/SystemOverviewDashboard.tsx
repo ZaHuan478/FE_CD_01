@@ -4,7 +4,6 @@ import {
   Database,
   GitBranch,
   ShieldCheck,
-  ArrowRight,
   TrendingUp,
   Activity,
   CheckCircle2,

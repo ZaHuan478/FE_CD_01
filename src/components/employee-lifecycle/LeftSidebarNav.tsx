@@ -8,11 +8,7 @@ import {
   ChevronLeft,
   ChevronRight,
   ShieldCheck,
-  FileText,
-  Sparkles,
-  Users,
-  Activity,
-  Award
+  Sparkles
 } from 'lucide-react'
 import { useLanguage } from '../../context/LanguageContext'
 

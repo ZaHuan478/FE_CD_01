@@ -1,5 +1,5 @@
-import React, { useState } from 'react'
-import { ChevronDown, ChevronUp, ArrowRight, Sparkles, CheckCircle2, FileText, UserCheck, Filter, Link2 } from 'lucide-react'
+import React, { useState, useEffect } from 'react'
+import { ChevronDown, ChevronUp, ArrowRight, Filter, Link2 } from 'lucide-react'
 import type { LifecycleStep } from '../../types/employee-lifecycle'
 import { useLanguage } from '../../context/LanguageContext'
 import { CLUSTERS, getStepIcon } from './data/lifecycleClustersData.tsx'
@@ -142,9 +142,30 @@ export const LifecycleStepper: React.FC<LifecycleStepperProps> = ({
   const { language, t } = useLanguage()
   const [isExpanded, setIsExpanded] = useState<boolean>(true)
   const [selectedModuleFilter, setSelectedModuleFilter] = useState<string>('ALL')
+  const [previewStepId, setPreviewStepId] = useState<string>(activeStepId || (steps[0]?.id ?? 'LIFE-01'))
 
-  const activeStep = steps.find((s) => s.id === activeStepId) || steps[0]
-  const activeModInfo = STEP_MODULE_MAP[activeStep.id]
+  // Sync preview step when activeStepId prop changes
+  useEffect(() => {
+    if (activeStepId) {
+      setPreviewStepId(activeStepId)
+    }
+  }, [activeStepId])
+
+  const activeStep = steps.find((s) => s.id === previewStepId) || steps[0]
+  const activeModInfo = STEP_MODULE_MAP[activeStep?.id || 'LIFE-01']
+  const currentStepIdx = steps.findIndex((s) => s.id === activeStep?.id)
+
+  const handlePrevStep = () => {
+    if (currentStepIdx > 0) {
+      setPreviewStepId(steps[currentStepIdx - 1].id)
+    }
+  }
+
+  const handleNextStep = () => {
+    if (currentStepIdx < steps.length - 1) {
+      setPreviewStepId(steps[currentStepIdx + 1].id)
+    }
+  }
 
   // Filter steps based on selected module filter option
   const activeFilterOpt = MODULE_FILTER_OPTIONS.find((m) => m.id === selectedModuleFilter)
@@ -154,7 +175,7 @@ export const LifecycleStepper: React.FC<LifecycleStepperProps> = ({
   }
 
   return (
-    <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200/80 dark:border-slate-800 shadow-sm p-4 sm:p-6 space-y-4 transition-all duration-300 hover:shadow-md">
+    <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200/80 dark:border-slate-800 shadow-sm p-4 sm:p-6 space-y-5 transition-all duration-300 hover:shadow-md">
       
       {/* HEADER BAR */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-100 dark:border-slate-800 pb-4">
@@ -164,7 +185,7 @@ export const LifecycleStepper: React.FC<LifecycleStepperProps> = ({
               Layer 2 · Main Pipeline Flow
             </span>
             <span className="text-xs text-slate-500 dark:text-slate-400 font-medium">
-              {language === 'vi' ? '7 Bước Vòng đời Liên hoàn · Phân định Phân hệ HR' : '7 Continuous Lifecycle Steps · HR Modules Mapped'}
+              {language === 'vi' ? '7 Bước Vòng đời Liên hoàn · Master-Detail Tương tác' : '7 Continuous Lifecycle Steps · Interactive Master-Detail'}
             </span>
           </div>
           <h2 className="text-base sm:text-lg font-bold text-slate-900 dark:text-white tracking-tight">
@@ -217,7 +238,7 @@ export const LifecycleStepper: React.FC<LifecycleStepperProps> = ({
 
       {/* EXPANDABLE PIPELINE CONTENT */}
       {isExpanded && (
-        <div className="pt-1 animate-fadeIn space-y-4">
+        <div className="pt-1 animate-fadeIn space-y-5">
           <div className="overflow-x-auto no-scrollbar py-2">
             <div className="min-w-[1020px] lg:min-w-0 relative">
 
@@ -249,7 +270,7 @@ export const LifecycleStepper: React.FC<LifecycleStepperProps> = ({
                       {/* Step Cards inside Cluster */}
                       <div className={`grid ${cluster.subGridCols} gap-2.5 sm:gap-3 items-stretch h-full`}>
                         {clusterSteps.map((step) => {
-                          const isActive = activeStepId === step.id
+                          const isSelected = previewStepId === step.id
                           const stepIcon = getStepIcon(step.id)
                           const mod = STEP_MODULE_MAP[step.id]
                           const isHighlighted = isStepHighlighted(step.id)
@@ -258,18 +279,18 @@ export const LifecycleStepper: React.FC<LifecycleStepperProps> = ({
                             <div key={step.id} className="flex flex-col group">
                               <button
                                 type="button"
-                                onClick={() => onSelectStep(step.id)}
+                                onClick={() => setPreviewStepId(step.id)}
                                 className={`w-full h-full min-h-[175px] flex flex-col justify-between items-center text-center p-3 rounded-2xl border transition-all duration-200 cursor-pointer ${!isHighlighted
                                     ? 'opacity-35 grayscale hover:grayscale-0 hover:opacity-100 bg-slate-50 dark:bg-slate-950 border-slate-200 dark:border-slate-800'
-                                    : isActive
-                                      ? 'bg-blue-600 text-white border-blue-600 shadow-md transform -translate-y-1 ring-2 ring-blue-400'
+                                    : isSelected
+                                      ? 'bg-blue-600 text-white border-blue-600 shadow-lg transform -translate-y-1.5 ring-3 ring-blue-400/50 scale-[1.02]'
                                       : 'bg-white dark:bg-slate-900 hover:bg-blue-50/40 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-200 border-slate-200/90 dark:border-slate-800 hover:border-blue-400 dark:hover:border-blue-700 hover:shadow-md hover:-translate-y-1 shadow-2xs'
                                   }`}
                               >
                                 {/* Top Module Tag Badge */}
                                 {mod && (
                                   <span
-                                    className={`px-2 py-0.5 text-[9px] font-extrabold uppercase tracking-wider rounded-md border truncate max-w-full ${isActive
+                                    className={`px-2 py-0.5 text-[9px] font-extrabold uppercase tracking-wider rounded-md border truncate max-w-full ${isSelected
                                         ? 'bg-white/20 text-white border-white/30'
                                         : `${mod.bg} ${mod.color} ${mod.border}`
                                       }`}
@@ -280,7 +301,7 @@ export const LifecycleStepper: React.FC<LifecycleStepperProps> = ({
 
                                 {/* Icon Container */}
                                 <div
-                                  className={`w-9 h-9 rounded-xl flex items-center justify-center font-bold text-xs my-2 transition-colors shrink-0 ${isActive
+                                  className={`w-9 h-9 rounded-xl flex items-center justify-center font-bold text-xs my-2 transition-colors shrink-0 ${isSelected
                                       ? 'bg-white/20 text-white border border-white/30'
                                       : 'bg-slate-50 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-200/80 dark:border-slate-700'
                                     }`}
@@ -291,13 +312,13 @@ export const LifecycleStepper: React.FC<LifecycleStepperProps> = ({
                                 {/* Step Number & Title */}
                                 <div>
                                   <span
-                                    className={`text-[10px] font-extrabold uppercase tracking-wider block ${isActive ? 'text-blue-100' : 'text-slate-400 dark:text-slate-500'
+                                    className={`text-[10px] font-extrabold uppercase tracking-wider block ${isSelected ? 'text-blue-100' : 'text-slate-400 dark:text-slate-500'
                                       }`}
                                   >
                                     Bước {step.stepNumber} · {step.id}
                                   </span>
                                   <h4
-                                    className={`text-xs font-bold leading-tight line-clamp-2 mt-0.5 ${isActive ? 'text-white' : 'text-slate-900 dark:text-white'
+                                    className={`text-xs font-bold leading-tight line-clamp-2 mt-0.5 ${isSelected ? 'text-white' : 'text-slate-900 dark:text-white'
                                       }`}
                                   >
                                     {step.title}
@@ -307,7 +328,7 @@ export const LifecycleStepper: React.FC<LifecycleStepperProps> = ({
                                 {/* SOP Badge */}
                                 {step.sopBadge && (
                                   <span
-                                    className={`mt-2 px-2 py-0.5 text-[9px] font-mono font-bold rounded border ${isActive
+                                    className={`mt-2 px-2 py-0.5 text-[9px] font-mono font-bold rounded border ${isSelected
                                         ? 'bg-white/20 text-white border-white/40'
                                         : cluster.sopBadgeColor
                                       }`}
@@ -328,73 +349,145 @@ export const LifecycleStepper: React.FC<LifecycleStepperProps> = ({
             </div>
           </div>
 
-          {/* ACTIVE STEP INTEGRATED INSPECTOR BANNER WITH PRIMARY & CO-OPERATING MODULES */}
+          {/* DYNAMIC MASTER-DETAIL STEP CANVAS (EXPANDED INSPECTOR) */}
           {activeStep && activeModInfo && (
-            <div className="p-4 rounded-2xl bg-slate-50/90 dark:bg-slate-950/80 border border-blue-200/70 dark:border-blue-900/40 flex flex-col md:flex-row md:items-center justify-between gap-4 animate-fadeIn">
-              <div className="flex items-start gap-3">
-                <div className="w-10 h-10 rounded-2xl bg-blue-600 text-white flex items-center justify-center font-black text-sm shrink-0 shadow-sm mt-0.5">
-                  {activeStep.stepNumber}
-                </div>
-                <div className="space-y-1.5">
-                  <div className="flex flex-wrap items-center gap-2">
-                    <span className="text-xs font-mono font-bold text-blue-600 dark:text-blue-400">
-                      {activeStep.id}
-                    </span>
-                    
-                    {/* Primary Owning Module */}
-                    <span className={`text-[10px] font-extrabold uppercase px-2 py-0.5 rounded border ${activeModInfo.bg} ${activeModInfo.color} ${activeModInfo.border}`}>
-                      🎯 Phân hệ chính: {language === 'vi' ? activeModInfo.name : activeModInfo.nameEn}
-                    </span>
-
-                    {activeStep.sopBadge && (
-                      <span className="text-[10px] font-mono font-bold bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 px-2 py-0.5 rounded border border-emerald-500/30">
-                        📋 {activeStep.sopBadge}
-                      </span>
-                    )}
+            <div className="rounded-2xl bg-gradient-to-br from-slate-50 via-white to-blue-50/40 dark:from-slate-950 dark:via-slate-900 dark:to-blue-950/20 border-2 border-blue-500/30 dark:border-blue-500/30 p-5 shadow-sm space-y-4 animate-fadeIn transition-all">
+              
+              {/* Canvas Header */}
+              <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 border-b border-slate-200/80 dark:border-slate-800 pb-4">
+                <div className="flex items-start gap-3.5">
+                  <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-blue-600 to-indigo-600 text-white flex items-center justify-center font-black text-lg shrink-0 shadow-md">
+                    {activeStep.stepNumber}
                   </div>
-
-                  <h3 className="text-sm font-bold text-slate-900 dark:text-white">
-                    {activeStep.title}
-                  </h3>
-                  
-                  <p className="text-xs text-slate-600 dark:text-slate-400">
-                    {language === 'vi' ? activeModInfo.desc : activeModInfo.descEn}
-                  </p>
-
-                  {/* Co-operating / Interacting Modules Badges */}
-                  {activeModInfo.coModules && activeModInfo.coModules.length > 0 && (
-                    <div className="flex flex-wrap items-center gap-1.5 pt-1">
-                      <span className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider flex items-center gap-1">
-                        <Link2 className="w-3 h-3 text-emerald-500" />
-                        {language === 'vi' ? 'Phân hệ phối hợp:' : 'Co-operating:'}
+                  <div>
+                    <div className="flex flex-wrap items-center gap-2 mb-1">
+                      <span className="px-2 py-0.5 text-xs font-mono font-black bg-blue-600 text-white rounded-md shadow-2xs">
+                        {activeStep.id}
                       </span>
-                      {activeModInfo.coModules.map((coMod, idx) => (
-                        <span
-                          key={idx}
-                          className={`text-[9px] font-bold px-2 py-0.5 rounded-md border ${coMod.bg} ${coMod.color}`}
-                        >
-                          {language === 'vi' ? coMod.name : coMod.nameEn}
+                      <span className={`text-[10px] font-extrabold uppercase px-2.5 py-0.5 rounded-md border ${activeModInfo.bg} ${activeModInfo.color} ${activeModInfo.border}`}>
+                        🎯 {language === 'vi' ? activeModInfo.name : activeModInfo.nameEn}
+                      </span>
+                      {activeStep.sopBadge && (
+                        <span className="text-[10px] font-mono font-bold bg-emerald-500/10 text-emerald-700 dark:text-emerald-300 px-2.5 py-0.5 rounded-md border border-emerald-500/30">
+                          📋 {activeStep.sopBadge}
                         </span>
-                      ))}
+                      )}
                     </div>
-                  )}
+                    <h3 className="text-base sm:text-lg font-bold text-slate-900 dark:text-white">
+                      {activeStep.title}
+                    </h3>
+                    <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-400 mt-0.5">
+                      {language === 'vi' ? activeModInfo.desc : activeModInfo.descEn}
+                    </p>
+                  </div>
+                </div>
+
+                {/* Step Navigator (Prev / Next & Direct Open CTA) */}
+                <div className="flex items-center gap-2 self-start lg:self-center shrink-0">
+                  <button
+                    type="button"
+                    onClick={handlePrevStep}
+                    disabled={currentStepIdx === 0}
+                    className={`px-3 py-2 text-xs font-bold rounded-xl border transition-all cursor-pointer ${currentStepIdx === 0
+                        ? 'opacity-40 cursor-not-allowed bg-slate-100 dark:bg-slate-800 text-slate-400 border-slate-200 dark:border-slate-700'
+                        : 'bg-white dark:bg-slate-800 hover:bg-slate-100 text-slate-700 dark:text-slate-200 border-slate-200 dark:border-slate-700'
+                      }`}
+                  >
+                    ← {language === 'vi' ? 'Bước trước' : 'Previous'}
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={handleNextStep}
+                    disabled={currentStepIdx === steps.length - 1}
+                    className={`px-3 py-2 text-xs font-bold rounded-xl border transition-all cursor-pointer ${currentStepIdx === steps.length - 1
+                        ? 'opacity-40 cursor-not-allowed bg-slate-100 dark:bg-slate-800 text-slate-400 border-slate-200 dark:border-slate-700'
+                        : 'bg-white dark:bg-slate-800 hover:bg-slate-100 text-slate-700 dark:text-slate-200 border-slate-200 dark:border-slate-700'
+                      }`}
+                  >
+                    {language === 'vi' ? 'Bước tiếp' : 'Next'} →
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => onSelectStep(activeStep.id)}
+                    className="px-4 py-2 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white text-xs font-bold rounded-xl shadow-sm transition-all cursor-pointer flex items-center gap-1.5 ml-1"
+                  >
+                    <span>{language === 'vi' ? 'Mở Chi Tiết Quy Trình (SOP)' : 'Open Full SOP Spec'}</span>
+                    <ArrowRight className="w-3.5 h-3.5" />
+                  </button>
                 </div>
               </div>
 
-              <button
-                type="button"
-                onClick={() => onSelectStep(activeStep.id)}
-                className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold rounded-xl shadow-xs transition-all cursor-pointer flex items-center justify-center gap-1.5 shrink-0 self-start md:self-center"
-              >
-                <span>{language === 'vi' ? 'Xem Đặc Tả & Wireframe Form Bước Này →' : 'View Spec & Wireframe Form →'}</span>
-              </button>
+              {/* Canvas Body: Inputs, Outputs, and Associated Modules */}
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-3.5">
+                
+                {/* Inputs Box */}
+                <div className="bg-white dark:bg-slate-900/90 rounded-xl p-3.5 border border-slate-200/80 dark:border-slate-800 space-y-2">
+                  <div className="flex items-center gap-1.5 text-xs font-bold text-slate-700 dark:text-slate-300">
+                    <span className="w-2 h-2 rounded-full bg-blue-500" />
+                    <span>{language === 'vi' ? 'Dữ liệu Đầu vào (Inputs):' : 'Input Data:'}</span>
+                  </div>
+                  <div className="flex flex-wrap gap-1.5">
+                    {activeStep.inputs && activeStep.inputs.length > 0 ? (
+                      activeStep.inputs.map((inp, idx) => (
+                        <span key={idx} className="text-[11px] font-medium bg-blue-50/70 dark:bg-blue-950/50 text-blue-700 dark:text-blue-300 px-2 py-0.5 rounded-md border border-blue-200/50 dark:border-blue-900/50">
+                          {inp}
+                        </span>
+                      ))
+                    ) : (
+                      <span className="text-[11px] text-slate-400 italic">Hồ sơ ứng viên / Yêu cầu nghiệp vụ</span>
+                    )}
+                  </div>
+                </div>
+
+                {/* Outputs Box */}
+                <div className="bg-white dark:bg-slate-900/90 rounded-xl p-3.5 border border-slate-200/80 dark:border-slate-800 space-y-2">
+                  <div className="flex items-center gap-1.5 text-xs font-bold text-slate-700 dark:text-slate-300">
+                    <span className="w-2 h-2 rounded-full bg-emerald-500" />
+                    <span>{language === 'vi' ? 'Kết quả Đầu ra (Outputs):' : 'Output Results:'}</span>
+                  </div>
+                  <div className="flex flex-wrap gap-1.5">
+                    {activeStep.outputs && activeStep.outputs.length > 0 ? (
+                      activeStep.outputs.map((out, idx) => (
+                        <span key={idx} className="text-[11px] font-medium bg-emerald-50/70 dark:bg-emerald-950/50 text-emerald-700 dark:text-emerald-300 px-2 py-0.5 rounded-md border border-emerald-200/50 dark:border-emerald-900/50">
+                          {out}
+                        </span>
+                      ))
+                    ) : (
+                      <span className="text-[11px] text-slate-400 italic">Hồ sơ số hóa / Quyết định nhân sự</span>
+                    )}
+                  </div>
+                </div>
+
+                {/* Co-operating Modules Box */}
+                <div className="bg-white dark:bg-slate-900/90 rounded-xl p-3.5 border border-slate-200/80 dark:border-slate-800 space-y-2">
+                  <div className="flex items-center gap-1.5 text-xs font-bold text-slate-700 dark:text-slate-300">
+                    <Link2 className="w-3.5 h-3.5 text-indigo-500" />
+                    <span>{language === 'vi' ? 'Phân hệ Phối hợp (Co-Modules):' : 'Co-operating Modules:'}</span>
+                  </div>
+                  <div className="flex flex-wrap gap-1.5">
+                    {activeModInfo.coModules && activeModInfo.coModules.length > 0 ? (
+                      activeModInfo.coModules.map((coMod, idx) => (
+                        <span key={idx} className={`text-[10px] font-bold px-2 py-0.5 rounded-md border ${coMod.bg} ${coMod.color}`}>
+                          {language === 'vi' ? coMod.name : coMod.nameEn}
+                        </span>
+                      ))
+                    ) : (
+                      <span className="text-[11px] text-slate-400 italic">Toàn hệ thống Core HR</span>
+                    )}
+                  </div>
+                </div>
+
+              </div>
+
             </div>
           )}
 
           {/* Footer Note */}
           <div className="text-center pt-2 border-t border-slate-100 dark:border-slate-800/80">
             <p className="text-xs text-slate-400 dark:text-slate-500 font-medium italic">
-              * Quy trình 7 bước Vòng đời Nhân viên vận hành liên hoàn từ khi Tiếp nhận đến khi Thanh lý & Đóng hồ sơ.
+              * Bấm chọn bất kỳ bước nào trong 7 bước phía trên để xem nhanh Dữ liệu Đầu vào, Đầu ra và Phân hệ liên quan.
             </p>
           </div>
         </div>

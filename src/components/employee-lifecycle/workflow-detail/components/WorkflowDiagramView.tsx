@@ -3,7 +3,6 @@ import {
   GitBranch,
   ArrowRight,
   UserCheck,
-  ChevronRight,
   CheckCircle2,
   AlertCircle,
   Building2,

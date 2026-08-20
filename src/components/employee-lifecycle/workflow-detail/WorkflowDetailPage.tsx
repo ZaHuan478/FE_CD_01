@@ -10,8 +10,7 @@ import {
   Sun,
   Moon,
   ChevronDown,
-  ChevronUp,
-  Globe
+  ChevronUp
 } from 'lucide-react'
 import type { WorkflowDetailPageProps } from './types'
 import { SOP_DATABASE } from './data/sopDatabase'
@@ -21,7 +20,6 @@ import { WorkflowDiagramView } from './components/WorkflowDiagramView'
 import { WorkflowTableView } from './components/WorkflowTableView'
 import { SopInfographicFlowView } from './components/SopInfographicFlowView'
 import { useLanguage } from '../../../context/LanguageContext'
-import type { Language } from '../../../data/translations'
 import { LanguageSelector } from '../../common/LanguageSelector'
 
 export const WorkflowDetailPage: React.FC<WorkflowDetailPageProps> = ({
@@ -29,12 +27,15 @@ export const WorkflowDetailPage: React.FC<WorkflowDetailPageProps> = ({
   onBack,
   onOpenWireframe
 }) => {
-  const { language, setLanguage, t } = useLanguage()
+  const { language, t } = useLanguage()
 
   // Always scroll to top when opening or switching workflow detail
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: 'instant' })
   }, [item.id])
+
+  // Active top-level tab in workflow detail
+  const [activeWorkflowTab, setActiveWorkflowTab] = useState<'diagram' | 'roles' | 'specs'>('diagram')
 
   // Theme state synced with global document dark mode
   const [isDarkMode, setIsDarkMode] = useState<boolean>(() => {
@@ -155,39 +156,51 @@ export const WorkflowDetailPage: React.FC<WorkflowDetailPageProps> = ({
   return (
     <div className={`min-h-screen transition-colors duration-300 pb-20 animate-fadeIn ${isDarkMode ? 'bg-slate-950 text-slate-100' : 'bg-slate-50/50 text-slate-800'
       }`}>
-      {/* Top Fixed Header with Back Button & Theme Toggle */}
-      <header className={`sticky top-0 z-30 border-b backdrop-blur-md transition-colors duration-300 ${isDarkMode ? 'bg-slate-950/90 border-slate-800 text-white' : 'bg-white/90 border-slate-200 text-slate-900 shadow-2xs'
+      
+      {/* COMPACT TOP FIXED HEADER */}
+      <header className={`sticky top-0 z-30 border-b backdrop-blur-md transition-colors duration-300 ${isDarkMode ? 'bg-slate-950/95 border-slate-800 text-white' : 'bg-white/95 border-slate-200 text-slate-900 shadow-2xs'
         }`}>
-        <div className="w-[92%] max-w-[1920px] mx-auto px-2 sm:px-4 py-3 flex items-center justify-between">
-          <div className="flex items-center gap-3">
+        
+        {/* Main Header Bar */}
+        <div className="w-[92%] max-w-[1920px] mx-auto px-2 sm:px-4 py-2.5 flex items-center justify-between gap-3">
+          
+          {/* Left: Back Button & Step Identity */}
+          <div className="flex items-center gap-2.5 sm:gap-3 truncate">
             <button
               type="button"
               onClick={onBack}
-              className={`p-2 rounded-xl border transition-all flex items-center gap-2 text-xs sm:text-sm font-extrabold cursor-pointer ${isDarkMode
+              className={`p-2 rounded-xl border transition-all flex items-center gap-1.5 text-xs font-extrabold cursor-pointer shrink-0 ${isDarkMode
                 ? 'bg-slate-900 hover:bg-slate-800 border-slate-800 text-slate-200'
                 : 'bg-slate-100 hover:bg-slate-200 border-slate-200 text-slate-800'
                 }`}
             >
               <ArrowLeft className="w-4 h-4" />
               <span className="hidden sm:inline">
-                {language === 'vi' ? 'Quay lại Bức tranh Tổng thể Quy trình' : 'Back to Overall Process Blueprint'}
+                {language === 'vi' ? 'Quay lại Bức tranh Tổng thể' : 'Back to Blueprint'}
               </span>
-              <span className="sm:hidden">{t('common.back', 'Quay lại')}</span>
             </button>
 
-            <div className="h-5 w-px bg-slate-300 dark:bg-slate-800 hidden sm:block" />
+            <div className="h-5 w-px bg-slate-300 dark:bg-slate-800 hidden sm:block shrink-0" />
 
-            <div className="flex items-center gap-2">
-              <span className="px-2.5 py-1 text-xs font-mono font-bold bg-blue-600/10 text-blue-700 dark:text-blue-400 rounded-lg border border-blue-600/20">
-                SOP SPECIFICATION
-              </span>
-              <span className="text-xs sm:text-sm font-bold text-slate-500 dark:text-slate-400 hidden md:inline">
-                {language === 'vi' ? 'Mã:' : 'ID:'} <strong className="text-slate-900 dark:text-white font-mono">{item.id}</strong>
-              </span>
+            <div className="truncate">
+              <div className="flex items-center gap-2">
+                <span className="px-2 py-0.5 text-[11px] font-mono font-black bg-blue-600 text-white rounded-md shrink-0">
+                  {item.id}
+                </span>
+                <h1 className="text-xs sm:text-sm font-bold text-slate-900 dark:text-white truncate">
+                  {item.title}
+                </h1>
+                {item.sopIds && item.sopIds.length > 0 && (
+                  <span className="hidden md:inline-flex px-2 py-0.5 text-[10px] font-mono font-bold bg-emerald-500/10 text-emerald-700 dark:text-emerald-300 rounded border border-emerald-500/30 shrink-0">
+                    📋 {item.sopIds.join(', ')}
+                  </span>
+                )}
+              </div>
             </div>
           </div>
 
-          <div className="flex items-center gap-2.5">
+          {/* Right: Language, Theme & Action CTA */}
+          <div className="flex items-center gap-2 shrink-0">
             {/* Custom Language Selection Popover */}
             <LanguageSelector isDarkTheme={isDarkMode} />
 
@@ -195,7 +208,7 @@ export const WorkflowDetailPage: React.FC<WorkflowDetailPageProps> = ({
             <button
               type="button"
               onClick={toggleTheme}
-              className={`p-2 rounded-2xl border transition-all flex items-center gap-2 text-xs font-bold cursor-pointer ${isDarkMode
+              className={`p-2 rounded-xl border transition-all flex items-center gap-2 text-xs font-bold cursor-pointer ${isDarkMode
                 ? 'bg-slate-900 hover:bg-slate-800 border-slate-800 text-amber-400'
                 : 'bg-slate-100 hover:bg-slate-200 border-slate-200 text-slate-700'
                 }`}
@@ -208,268 +221,284 @@ export const WorkflowDetailPage: React.FC<WorkflowDetailPageProps> = ({
               )}
             </button>
 
-
-            {item.sopIds && item.sopIds.length > 0 && (
-              <span className="hidden sm:inline-flex px-3 py-1 text-xs sm:text-sm font-mono font-extrabold bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 rounded-xl border border-emerald-500/20">
-                📋 {item.sopIds.join(', ')}
-              </span>
-            )}
-
             {onOpenWireframe && (
               <button
                 type="button"
                 onClick={() => onOpenWireframe(item)}
-                className="hidden md:flex items-center gap-1.5 px-3.5 py-1.5 text-xs sm:text-sm font-bold text-white bg-blue-600 hover:bg-blue-500 rounded-xl border border-blue-400 transition-all shadow-sm cursor-pointer"
+                className="flex items-center gap-1.5 px-3.5 py-1.5 text-xs font-bold text-white bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 rounded-xl shadow-xs transition-all cursor-pointer shrink-0"
               >
                 <FileText className="w-4 h-4" />
-                <span>{t('common.viewWireframe', 'Xem Giao Diện Form UI')}</span>
+                <span className="hidden sm:inline">{t('common.viewWireframe', 'Xem Form UI')}</span>
               </button>
             )}
+          </div>
+        </div>
+
+        {/* WORKFLOW VIEW TABS (DIAGRAM vs ROLES & RACI vs SPECS TABLE) */}
+        <div className="border-t border-slate-200/80 dark:border-slate-800/80 bg-slate-100/60 dark:bg-slate-950/60">
+          <div className="w-[92%] max-w-[1920px] mx-auto px-2 sm:px-4 flex items-center justify-between gap-4 overflow-x-auto no-scrollbar py-1.5">
+            
+            <div className="flex items-center gap-1.5">
+              <button
+                type="button"
+                onClick={() => setActiveWorkflowTab('diagram')}
+                className={`px-3.5 py-1.5 text-xs font-bold rounded-xl transition-all flex items-center gap-2 cursor-pointer shrink-0 ${activeWorkflowTab === 'diagram'
+                    ? 'bg-blue-600 text-white shadow-xs'
+                    : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-200/60 dark:hover:bg-slate-800/60'
+                  }`}
+              >
+                <Sparkles className="w-3.5 h-3.5" />
+                <span>{t('workflow.tab.diagram', 'Sơ đồ Quy trình Trực quan')}</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setActiveWorkflowTab('roles')}
+                className={`px-3.5 py-1.5 text-xs font-bold rounded-xl transition-all flex items-center gap-2 cursor-pointer shrink-0 ${activeWorkflowTab === 'roles'
+                    ? 'bg-indigo-600 text-white shadow-xs'
+                    : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-200/60 dark:hover:bg-slate-800/60'
+                  }`}
+              >
+                <UserCheck className="w-3.5 h-3.5" />
+                <span>{t('workflow.tab.roles', 'Phân định Vai trò & RACI')}</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setActiveWorkflowTab('specs')}
+                className={`px-3.5 py-1.5 text-xs font-bold rounded-xl transition-all flex items-center gap-2 cursor-pointer shrink-0 ${activeWorkflowTab === 'specs'
+                    ? 'bg-emerald-600 text-white shadow-xs'
+                    : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-200/60 dark:hover:bg-slate-800/60'
+                  }`}
+              >
+                <ListCheck className="w-3.5 h-3.5" />
+                <span>{t('workflow.tab.specs', 'Bảng Đặc tả & Checklist')}</span>
+              </button>
+            </div>
+
+            <span className="text-[11px] font-mono text-slate-400 dark:text-slate-500 hidden md:inline shrink-0">
+              Standardized Workflow Spec
+            </span>
           </div>
         </div>
       </header>
 
 
       {/* Main Workflow Workspace Content (92% Screen Width) */}
-      <main className="w-[92%] max-w-[1920px] mx-auto px-2 sm:px-4 py-6 space-y-6">
+      <main className="w-[92%] max-w-[1920px] mx-auto px-2 sm:px-4 py-5 space-y-5">
 
-        {/* Hero Banner Header */}
-        <div className={`rounded-2xl p-6 sm:p-7 border shadow-xl relative overflow-hidden transition-colors duration-300 ${isDarkMode
-          ? 'bg-gradient-to-r from-slate-950 via-slate-900 to-slate-950 border-slate-800'
-          : 'bg-gradient-to-r from-blue-900 via-indigo-900 to-slate-900 border-blue-800 text-white'
-          }`}>
-          <div className="absolute -right-10 -bottom-10 w-64 h-64 bg-blue-500/10 rounded-full blur-3xl pointer-events-none" />
+        {/* TAB 1: SƠ ĐỒ QUY TRÌNH TRỰC QUAN (INFOGRAPHIC / FLOWCHART / COMPACT TABLE) */}
+        {activeWorkflowTab === 'diagram' && (
+          <div className="space-y-4 animate-fadeIn">
+            
+            {/* SUB-PROCESS SELECTOR (If multiple SOPs exist) */}
+            {availableSopProcesses.length > 1 && (
+              <div className={`p-3.5 rounded-2xl border flex flex-wrap items-center justify-between gap-3 shadow-2xs transition-colors ${isDarkMode ? 'bg-slate-900 border-slate-800' : 'bg-white border-slate-200/90'
+                }`}>
+                <span className="text-xs font-extrabold uppercase tracking-wider text-slate-700 dark:text-slate-300">
+                  {language === 'vi' ? 'Quy trình SOP tương ứng:' : 'SOP Process:'}
+                </span>
 
-          <div className="flex flex-col md:flex-row md:items-start justify-between gap-4 relative z-10">
-            <div className="space-y-2.5 max-w-4xl">
-              <div className="flex flex-wrap items-center gap-2">
-                <span className="px-2.5 py-0.5 text-xs font-mono font-extrabold uppercase bg-blue-500/20 text-blue-300 rounded border border-blue-400/30">
-                  Document Spec: 1.EMP.HRM.SOP.docx
-                </span>
-                <span className="px-2.5 py-0.5 text-xs font-semibold bg-emerald-500/20 text-emerald-300 rounded border border-emerald-400/30">
-                  Role Mapping: Candidate vs. HR Engine
-                </span>
+                <div className="flex flex-wrap gap-2">
+                  {availableSopProcesses.map((proc, idx) => {
+                    const isProcSelected = selectedProcessIdx === idx
+                    return (
+                      <button
+                        key={proc.sopCode}
+                        type="button"
+                        onClick={() => {
+                          setSelectedProcessIdx(idx)
+                          setSelectedStepIdx(0)
+                        }}
+                        className={`flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold rounded-xl border transition-all cursor-pointer ${isProcSelected
+                          ? 'bg-blue-600 text-white border-blue-600 shadow-xs'
+                          : isDarkMode
+                            ? 'bg-slate-950 text-slate-300 border-slate-800 hover:bg-slate-800'
+                            : 'bg-slate-100 text-slate-700 border-slate-200 hover:bg-slate-200'
+                          }`}
+                      >
+                        <Building2 className="w-3.5 h-3.5" />
+                        <span>{proc.sopCode}: {proc.sopTitle}</span>
+                        <span className="text-[10px] font-mono opacity-80 bg-black/20 px-1.5 py-0.2 rounded">
+                          {proc.steps.length}
+                        </span>
+                      </button>
+                    )
+                  })}
+                </div>
               </div>
-
-              <h1 className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight leading-snug">
-                {language === 'vi' ? 'SƠ ĐỒ WORKFLOW QUY TRÌNH:' : 'WORKFLOW PROCESS DIAGRAM:'} {item.title.toUpperCase()}
-              </h1>
-
-              <p className="text-xs sm:text-sm text-slate-200 leading-relaxed">
-                {item.subtitle}
-              </p>
-            </div>
-
-            {onOpenWireframe && (
-              <button
-                type="button"
-                onClick={() => onOpenWireframe(item)}
-                className="self-start flex items-center gap-2 px-4 py-2.5 text-xs font-bold text-white bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 rounded-xl border border-blue-400 shadow-md transition-all shrink-0 cursor-pointer"
-              >
-                <FileText className="w-4 h-4" />
-                <span>{language === 'vi' ? 'Xem UI Form Thao tác' : 'View Form UI Wireframe'}</span>
-              </button>
             )}
-          </div>
-        </div>
 
-        {/* ROLE-BASED INPUT -> OUTPUT MAPPING MATRIX */}
-        <RoleFlowSection
-          availableRoleFlows={availableRoleFlows}
-          activeRoleTab={activeRoleTab}
-          setActiveRoleTab={setActiveRoleTab}
-          isDarkMode={isDarkMode}
-        />
+            {/* WORKFLOW VIEW CONTROLLER SWITCHER */}
+            <div className={`p-3 rounded-2xl border flex flex-wrap items-center justify-between gap-3 shadow-2xs transition-colors ${isDarkMode ? 'bg-slate-900 border-slate-800' : 'bg-white border-slate-200/90'
+              }`}>
+              <div className="flex flex-wrap items-center gap-1.5">
+                <button
+                  type="button"
+                  onClick={() => setViewMode('infographic')}
+                  className={`flex items-center gap-1.5 px-3.5 py-1.5 text-xs font-bold rounded-xl transition-all cursor-pointer ${viewMode === 'infographic'
+                    ? 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-xs'
+                    : isDarkMode ? 'bg-slate-950 text-slate-400 hover:bg-slate-800 border border-slate-800' : 'bg-slate-100 text-slate-700 hover:bg-slate-200 border border-slate-200'
+                    }`}
+                >
+                  <Sparkles className="w-3.5 h-3.5 text-amber-300" />
+                  <span>
+                    {language === 'vi' ? '🎨 Sơ đồ Infographic 5 Giai đoạn' : '🎨 5-Stage Infographic'}
+                  </span>
+                </button>
 
-        {/* ACTORS MATRIX BANNER */}
-        {item.actors && item.actors.length > 0 && (
-          <div className={`rounded-2xl p-5 border space-y-3 shadow-2xs transition-colors duration-300 ${isDarkMode ? 'bg-slate-950 border-slate-800' : 'bg-white border-slate-200/90'
-            }`}>
-            <div className="flex items-center justify-between border-b border-slate-200 dark:border-slate-800 pb-3">
-              <div className="flex items-center gap-2 text-xs font-extrabold uppercase tracking-wider text-slate-700 dark:text-slate-300">
-                <UserCheck className="w-4 h-4 text-blue-600 dark:text-blue-400" />
-                <span>
-                  {language === 'vi'
-                    ? 'Ma trận Phân quyền & Vai trò Thực hiện (Actors Matrix)'
-                    : 'Roles & Permissions Matrix (Actors Matrix)'}
-                </span>
+                <button
+                  type="button"
+                  onClick={() => setViewMode('diagram')}
+                  className={`flex items-center gap-1.5 px-3.5 py-1.5 text-xs font-bold rounded-xl transition-all cursor-pointer ${viewMode === 'diagram'
+                    ? 'bg-blue-600 text-white shadow-xs'
+                    : isDarkMode ? 'bg-slate-950 text-slate-400 hover:bg-slate-800 border border-slate-800' : 'bg-slate-100 text-slate-700 hover:bg-slate-200 border border-slate-200'
+                    }`}
+                >
+                  <GitBranch className="w-3.5 h-3.5" />
+                  <span>
+                    {language === 'vi'
+                      ? `Sơ đồ Flowchart (${currentProcess.steps.length} Bước)`
+                      : `Flowchart (${currentProcess.steps.length} Steps)`}
+                  </span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => setViewMode('table')}
+                  className={`flex items-center gap-1.5 px-3.5 py-1.5 text-xs font-bold rounded-xl transition-all cursor-pointer ${viewMode === 'table'
+                    ? 'bg-blue-600 text-white shadow-xs'
+                    : isDarkMode ? 'bg-slate-950 text-slate-400 hover:bg-slate-800 border border-slate-800' : 'bg-slate-100 text-slate-700 hover:bg-slate-200 border border-slate-200'
+                    }`}
+                >
+                  <ListCheck className="w-3.5 h-3.5" />
+                  <span>
+                    {language === 'vi' ? 'Bảng SOP Specs' : 'SOP Specs Table'}
+                  </span>
+                </button>
               </div>
 
-              {/* Collapse Dropdown Toggle Button */}
-              <button
-                type="button"
-                onClick={() => setIsActorsExpanded(!isActorsExpanded)}
-                className={`p-2 rounded-xl border flex items-center gap-1 text-xs font-bold transition-all cursor-pointer ${
-                  isDarkMode
-                    ? 'bg-slate-900 border-slate-800 text-slate-300 hover:bg-slate-800'
-                    : 'bg-slate-100 border-slate-200 text-slate-700 hover:bg-slate-200'
-                }`}
-                title={isActorsExpanded ? (language === 'vi' ? 'Thu gọn' : 'Collapse') : (language === 'vi' ? 'Mở rộng' : 'Expand')}
-              >
-                <span>{isActorsExpanded ? (language === 'vi' ? 'Thu gọn' : 'Collapse') : (language === 'vi' ? 'Mở rộng' : 'Expand')}</span>
-                {isActorsExpanded ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
-              </button>
+              <span className="text-xs text-slate-500 dark:text-slate-400 font-mono hidden sm:inline">
+                {language === 'vi' ? 'Đang hiển thị:' : 'Viewing:'} <strong className="text-blue-600 dark:text-blue-300">{currentProcess.sopCode}</strong>
+              </span>
             </div>
 
-            {isActorsExpanded && (
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-3 animate-fadeIn pt-1">
-                {item.actors.map((actor, idx) => (
-                  <div
-                    key={idx}
-                    className={`border rounded-xl p-3.5 flex items-start gap-3 transition-colors ${isDarkMode ? 'bg-slate-900/90 border-slate-800' : 'bg-slate-50 border-slate-200/80 hover:bg-white'
-                      }`}
-                  >
-                    <div className={`w-8 h-8 rounded-lg flex items-center justify-center font-bold text-xs shrink-0 ${idx === 0
-                      ? 'bg-amber-500/20 text-amber-700 dark:text-amber-300 border border-amber-500/30'
-                      : idx === 1
-                        ? 'bg-blue-500/20 text-blue-700 dark:text-blue-300 border border-blue-500/30'
-                        : 'bg-emerald-500/20 text-emerald-700 dark:text-emerald-300 border border-emerald-500/30'
-                      }`}>
-                      {idx + 1}
-                    </div>
-                    <div>
-                      <span className="text-[10px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 block mb-0.5">
-                        {actor.role}
-                      </span>
-                      <h4 className="text-xs font-bold text-slate-900 dark:text-white leading-tight">
-                        {actor.name}
-                      </h4>
-                      <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-1 leading-snug">
-                        {actor.action}
-                      </p>
-                    </div>
-                  </div>
-                ))}
-              </div>
+            {/* VIEW MODE 1: INFOGRAPHIC 5-STAGE BLUEPRINT VIEW */}
+            {viewMode === 'infographic' && (
+              <SopInfographicFlowView
+                sopCode={currentProcess.sopCode}
+                isDarkMode={isDarkMode}
+                onOpenWireframe={onOpenWireframe ? () => onOpenWireframe(item) : undefined}
+              />
+            )}
+
+            {/* VIEW MODE 2: VISUAL FLOWCHART DIAGRAM */}
+            {viewMode === 'diagram' && (
+              <WorkflowDiagramView
+                currentProcess={currentProcess}
+                selectedStepIdx={selectedStepIdx}
+                setSelectedStepIdx={setSelectedStepIdx}
+                isDarkMode={isDarkMode}
+                item={item}
+                onOpenWireframe={onOpenWireframe}
+              />
+            )}
+
+            {/* VIEW MODE 3: FULL SOP SPECIFICATIONS TABLE */}
+            {viewMode === 'table' && (
+              <WorkflowTableView
+                currentProcess={currentProcess}
+                isDarkMode={isDarkMode}
+              />
             )}
           </div>
         )}
 
-        {/* SUB-PROCESS SELECTOR TABS */}
-        {availableSopProcesses.length > 1 && (
-          <div className={`p-4 rounded-2xl border space-y-3 shadow-2xs transition-colors duration-300 ${isDarkMode ? 'bg-slate-950 border-slate-800' : 'bg-white border-slate-200/90'
-            }`}>
-            <span className="text-[11px] font-extrabold uppercase tracking-wider text-slate-700 dark:text-slate-300 block">
-              {language === 'vi'
-                ? 'Các Quy trình SOP Chi tiết tương ứng với bước này:'
-                : 'Detailed SOP Processes for this step:'}
-            </span>
+        {/* TAB 2: PHÂN ĐỊNH VAI TRÒ & MA TRẬN RACI */}
+        {activeWorkflowTab === 'roles' && (
+          <div className="space-y-5 animate-fadeIn">
+            {/* ROLE-BASED INPUT -> OUTPUT MAPPING MATRIX */}
+            <RoleFlowSection
+              availableRoleFlows={availableRoleFlows}
+              activeRoleTab={activeRoleTab}
+              setActiveRoleTab={setActiveRoleTab}
+              isDarkMode={isDarkMode}
+            />
 
-            <div className="flex flex-wrap gap-2.5">
-              {availableSopProcesses.map((proc, idx) => {
-                const isProcSelected = selectedProcessIdx === idx
-                return (
-                  <button
-                    key={proc.sopCode}
-                    type="button"
-                    onClick={() => {
-                      setSelectedProcessIdx(idx)
-                      setSelectedStepIdx(0)
-                    }}
-                    className={`flex items-center gap-2 px-4 py-2.5 text-xs font-bold rounded-xl border transition-all cursor-pointer ${isProcSelected
-                      ? 'bg-blue-600 text-white border-blue-600 shadow-sm transform -translate-y-0.5'
-                      : isDarkMode
-                        ? 'bg-slate-900 text-slate-300 border-slate-800 hover:bg-slate-800'
-                        : 'bg-slate-100 text-slate-700 border-slate-200 hover:bg-slate-200'
-                      }`}
-                  >
-                    <Building2 className="w-4 h-4" />
-                    <span>{proc.sopCode}: {proc.sopTitle}</span>
-                    <span className="text-[10px] font-mono opacity-80 bg-black/20 px-2 py-0.5 rounded-md">
-                      {proc.steps.length} {language === 'vi' ? 'bước' : 'steps'}
+            {/* ACTORS MATRIX BANNER */}
+            {item.actors && item.actors.length > 0 && (
+              <div className={`rounded-2xl p-5 border space-y-3 shadow-2xs transition-colors duration-300 ${isDarkMode ? 'bg-slate-900 border-slate-800' : 'bg-white border-slate-200/90'
+                }`}>
+                <div className="flex items-center justify-between border-b border-slate-200 dark:border-slate-800 pb-3">
+                  <div className="flex items-center gap-2 text-xs font-extrabold uppercase tracking-wider text-slate-700 dark:text-slate-300">
+                    <UserCheck className="w-4 h-4 text-blue-600 dark:text-blue-400" />
+                    <span>
+                      {language === 'vi'
+                        ? 'Ma trận Phân quyền & Vai trò Thực hiện (Actors Matrix)'
+                        : 'Roles & Permissions Matrix (Actors Matrix)'}
                     </span>
+                  </div>
+
+                  {/* Collapse Dropdown Toggle Button */}
+                  <button
+                    type="button"
+                    onClick={() => setIsActorsExpanded(!isActorsExpanded)}
+                    className={`p-2 rounded-xl border flex items-center gap-1 text-xs font-bold transition-all cursor-pointer ${
+                      isDarkMode
+                        ? 'bg-slate-950 border-slate-800 text-slate-300 hover:bg-slate-800'
+                        : 'bg-slate-100 border-slate-200 text-slate-700 hover:bg-slate-200'
+                    }`}
+                    title={isActorsExpanded ? (language === 'vi' ? 'Thu gọn' : 'Collapse') : (language === 'vi' ? 'Mở rộng' : 'Expand')}
+                  >
+                    <span>{isActorsExpanded ? (language === 'vi' ? 'Thu gọn' : 'Collapse') : (language === 'vi' ? 'Mở rộng' : 'Expand')}</span>
+                    {isActorsExpanded ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
                   </button>
-                )
-              })}
-            </div>
+                </div>
+
+                {isActorsExpanded && (
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-3 animate-fadeIn pt-1">
+                    {item.actors.map((actor, idx) => (
+                      <div
+                        key={idx}
+                        className={`border rounded-xl p-3.5 flex items-start gap-3 transition-colors ${isDarkMode ? 'bg-slate-950 border-slate-800' : 'bg-slate-50 border-slate-200/80 hover:bg-white'
+                          }`}
+                      >
+                        <div className={`w-8 h-8 rounded-lg flex items-center justify-center font-bold text-xs shrink-0 ${idx === 0
+                          ? 'bg-amber-500/20 text-amber-700 dark:text-amber-300 border border-amber-500/30'
+                          : idx === 1
+                            ? 'bg-blue-500/20 text-blue-700 dark:text-blue-300 border border-blue-500/30'
+                            : 'bg-emerald-500/20 text-emerald-700 dark:text-emerald-300 border border-emerald-500/30'
+                          }`}>
+                          {idx + 1}
+                        </div>
+                        <div>
+                          <span className="text-[10px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 block mb-0.5">
+                            {actor.role}
+                          </span>
+                          <h4 className="text-xs font-bold text-slate-900 dark:text-white leading-tight">
+                            {actor.name}
+                          </h4>
+                          <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-1 leading-snug">
+                            {actor.action}
+                          </p>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            )}
           </div>
         )}
 
-        {/* WORKFLOW VIEW CONTROLLER */}
-        <div className="flex flex-wrap items-center justify-between border-b border-slate-200 dark:border-slate-800 pb-3 gap-2">
-          <div className="flex flex-wrap items-center gap-2">
-            <button
-              type="button"
-              onClick={() => setViewMode('infographic')}
-              className={`flex items-center gap-1.5 px-4 py-2 text-xs sm:text-sm font-extrabold rounded-xl transition-all cursor-pointer ${viewMode === 'infographic'
-                ? 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-md'
-                : isDarkMode ? 'bg-slate-900 text-slate-400 hover:bg-slate-800 border border-slate-800' : 'bg-slate-100 text-slate-700 hover:bg-slate-200 border border-slate-200'
-                }`}
-            >
-              <Sparkles className="w-4 h-4 text-amber-300 animate-pulse" />
-              <span>
-                {language === 'vi'
-                  ? '🎨 Sơ đồ Infographic 5 Giai đoạn (Chuẩn Enterprise)'
-                  : '🎨 5-Stage Infographic Blueprint'}
-              </span>
-            </button>
-
-            <button
-              type="button"
-              onClick={() => setViewMode('diagram')}
-              className={`flex items-center gap-1.5 px-4 py-2 text-xs sm:text-sm font-bold rounded-xl transition-all cursor-pointer ${viewMode === 'diagram'
-                ? 'bg-blue-600 text-white shadow-sm'
-                : isDarkMode ? 'bg-slate-900 text-slate-400 hover:bg-slate-800 border border-slate-800' : 'bg-slate-100 text-slate-700 hover:bg-slate-200 border border-slate-200'
-                }`}
-            >
-              <GitBranch className="w-4 h-4" />
-              <span>
-                {language === 'vi'
-                  ? `Sơ đồ Flowchart Trực quan (${currentProcess.steps.length} Bước)`
-                  : `Visual Flowchart Diagram (${currentProcess.steps.length} Steps)`}
-              </span>
-            </button>
-
-            <button
-              type="button"
-              onClick={() => setViewMode('table')}
-              className={`flex items-center gap-1.5 px-4 py-2 text-xs sm:text-sm font-bold rounded-xl transition-all cursor-pointer ${viewMode === 'table'
-                ? 'bg-blue-600 text-white shadow-sm'
-                : isDarkMode ? 'bg-slate-900 text-slate-400 hover:bg-slate-800 border border-slate-800' : 'bg-slate-100 text-slate-700 hover:bg-slate-200 border border-slate-200'
-                }`}
-            >
-              <ListCheck className="w-4 h-4" />
-              <span>
-                {language === 'vi'
-                  ? 'Bảng Chi tiết Các bước (SOP Specs Table)'
-                  : 'SOP Specifications Table'}
-              </span>
-            </button>
+        {/* TAB 3: BẢNG ĐẶC TẢ SOP CHI TIẾT & CHECKLIST */}
+        {activeWorkflowTab === 'specs' && (
+          <div className="space-y-5 animate-fadeIn">
+            <WorkflowTableView
+              currentProcess={currentProcess}
+              isDarkMode={isDarkMode}
+            />
           </div>
-
-          <span className="text-xs text-slate-500 dark:text-slate-400 font-mono hidden sm:inline">
-            {language === 'vi' ? 'Đang xem:' : 'Viewing:'} <strong className="text-blue-600 dark:text-blue-300">{currentProcess.sopCode}</strong>
-          </span>
-        </div>
-
-
-        {/* VIEW MODE 1: INFOGRAPHIC 5-STAGE BLUEPRINT VIEW */}
-        {viewMode === 'infographic' && (
-          <SopInfographicFlowView
-            sopCode={currentProcess.sopCode}
-            isDarkMode={isDarkMode}
-            onOpenWireframe={onOpenWireframe ? () => onOpenWireframe(item) : undefined}
-          />
-        )}
-
-        {/* VIEW MODE 2: VISUAL FLOWCHART DIAGRAM */}
-        {viewMode === 'diagram' && (
-          <WorkflowDiagramView
-            currentProcess={currentProcess}
-            selectedStepIdx={selectedStepIdx}
-            setSelectedStepIdx={setSelectedStepIdx}
-            isDarkMode={isDarkMode}
-            item={item}
-            onOpenWireframe={onOpenWireframe}
-          />
-        )}
-
-        {/* VIEW MODE 3: FULL SOP SPECIFICATIONS TABLE */}
-        {viewMode === 'table' && (
-          <WorkflowTableView
-            currentProcess={currentProcess}
-            isDarkMode={isDarkMode}
-          />
         )}
 
       </main>

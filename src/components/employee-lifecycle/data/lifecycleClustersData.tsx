@@ -1,4 +1,3 @@
-import React from 'react'
 import { UserPlus, FileCheck, MapPin, FileSignature, CircleDollarSign, Activity, UserMinus, Sparkles } from 'lucide-react'
 
 export interface ClusterConfig {

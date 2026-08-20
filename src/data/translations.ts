@@ -259,5 +259,53 @@ export const translations: TranslationDict = {
   'common.statusDraft': {
     vi: 'Bản thảo Review',
     en: 'Draft Review'
+  },
+
+  // Tabs Navigation
+  'tabs.lifecycle': {
+    vi: 'Vòng đời Nhân sự',
+    en: 'Employee Lifecycle'
+  },
+  'tabs.masterdata': {
+    vi: 'Master Data & ERD',
+    en: 'Master Data & ERD'
+  },
+  'tabs.reports': {
+    vi: 'Báo cáo & Độ phủ SOP',
+    en: 'Reports & SOP Coverage'
+  },
+  'tabs.guideBtn': {
+    vi: 'Hướng dẫn Kiến trúc',
+    en: 'Architecture Guide'
+  },
+  'stepper.activeStepDetail': {
+    vi: 'Chi tiết Bước được chọn',
+    en: 'Selected Step Detail'
+  },
+  'stepper.quickActions': {
+    vi: 'Hành động Nhanh',
+    en: 'Quick Actions'
+  },
+  'stepper.openFullWorkflow': {
+    vi: 'Mở Quy trình Chi tiết Toàn diện (SOP)',
+    en: 'Open Full Workflow SOP Spec'
+  },
+  'stepper.coModules': {
+    vi: 'Phân hệ Phối hợp',
+    en: 'Associated Modules'
+  },
+
+  // Workflow Detail Tabs
+  'workflow.tab.diagram': {
+    vi: 'Sơ đồ Quy trình Trực quan',
+    en: 'Visual Process Diagram'
+  },
+  'workflow.tab.roles': {
+    vi: 'Phân định Vai trò & RACI',
+    en: 'Role Mapping & RACI Matrix'
+  },
+  'workflow.tab.specs': {
+    vi: 'Bảng Đặc tả & Checklist',
+    en: 'SOP Specs & Checklist'
   }
 }

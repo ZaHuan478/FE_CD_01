@@ -4,7 +4,7 @@ import { useLanguage } from '../../context/LanguageContext'
 
 export const SystemGuideBanner: React.FC = () => {
   const [isExpanded, setIsExpanded] = useState<boolean>(true)
-  const { language, t } = useLanguage()
+  const { language } = useLanguage()
 
   return (
     <div className="bg-white dark:bg-slate-900 rounded-2xl border border-blue-200/80 dark:border-slate-800 shadow-xs overflow-hidden transition-all duration-300">

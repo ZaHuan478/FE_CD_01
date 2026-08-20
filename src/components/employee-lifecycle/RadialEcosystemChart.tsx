@@ -1,20 +1,13 @@
 import React, { useState } from 'react'
 import {
-  Users,
-  Clock,
-  CircleDollarSign,
-  Receipt,
-  ShieldCheck,
-  Sparkles,
   Layers,
-  CheckCircle2,
   ListCheck,
   ChevronDown,
   ChevronUp,
   MousePointerClick
 } from 'lucide-react'
 
-import { FIVE_CORE_MODULES, type ModuleEcosystemItem, type SopDetailItem } from './data/ecosystemModulesData.tsx'
+import { FIVE_CORE_MODULES } from './data/ecosystemModulesData.tsx'
 import { useLanguage } from '../../context/LanguageContext'
 
 export const RadialEcosystemChart: React.FC = () => {

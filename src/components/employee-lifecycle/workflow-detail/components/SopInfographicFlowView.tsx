@@ -7,30 +7,12 @@ import {
   CheckCircle2,
   AlertTriangle,
   XCircle,
-  UserCheck,
-  ChevronRight,
-  Sparkles,
-  Info,
   Lock,
-  Calendar,
-  FileText,
-  User,
-  ArrowRight,
   ShieldAlert,
   DollarSign,
-  TrendingUp,
   Percent,
-  Briefcase,
-  Users,
-  UserPlus,
   Target,
-  Award,
-  LogOut,
-  Laptop,
-  CreditCard,
-  Building,
-  FileCheck2,
-  Crown
+  LogOut
 } from 'lucide-react'
 import { useLanguage } from '../../../../context/LanguageContext'
 

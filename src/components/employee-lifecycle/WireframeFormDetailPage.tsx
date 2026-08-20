@@ -13,15 +13,10 @@ import {
   X,
   AlertCircle,
   Clock,
-  UserCheck,
-  Database,
-  Building2,
-  GitBranch,
-  Globe
+  GitBranch
 } from 'lucide-react'
 import type { DetailItem } from '../../types/employee-lifecycle'
 import { useLanguage } from '../../context/LanguageContext'
-import type { Language } from '../../data/translations'
 import { LanguageSelector } from '../common/LanguageSelector'
 
 interface WireframeFormDetailPageProps {
@@ -33,7 +28,7 @@ export const WireframeFormDetailPage: React.FC<WireframeFormDetailPageProps> = (
   item,
   onBack
 }) => {
-  const { language, setLanguage, t } = useLanguage()
+  const { language, t } = useLanguage()
 
   // Theme state synced with global document dark mode
   const [isDarkMode, setIsDarkMode] = useState<boolean>(() => {

@@ -1,6 +1,6 @@
 import React, { useMemo, useState, useEffect, useCallback } from 'react'
 import { useSearchParams, useParams, useLocation, useNavigate } from 'react-router-dom'
-import { Sparkles, Layers, Database, FileText, X, Layout, Sun, Moon, Globe } from 'lucide-react'
+import { Sparkles, Layers, Database, Sun, Moon } from 'lucide-react'
 
 import { MasterDataCard } from '../../components/employee-lifecycle/MasterDataCard'
 import { MasterDataRelationshipModal } from '../../components/employee-lifecycle/MasterDataRelationshipModal'
@@ -10,9 +10,7 @@ import { SystemSupportBar } from '../../components/employee-lifecycle/SystemSupp
 import { SystemGuideBanner } from '../../components/employee-lifecycle/SystemGuideBanner'
 import { SystemOverviewDashboard } from '../../components/employee-lifecycle/SystemOverviewDashboard'
 import { LeftSidebarNav } from '../../components/employee-lifecycle/LeftSidebarNav'
-import { WireframeFormModal } from '../../components/employee-lifecycle/WireframeFormModal'
 import { WireframeFormDetailPage } from '../../components/employee-lifecycle/WireframeFormDetailPage'
-import { NodeDetailDrawer } from '../../components/employee-lifecycle/NodeDetailDrawer'
 import { WorkflowDetailPage } from '../../components/employee-lifecycle/WorkflowDetailPage'
 import { LanguageSelector } from '../../components/common/LanguageSelector'
 
@@ -20,16 +18,31 @@ import { masterData, lifecycleProcesses, crossFunctionalProcesses, sharedService
 import { sopDictionary } from '../../components/employee-lifecycle/data/sopDictionary'
 import type { MasterDataCategory, LifecycleStep, OperationModule, DetailItem } from '../../types/employee-lifecycle'
 import { useLanguage } from '../../context/LanguageContext'
-import type { Language } from '../../data/translations'
 
 export const EmployeeLifecyclePage: React.FC = () => {
-  const { language, setLanguage, t } = useLanguage()
+  const { t } = useLanguage()
   const { id: routeId } = useParams<{ id?: string }>()
   const location = useLocation()
   const navigate = useNavigate()
 
-  const [activeSection, setActiveSection] = useState('overview-dashboard')
+  const [searchParams, setSearchParams] = useSearchParams()
+  const initialTab = (searchParams.get('tab') as 'lifecycle' | 'masterdata' | 'reports') || 'lifecycle'
+  const [activeTab, setActiveTab] = useState<'lifecycle' | 'masterdata' | 'reports'>(initialTab)
+  const [isGuideModalOpen, setIsGuideModalOpen] = useState(false)
+
+  const [activeSection, setActiveSection] = useState('layer-2-lifecycle')
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false)
+
+  // Sync tab with URL search parameter
+  const handleTabChange = (tab: 'lifecycle' | 'masterdata' | 'reports') => {
+    setActiveTab(tab)
+    setSearchParams((prev) => {
+      const next = new URLSearchParams(prev)
+      next.set('tab', tab)
+      return next
+    })
+    window.scrollTo({ top: 0, behavior: 'smooth' })
+  }
 
   // Theme state: dark / light mode toggle
   const [isDarkMode, setIsDarkMode] = useState<boolean>(() => {
@@ -72,19 +85,30 @@ export const EmployeeLifecyclePage: React.FC = () => {
 
   const handleNavigateSection = (sectionId: string) => {
     setActiveSection(sectionId)
-    if (sectionId === 'overview-dashboard') {
+
+    if (sectionId === 'overview-dashboard' || sectionId === 'sop-specs-matrix') {
+      setActiveTab('reports')
       window.scrollTo({ top: 0, behavior: 'smooth' })
-    } else {
-      const el = document.getElementById(sectionId)
-      if (el) {
-        const headerOffset = 90 // Sticky header offset height
-        const elementPosition = el.getBoundingClientRect().top
-        const offsetPosition = elementPosition + window.pageYOffset - headerOffset
-        window.scrollTo({
-          top: offsetPosition,
-          behavior: 'smooth'
-        })
-      }
+      return
+    }
+
+    if (sectionId === 'layer-1-master-data') {
+      setActiveTab('masterdata')
+      window.scrollTo({ top: 0, behavior: 'smooth' })
+      return
+    }
+
+    if (sectionId === 'layer-2-lifecycle' || sectionId === 'layer-3-operations' || sectionId === 'system-support') {
+      setActiveTab('lifecycle')
+      setTimeout(() => {
+        const el = document.getElementById(sectionId)
+        if (el) {
+          const headerOffset = 130
+          const elementPosition = el.getBoundingClientRect().top
+          const offsetPosition = elementPosition + window.pageYOffset - headerOffset
+          window.scrollTo({ top: offsetPosition, behavior: 'smooth' })
+        }
+      }, 50)
     }
   }
 
@@ -336,74 +360,141 @@ export const EmployeeLifecyclePage: React.FC = () => {
             </div>
           </div>
         </div>
+
+        {/* MODERNIZED SUB-HEADER: 3 MAIN TABS & ARCHITECTURE GUIDE BUTTON */}
+        <div className="bg-slate-950/80 border-t border-slate-800/80 backdrop-blur-sm">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 flex items-center justify-between overflow-x-auto no-scrollbar gap-4">
+
+            {/* Tab Navigation Buttons */}
+            <div className="flex items-center gap-1 sm:gap-2 py-2">
+              <button
+                type="button"
+                onClick={() => handleTabChange('lifecycle')}
+                className={`px-3.5 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-2 cursor-pointer shrink-0 ${activeTab === 'lifecycle'
+                  ? 'bg-blue-600 text-white shadow-sm'
+                  : 'text-slate-400 hover:text-white hover:bg-slate-800/60'
+                  }`}
+              >
+                <Layers className="w-4 h-4" />
+                <span>{t('tabs.lifecycle', 'Vòng đời Nhân sự')}</span>
+                <span className="px-1.5 py-0.2 text-[10px] rounded-md bg-white/20 text-white font-mono">
+                  7 Bước
+                </span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => handleTabChange('masterdata')}
+                className={`px-3.5 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-2 cursor-pointer shrink-0 ${activeTab === 'masterdata'
+                  ? 'bg-blue-600 text-white shadow-sm'
+                  : 'text-slate-400 hover:text-white hover:bg-slate-800/60'
+                  }`}
+              >
+                <Database className="w-4 h-4" />
+                <span>{t('tabs.masterdata', 'Master Data & ERD')}</span>
+                <span className="px-1.5 py-0.2 text-[10px] rounded-md bg-white/20 text-white font-mono">
+                  10 Nhóm
+                </span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => handleTabChange('reports')}
+                className={`px-3.5 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-2 cursor-pointer shrink-0 ${activeTab === 'reports'
+                  ? 'bg-blue-600 text-white shadow-sm'
+                  : 'text-slate-400 hover:text-white hover:bg-slate-800/60'
+                  }`}
+              >
+                <Sparkles className="w-4 h-4" />
+                <span>{t('tabs.reports', 'Báo cáo & Độ phủ SOP')}</span>
+                <span className="px-1.5 py-0.2 text-[10px] rounded-md bg-white/20 text-white font-mono">
+                  45 SOPs
+                </span>
+              </button>
+            </div>
+
+            {/* Guide Explainer Toggle Button */}
+            <button
+              type="button"
+              onClick={() => setIsGuideModalOpen(!isGuideModalOpen)}
+              className={`px-3 py-1.5 rounded-xl border text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer shrink-0 ${isGuideModalOpen
+                ? 'bg-indigo-600 text-white border-indigo-500 shadow-xs'
+                : 'bg-slate-800/80 hover:bg-slate-700 text-slate-300 border-slate-700'
+                }`}
+            >
+              <Sparkles className="w-3.5 h-3.5 text-indigo-400" />
+              <span>{t('tabs.guideBtn', 'Hướng dẫn Kiến trúc')}</span>
+            </button>
+          </div>
+        </div>
       </header>
 
 
       {/* Main Container Workspace (92% Screen Width for maximum viewability) */}
-      <main className="w-[92%] max-w-[1920px] mx-auto px-2 sm:px-4 lg:px-6 py-5 sm:py-8 space-y-6 sm:space-y-8">
+      <main className="w-[92%] max-w-[1920px] mx-auto px-2 sm:px-4 lg:px-6 py-5 sm:py-6 space-y-6">
 
-        {/* Intro Eyebrow Banner */}
-        <div className={`rounded-2xl p-4 sm:p-5 border shadow-xs flex flex-col md:flex-row md:items-center justify-between gap-3 sm:gap-4 transition-colors duration-300 ${isDarkMode ? 'bg-slate-900 border-slate-800 text-slate-100' : 'bg-white border-slate-200/80 text-slate-900'
-          }`}>
-          <div className="flex items-start gap-3 sm:gap-3.5">
-            <div className="p-2 sm:p-2.5 bg-indigo-50 dark:bg-indigo-950/60 text-indigo-600 dark:text-indigo-400 rounded-xl shrink-0 mt-0.5 border border-indigo-100 dark:border-indigo-900/50">
-              <Sparkles className="w-4 h-4 sm:w-5 sm:h-5" />
+        {/* Collapsible Architecture Guide Banner */}
+        {isGuideModalOpen && (
+          <div className="animate-fadeIn">
+            <SystemGuideBanner />
+          </div>
+        )}
+
+        {/* TAB 1: VÒNG ĐỜI NHÂN SỰ & NGHIỆP VỤ VẬN HÀNH (MAIN WORKSPACE) */}
+        {activeTab === 'lifecycle' && (
+          <div className="space-y-6 animate-fadeIn">
+            {/* TẦNG 2: VÒNG ĐỜI NHÂN VIÊN (Interactive Stepper & Detail Canvas) */}
+            <div id="layer-2-lifecycle" className="scroll-mt-28">
+              <LifecycleStepper
+                steps={lifecycleSteps}
+                activeStepId={selectedItem?.id}
+                onSelectStep={handleOpenItemDetails}
+              />
             </div>
-            <div>
-              <h2 className="text-xs sm:text-sm font-bold leading-snug">
-                {t('banner.title', 'Bức tranh Tổng thể Quy trình Quản trị Nhân sự (Business Process Blueprint)')}
-              </h2>
-              <p className="text-[11px] sm:text-xs text-slate-500 dark:text-slate-400 mt-0.5 leading-relaxed">
-                {t('banner.description', 'Cấu trúc phân tầng tiêu chuẩn: Tầng 1 Master Data ➔ Tầng 2 Vòng đời Nhân viên ➔ Tầng 3 Nghiệp vụ Phát sinh ➔ Thanh Hỗ trợ Hệ thống')}
-              </p>
+
+            {/* TẦNG 3: NGHIỆP VỤ PHÁT SINH (Minimalist Cards Grid 4x2) */}
+            <div id="layer-3-operations" className="scroll-mt-28">
+              <OperationsGrid
+                modules={operationModules}
+                onSelectModule={handleOpenItemDetails}
+              />
+            </div>
+
+            {/* TẦNG HỖ TRỢ XUYÊN SUỐT (System Support Sticky Bar) */}
+            <div id="system-support" className="scroll-mt-28">
+              <SystemSupportBar
+                onSelectUtility={handleOpenItemDetails}
+              />
             </div>
           </div>
-        </div>
+        )}
 
+        {/* TAB 2: MASTER DATA & SƠ ĐỒ ERD */}
+        {activeTab === 'masterdata' && (
+          <div className="space-y-6 animate-fadeIn">
+            {/* TẦNG 1: MASTER DATA CARD */}
+            <div id="layer-1-master-data" className="scroll-mt-28">
+              <MasterDataCard
+                categories={masterDataCategories}
+                onOpenERD={handleOpenERD}
+                onSelectCategory={handleOpenItemDetails}
+              />
+            </div>
+          </div>
+        )}
 
-        {/* Onboarding Guide & Concept Explainer Banner for Newcomers */}
-        <SystemGuideBanner />
-
-        {/* HRMS EXECUTIVE SYSTEM DASHBOARD & QUICK LAYER NAVIGATOR */}
-        <div id="overview-dashboard" className="scroll-mt-20">
-          <SystemOverviewDashboard
-            onSelectStep={handleOpenItemDetails}
-            onOpenERD={handleOpenERD}
-          />
-        </div>
-
-        {/* TẦNG 1: MASTER DATA CARD (Single-Entry Card) */}
-        <div id="layer-1-master-data" className="scroll-mt-20">
-          <MasterDataCard
-            categories={masterDataCategories}
-            onOpenERD={handleOpenERD}
-            onSelectCategory={handleOpenItemDetails}
-          />
-        </div>
-
-        {/* TẦNG 2: VÒNG ĐỜI NHÂN VIÊN (7-Step Horizontal Stepper Pipeline) */}
-        <div id="layer-2-lifecycle" className="scroll-mt-20">
-          <LifecycleStepper
-            steps={lifecycleSteps}
-            activeStepId={selectedItem?.id}
-            onSelectStep={handleOpenItemDetails}
-          />
-        </div>
-
-        {/* TẦNG 3: NGHIỆP VỤ PHÁT SINH (Minimalist Cards Grid 4x2) */}
-        <div id="layer-3-operations" className="scroll-mt-20">
-          <OperationsGrid
-            modules={operationModules}
-            onSelectModule={handleOpenItemDetails}
-          />
-        </div>
-
-        {/* TẦNG HỖ TRỢ XUYÊN SUỐT (System Support Sticky Bar) */}
-        <div id="system-support" className="scroll-mt-20">
-          <SystemSupportBar
-            onSelectUtility={handleOpenItemDetails}
-          />
-        </div>
+        {/* TAB 3: BÁO CÁO & ĐỘ PHỦ SOP (EXECUTIVE DASHBOARD & RADIAL CHART) */}
+        {activeTab === 'reports' && (
+          <div className="space-y-6 animate-fadeIn">
+            {/* HRMS EXECUTIVE SYSTEM DASHBOARD & RADIAL ECOSYSTEM WHEEL */}
+            <div id="overview-dashboard" className="scroll-mt-28">
+              <SystemOverviewDashboard
+                onSelectStep={handleOpenItemDetails}
+                onOpenERD={handleOpenERD}
+              />
+            </div>
+          </div>
+        )}
 
       </main>
 
