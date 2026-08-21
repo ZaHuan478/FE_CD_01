@@ -130,10 +130,10 @@ export const RadialEcosystemChart: React.FC = () => {
           </div>
 
           <h3 className="text-[10px] min-[400px]:text-xs sm:text-sm font-black tracking-tight text-slate-900 dark:text-white uppercase leading-none">
-            HRMS 5 CORE MODULES
+            HRMS 6 CORE MODULES
           </h3>
           <span className="text-[8px] sm:text-[10px] font-bold text-blue-600 dark:text-blue-400 uppercase tracking-widest mt-0.5 sm:mt-1">
-            45/45 SOP Specs
+            50/50 SOP Specs
           </span>
 
           <p className="text-[10px] text-slate-500 dark:text-slate-400 mt-1 line-clamp-2 leading-tight hidden sm:block">
@@ -377,7 +377,7 @@ export const RadialEcosystemChart: React.FC = () => {
               {/* ========================================================================= */}
               {/* 📋 CỘT TRÁI (38% / 5 Cols): TIẾN TRÌNH CÁC CHẶNG NGHIỆP VỤ & DANH SÁCH SOPS */}
               {/* ========================================================================= */}
-              <div className="lg:col-span-5 space-y-3.5 max-h-[750px] overflow-y-auto pr-1">
+              <div className="lg:col-span-5 space-y-3.5 relative">
                 <div className="flex items-center justify-between text-xs font-extrabold uppercase text-slate-500 dark:text-slate-400 pb-1 border-b border-slate-100 dark:border-slate-800">
                   <span className="flex items-center gap-1.5">
                     <ListCheck className="w-4 h-4 text-blue-600 dark:text-blue-400" />
@@ -392,7 +392,7 @@ export const RadialEcosystemChart: React.FC = () => {
 
                 {/* 🎯 CUSTOM STAGE DROPDOWN SELECTOR (BO GÓC ROUNDED-2XL CAO CẤP) */}
                 {activeModule.stages && activeModule.stages.length > 0 && (
-                  <div className="p-2.5 rounded-2xl border border-slate-200 dark:border-slate-800 bg-slate-100/70 dark:bg-slate-950/70 flex items-center justify-between gap-2 shadow-2xs">
+                  <div className="p-2.5 rounded-2xl border border-slate-200 dark:border-slate-800 bg-slate-100/70 dark:bg-slate-950/70 flex items-center justify-between gap-2 shadow-2xs relative z-30">
                     <div className="flex items-center gap-1.5 min-w-0">
                       <GitBranch className="w-4 h-4 text-blue-600 dark:text-blue-400 shrink-0" />
                       <span className="text-[11px] font-extrabold uppercase text-slate-500 dark:text-slate-400 whitespace-nowrap">
@@ -419,9 +419,9 @@ export const RadialEcosystemChart: React.FC = () => {
                         <ChevronDown className={`w-3.5 h-3.5 text-slate-400 shrink-0 transition-transform duration-200 ${isStageDropdownOpen ? 'rotate-180' : ''}`} />
                       </button>
 
-                      {/* Floating Dropdown Menu (Bo Góc Tròn rounded-2xl 100%) */}
+                      {/* Floating Dropdown Menu (Bo Góc Tròn rounded-2xl 100% - Không bao giờ bị cắt) */}
                       {isStageDropdownOpen && (
-                        <div className="absolute right-0 top-full mt-1.5 w-full min-w-[280px] p-1.5 rounded-2xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 shadow-2xl z-50 animate-fadeIn space-y-1">
+                        <div className="absolute right-0 top-full mt-2 w-[290px] sm:w-[320px] p-2 rounded-2xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 shadow-2xl z-50 animate-fadeIn space-y-1 ring-1 ring-black/10 dark:ring-white/10">
                           {/* Option: ALL */}
                           <button
                             type="button"
@@ -482,7 +482,8 @@ export const RadialEcosystemChart: React.FC = () => {
                   </div>
                 )}
 
-                {/* Render Stages Accordions */}
+                {/* Render Stages Accordions inside scrollable container */}
+                <div className="space-y-3 max-h-[640px] overflow-y-auto pr-1">
                 {activeModule.stages && activeModule.stages.length > 0 ? (
                   activeModule.stages
                     .filter((stage) => selectedStageId === 'ALL' || stage.stageId === selectedStageId)
@@ -609,6 +610,7 @@ export const RadialEcosystemChart: React.FC = () => {
                     })}
                   </div>
                 )}
+                </div>
               </div>
 
               {/* ========================================================================= */}

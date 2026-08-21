@@ -12,9 +12,11 @@ import {
   SlidersHorizontal,
   ChevronRight,
   ChevronDown,
-  ChevronUp
+  ChevronUp,
+  Workflow
 } from 'lucide-react'
 import { RadialEcosystemChart } from './RadialEcosystemChart'
+import { SubsystemMatrixView } from './matrix/SubsystemMatrixView'
 import { useLanguage } from '../../context/LanguageContext'
 
 interface SystemOverviewDashboardProps {
@@ -27,7 +29,7 @@ export const SystemOverviewDashboard: React.FC<SystemOverviewDashboardProps> = (
   onOpenERD
 }) => {
   const { language, t } = useLanguage()
-  const [coverageViewMode, setCoverageViewMode] = useState<'wheel' | 'bar'>('wheel')
+  const [coverageViewMode, setCoverageViewMode] = useState<'wheel' | 'matrix' | 'bar'>('wheel')
   const [isCoverageExpanded, setIsCoverageExpanded] = useState<boolean>(true)
 
   return (
@@ -234,23 +236,35 @@ export const SystemOverviewDashboard: React.FC<SystemOverviewDashboardProps> = (
 
           <div className="flex items-center gap-2 shrink-0">
             {/* View Mode Switcher */}
-            <div className="flex items-center p-1 bg-slate-100 dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700">
+            <div className="flex items-center p-1 bg-slate-100 dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700">
               <button
                 type="button"
                 onClick={() => setCoverageViewMode('wheel')}
-                className={`flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold rounded-lg transition-all cursor-pointer ${coverageViewMode === 'wheel'
+                className={`flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold rounded-xl transition-all cursor-pointer ${coverageViewMode === 'wheel'
                   ? 'bg-blue-600 text-white shadow-xs'
                   : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
                   }`}
               >
                 <PieChart className="w-3.5 h-3.5" />
-                <span>{language === 'vi' ? 'Sơ đồ Vòng tròn (Radial Wheel)' : 'Radial Wheel Diagram'}</span>
+                <span>{language === 'vi' ? 'Sơ đồ Vòng tròn 6 Phân hệ' : '6-Module Radial Wheel'}</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setCoverageViewMode('matrix')}
+                className={`flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold rounded-xl transition-all cursor-pointer ${coverageViewMode === 'matrix'
+                  ? 'bg-blue-600 text-white shadow-xs'
+                  : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
+                  }`}
+              >
+                <Workflow className="w-3.5 h-3.5" />
+                <span>{language === 'vi' ? 'Ma Trận Tương Quan I/O' : 'I/O Matrix'}</span>
               </button>
 
               <button
                 type="button"
                 onClick={() => setCoverageViewMode('bar')}
-                className={`flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold rounded-lg transition-all cursor-pointer ${coverageViewMode === 'bar'
+                className={`flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold rounded-xl transition-all cursor-pointer ${coverageViewMode === 'bar'
                   ? 'bg-blue-600 text-white shadow-xs'
                   : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
                   }`}
@@ -261,14 +275,14 @@ export const SystemOverviewDashboard: React.FC<SystemOverviewDashboardProps> = (
             </div>
 
             <span className="hidden md:flex text-xs font-bold text-emerald-600 dark:text-emerald-400 items-center gap-1">
-              <CheckCircle2 className="w-3.5 h-3.5" /> 45/45 SOPs Specs Integrated
+              <CheckCircle2 className="w-3.5 h-3.5" /> 50/50 SOPs Specs Integrated
             </span>
 
             {/* Collapse / Expand Dropdown Button */}
             <button
               type="button"
               onClick={() => setIsCoverageExpanded(!isCoverageExpanded)}
-              className="p-2 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 transition-colors flex items-center gap-1 text-xs font-bold cursor-pointer"
+              className="p-2 rounded-2xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 transition-colors flex items-center gap-1 text-xs font-bold cursor-pointer"
               title={isCoverageExpanded ? (language === 'vi' ? 'Thu gọn' : 'Collapse') : (language === 'vi' ? 'Mở rộng' : 'Expand')}
             >
               <span>{isCoverageExpanded ? (language === 'vi' ? 'Thu gọn' : 'Collapse') : (language === 'vi' ? 'Mở rộng' : 'Expand')}</span>
@@ -280,16 +294,32 @@ export const SystemOverviewDashboard: React.FC<SystemOverviewDashboardProps> = (
         {/* EXPANDABLE BODY CONTENT */}
         {isCoverageExpanded && (
           <div className="animate-fadeIn space-y-4">
-            {/* VIEW MODE 1: RADIAL ECOSYSTEM WHEEL (MISA AMIS STYLE) */}
+            {/* VIEW MODE 1: RADIAL ECOSYSTEM WHEEL */}
             {coverageViewMode === 'wheel' && (
               <RadialEcosystemChart />
             )}
 
-            {/* VIEW MODE 2: ORIGINAL BAR CHARTS */}
+            {/* VIEW MODE 2: INTERACTIVE INPUT-OUTPUT MATRIX VIEW */}
+            {coverageViewMode === 'matrix' && (
+              <SubsystemMatrixView />
+            )}
+
+            {/* VIEW MODE 3: 6-MODULE BAR CHARTS */}
             {coverageViewMode === 'bar' && (
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 pt-2">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-3.5 pt-2">
+                {/* Module ATS */}
+                <div className="space-y-1.5 p-3 rounded-2xl border border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-950/40">
+                  <div className="flex justify-between text-xs font-bold">
+                    <span>ATS ({language === 'vi' ? 'Tuyển dụng' : 'Recruitment'})</span>
+                    <span className="text-purple-600 dark:text-purple-400 font-mono">5/5 SOPs</span>
+                  </div>
+                  <div className="w-full h-2 bg-slate-200 dark:bg-slate-800 rounded-full overflow-hidden">
+                    <div className="h-full bg-purple-600 rounded-full w-full" />
+                  </div>
+                </div>
+
                 {/* Module EMP */}
-                <div className="space-y-1.5 p-3 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-950/40">
+                <div className="space-y-1.5 p-3 rounded-2xl border border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-950/40">
                   <div className="flex justify-between text-xs font-bold">
                     <span>Core EMP ({language === 'vi' ? 'Hồ sơ' : 'Profile'})</span>
                     <span className="text-blue-600 dark:text-blue-400 font-mono">15/15 SOPs</span>
@@ -300,7 +330,7 @@ export const SystemOverviewDashboard: React.FC<SystemOverviewDashboardProps> = (
                 </div>
 
                 {/* Module ATT */}
-                <div className="space-y-1.5 p-3 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-950/40">
+                <div className="space-y-1.5 p-3 rounded-2xl border border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-950/40">
                   <div className="flex justify-between text-xs font-bold">
                     <span>ATT ({language === 'vi' ? 'Chấm công' : 'Attendance'})</span>
                     <span className="text-emerald-600 dark:text-emerald-400 font-mono">15/15 SOPs</span>
@@ -310,19 +340,8 @@ export const SystemOverviewDashboard: React.FC<SystemOverviewDashboardProps> = (
                   </div>
                 </div>
 
-                {/* Module INS */}
-                <div className="space-y-1.5 p-3 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-950/40">
-                  <div className="flex justify-between text-xs font-bold">
-                    <span>INS ({language === 'vi' ? 'Bảo hiểm' : 'Insurance'})</span>
-                    <span className="text-purple-600 dark:text-purple-400 font-mono">8/8 SOPs</span>
-                  </div>
-                  <div className="w-full h-2 bg-slate-200 dark:bg-slate-800 rounded-full overflow-hidden">
-                    <div className="h-full bg-purple-600 rounded-full w-full" />
-                  </div>
-                </div>
-
                 {/* Module PAY */}
-                <div className="space-y-1.5 p-3 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-950/40">
+                <div className="space-y-1.5 p-3 rounded-2xl border border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-950/40">
                   <div className="flex justify-between text-xs font-bold">
                     <span>PAY ({language === 'vi' ? 'Tiền lương' : 'Payroll'})</span>
                     <span className="text-amber-600 dark:text-amber-400 font-mono">4/4 SOPs</span>
@@ -332,8 +351,19 @@ export const SystemOverviewDashboard: React.FC<SystemOverviewDashboardProps> = (
                   </div>
                 </div>
 
+                {/* Module INS */}
+                <div className="space-y-1.5 p-3 rounded-2xl border border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-950/40">
+                  <div className="flex justify-between text-xs font-bold">
+                    <span>INS ({language === 'vi' ? 'Bảo hiểm' : 'Insurance'})</span>
+                    <span className="text-purple-600 dark:text-purple-400 font-mono">8/8 SOPs</span>
+                  </div>
+                  <div className="w-full h-2 bg-slate-200 dark:bg-slate-800 rounded-full overflow-hidden">
+                    <div className="h-full bg-purple-600 rounded-full w-full" />
+                  </div>
+                </div>
+
                 {/* Module TAX */}
-                <div className="space-y-1.5 p-3 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-950/40">
+                <div className="space-y-1.5 p-3 rounded-2xl border border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-950/40">
                   <div className="flex justify-between text-xs font-bold">
                     <span>TAX ({language === 'vi' ? 'Thuế TNCN' : 'Personal Tax'})</span>
                     <span className="text-indigo-600 dark:text-indigo-400 font-mono">3/3 SOPs</span>

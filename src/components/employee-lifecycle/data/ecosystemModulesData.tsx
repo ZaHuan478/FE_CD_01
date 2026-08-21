@@ -1,5 +1,5 @@
 import React from 'react'
-import { Users, Clock, CircleDollarSign, Receipt, ShieldCheck } from 'lucide-react'
+import { Users, Clock, CircleDollarSign, Receipt, ShieldCheck, Target } from 'lucide-react'
 
 export interface ModuleStage {
   stageId: string
@@ -52,8 +52,124 @@ export interface ModuleEcosystemItem {
   angleDeg: number
 }
 
-// STRICTLY 5 REAL MODULES FROM SOP-HRUX SPECS (45 SOPS TOTAL)
-export const FIVE_CORE_MODULES: ModuleEcosystemItem[] = [
+// 6 REAL ENTERPRISE HRMS MODULES (50 SOPS TOTAL)
+export const SIX_CORE_MODULES: ModuleEcosystemItem[] = [
+  {
+    id: 'ats',
+    code: 'Tuyển dụng ATS',
+    name: 'Phân hệ Tuyển dụng & Săn tìm Nhân tài (ATS)',
+    nameEn: 'Recruitment & Applicant Tracking System (ATS)',
+    sopCount: '5/5 SOPs',
+    percentage: '100%',
+    subFeatures: ['Kế hoạch định biên & Yêu cầu tuyển dụng', 'Sàng lọc CV & Phỏng vấn ứng viên', 'Phát hành Offer & Chuyển giao Onboarding'],
+    subFeaturesEn: ['Headcount requisition & Job postings', 'CV screening & Candidate interviews', 'Offer generation & Onboarding handover'],
+    stages: [
+      {
+        stageId: 'ATS_STG_1',
+        stageNumber: 1,
+        stageTitle: 'Chặng 1: Hoạch định Nhu cầu & Đăng tin Tuyển dụng',
+        stageTitleEn: 'Stage 1: Requisition & Job Sourcing',
+        description: 'Thu thập phiếu yêu cầu tuyển dụng từ các phòng ban, kiểm tra định biên nhân sự và đăng tin trên các kênh đối tác.',
+        descriptionEn: 'Gather recruitment requisitions, verify headcount plans, and publish vacancies to job boards.',
+        sopCodes: ['SOP-REC-01', 'SOP-REC-02']
+      },
+      {
+        stageId: 'ATS_STG_2',
+        stageNumber: 2,
+        stageTitle: 'Chặng 2: Sàng lọc CV, Phỏng vấn & Thư mời Offer',
+        stageTitleEn: 'Stage 2: Screening, Interview & Offer',
+        description: 'Tiếp nhận hồ sơ ứng viên, chấm điểm phỏng vấn, thẩm định năng lực và phát hành thư mời nhận việc chuyển sang Onboarding.',
+        descriptionEn: 'Screen candidate profiles, evaluate interview scorecards, and issue official offer letters for onboarding handover.',
+        sopCodes: ['SOP-REC-03', 'SOP-REC-04', 'SOP-REC-05']
+      }
+    ],
+    sopList: [
+      {
+        code: 'SOP-REC-01',
+        title: 'Đề xuất nhu cầu tuyển dụng & Phê duyệt định biên',
+        titleEn: 'Recruitment Requisition & Headcount Approval',
+        type: 'N',
+        stageNumber: 1,
+        actor: 'Trưởng bộ phận & HR Tuyển dụng',
+        actorEn: 'Line Manager & Talent Acquisition Lead',
+        scopeNote: 'Khởi tạo phiếu yêu cầu tuyển dụng khi phòng ban có phát sinh nhân sự mới hoặc thay thế, đối soát với hạn mức định biên EMP01.',
+        scopeNoteEn: 'Initiate headcount requisition when departments expand or backfill, cross-referencing against EMP01 headcount quotas.',
+        inputs: ['Phiếu đề xuất tuyển dụng', 'Hạn mức định biên phòng ban (MD-05)', 'Tiêu chuẩn chức danh JD (MD-06)'],
+        outputs: ['Yêu cầu tuyển dụng được phê duyệt', 'Ngân sách tuyển dụng vị trí được cấp phép'],
+        workflowId: 'LIFE-01',
+        wireframeId: 'LIFE-01'
+      },
+      {
+        code: 'SOP-REC-02',
+        title: 'Đăng tin tuyển dụng & Quản lý Job Boards đối tác',
+        titleEn: 'Job Posting & Partner Channels Management',
+        type: 'A',
+        stageNumber: 1,
+        actor: 'Chuyên viên Tuyển dụng (TA Specialist)',
+        actorEn: 'Talent Acquisition Specialist',
+        scopeNote: 'Tự động đồng bộ tin tuyển dụng lên LinkedIn, TopCV, VietnamWorks và hệ thống giới thiệu nội bộ (Referral).',
+        scopeNoteEn: 'Automatically synchronize job vacancies to LinkedIn, job boards and internal referral programs.',
+        inputs: ['Bản mô tả công việc (JD)', 'Kênh đăng tuyển (MD-ATS-02)', 'Chi phí ngân sách tuyển dụng'],
+        outputs: ['Tin tuyển dụng phát hành công khai', 'Link nộp CV trực tuyến cho ứng viên'],
+        workflowId: 'LIFE-01',
+        wireframeId: 'LIFE-01'
+      },
+      {
+        code: 'SOP-REC-03',
+        title: 'Thu thập, Sàng lọc CV & Đánh giá sơ bộ ứng viên',
+        titleEn: 'CV Ingestion, Automated Screening & Shortlisting',
+        type: 'M',
+        stageNumber: 2,
+        actor: 'Chuyên viên Tuyển dụng & AI Parser',
+        actorEn: 'TA Specialist & CV Parsing Engine',
+        scopeNote: 'Tự động trích xuất thông tin CV, đối chiếu với Tiêu chí tuyển dụng (MD-ATS-01) để lọc ra danh sách ứng viên tiềm năng (Shortlist).',
+        scopeNoteEn: 'Auto-parse candidate resumes against hiring criteria (MD-ATS-01) to generate qualified candidate shortlists.',
+        inputs: ['File CV ứng viên', 'Khung điều kiện tuyển dụng (MD-ATS-01)', 'Học vấn & Kinh nghiệm (MD-04)'],
+        outputs: ['Hồ sơ ứng viên chuẩn hóa trong kho ATS', 'Danh sách ứng viên vào vòng phỏng vấn'],
+        workflowId: 'LIFE-01',
+        wireframeId: 'LIFE-01'
+      },
+      {
+        code: 'SOP-REC-04',
+        title: 'Phỏng vấn, Chấm điểm chuyên môn & Đánh giá tiềm năng',
+        titleEn: 'Interview Scoring, Technical Assessment & Evaluation',
+        type: 'M',
+        stageNumber: 2,
+        actor: 'Hội đồng phỏng vấn & Trưởng bộ phận',
+        actorEn: 'Interview Panel & Hiring Manager',
+        scopeNote: 'Tổ chức phỏng vấn trực tiếp/online, nhập điểm đánh giá theo tiêu chí và đưa ra kết luận Đạt/Không đạt (Pass/Fail).',
+        scopeNoteEn: 'Conduct interviews, record evaluation scores against job competencies, and decide Pass/Fail status.',
+        inputs: ['Lịch phỏng vấn đã xếp', 'Bộ tiêu chí chấm điểm chuyên môn', 'Hồ sơ năng lực ứng viên'],
+        outputs: ['Bảng điểm đánh giá phỏng vấn (Scorecard)', 'Quyết định lựa chọn ứng viên trúng tuyển'],
+        workflowId: 'LIFE-01',
+        wireframeId: 'LIFE-01'
+      },
+      {
+        code: 'SOP-REC-05',
+        title: 'Phát hành Thư mời nhận việc (Offer) & Chuyển giao Onboarding',
+        titleEn: 'Offer Letter Generation & Onboarding Ingestion Handover',
+        type: 'A',
+        stageNumber: 2,
+        actor: 'HR Tuyển dụng & Hệ thống Tự động',
+        actorEn: 'TA Lead & Automated Handover Engine',
+        scopeNote: 'Phát hành Thư mời nhận việc kèm mức lương P1 (MD-07). Khi ứng viên ký số chấp thuận, hệ thống tự động bắn toàn bộ dữ liệu sang Core EMP (SOP-EMP-02) để tiếp nhận Onboarding.',
+        scopeNoteEn: 'Generate official offer letters based on P1 pay scale (MD-07). Upon digital signature acceptance, automatically stream data to Core EMP (SOP-EMP-02).',
+        inputs: ['Quyết định trúng tuyển', 'Thang bảng lương 3P (MD-07)', 'Chữ ký số xác nhận của ứng viên'],
+        outputs: ['Thư mời nhận việc có hiệu lực (Offer Letter)', 'Gói dữ liệu ứng viên chuyển giao sang Onboarding (SOP-EMP-02)'],
+        workflowId: 'LIFE-01',
+        wireframeId: 'LIFE-01'
+      }
+    ],
+    color: '#8b5cf6',
+    gradient: 'from-purple-600 to-indigo-600',
+    border: 'border-purple-500/30',
+    bgLight: 'bg-purple-50',
+    bgDark: 'bg-purple-950/40',
+    textLight: 'text-purple-700',
+    textDark: 'text-purple-300',
+    icon: <Target className="w-5 h-5 text-purple-600 dark:text-purple-400" />,
+    angleDeg: 270 // 12 o'clock
+  },
   {
     id: 'emp',
     code: 'Core EMP',
@@ -323,7 +439,7 @@ export const FIVE_CORE_MODULES: ModuleEcosystemItem[] = [
     textLight: 'text-blue-700',
     textDark: 'text-blue-300',
     icon: <Users className="w-5 h-5 text-blue-600 dark:text-blue-400" />,
-    angleDeg: 270 // Top (12 o'clock)
+    angleDeg: 330 // 2 o'clock (Top Right)
   },
   {
     id: 'att',
@@ -553,7 +669,7 @@ export const FIVE_CORE_MODULES: ModuleEcosystemItem[] = [
     textLight: 'text-emerald-700',
     textDark: 'text-emerald-300',
     icon: <Clock className="w-5 h-5 text-emerald-600 dark:text-emerald-400" />,
-    angleDeg: 342 // Top Right
+    angleDeg: 30 // 4 o'clock (Bottom Right)
   },
   {
     id: 'pay',
@@ -642,7 +758,7 @@ export const FIVE_CORE_MODULES: ModuleEcosystemItem[] = [
     textLight: 'text-amber-700',
     textDark: 'text-amber-300',
     icon: <CircleDollarSign className="w-5 h-5 text-amber-600 dark:text-amber-400" />,
-    angleDeg: 54 // Bottom Right
+    angleDeg: 90 // 6 o'clock (Bottom)
   },
   {
     id: 'tax',
@@ -719,7 +835,7 @@ export const FIVE_CORE_MODULES: ModuleEcosystemItem[] = [
     textLight: 'text-indigo-700',
     textDark: 'text-indigo-300',
     icon: <Receipt className="w-5 h-5 text-indigo-600 dark:text-indigo-400" />,
-    angleDeg: 126 // Bottom Left
+    angleDeg: 210 // 10 o'clock (Top Left)
   },
   {
     id: 'ins',
@@ -856,9 +972,9 @@ export const FIVE_CORE_MODULES: ModuleEcosystemItem[] = [
     textLight: 'text-purple-700',
     textDark: 'text-purple-300',
     icon: <ShieldCheck className="w-5 h-5 text-purple-600 dark:text-purple-400" />,
-    angleDeg: 198 // Top Left
+    angleDeg: 150 // 8 o'clock (Bottom Left)
   }
 ]
 
-
-
+// Backward compatibility export
+export const FIVE_CORE_MODULES: ModuleEcosystemItem[] = SIX_CORE_MODULES
