@@ -18,12 +18,24 @@ interface EcosystemSopDetailProps {
   activeSopItem: SopDetailItem
 }
 
+const getWorkflowIdForSop = (code: string): string => {
+  if (code.includes('EMP-01') || code.includes('EMP01') || code.includes('ORG')) return 'LIFE-00'
+  if (code.includes('REC') || code.includes('ATS') || code.includes('EMP-02') || code.includes('EMP02') || code.includes('EMP-03') || code.includes('EMP03')) return 'LIFE-01'
+  if (code.includes('EMP-04') || code.includes('EMP04') || code.includes('DOC') || code.includes('PROFILE')) return 'LIFE-02'
+  if (code.includes('EMP-11') || code.includes('EMP11') || code.includes('EMP-14') || code.includes('EMP14') || code.includes('MOBILITY') || code.includes('PLACEMENT') || code.includes('POSITION')) return 'LIFE-03'
+  if (code.includes('INS') || code.includes('PROB') || code.includes('EVAL') || code.includes('EMP-05') || code.includes('EMP05') || code.includes('EMP-06') || code.includes('EMP06') || code.includes('EMP-07') || code.includes('EMP07')) return 'LIFE-04'
+  if (code.includes('PAY') || code.includes('TAX') || code.includes('SAL') || code.includes('PROM') || code.includes('TRAIN') || code.includes('EMP-08') || code.includes('EMP08') || code.includes('EMP-09') || code.includes('EMP09') || code.includes('EMP-10') || code.includes('EMP10') || code.includes('EMP-12') || code.includes('EMP12') || code.includes('EMP-13') || code.includes('EMP13')) return 'LIFE-05'
+  if (code.includes('ATT') || code.includes('LEAVE') || code.includes('OT') || code.includes('SHIFT') || code.includes('TIMESHEET')) return 'LIFE-06'
+  if (code.includes('OFF') || code.includes('EMP-15') || code.includes('EMP15') || code.includes('EXIT') || code.includes('RESIGN')) return 'LIFE-07'
+  return 'LIFE-01'
+}
+
 export const EcosystemSopDetail: React.FC<EcosystemSopDetailProps> = ({ activeSopItem }) => {
   const { language } = useLanguage()
   const navigate = useNavigate()
 
-  const workflowId = activeSopItem.workflowId || 'LIFE-01'
-  const wireframeId = activeSopItem.wireframeId || activeSopItem.workflowId || 'LIFE-01'
+  const workflowId = activeSopItem.workflowId || getWorkflowIdForSop(activeSopItem.code)
+  const wireframeId = activeSopItem.wireframeId || workflowId
 
   return (
     <div className="sticky top-20 bg-slate-50/70 dark:bg-slate-950/70 border border-slate-200 dark:border-slate-800 rounded-3xl p-5 sm:p-6 space-y-4 shadow-sm animate-fadeIn">
@@ -104,7 +116,7 @@ export const EcosystemSopDetail: React.FC<EcosystemSopDetailProps> = ({ activeSo
       <div className="flex items-center gap-2 p-3 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 text-xs">
         <UserCheck className="w-4 h-4 text-emerald-600 dark:text-emerald-400 shrink-0" />
         <span className="font-extrabold text-slate-500 dark:text-slate-400 uppercase text-[10px]">
-          {language === 'vi' ? 'VAI TRÒ THỰC HIỆN:' : 'ACTOR & RACI:'}
+          {language === 'vi' ? 'VAI TRÒ THỰC HIỆN:' : 'Roles and responsibilities:'}
         </span>
         <span className="font-bold text-slate-900 dark:text-white">
           {language === 'vi' ? activeSopItem.actor || 'Chuyên viên Nhân sự & Hệ thống' : activeSopItem.actorEn || 'HR Specialist & System'}
@@ -200,7 +212,7 @@ export const EcosystemSopDetail: React.FC<EcosystemSopDetailProps> = ({ activeSo
           >
             <div className="flex items-center gap-2">
               <UserCheck className="w-4 h-4 text-slate-900 dark:text-white group-hover:scale-110 transition-transform" />
-              <span>{language === 'vi' ? 'Phân định Vai trò & RACI Matrix' : 'Roles & RACI Matrix'}</span>
+              <span>{language === 'vi' ? 'Phân định vai trò & trách nhiệm' : 'Roles and responsibilities'}</span>
             </div>
             <ArrowUpRight className="w-4 h-4 text-slate-900 dark:text-white group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-all" />
           </button>
@@ -213,7 +225,7 @@ export const EcosystemSopDetail: React.FC<EcosystemSopDetailProps> = ({ activeSo
           >
             <div className="flex items-center gap-2">
               <ListCheck className="w-4 h-4 text-slate-900 dark:text-white group-hover:scale-110 transition-transform" />
-              <span>{language === 'vi' ? 'Bảng Đặc tả SOP Specs' : 'SOP Specifications Table'}</span>
+              <span>{language === 'vi' ? 'Bảng kiểm & quy định' : 'Checklist and rules'}</span>
             </div>
             <ArrowUpRight className="w-4 h-4 text-slate-900 dark:text-white group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-all" />
           </button>

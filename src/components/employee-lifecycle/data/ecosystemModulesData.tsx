@@ -271,7 +271,8 @@ export const SIX_CORE_MODULES: ModuleEcosystemItem[] = [
         scopeNoteEn: 'Rehiring former employee retaining existing Employee ID and reactivating employment history.',
         inputs: ['Mã nhân viên cũ', 'Thông tin cập nhật mới (CCCD, Địa chỉ, Số tài khoản)', 'Quyết định tiếp nhận lại'],
         outputs: ['Hồ sơ nhân viên khôi phục trạng thái hoạt động', 'Gán vị trí công tác mới', 'Đồng bộ lại tài khoản hệ thống'],
-        workflowId: 'LIFE-02'
+        workflowId: 'LIFE-01',
+        wireframeId: 'LIFE-01'
       },
       {
         code: 'SOP-EMP-04',
@@ -285,7 +286,8 @@ export const SIX_CORE_MODULES: ModuleEcosystemItem[] = [
         scopeNoteEn: 'Ongoing maintenance, updates and lookup of master employee profiles, qualifications, dependents and audit logs.',
         inputs: ['Mã nhân viên (EMP ID)', 'Giấy tờ chứng thực biến động (Giấy khai sinh con, CCCD mới)', 'Bằng cấp học vấn bổ sung'],
         outputs: ['Hồ sơ Master Data được cập nhật phiên bản mới', 'Đăng ký giảm trừ gia cảnh thuế TNCN (TAX01)', 'Lịch sử thay đổi (Audit Log) ghi nhận hệ thống'],
-        workflowId: 'LIFE-02'
+        workflowId: 'LIFE-02',
+        wireframeId: 'LIFE-02'
       },
       {
         code: 'SOP-EMP-05',
@@ -299,7 +301,8 @@ export const SIX_CORE_MODULES: ModuleEcosystemItem[] = [
         scopeNoteEn: 'Automated 30/45-day contract expiry notification, performance review and contract renewal signing.',
         inputs: ['Danh sách hợp đồng sắp đáo hạn', 'Đánh giá hiệu quả công việc từ TBP', 'Nguyện vọng tiếp tục làm việc'],
         outputs: ['HĐLĐ tái ký mới (12/24 tháng hoặc Không xác định thời hạn)', 'Ghi nhận lịch sử gia hạn hợp đồng'],
-        workflowId: 'LIFE-04'
+        workflowId: 'LIFE-04',
+        wireframeId: 'LIFE-04'
       },
       {
         code: 'SOP-EMP-06',
@@ -313,7 +316,8 @@ export const SIX_CORE_MODULES: ModuleEcosystemItem[] = [
         scopeNoteEn: 'Drafting and signing official employment contracts upon successful probation evaluation.',
         inputs: ['Kết quả đánh giá thử việc Đạt (EMP02 / EMP10)', 'Thang bảng lương áp dụng (MD-07)', 'Mẫu hợp đồng chuẩn Word Template'],
         outputs: ['Mã số HĐLĐ chính thức có chữ ký số 2 bên', 'Bản PDF HĐLĐ lưu trữ két số (E-Vault)', 'Cập nhật mức đóng BHXH theo hợp đồng'],
-        workflowId: 'LIFE-04'
+        workflowId: 'LIFE-04',
+        wireframeId: 'LIFE-04'
       },
       {
         code: 'SOP-EMP-07',
@@ -327,7 +331,8 @@ export const SIX_CORE_MODULES: ModuleEcosystemItem[] = [
         scopeNoteEn: 'Issuing and signing employment contract annexes upon wage and allowance adjustments.',
         inputs: ['Quyết định điều chỉnh lương / phụ cấp', 'HĐLĐ hiện tại đang có hiệu lực', 'Mẫu phụ lục hợp đồng chuẩn'],
         outputs: ['Phụ lục HĐLĐ có chữ ký 2 bên', 'Cập nhật mức đóng BHXH mới', 'Đồng bộ sang bảng lương PAY'],
-        workflowId: 'LIFE-04'
+        workflowId: 'LIFE-04',
+        wireframeId: 'LIFE-04'
       },
       {
         code: 'SOP-EMP-08',
@@ -341,7 +346,8 @@ export const SIX_CORE_MODULES: ModuleEcosystemItem[] = [
         scopeNoteEn: 'Annual scheduled salary review based on annual KPI performance and company budget.',
         inputs: ['Bảng đánh giá KPI năm', 'Tỷ lệ tăng lương đề xuất theo xếp loại', 'Hạn mức ngân sách quỹ lương'],
         outputs: ['Danh sách nhân sự được duyệt tăng lương', 'Quyết định tăng lương định kỳ', 'Kích hoạt ký Phụ lục HĐLĐ (EMP07)'],
-        workflowId: 'LIFE-05'
+        workflowId: 'LIFE-05',
+        wireframeId: 'LIFE-05'
       },
       {
         code: 'SOP-EMP-09',
@@ -355,7 +361,8 @@ export const SIX_CORE_MODULES: ModuleEcosystemItem[] = [
         scopeNoteEn: 'Off-cycle ad-hoc salary increment due to exceptional merit, retention or added scope.',
         inputs: ['Tờ trình đề xuất tăng lương đột xuất của TBP', 'Lý do giải trình & Báo cáo đóng góp', 'Ý kiến HRD'],
         outputs: ['Quyết định tăng lương đột xuất có phê duyệt BOD', 'Cập nhật bảng lương kỳ tới', 'Ký Phụ lục HĐLĐ'],
-        workflowId: 'LIFE-05'
+        workflowId: 'LIFE-05',
+        wireframeId: 'LIFE-05'
       },
       {
         code: 'SOP-EMP-10',
@@ -369,7 +376,8 @@ export const SIX_CORE_MODULES: ModuleEcosystemItem[] = [
         scopeNoteEn: 'Automated scan and baseline wage adjustment for compliance with new statutory regional minimum wage decrees.',
         inputs: ['Nghị định quy định mức lương tối thiểu vùng mới', 'Danh sách nhân sự có mức đóng < mức quy định', 'Cấu hình thời điểm áp dụng'],
         outputs: ['Bảng điều chỉnh mức lương & BHXH hàng loạt', 'Thông báo tự động đến nhân sự', 'Đồng bộ cơ quan BHXH'],
-        workflowId: 'LIFE-05'
+        workflowId: 'LIFE-05',
+        wireframeId: 'LIFE-05'
       },
       {
         code: 'SOP-EMP-11',
@@ -383,7 +391,8 @@ export const SIX_CORE_MODULES: ModuleEcosystemItem[] = [
         scopeNoteEn: 'Personnel action workflows: Managerial appointments, concurrent assignments, transfers and internal mobility.',
         inputs: ['Tờ trình nhân sự từ Khối/Phòng', 'Hạn mức định biên vị trí mới', 'Biên bản thống nhất 2 phòng ban'],
         outputs: ['Quyết định nhân sự chính thức có chữ ký BOD', 'Cập nhật Sơ đồ tổ chức & Phân quyền hệ thống', 'Cập nhật phụ cấp chức vụ'],
-        workflowId: 'LIFE-05'
+        workflowId: 'LIFE-03',
+        wireframeId: 'LIFE-03'
       },
       {
         code: 'SOP-EMP-12',
@@ -397,7 +406,8 @@ export const SIX_CORE_MODULES: ModuleEcosystemItem[] = [
         scopeNoteEn: 'Handling labor code violations: Incident report, hearing committee, disciplinary decisions and profile records.',
         inputs: ['Biên bản vi phạm kỷ luật', 'Bản tường trình của nhân viên', 'Biên bản họp Hội đồng kỷ luật'],
         outputs: ['Quyết định xử lý kỷ luật (Khiển trách/Kéo dài nâng lương/Cách chức/Sa thải)', 'Khấu trừ hoặc giảm trừ lương (nếu có)', 'Lưu hồ sơ nhân sự'],
-        workflowId: 'LIFE-05'
+        workflowId: 'LIFE-05',
+        wireframeId: 'LIFE-05'
       },
       {
         code: 'SOP-EMP-13',
@@ -411,7 +421,8 @@ export const SIX_CORE_MODULES: ModuleEcosystemItem[] = [
         scopeNoteEn: 'Recognizing individual and team excellence: Project milestones, innovations and periodic awards.',
         inputs: ['Hồ sơ đề xuất khen thưởng & Minh chứng thành tích', 'Quy chế thi đua khen thưởng', 'Phê duyệt của Hội đồng'],
         outputs: ['Quyết định khen thưởng chính thức', 'Tiền thưởng tự động đẩy vào kỳ lương PAY', 'Vinh danh trên bảng tin Portal'],
-        workflowId: 'LIFE-05'
+        workflowId: 'LIFE-05',
+        wireframeId: 'LIFE-05'
       },
       {
         code: 'SOP-EMP-14',
@@ -425,7 +436,8 @@ export const SIX_CORE_MODULES: ModuleEcosystemItem[] = [
         scopeNoteEn: 'Domestic and international business trip planning, travel itinerary approvals, expense advances and reimbursements.',
         inputs: ['Kế hoạch công tác & Mục tiêu công việc', 'Dự toán chi phí vé/khách sạn/công tác phí', 'Danh sách nhân sự tham gia'],
         outputs: ['Giấy đi đường & Quyết định cử công tác', 'Lệnh tạm ứng chi phí kế toán', 'Ghi nhận ngày công tác trên bảng chấm công ATT'],
-        workflowId: 'LIFE-03'
+        workflowId: 'LIFE-03',
+        wireframeId: 'LIFE-03'
       },
       {
         code: 'SOP-EMP-15',
@@ -439,7 +451,8 @@ export const SIX_CORE_MODULES: ModuleEcosystemItem[] = [
         scopeNoteEn: 'Comprehensive offboarding workflow: Resignation notice, 4-party asset handover, contract termination, severance calculation and master archive lock.',
         inputs: ['Đơn xin nghỉ việc / Quyết định chấm dứt HĐLĐ', 'Check-list bàn giao công việc & Tài sản IT/Hành chính', 'Bảng tính công & phép tồn lũy kế'],
         outputs: ['Quyết định nghỉ việc chính thức', 'Bảng quyết toán thôi việc (Final Pay)', 'Báo giảm BHXH (INS03) & Khóa tài khoản vĩnh viễn'],
-        workflowId: 'LIFE-07'
+        workflowId: 'LIFE-07',
+        wireframeId: 'LIFE-07'
       }
     ],
     color: '#2563eb',
@@ -501,7 +514,9 @@ export const SIX_CORE_MODULES: ModuleEcosystemItem[] = [
         actorEn: 'Timekeeping HR',
         scopeNote: 'Thiết lập khung giờ vào/ra, ca gãy, ca đêm và lịch nghỉ lễ chuẩn công ty.',
         inputs: ['Quy chế làm việc công ty', 'Lịch nghỉ lễ nhà nước'],
-        outputs: ['Danh mục Ca làm việc (MD-08)', 'Khung giờ cho phép quẹt thẻ']
+        outputs: ['Danh mục Ca làm việc (MD-08)', 'Khung giờ cho phép quẹt thẻ'],
+        workflowId: 'LIFE-06',
+        wireframeId: 'LIFE-06'
       },
       {
         code: 'SOP-ATT-02',
@@ -513,7 +528,9 @@ export const SIX_CORE_MODULES: ModuleEcosystemItem[] = [
         actorEn: 'Shift Manager / Lead',
         scopeNote: 'Gán ca tuần/tháng cho nhân viên sản xuất, nhà máy hoặc cửa hàng bán lẻ.',
         inputs: ['Kế hoạch nhân sự ca kíp', 'Danh sách nhân viên'],
-        outputs: ['Bảng phân ca làm việc chi tiết', 'Thông báo lịch ca lên Mobile App']
+        outputs: ['Bảng phân ca làm việc chi tiết', 'Thông báo lịch ca lên Mobile App'],
+        workflowId: 'LIFE-06',
+        wireframeId: 'LIFE-06'
       },
       {
         code: 'SOP-ATT-03',
@@ -525,7 +542,9 @@ export const SIX_CORE_MODULES: ModuleEcosystemItem[] = [
         actorEn: 'Automated Sync Engine',
         scopeNote: 'Real-time sync dữ liệu quẹt thẻ vân tay, nhận diện khuôn mặt về cơ sở dữ liệu.',
         inputs: ['Dữ liệu IP máy chấm công', 'Log quẹt thẻ thời gian thực'],
-        outputs: ['Dữ liệu In/Out thô được chuẩn hóa', 'Khớp nối với Mã nhân viên']
+        outputs: ['Dữ liệu In/Out thô được chuẩn hóa', 'Khớp nối với Mã nhân viên'],
+        workflowId: 'LIFE-06',
+        wireframeId: 'LIFE-06'
       },
       {
         code: 'SOP-ATT-04',
@@ -537,7 +556,9 @@ export const SIX_CORE_MODULES: ModuleEcosystemItem[] = [
         actorEn: 'Employee & Manager',
         scopeNote: 'Nộp đơn xin nghỉ phép năm, kiểm tra quỹ phép tồn và chuỗi phê duyệt theo cấp bậc.',
         inputs: ['Loại phép (Phép năm, Không lương)', 'Số ngày nghỉ & Ngày bắt đầu', 'Người bàn giao công việc'],
-        outputs: ['Đơn phép được duyệt', 'Tự động trừ Quỹ phép tồn', 'Ghi nhận ngày công hợp lệ']
+        outputs: ['Đơn phép được duyệt', 'Tự động trừ Quỹ phép tồn', 'Ghi nhận ngày công hợp lệ'],
+        workflowId: 'LIFE-06',
+        wireframeId: 'LIFE-06'
       },
       {
         code: 'SOP-ATT-05',
@@ -549,7 +570,9 @@ export const SIX_CORE_MODULES: ModuleEcosystemItem[] = [
         actorEn: 'Employee & Line Manager',
         scopeNote: 'Giải trình quên quẹt thẻ, đi công tác đột xuất hoặc lý do chính đáng.',
         inputs: ['Ngày có lỗi quẹt thẻ', 'Lý do giải trình', 'Bằng chứng kèm theo (nếu có)'],
-        outputs: ['Bổ sung giờ quẹt thẻ hợp lệ', 'Xóa cảnh báo đi trễ trên bảng công']
+        outputs: ['Bổ sung giờ quẹt thẻ hợp lệ', 'Xóa cảnh báo đi trễ trên bảng công'],
+        workflowId: 'LIFE-06',
+        wireframeId: 'LIFE-06'
       },
       {
         code: 'SOP-ATT-06',
@@ -561,7 +584,9 @@ export const SIX_CORE_MODULES: ModuleEcosystemItem[] = [
         actorEn: 'Team Lead & Department Head',
         scopeNote: 'Đăng ký làm thêm giờ trước ca, kiểm tra trần OT 40h/tháng theo luật lao động.',
         inputs: ['Khung giờ OT dự kiến', 'Danh sách nhân sự tham gia', 'Lý do công việc'],
-        outputs: ['Kế hoạch OT được phê duyệt', 'Cơ sở đối soát giờ quẹt thẻ thực tế']
+        outputs: ['Kế hoạch OT được phê duyệt', 'Cơ sở đối soát giờ quẹt thẻ thực tế'],
+        workflowId: 'LIFE-06',
+        wireframeId: 'LIFE-06'
       },
       {
         code: 'SOP-ATT-07',
@@ -573,7 +598,9 @@ export const SIX_CORE_MODULES: ModuleEcosystemItem[] = [
         actorEn: 'System Engine & HR',
         scopeNote: 'Tự động cộng dồn giờ OT chuyển đổi thành ngày nghỉ bù hoặc tính lũy kế phép thâm niên.',
         inputs: ['Số giờ OT được duyệt chuyển đổi', 'Thâm niên làm việc'],
-        outputs: ['Quỹ nghỉ bù khả dụng', 'Báo cáo số dư phép tồn toàn công ty']
+        outputs: ['Quỹ nghỉ bù khả dụng', 'Báo cáo số dư phép tồn toàn công ty'],
+        workflowId: 'LIFE-06',
+        wireframeId: 'LIFE-06'
       },
       {
         code: 'SOP-ATT-08',
@@ -585,7 +612,9 @@ export const SIX_CORE_MODULES: ModuleEcosystemItem[] = [
         actorEn: 'Employee & Manager',
         scopeNote: 'Ghi nhận ngày làm việc tại địa điểm khách hàng, dự án hoặc công tác bên ngoài.',
         inputs: ['Đơn công tác ngoài', 'Vị trí check-in GPS'],
-        outputs: ['Xác nhận đủ ngày công làm việc thực tế']
+        outputs: ['Xác nhận đủ ngày công làm việc thực tế'],
+        workflowId: 'LIFE-06',
+        wireframeId: 'LIFE-06'
       },
       {
         code: 'SOP-ATT-09',
@@ -597,7 +626,9 @@ export const SIX_CORE_MODULES: ModuleEcosystemItem[] = [
         actorEn: 'Employee & Insurance HR',
         scopeNote: 'Ghi nhận nghỉ chế độ bảo hiểm xã hội, làm căn cứ thanh toán chế độ ốm đau thai sản.',
         inputs: ['Giấy ra viện / Giấy chứng nhận nghỉ việc hưởng BHXH', 'Thời gian nghỉ theo chỉ định'],
-        outputs: ['Ghi nhận nghỉ chế độ trên bảng công', 'Đồng bộ hồ sơ sang Phân hệ Bảo hiểm (INS05)']
+        outputs: ['Ghi nhận nghỉ chế độ trên bảng công', 'Đồng bộ hồ sơ sang Phân hệ Bảo hiểm (INS05)'],
+        workflowId: 'LIFE-06',
+        wireframeId: 'LIFE-06'
       },
       {
         code: 'SOP-ATT-10',
@@ -609,7 +640,9 @@ export const SIX_CORE_MODULES: ModuleEcosystemItem[] = [
         actorEn: 'Employee & Mobile App',
         scopeNote: 'Chấm công di động qua định vị GPS bán kính văn phòng và nhận diện khuôn mặt AI.',
         inputs: ['Tọa độ GPS điện thoại', 'Ảnh chụp Face ID thời gian thực'],
-        outputs: ['Log chấm công hợp lệ kèm ảnh chụp và tọa độ']
+        outputs: ['Log chấm công hợp lệ kèm ảnh chụp và tọa độ'],
+        workflowId: 'LIFE-06',
+        wireframeId: 'LIFE-06'
       },
       {
         code: 'SOP-ATT-11',
@@ -621,7 +654,9 @@ export const SIX_CORE_MODULES: ModuleEcosystemItem[] = [
         actorEn: 'Automated Engine',
         scopeNote: 'Tự động gom log quẹt thẻ, đơn phép, đơn OT và tính ra tổng số ngày công chuẩn trong tháng.',
         inputs: ['Dữ liệu quẹt thẻ 30 ngày', 'Danh sách đơn phép đã duyệt', 'Lịch phân ca'],
-        outputs: ['Bảng tổng hợp công chi tiết từng nhân viên (Ngày công, Giờ OT, Số lần đi trễ)']
+        outputs: ['Bảng tổng hợp công chi tiết từng nhân viên (Ngày công, Giờ OT, Số lần đi trễ)'],
+        workflowId: 'LIFE-06',
+        wireframeId: 'LIFE-06'
       },
       {
         code: 'SOP-ATT-12',
@@ -633,7 +668,9 @@ export const SIX_CORE_MODULES: ModuleEcosystemItem[] = [
         actorEn: 'Attendance HR & Manager',
         scopeNote: 'Cảnh báo nhân viên vi phạm quá số lần đi trễ, quên quẹt thẻ hoặc nghỉ không phép.',
         inputs: ['Bảng công chưa hoàn thiện', 'Ngưỡng vi phạm nội quy'],
-        outputs: ['Danh sách cảnh báo vi phạm', 'Thông báo nhắc nhở gửi nhân viên']
+        outputs: ['Danh sách cảnh báo vi phạm', 'Thông báo nhắc nhở gửi nhân viên'],
+        workflowId: 'LIFE-06',
+        wireframeId: 'LIFE-06'
       },
       {
         code: 'SOP-ATT-13',
@@ -645,7 +682,9 @@ export const SIX_CORE_MODULES: ModuleEcosystemItem[] = [
         actorEn: 'HR Manager & C&B Specialist',
         scopeNote: 'Khóa dữ liệu bảng công không cho chỉnh sửa và đẩy dữ liệu sang Phân hệ Lương PAY.',
         inputs: ['Bảng công đã giải trình 100%', 'Chữ ký số duyệt của HR Manager'],
-        outputs: ['Bảng công chính thức bị khóa sổ (Locked)', 'File dữ liệu công nạp tự động vào Bảng lương PAY']
+        outputs: ['Bảng công chính thức bị khóa sổ (Locked)', 'File dữ liệu công nạp tự động vào Bảng lương PAY'],
+        workflowId: 'LIFE-06',
+        wireframeId: 'LIFE-06'
       },
       {
         code: 'SOP-ATT-14',
@@ -657,7 +696,9 @@ export const SIX_CORE_MODULES: ModuleEcosystemItem[] = [
         actorEn: 'Employee & Project Manager',
         scopeNote: 'Phân bổ số giờ làm việc theo từng dự án hoặc trung tâm chi phí để hạch toán chi phí.',
         inputs: ['Mã dự án (Project Code)', 'Số giờ làm việc thực tế'],
-        outputs: ['Báo cáo Man-hours theo dự án']
+        outputs: ['Báo cáo Man-hours theo dự án'],
+        workflowId: 'LIFE-06',
+        wireframeId: 'LIFE-06'
       },
       {
         code: 'SOP-ATT-15',
@@ -669,7 +710,9 @@ export const SIX_CORE_MODULES: ModuleEcosystemItem[] = [
         actorEn: 'Board & HRD',
         scopeNote: 'Thống kê tỷ lệ đi làm đúng giờ, tỷ lệ nghỉ phép và chi phí làm thêm giờ toàn công ty.',
         inputs: ['Dữ liệu bảng công lịch sử 12 tháng'],
-        outputs: ['Dashboard phân tích tuân thủ giờ công', 'Báo cáo chi phí OT theo phòng ban']
+        outputs: ['Dashboard phân tích tuân thủ giờ công', 'Báo cáo chi phí OT theo phòng ban'],
+        workflowId: 'LIFE-06',
+        wireframeId: 'LIFE-06'
       }
     ],
     color: '#059669',
@@ -722,7 +765,9 @@ export const SIX_CORE_MODULES: ModuleEcosystemItem[] = [
         actorEn: 'C&B Specialist & HR Manager',
         scopeNote: 'Cấu hình công thức tính lương Gross/Net, trần đóng BHXH, biểu thuế lũy tiến và các khoản phụ cấp.',
         inputs: ['Quy chế lương thưởng công ty', 'Quy định mức lương tối thiểu vùng'],
-        outputs: ['Bộ công thức tính lương tự động', 'Danh mục Ngạch bậc lương (MD-07)']
+        outputs: ['Bộ công thức tính lương tự động', 'Danh mục Ngạch bậc lương (MD-07)'],
+        workflowId: 'LIFE-05',
+        wireframeId: 'LIFE-05'
       },
       {
         code: 'SOP-PAY-02',
@@ -734,7 +779,9 @@ export const SIX_CORE_MODULES: ModuleEcosystemItem[] = [
         actorEn: 'Automated Payroll Engine',
         scopeNote: 'Kết nối Bảng công khóa sổ (ATT13), dữ liệu KPI/Doanh số và tự động chạy tính lương toàn công ty.',
         inputs: ['Bảng chấm công đã khóa từ ATT', 'Hợp đồng lao động & Mức lương từ Core EMP', 'Dữ liệu trích nộp BHXH/Thuế'],
-        outputs: ['Bảng tính lương chi tiết từng nhân sự (Gross, Giảm trừ BHXH, Thuế TNCN, Lương thực nhận Net)']
+        outputs: ['Bảng tính lương chi tiết từng nhân sự (Gross, Giảm trừ BHXH, Thuế TNCN, Lương thực nhận Net)'],
+        workflowId: 'LIFE-05',
+        wireframeId: 'LIFE-05'
       },
       {
         code: 'SOP-PAY-03',
@@ -746,7 +793,9 @@ export const SIX_CORE_MODULES: ModuleEcosystemItem[] = [
         actorEn: 'HRD, Chief Accountant & CEO',
         scopeNote: 'Thẩm định bảng lương 3 cấp, ký số phê duyệt và sinh file mã hóa gửi Ngân hàng giải ngân.',
         inputs: ['Tờ trình chi lương tháng', 'Bảng lương tổng hợp'],
-        outputs: ['Quyết định chi lương đã duyệt', 'File chi lương định dạng ngân hàng (Vietcombank/BIDV/Techcombank)']
+        outputs: ['Quyết định chi lương đã duyệt', 'File chi lương định dạng ngân hàng (Vietcombank/BIDV/Techcombank)'],
+        workflowId: 'LIFE-05',
+        wireframeId: 'LIFE-05'
       },
       {
         code: 'SOP-PAY-04',
@@ -758,7 +807,9 @@ export const SIX_CORE_MODULES: ModuleEcosystemItem[] = [
         actorEn: 'Automated System & Employee',
         scopeNote: 'Mã hóa và gửi phiếu lương bảo mật qua Mobile App/Email cá nhân, tiếp nhận thắc mắc trực tuyến.',
         inputs: ['Bảng lương đã chi trả thành công'],
-        outputs: ['Phiếu lương điện tử (E-payslip) bảo mật OTP trên App', 'Kênh tiếp nhận giải đáp thắc mắc lương']
+        outputs: ['Phiếu lương điện tử (E-payslip) bảo mật OTP trên App', 'Kênh tiếp nhận giải đáp thắc mắc lương'],
+        workflowId: 'LIFE-05',
+        wireframeId: 'LIFE-05'
       }
     ],
     color: '#f59e0b',
@@ -811,7 +862,9 @@ export const SIX_CORE_MODULES: ModuleEcosystemItem[] = [
         actorEn: 'Employee & Tax Specialist',
         scopeNote: 'Khai báo hồ sơ giảm trừ gia cảnh, đối soát giấy khai sinh và nộp Cơ quan Thuế.',
         inputs: ['CCCD nhân viên', 'Giấy khai sinh con / Giấy tờ thân nhân phụ thuộc'],
-        outputs: ['Mã số thuế cá nhân (MST)', 'Mã số người phụ thuộc được cơ quan thuế chấp thuận']
+        outputs: ['Mã số thuế cá nhân (MST)', 'Mã số người phụ thuộc được cơ quan thuế chấp thuận'],
+        workflowId: 'LIFE-05',
+        wireframeId: 'LIFE-05'
       },
       {
         code: 'SOP-TAX-02',
@@ -823,7 +876,9 @@ export const SIX_CORE_MODULES: ModuleEcosystemItem[] = [
         actorEn: 'Automated Engine & Tax Accountant',
         scopeNote: 'Tự động áp biểu thuế lũy tiến từng phần (5% - 35%) theo thu nhập tính thuế hàng tháng.',
         inputs: ['Thu nhập chịu thuế từ Bảng lương PAY', 'Mức giảm trừ bản thân (11tr) & người phụ thuộc (4.4tr)'],
-        outputs: ['Số thuế TNCN phải khấu trừ', 'Tờ khai thuế TNCN định kỳ Mẫu 05/KK-TNCN']
+        outputs: ['Số thuế TNCN phải khấu trừ', 'Tờ khai thuế TNCN định kỳ Mẫu 05/KK-TNCN'],
+        workflowId: 'LIFE-05',
+        wireframeId: 'LIFE-05'
       },
       {
         code: 'SOP-TAX-03',
@@ -835,7 +890,9 @@ export const SIX_CORE_MODULES: ModuleEcosystemItem[] = [
         actorEn: 'Tax Accountant, HR & Tax Authority',
         scopeNote: 'Tổng hợp thu nhập 12 tháng, tiếp nhận giấy ủy quyền quyết toán và xuất chứng từ khấu trừ thuế điện tử.',
         inputs: ['Bản cam kết ủy quyền quyết toán thuế', 'Tổng thu nhập chịu thuế cả năm'],
-        outputs: ['Hồ sơ quyết toán thuế TNCN Mẫu 05/QTT-TNCN', 'Chứng từ khấu trừ thuế TNCN điện tử cấp cho nhân viên']
+        outputs: ['Hồ sơ quyết toán thuế TNCN Mẫu 05/QTT-TNCN', 'Chứng từ khấu trừ thuế TNCN điện tử cấp cho nhân viên'],
+        workflowId: 'LIFE-05',
+        wireframeId: 'LIFE-05'
       }
     ],
     color: '#6366f1',
@@ -888,7 +945,9 @@ export const SIX_CORE_MODULES: ModuleEcosystemItem[] = [
         actorEn: 'Insurance Specialist & HR Manager',
         scopeNote: 'Cấu hình tỷ lệ trích nộp theo luật (DN: 21.5%, NLĐ: 10.5%) và trần đóng BHXH/BHYT.',
         inputs: ['Nghị định quy định mức lương cơ sở', 'Khung mức lương đóng tối đa'],
-        outputs: ['Bảng tỷ lệ trích đóng BHXH tự động áp dụng']
+        outputs: ['Bảng tỷ lệ trích đóng BHXH tự động áp dụng'],
+        workflowId: 'LIFE-04',
+        wireframeId: 'LIFE-04'
       },
       {
         code: 'SOP-INS-02',
@@ -900,7 +959,9 @@ export const SIX_CORE_MODULES: ModuleEcosystemItem[] = [
         actorEn: 'Insurance Specialist & E-Insurance Software',
         scopeNote: 'Kế thừa hồ sơ nhân viên mới trúng tuyển (SOP-EMP-02), lập hồ sơ báo tăng gửi Cơ quan BHXH.',
         inputs: ['Hồ sơ nhân viên mới từ Core EMP', 'Hợp đồng lao động chính thức ký kết (EMP04)', 'Mã số sổ BHXH cũ (nếu có)'],
-        outputs: ['Hồ sơ Báo tăng Mẫu D02-LT', 'Mã số BHXH mới hoặc xác nhận chuyển nơi đóng']
+        outputs: ['Hồ sơ Báo tăng Mẫu D02-LT', 'Mã số BHXH mới hoặc xác nhận chuyển nơi đóng'],
+        workflowId: 'LIFE-04',
+        wireframeId: 'LIFE-04'
       },
       {
         code: 'SOP-INS-03',
@@ -912,7 +973,9 @@ export const SIX_CORE_MODULES: ModuleEcosystemItem[] = [
         actorEn: 'Insurance Specialist & Insurance Agency',
         scopeNote: 'Kế thừa quyết định thôi việc từ Core EMP (SOP-EMP-15), lập hồ sơ báo giảm kịp thời tránh phát sinh tiền nộp thừa.',
         inputs: ['Quyết định chấm dứt HĐLĐ', 'Thẻ BHYT điện tử'],
-        outputs: ['Xác nhận Báo giảm của Cơ quan BHXH', 'Thủ tục chốt sổ BHXH']
+        outputs: ['Xác nhận Báo giảm của Cơ quan BHXH', 'Thủ tục chốt sổ BHXH'],
+        workflowId: 'LIFE-04',
+        wireframeId: 'LIFE-04'
       },
       {
         code: 'SOP-INS-04',
@@ -924,7 +987,9 @@ export const SIX_CORE_MODULES: ModuleEcosystemItem[] = [
         actorEn: 'Insurance Specialist',
         scopeNote: 'Điều chỉnh mức lương đóng bảo hiểm khi có quyết định tăng lương hoặc điều chỉnh phụ cấp.',
         inputs: ['Phụ lục HĐLĐ tăng lương', 'Danh sách nhân sự điều chỉnh'],
-        outputs: ['Hồ sơ điều chỉnh mức đóng gửi Cơ quan BHXH']
+        outputs: ['Hồ sơ điều chỉnh mức đóng gửi Cơ quan BHXH'],
+        workflowId: 'LIFE-04',
+        wireframeId: 'LIFE-04'
       },
       {
         code: 'SOP-INS-05',
@@ -936,7 +1001,9 @@ export const SIX_CORE_MODULES: ModuleEcosystemItem[] = [
         actorEn: 'Employee & Insurance Specialist',
         scopeNote: 'Tiếp nhận chứng từ y tế, lập hồ sơ hưởng chế độ ốm đau, thai sản Mẫu 01B-HSB gửi BHXH chi trả trợ cấp.',
         inputs: ['Giấy chứng sinh / Giấy ra viện', 'Thời gian nghỉ trên bảng công ATT09', 'Số tài khoản nhận tiền trợ cấp'],
-        outputs: ['Quyết định duyệt chi tiền trợ cấp từ Cơ quan BHXH', 'Tiền trợ cấp chuyển trực tiếp vào tài khoản nhân viên']
+        outputs: ['Quyết định duyệt chi tiền trợ cấp từ Cơ quan BHXH', 'Tiền trợ cấp chuyển trực tiếp vào tài khoản nhân viên'],
+        workflowId: 'LIFE-04',
+        wireframeId: 'LIFE-04'
       },
       {
         code: 'SOP-INS-06',
@@ -948,7 +1015,9 @@ export const SIX_CORE_MODULES: ModuleEcosystemItem[] = [
         actorEn: 'Accountant & Insurance Specialist',
         scopeNote: 'Đối chiếu Thông báo kết quả đóng BHXH Mẫu C12-TS từ Cơ quan BHXH với số liệu trích nộp nội bộ.',
         inputs: ['Thông báo Mẫu C12-TS của Cơ quan BHXH', 'Bảng trích nộp nội bộ từ Bảng lương PAY'],
-        outputs: ['Biên bản đối chiếu khớp 100%', 'Lệnh ủy nhiệm chi chuyển tiền đóng BHXH']
+        outputs: ['Biên bản đối chiếu khớp 100%', 'Lệnh ủy nhiệm chi chuyển tiền đóng BHXH'],
+        workflowId: 'LIFE-04',
+        wireframeId: 'LIFE-04'
       },
       {
         code: 'SOP-INS-07',
@@ -960,7 +1029,9 @@ export const SIX_CORE_MODULES: ModuleEcosystemItem[] = [
         actorEn: 'Insurance Specialist & Agency',
         scopeNote: 'Hoàn tất thủ tục chốt sổ in tờ rời xác nhận thời gian đóng bảo hiểm khi nhân viên nghỉ việc.',
         inputs: ['Hồ sơ báo giảm đã duyệt', 'Sổ BHXH'],
-        outputs: ['Tờ rời chốt sổ BHXH bàn giao cho nhân viên', 'Xác nhận chấm dứt nghĩa vụ đóng']
+        outputs: ['Tờ rời chốt sổ BHXH bàn giao cho nhân viên', 'Xác nhận chấm dứt nghĩa vụ đóng'],
+        workflowId: 'LIFE-04',
+        wireframeId: 'LIFE-04'
       },
       {
         code: 'SOP-INS-08',
@@ -972,7 +1043,9 @@ export const SIX_CORE_MODULES: ModuleEcosystemItem[] = [
         actorEn: 'HRD & Board of Management',
         scopeNote: 'Báo cáo phân tích tổng chi phí bảo hiểm doanh nghiệp phải nộp 12 tháng và dự toán năm sau.',
         inputs: ['Dữ liệu đóng bảo hiểm lũy kế cả năm'],
-        outputs: ['Báo cáo phân tích chi phí bảo hiểm theo Cost Center']
+        outputs: ['Báo cáo phân tích chi phí bảo hiểm theo Cost Center'],
+        workflowId: 'LIFE-04',
+        wireframeId: 'LIFE-04'
       }
     ],
     color: '#9333ea',

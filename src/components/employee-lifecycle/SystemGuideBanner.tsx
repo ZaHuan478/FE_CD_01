@@ -116,7 +116,7 @@ export const SystemGuideBanner: React.FC = () => {
                   <span>LIFE ({language === 'vi' ? 'Vòng đời Nhân viên' : 'Employee Lifecycle'})</span>
                 </div>
                 <p className="text-xs text-slate-600 dark:text-slate-300 leading-relaxed">
-                  <strong className="text-slate-900 dark:text-white">{language === 'vi' ? 'Hành trình Nhân sự (7 Bước):' : 'HR Lifecycle Journey (7 Steps):'}</strong> {language === 'vi' ? 'Chuỗi giai đoạn tuần tự từ khi nhân viên Tiếp nhận (LIFE-01) ➔ Bố trí ➔ Hợp đồng ➔ Lương ➔ Nghỉ việc (LIFE-07).' : 'End-to-end employee stages from Onboarding (LIFE-01) ➔ Placement ➔ Contract ➔ Payroll ➔ Offboarding (LIFE-07).'}
+                  <strong className="text-slate-900 dark:text-white">{language === 'vi' ? 'Hành trình Nhân sự (8 Giai đoạn):' : 'HR Lifecycle Journey (8 Stages):'}</strong> {language === 'vi' ? 'Chuỗi giai đoạn tuần tự từ Định biên (LIFE-00) ➔ Tiếp nhận (LIFE-01) ➔ Bố trí ➔ Hợp đồng ➔ Lương ➔ Nghỉ việc (LIFE-07).' : 'End-to-end employee stages from Planning (LIFE-00) ➔ Onboarding (LIFE-01) ➔ Placement ➔ Contract ➔ Payroll ➔ Offboarding (LIFE-07).'}
                 </p>
                 <div className="mt-3 pt-2 border-t border-slate-100 dark:border-slate-800 text-[11px] text-purple-600 dark:text-purple-400 font-semibold">
                   👉 {language === 'vi' ? 'Đóng vai trò: Trục thời gian chính của nhân sự' : 'Role: Master HR timeline & milestone axis'}
@@ -175,7 +175,7 @@ export const SystemGuideBanner: React.FC = () => {
               <div className="flex items-center gap-3 bg-gradient-to-r from-purple-900 to-indigo-900 p-3 rounded-lg border border-purple-500/50 w-full lg:w-auto">
                 <RefreshCw className="w-5 h-5 text-purple-300 shrink-0" />
                 <div>
-                  <div className="text-xs font-bold text-purple-200">{language === 'vi' ? 'VÒNG ĐỜI NHÂN VIÊN' : 'EMPLOYEE LIFECYCLE'} (LIFE-01..07)</div>
+                  <div className="text-xs font-bold text-purple-200">{language === 'vi' ? 'VÒNG ĐỜI NHÂN VIÊN' : 'EMPLOYEE LIFECYCLE'} (LIFE-00..07)</div>
                   <div className="text-[11px] text-purple-300">{language === 'vi' ? 'Cập nhật vào Hồ sơ Nhân viên Trung tâm' : 'Updates Central Employee Master Profile'}</div>
                 </div>
               </div>
@@ -192,4 +192,3 @@ export const SystemGuideBanner: React.FC = () => {
     </div>
   )
 }
-

@@ -1,426 +1,525 @@
-import type { MasterCatalogItem } from '../types'
+import type { CatalogFieldSchema, MasterCatalogItem } from '../types'
 
-/**
- * MASTER DATA HUB DATABASE - 100% CĂN CỨ THEO BỘ TÀI LIỆU ĐẶC TẢ SOP DOANH NGHIỆP:
- * - 1.EMP.HRM.SOP.docx (Mục 5: Danh mục dùng chung toàn bộ HRM & Mục 6: Cấu hình hệ thống)
- * - 2.ATT.HRM.SOP.docx (Chấm công, Ca kíp & Chứng từ nghỉ phép)
- * - 3.INS.HRM.SOP.docx (Bảo hiểm Xã hội, Y tế & Cơ sở KCB)
- * - 4.PAY.HRM.SOP.docx (Thang bảng lương 3P & 20 Loại Phụ cấp)
- * - 5.TAX.HRM.SOP.docx (Mã số Thuế & Người phụ thuộc)
- */
+const LIFE_ALL = ['LIFE-00', 'LIFE-01', 'LIFE-02', 'LIFE-03', 'LIFE-04', 'LIFE-05', 'LIFE-06', 'LIFE-07']
+
+const field = (
+  key: string,
+  name: string,
+  nameEn: string,
+  type: CatalogFieldSchema['type'],
+  required = true,
+  validationRules: string[] = []
+): CatalogFieldSchema => ({
+  key,
+  name,
+  nameEn,
+  type,
+  required,
+  description: `${name} trong danh mục chuẩn`,
+  descriptionEn: `${nameEn} in the enterprise master catalog`,
+  validationRules
+})
+
+const uniqueCode = (catalogId: string) => [
+  { id: `${catalogId}-REQ-CODE`, field: 'code', type: 'required' as const, rule: 'code is mandatory', message: 'Mã danh mục là bắt buộc.' },
+  { id: `${catalogId}-UNQ-CODE`, field: 'code', type: 'unique' as const, rule: 'code must be unique within catalog', message: 'Mã không được trùng trong cùng danh mục.' }
+]
+
 export const MASTER_DATA_HUB_DATABASE: MasterCatalogItem[] = [
-  // =========================================================================
-  // 🏛️ TẦNG 1: DANH MỤC DÙNG CHUNG CHO TOÀN BỘ HỆ THỐNG HRM (DOCX SECTION 5)
-  // =========================================================================
   {
-    id: 'MD-GEO-PROV',
-    code: 'MD-01.01',
-    title: 'Danh mục Tỉnh / Thành Phố',
-    titleEn: 'Provinces & Cities Catalog',
-    subtitle: 'Mã BHXH, Mã Thuế, Tên Tiếng Việt & Tiếng Anh (Mục 5.1 DOCX)',
-    subtitleEn: 'Insurance Code, Tax Code, Bilingual Names',
+    id: 'MD-01',
+    code: 'MD-01',
+    title: 'Danh mục Địa lý hành chính',
+    titleEn: 'Administrative Geography Catalog',
+    subtitle: 'Tỉnh/Thành, Quận/Huyện, Phường/Xã phục vụ địa chỉ, BHXH, Thuế và KCB',
+    subtitleEn: 'Province, district and ward hierarchy for address, insurance, tax and healthcare',
     tier: 'tier1_global',
     moduleId: 'global',
-    moduleName: 'Toàn hệ thống (Global)',
+    moduleName: 'Toàn hệ thống',
     moduleNameEn: 'Enterprise Global',
-    recordCount: 63,
+    recordCount: 10632,
     color: 'blue',
-    iconName: 'Globe',
-    feedsIntoModules: ['Nhân sự Core EMP (EMP02, EMP04)', 'Bảo hiểm INS', 'Thuế TAX'],
-    feedsIntoWorkflows: ['LIFE-01', 'LIFE-02', 'SOP-INS-02', 'SOP-TAX-01'],
-    description: 'Trích xuất chính xác từ Mục 5.1 tài liệu 1.EMP.HRM.SOP.docx: Quản lý danh sách Tỉnh/Thành phố kèm đồng bộ Mã BHXH và Mã cơ quan Thuế.',
-    descriptionEn: 'Official Section 5.1 from 1.EMP.HRM.SOP.docx: Provinces directory mapped to Social Insurance and Tax Office regional codes.',
+    iconName: 'Map',
+    feedsIntoModules: ['Core EMP', 'INS', 'TAX', 'ATS'],
+    feedsIntoWorkflows: LIFE_ALL,
+    description: 'Nguồn địa lý chuẩn cho hồ sơ nhân viên, người phụ thuộc, cơ quan thuế, cơ quan BHXH và cơ sở KCB.',
+    descriptionEn: 'Canonical geography source for employee profiles, dependents, tax agencies, insurance offices and healthcare providers.',
     fields: [
-      { name: 'Mã Tỉnh/Thành phố', nameEn: 'Province Code', key: 'code', type: 'string', required: true, description: 'Mã định danh tỉnh thành theo chuẩn', descriptionEn: 'Official province code' },
-      { name: 'Mã theo BHXH', nameEn: 'Social Insurance Code', key: 'bhxhCode', type: 'string', required: true, description: 'Mã tỉnh quy chuẩn bên cơ quan BHXH', descriptionEn: 'Social insurance authority province code' },
-      { name: 'Mã theo cơ quan Thuế', nameEn: 'Tax Authority Code', key: 'taxCode', type: 'string', required: true, description: 'Mã tỉnh quy chuẩn bên Tổng cục Thuế', descriptionEn: 'Tax department province code' },
-      { name: 'Tên Tỉnh/Thành (Tiếng Việt)', nameEn: 'Province Name (VN)', key: 'name', type: 'string', required: true, description: 'Tên đầy đủ tiếng Việt', descriptionEn: 'Vietnamese province name' },
-      { name: 'Tên Tỉnh/Thành (Tiếng Anh)', nameEn: 'Province Name (EN)', key: 'nameEn', type: 'string', required: false, description: 'Tên tiếng Anh chuẩn quốc tế', descriptionEn: 'English province name' }
+      field('code', 'Mã địa bàn', 'Area Code', 'string', true, ['required', 'unique']),
+      field('name', 'Tên địa bàn', 'Area Name', 'string'),
+      field('level', 'Cấp hành chính', 'Administrative Level', 'select', true, ['Province|District|Ward']),
+      field('parentCode', 'Mã cấp cha', 'Parent Area Code', 'lookup', false),
+      field('region', 'Vùng lương tối thiểu', 'Minimum Wage Region', 'select', true, ['I|II|III|IV'])
     ],
     sampleRecords: [
-      { id: 'PROV-01', code: '01', bhxhCode: '001', taxCode: '101', name: 'Thành phố Hà Nội', nameEn: 'Ha Noi City', status: 'active' },
-      { id: 'PROV-02', code: '79', bhxhCode: '079', taxCode: '105', name: 'Thành phố Hồ Chí Minh', nameEn: 'Ho Chi Minh City', status: 'active' },
-      { id: 'PROV-03', code: '48', bhxhCode: '048', taxCode: '104', name: 'Thành phố Đà Nẵng', nameEn: 'Da Nang City', status: 'active' },
-      { id: 'PROV-04', code: '74', bhxhCode: '074', taxCode: '107', name: 'Tỉnh Bình Dương', nameEn: 'Binh Duong Province', status: 'active' }
-    ]
-  },
-  {
-    id: 'MD-GEO-DIST',
-    code: 'MD-01.02',
-    title: 'Danh mục Quận / Huyện & Phường / Xã',
-    titleEn: 'Districts & Wards Directory',
-    subtitle: 'Phân cấp hành chính cấp Quận/Huyện và Phường/Xã (Mục 5.2-5.3 DOCX)',
-    subtitleEn: 'Constituent Administrative Districts & Wards',
-    tier: 'tier1_global',
-    moduleId: 'global',
-    moduleName: 'Toàn hệ thống (Global)',
-    moduleNameEn: 'Enterprise Global',
-    recordCount: 705,
-    color: 'blue',
-    iconName: 'Building2',
-    feedsIntoModules: ['Nhân sự Core EMP (EMP04)', 'Khai báo Thường trú / Tạm trú'],
-    feedsIntoWorkflows: ['LIFE-02'],
-    description: 'Trích xuất từ Mục 5.2 và 5.3 tài liệu 1.EMP.HRM.SOP.docx: Danh sách Quận/Huyện và Phường/Xã trực thuộc Tỉnh/Thành phố.',
-    descriptionEn: 'Extracted from Sections 5.2 and 5.3 of 1.EMP.HRM.SOP.docx for employee permanent and temporary addresses.',
-    fields: [
-      { name: 'Mã Quận/Huyện', nameEn: 'District Code', key: 'code', type: 'string', required: true, description: 'Mã định danh quận/huyện', descriptionEn: 'District code' },
-      { name: 'Tên Quận/Huyện (Tiếng Việt)', nameEn: 'District Name (VN)', key: 'name', type: 'string', required: true, description: 'Tên tiếng Việt', descriptionEn: 'Vietnamese district name' },
-      { name: 'Tỉnh/Thành phố Trực thuộc', nameEn: 'Parent Province', key: 'province', type: 'lookup', required: true, description: 'Thuộc tỉnh/thành nào', descriptionEn: 'Parent province reference' }
+      { id: 'GEO-01', code: 'HN', name: 'Thành phố Hà Nội', level: 'Province', parentCode: '', region: 'I', status: 'active' },
+      { id: 'GEO-02', code: 'HCM', name: 'Thành phố Hồ Chí Minh', level: 'Province', parentCode: '', region: 'I', status: 'active' },
+      { id: 'GEO-03', code: 'DN', name: 'Thành phố Đà Nẵng', level: 'Province', parentCode: '', region: 'II', status: 'active' },
+      { id: 'GEO-04', code: 'Q1-HCM', name: 'Quận 1', level: 'District', parentCode: 'HCM', region: 'I', status: 'active' }
     ],
-    sampleRecords: [
-      { id: 'DST-01', code: 'Q1-HCM', name: 'Quận 1', province: 'Thành phố Hồ Chí Minh', status: 'active' },
-      { id: 'DST-02', code: 'Q-BD-HN', name: 'Quận Ba Đình', province: 'Thành phố Hà Nội', status: 'active' },
-      { id: 'DST-03', code: 'Q-HC-DN', name: 'Quận Hải Châu', province: 'Thành phố Đà Nẵng', status: 'active' }
-    ]
+    foreignKeys: [{ field: 'parentCode', targetCatalogId: 'MD-01', targetField: 'code', relationship: 'many-to-one' }],
+    validationConstraints: [...uniqueCode('MD-01'), { id: 'MD-01-CASCADE', field: 'parentCode', type: 'cascade_filter', rule: 'district.parentCode must match selected province code', message: 'Quận/Huyện phải thuộc Tỉnh/Thành đã chọn.' }],
+    relationalRules: [{ id: 'RR-GEO-01', title: 'Cascade địa lý', sourceField: 'parentCode', targetCatalogId: 'MD-01', targetField: 'code', ruleType: 'cascade', description: 'Chọn Tỉnh/Thành sẽ lọc Quận/Huyện và Phường/Xã tương ứng.' }]
   },
   {
-    id: 'MD-ETHNIC-RELIGION',
+    id: 'MD-02',
     code: 'MD-02',
     title: 'Danh mục Dân tộc, Tôn giáo & Quốc tịch',
     titleEn: 'Ethnicity, Religion & Nationality',
-    subtitle: '54 Dân tộc, Các Tôn giáo & Quốc tịch có Check Default (Mục 5.4-5.6 DOCX)',
-    subtitleEn: '54 Ethnic Groups, Religions & Nations with Default Mode',
+    subtitle: 'Danh mục dùng chung cho hồ sơ nhân viên, báo cáo lao động và dữ liệu pháp lý',
+    subtitleEn: 'Shared legal demographics for employee profiles and labor reporting',
     tier: 'tier1_global',
     moduleId: 'global',
-    moduleName: 'Toàn hệ thống (Global)',
+    moduleName: 'Toàn hệ thống',
     moduleNameEn: 'Enterprise Global',
-    recordCount: 54,
+    recordCount: 230,
     color: 'indigo',
-    iconName: 'Users2',
-    feedsIntoModules: ['Nhân sự Core EMP (EMP04)', 'Bảo hiểm INS', 'Báo cáo Lao động Nhà nước'],
-    feedsIntoWorkflows: ['LIFE-02', 'SOP-INS-02'],
-    description: 'Trích xuất chính xác Mục 5.4, 5.5, 5.6 tài liệu 1.EMP.HRM.SOP.docx: Khai báo 54 dân tộc, tôn giáo và quốc tịch kèm chế độ Check Mode giá trị mặc định khi nhập profile.',
-    descriptionEn: 'Section 5.4-5.6 from 1.EMP.HRM.SOP.docx: Ethnicities, religions and nationalities with auto-default check mode.',
-    fields: [
-      { name: 'Mã Dân tộc', nameEn: 'Ethnic Code', key: 'code', type: 'string', required: true, description: 'Mã số dân tộc chuẩn', descriptionEn: 'Ethnic code' },
-      { name: 'Tên Dân tộc', nameEn: 'Ethnic Name', key: 'name', type: 'string', required: true, description: 'Tên dân tộc', descriptionEn: 'Official name' },
-      { name: 'Giá trị Mặc định (Default)', nameEn: 'Default Flag', key: 'isDefault', type: 'boolean', required: true, description: 'Check mode dùng load default khi tạo hồ sơ', descriptionEn: 'Auto-load default in profile creation' }
-    ],
+    iconName: 'Users',
+    feedsIntoModules: ['Core EMP', 'ATS', 'INS'],
+    feedsIntoWorkflows: ['LIFE-01', 'LIFE-02', 'LIFE-07'],
+    description: 'Chuẩn hóa các thuộc tính nhân khẩu học dùng cho tuyển dụng, hồ sơ nhân sự và báo cáo tuân thủ.',
+    descriptionEn: 'Standard demographic attributes for hiring, personnel profiles and compliance reports.',
+    fields: [field('code', 'Mã', 'Code', 'string', true, ['required', 'unique']), field('name', 'Tên hiển thị', 'Display Name', 'string'), field('category', 'Nhóm danh mục', 'Category', 'select', true, ['Ethnicity|Religion|Nationality']), field('isDefault', 'Mặc định', 'Default', 'boolean', true)],
     sampleRecords: [
-      { id: 'ETH-01', code: '01', name: 'Kinh (Việt)', isDefault: true, status: 'active' },
-      { id: 'ETH-02', code: '02', name: 'Tày', isDefault: false, status: 'active' },
-      { id: 'ETH-03', code: '03', name: 'Thái', isDefault: false, status: 'active' },
-      { id: 'ETH-04', code: '04', name: 'Mường', isDefault: false, status: 'active' }
-    ]
+      { id: 'DEM-01', code: 'ETH-KINH', name: 'Kinh', category: 'Ethnicity', isDefault: true, status: 'active' },
+      { id: 'DEM-02', code: 'REL-NONE', name: 'Không', category: 'Religion', isDefault: true, status: 'active' },
+      { id: 'DEM-03', code: 'NAT-VN', name: 'Việt Nam', category: 'Nationality', isDefault: true, status: 'active' }
+    ],
+    validationConstraints: uniqueCode('MD-02')
   },
   {
-    id: 'MD-FAMILY-RELATION',
+    id: 'MD-03',
     code: 'MD-03',
-    title: 'Danh mục Loại Quan Hệ Gia Đình (26 Mối Quan Hệ)',
-    titleEn: 'Family Relationship Types (26 Relations)',
-    subtitle: 'Con, Ba, Mẹ, Vợ, Chồng, Ba/Mẹ chồng, Ba/Mẹ vợ... (Mục 5.10 DOCX)',
-    subtitleEn: 'Father, Mother, Spouse, Children, In-laws (Section 5.10)',
+    title: 'Danh mục Quan hệ gia đình & Người phụ thuộc',
+    titleEn: 'Family Relationship & Dependent Catalog',
+    subtitle: 'Quan hệ gia đình, điều kiện giảm trừ gia cảnh và hồ sơ chứng minh',
+    subtitleEn: 'Family relations, tax dependent eligibility and supporting documents',
     tier: 'tier1_global',
-    moduleId: 'global',
-    moduleName: 'Toàn hệ thống (Global)',
-    moduleNameEn: 'Enterprise Global',
+    moduleId: 'tax',
+    moduleName: 'Thuế TNCN',
+    moduleNameEn: 'Personal Income Tax',
     recordCount: 26,
-    color: 'indigo',
+    color: 'rose',
     iconName: 'HeartHandshake',
-    feedsIntoModules: ['Nhân sự Core EMP (EMP04)', 'Người phụ thuộc Thuế TNCN (TAX01)'],
-    feedsIntoWorkflows: ['LIFE-02', 'SOP-TAX-01'],
-    description: 'Trích xuất chính xác Mục 5.10 tài liệu 1.EMP.HRM.SOP.docx: Danh sách chuẩn 26 mối quan hệ gia đình phục vụ đăng ký liên hệ khẩn cấp và hồ sơ giảm trừ gia cảnh Thuế.',
-    descriptionEn: 'Section 5.10 from 1.EMP.HRM.SOP.docx: Standard 26 family relationship types for emergency contacts and tax dependents.',
-    fields: [
-      { name: 'Mã Quan hệ', nameEn: 'Relationship Code', key: 'code', type: 'string', required: true, description: 'Mã định danh quan hệ', descriptionEn: 'Relation identifier' },
-      { name: 'Loại Quan hệ', nameEn: 'Relationship Name', key: 'name', type: 'string', required: true, description: 'Tên mối quan hệ', descriptionEn: 'Relation title' },
-      { name: 'Số Thứ Tự Hiển Thị', nameEn: 'Display Order', key: 'sortOrder', type: 'number', required: true, description: 'Thứ tự ưu tiên trên dropdown', descriptionEn: 'Sort order in dropdown' }
-    ],
+    feedsIntoModules: ['Core EMP', 'TAX'],
+    feedsIntoWorkflows: ['LIFE-02', 'LIFE-05'],
+    description: 'Nguồn quan hệ gia đình dùng cho liên hệ khẩn cấp, người phụ thuộc và hồ sơ giảm trừ thuế.',
+    descriptionEn: 'Relationship source for emergency contacts, dependents and PIT deductions.',
+    fields: [field('code', 'Mã quan hệ', 'Relationship Code', 'string', true, ['required', 'unique']), field('name', 'Tên quan hệ', 'Relationship Name', 'string'), field('dependentEligible', 'Được đăng ký phụ thuộc', 'Dependent Eligible', 'boolean'), field('requiredDocument', 'Chứng từ bắt buộc', 'Required Document', 'string', false)],
     sampleRecords: [
-      { id: 'REL-01', code: 'REL-CON', name: 'Con', sortOrder: 1, status: 'active' },
-      { id: 'REL-02', code: 'REL-BA', name: 'Ba', sortOrder: 2, status: 'active' },
-      { id: 'REL-03', code: 'REL-ME', name: 'Mẹ', sortOrder: 3, status: 'active' },
-      { id: 'REL-04', code: 'REL-VO', name: 'Vợ', sortOrder: 4, status: 'active' },
-      { id: 'REL-05', code: 'REL-CHONG', name: 'Chồng', sortOrder: 5, status: 'active' },
-      { id: 'REL-06', code: 'REL-ME-CHONG', name: 'Mẹ chồng', sortOrder: 6, status: 'active' },
-      { id: 'REL-07', code: 'REL-ME-VO', name: 'Mẹ vợ', sortOrder: 7, status: 'active' }
-    ]
+      { id: 'REL-01', code: 'REL-CON', name: 'Con', dependentEligible: true, requiredDocument: 'Giấy khai sinh', status: 'active' },
+      { id: 'REL-02', code: 'REL-CHA', name: 'Cha', dependentEligible: true, requiredDocument: 'Giấy tờ chứng minh quan hệ', status: 'active' },
+      { id: 'REL-03', code: 'REL-VO', name: 'Vợ', dependentEligible: true, requiredDocument: 'Giấy đăng ký kết hôn', status: 'active' },
+      { id: 'REL-04', code: 'REL-ANHCHI', name: 'Anh/Chị/Em', dependentEligible: false, requiredDocument: 'Theo trường hợp đặc biệt', status: 'active' }
+    ],
+    validationConstraints: [...uniqueCode('MD-03'), { id: 'MD-03-TAX', field: 'dependentEligible', type: 'cross_catalog', rule: 'if dependentEligible=true then taxAgencyCode from MD-12 is required on dependent profile', message: 'Người phụ thuộc cần cơ quan thuế quản lý.' }],
+    relationalRules: [{ id: 'RR-TAX-DEP', title: 'Thuế và người phụ thuộc', sourceField: 'dependentEligible', targetCatalogId: 'MD-12', targetField: 'code', ruleType: 'blocking_dependency', description: 'Hồ sơ người phụ thuộc hợp lệ phải gắn cơ quan thuế quản lý.' }]
   },
   {
-    id: 'MD-EDUCATION-SKILLS',
+    id: 'MD-04',
     code: 'MD-04',
-    title: 'Danh mục Trình độ Học vấn, Tin học & Ngoại ngữ',
-    titleEn: 'Education Levels, IT & Language Proficiencies',
-    subtitle: 'Học vấn (Tiểu học-Tiến sĩ), Tin học (A/B), Ngoại ngữ (Mục 5.8-5.14 DOCX)',
-    subtitleEn: 'Education, IT Levels, Language Skills (Section 5.8-5.14)',
+    title: 'Danh mục Trình độ, Chứng chỉ & Kỹ năng',
+    titleEn: 'Education, Certification & Skill Catalog',
+    subtitle: 'Học vấn, ngoại ngữ, tin học, chứng chỉ nghề nghiệp và hồ sơ năng lực',
+    subtitleEn: 'Education, language, IT, professional certificates and skill records',
     tier: 'tier1_global',
     moduleId: 'global',
-    moduleName: 'Toàn hệ thống (Global)',
+    moduleName: 'Toàn hệ thống',
     moduleNameEn: 'Enterprise Global',
-    recordCount: 18,
-    color: 'blue',
+    recordCount: 86,
+    color: 'cyan',
     iconName: 'GraduationCap',
-    feedsIntoModules: ['Tuyển dụng ATS', 'Nhân sự Core EMP (EMP04)', 'Đào tạo L&D'],
-    feedsIntoWorkflows: ['LIFE-01', 'LIFE-02'],
-    description: 'Trích xuất Mục 5.8, 5.9, 5.11, 5.12, 5.13, 5.14 tài liệu 1.EMP.HRM.SOP.docx: Quản lý học vấn từ 1/12 đến Tiến sĩ, kỹ năng Tin học và Ngoại ngữ (Nghe/Nói/Đọc/Viết).',
-    descriptionEn: 'Section 5.8-5.14 from 1.EMP.HRM.SOP.docx: Education levels (Primary to PhD), Computer Skills (A/B/C) and Languages (Listening/Speaking/Reading/Writing).',
-    fields: [
-      { name: 'Mã Trình độ', nameEn: 'Skill/Edu Code', key: 'code', type: 'string', required: true, description: 'Mã định danh trình độ', descriptionEn: 'Qualification code' },
-      { name: 'Tên Trình độ Học vấn / Kỹ năng', nameEn: 'Qualification Name', key: 'name', type: 'string', required: true, description: 'Tên hiển thị', descriptionEn: 'Qualification title' },
-      { name: 'Phân loại', nameEn: 'Category', key: 'category', type: 'select', required: true, description: 'Học vấn / Tin học / Ngoại ngữ', descriptionEn: 'Education / IT / Language' }
-    ],
+    feedsIntoModules: ['ATS', 'Core EMP', 'L&D'],
+    feedsIntoWorkflows: ['LIFE-00', 'LIFE-01', 'LIFE-02', 'LIFE-03'],
+    description: 'Chuẩn hóa trình độ và kỹ năng phục vụ tuyển dụng, đánh giá thử việc và phát triển năng lực.',
+    descriptionEn: 'Normalizes education and skills for recruitment, probation evaluation and capability development.',
+    fields: [field('code', 'Mã năng lực', 'Capability Code', 'string', true, ['required', 'unique']), field('name', 'Tên trình độ/kỹ năng', 'Capability Name', 'string'), field('category', 'Phân loại', 'Category', 'select', true, ['Education|Language|IT|Certificate']), field('level', 'Cấp độ', 'Level', 'select', true, ['Basic|Intermediate|Advanced|Expert'])],
     sampleRecords: [
-      { id: 'EDU-01', code: 'EDU-UNI', name: 'Đại học (Cử nhân / Kỹ sư)', category: 'Trình độ Học vấn', status: 'active' },
-      { id: 'EDU-02', code: 'EDU-MAS', name: 'Thạc sĩ (Master)', category: 'Trình độ Học vấn', status: 'active' },
-      { id: 'EDU-03', code: 'IT-ADV', name: 'Tin học Cao cấp / Chuyên ngành', category: 'Cấp độ Tin học', status: 'active' },
-      { id: 'EDU-04', code: 'ENG-ADV', name: 'Tiếng Anh Cấp độ Advance (IELTS 7.0+)', category: 'Kỹ năng Ngoại ngữ', status: 'active' }
-    ]
+      { id: 'EDU-01', code: 'EDU-UNI', name: 'Đại học', category: 'Education', level: 'Advanced', status: 'active' },
+      { id: 'EDU-02', code: 'LANG-ENG-B2', name: 'Tiếng Anh B2', category: 'Language', level: 'Advanced', status: 'active' },
+      { id: 'EDU-03', code: 'CERT-PMP', name: 'Project Management Professional', category: 'Certificate', level: 'Expert', status: 'active' }
+    ],
+    validationConstraints: uniqueCode('MD-04')
   },
-
-  // =========================================================================
-  // 👥 TẦNG 2: PHÂN HỆ NHÂN SỰ CORE EMP (DOCX SECTION 5 & 6)
-  // =========================================================================
   {
     id: 'MD-05',
     code: 'MD-05',
-    title: 'Cơ Cấu Tổ Chức & Sơ Đồ Cây Phòng Ban',
-    titleEn: 'Organizational Structure & Department Hierarchy',
-    subtitle: 'Khối, Ban, Phòng, Bộ phận & Reporting Line (Mục 6 Cấu hình DOCX)',
-    subtitleEn: 'Division, Dept, Team & Managerial Reporting Lines',
+    title: 'Cơ cấu tổ chức & Phòng ban',
+    titleEn: 'Organization Structure & Departments',
+    subtitle: 'Cây tổ chức, reporting line, đơn vị hạch toán và mapping Cost Center',
+    subtitleEn: 'Organization tree, reporting line, legal unit and cost center mapping',
     tier: 'tier2_module',
     moduleId: 'emp',
-    moduleName: 'Nhân sự (Core EMP)',
-    moduleNameEn: 'Personnel Core (EMP)',
-    recordCount: 28,
+    moduleName: 'Core EMP',
+    moduleNameEn: 'Personnel Core',
+    recordCount: 48,
     color: 'blue',
     iconName: 'GitFork',
-    feedsIntoModules: ['Thiết lập Định biên (EMP01)', 'Điều chuyển Bổ nhiệm (EMP11)', 'Chấm công (ATT)'],
-    feedsIntoWorkflows: ['LIFE-01', 'LIFE-03', 'LIFE-05', 'SOP-EMP-06', 'SOP-EMP-07', 'SOP-EMP-11'],
-    description: 'Trích xuất từ Mục 6 tài liệu 1.EMP.HRM.SOP.docx: Cây cơ cấu tổ chức phân cấp cha-con, quy định Chức vụ quản lý trực tiếp và lộ trình phê duyệt.',
-    descriptionEn: 'Section 6 configuration from 1.EMP.HRM.SOP.docx: Parent-child organization tree governing direct managers and approval paths.',
-    fields: [
-      { name: 'Mã Đơn vị', nameEn: 'Dept Code', key: 'code', type: 'string', required: true, description: 'Mã phòng ban', descriptionEn: 'Unique department code' },
-      { name: 'Tên Phòng ban', nameEn: 'Dept Name', key: 'name', type: 'string', required: true, description: 'Tên chính thức trên cây tổ chức', descriptionEn: 'Official organizational title' },
-      { name: 'Cấp Tổ chức', nameEn: 'Org Level', key: 'level', type: 'string', required: true, description: 'Ban Giám đốc / Khối / Phòng', descriptionEn: 'Level hierarchy' },
-      { name: 'Mã Đơn vị Cấp Trên', nameEn: 'Parent Code', key: 'parentCode', type: 'string', required: false, description: 'Phòng ban cha', descriptionEn: 'Parent code' }
-    ],
+    feedsIntoModules: ['Core EMP', 'ATT', 'PAY', 'ERP'],
+    feedsIntoWorkflows: LIFE_ALL,
+    description: 'Cây phòng ban là khóa nền cho định biên, tiếp nhận, điều chuyển, tính công, phân bổ chi phí và thôi việc.',
+    descriptionEn: 'Department hierarchy drives workforce planning, onboarding, transfer, timekeeping, cost allocation and offboarding.',
+    fields: [field('code', 'Mã phòng ban', 'Department Code', 'string', true, ['required', 'unique']), field('name', 'Tên phòng ban', 'Department Name', 'string'), field('parentCode', 'Phòng ban cha', 'Parent Department', 'lookup', false), field('costCenterCode', 'Trung tâm chi phí', 'Cost Center', 'lookup'), field('managerJobCode', 'Chức danh quản lý', 'Manager Job', 'lookup', false)],
     sampleRecords: [
-      { id: 'ORG-01', code: 'BOM', name: 'Ban Giám Đốc (Board of Management)', level: 'Cấp 1 - Ban Điều Hành', parentCode: 'ROOT', status: 'active' },
-      { id: 'ORG-02', code: 'TECH-DIV', name: 'Khối Công Nghệ & Kỹ Thuật', level: 'Cấp 2 - Khối', parentCode: 'BOM', status: 'active' },
-      { id: 'ORG-03', code: 'HR-DIV', name: 'Khối Quản Trị Nguồn Nhân Lực', level: 'Cấp 2 - Khối', parentCode: 'BOM', status: 'active' },
-      { id: 'ORG-04', code: 'HR-CB-DEPT', name: 'Phòng Tiền Lương & Đãi Ngộ (C&B)', level: 'Cấp 3 - Phòng', parentCode: 'HR-DIV', status: 'active' }
-    ]
+      { id: 'ORG-01', code: 'BOD', name: 'Ban Tổng Giám đốc', parentCode: '', costCenterCode: 'CC-EXEC', managerJobCode: 'JOB-CEO', status: 'active' },
+      { id: 'ORG-02', code: 'HR', name: 'Khối Nhân sự', parentCode: 'BOD', costCenterCode: 'CC-HR', managerJobCode: 'JOB-HR-DIR', status: 'active' },
+      { id: 'ORG-03', code: 'TECH', name: 'Khối Công nghệ', parentCode: 'BOD', costCenterCode: 'CC-TECH', managerJobCode: 'JOB-TECH-DIR', status: 'active' },
+      { id: 'ORG-04', code: 'FIN', name: 'Phòng Tài chính Kế toán', parentCode: 'BOD', costCenterCode: 'CC-FIN', managerJobCode: 'JOB-ACC-MGR', status: 'active' }
+    ],
+    foreignKeys: [
+      { field: 'parentCode', targetCatalogId: 'MD-05', targetField: 'code', relationship: 'many-to-one' },
+      { field: 'costCenterCode', targetCatalogId: 'MD-13', targetField: 'code', relationship: 'many-to-one', required: true },
+      { field: 'managerJobCode', targetCatalogId: 'MD-06', targetField: 'code', relationship: 'many-to-one' }
+    ],
+    validationConstraints: [...uniqueCode('MD-05'), { id: 'MD-05-CC', field: 'costCenterCode', type: 'cross_catalog', rule: 'costCenterCode must exist in MD-13 and be active', message: 'Phòng ban phải gắn Cost Center còn hiệu lực.' }],
+    relationalRules: [{ id: 'RR-DEPT-CC', title: 'Phòng ban sang Cost Center', sourceField: 'costCenterCode', targetCatalogId: 'MD-13', targetField: 'code', ruleType: 'lookup', description: 'Mỗi phòng ban hoạt động phải ánh xạ một Cost Center ERP.' }]
   },
   {
     id: 'MD-06',
     code: 'MD-06',
-    title: 'Danh Mục Chức Danh & Chức Vụ Quản Lý',
-    titleEn: 'Job Titles & Managerial Positions Catalog',
-    subtitle: 'Chức danh chuyên môn, Chức vụ liên đới & Tiêu chuẩn công việc (Mục 5.24 DOCX)',
-    subtitleEn: 'Professional Titles, Associated Roles & Job Specs (Section 5.24)',
+    title: 'Danh mục Chức danh & Vị trí công việc',
+    titleEn: 'Job Title & Position Catalog',
+    subtitle: 'Chức danh, cấp bậc, nhóm vị trí và ngạch lương mặc định',
+    subtitleEn: 'Job titles, position level, job family and default salary grade',
     tier: 'tier2_module',
     moduleId: 'emp',
-    moduleName: 'Nhân sự (Core EMP)',
-    moduleNameEn: 'Personnel Core (EMP)',
-    recordCount: 65,
-    color: 'blue',
+    moduleName: 'Core EMP',
+    moduleNameEn: 'Personnel Core',
+    recordCount: 72,
+    color: 'sky',
     iconName: 'BadgeCheck',
-    feedsIntoModules: ['Ký Hợp đồng mới (EMP06)', 'Bổ nhiệm Điều chuyển (EMP11)', 'Định biên (EMP01)'],
-    feedsIntoWorkflows: ['LIFE-01', 'LIFE-04', 'LIFE-05', 'SOP-EMP-04', 'SOP-EMP-11'],
-    description: 'Trích xuất chính xác Mục 5.24 tài liệu 1.EMP.HRM.SOP.docx: Danh mục Chức danh, Chức vụ quản lý trực tiếp và Tiêu chuẩn công việc mặc định load sang hợp đồng.',
-    descriptionEn: 'Section 5.24 from 1.EMP.HRM.SOP.docx: Job titles, managerial roles and job specification templates loaded into employee contracts.',
-    fields: [
-      { name: 'Mã Chức danh', nameEn: 'Job Code', key: 'code', type: 'string', required: true, description: 'Mã chức danh', descriptionEn: 'Job code' },
-      { name: 'Tên Chức danh', nameEn: 'Job Title', key: 'name', type: 'string', required: true, description: 'Tên chuyên môn ghi trên HĐLĐ', descriptionEn: 'Contractual job title' },
-      { name: 'Chức vụ Quản lý Liên đới', nameEn: 'Managerial Role', key: 'role', type: 'string', required: false, description: 'Load từ danh mục Chức vụ', descriptionEn: 'Managerial position association' }
-    ],
+    feedsIntoModules: ['ATS', 'Core EMP', 'PAY', 'L&D'],
+    feedsIntoWorkflows: ['LIFE-00', 'LIFE-01', 'LIFE-03', 'LIFE-04', 'LIFE-05'],
+    description: 'Chức danh kiểm soát định biên, hợp đồng, bổ nhiệm và gợi ý ngạch lương hợp lệ.',
+    descriptionEn: 'Jobs control headcount, contracts, appointments and valid salary grade suggestions.',
+    fields: [field('code', 'Mã chức danh', 'Job Code', 'string', true, ['required', 'unique']), field('name', 'Tên chức danh', 'Job Title', 'string'), field('jobFamily', 'Nhóm nghề', 'Job Family', 'select'), field('level', 'Cấp bậc', 'Level', 'select'), field('salaryGradeCode', 'Ngạch lương', 'Salary Grade', 'lookup')],
     sampleRecords: [
-      { id: 'JOB-01', code: 'DEV-SENIOR', name: 'Kỹ Sư Phần Mềm Cao Cấp (Senior Developer)', role: 'Không giữ chức vụ quản lý', status: 'active' },
-      { id: 'JOB-02', code: 'HR-CB-SPEC', name: 'Chuyên Viên Tiền Lương & Chính Sách (C&B)', role: 'Không giữ chức vụ quản lý', status: 'active' },
-      { id: 'JOB-03', code: 'MGT-LEAD', name: 'Trưởng Nhóm Kỹ Thuật (Tech Lead)', role: 'Trưởng nhóm / Leader', status: 'active' }
-    ]
-  },
-  {
-    id: 'MD-OFFBOARDING-TYPES',
-    code: 'MD-OFFBOARD',
-    title: 'Danh Mục Loại Nghỉ Việc & Lý Do Nghỉ Việc',
-    titleEn: 'Termination Types & Exit Reasons',
-    subtitle: 'Nhóm nghỉ: Mất / Nghỉ hưu / Nghỉ việc & Lý do Exit Interview (Mục 5.18-5.19 DOCX)',
-    subtitleEn: 'Retirement, Resignation, Exit Interview Reasons (Section 5.18-5.19)',
-    tier: 'tier2_module',
-    moduleId: 'emp',
-    moduleName: 'Nhân sự (Core EMP)',
-    moduleNameEn: 'Personnel Core (EMP)',
-    recordCount: 12,
-    color: 'blue',
-    iconName: 'DoorOpen',
-    feedsIntoModules: ['Giảm lao động (EMP15)', 'Báo giảm Bảo hiểm (INS04)', 'Quyết toán nghỉ việc'],
-    feedsIntoWorkflows: ['LIFE-07', 'SOP-EMP-15', 'SOP-INS-04'],
-    description: 'Trích xuất chính xác Mục 5.18 và 5.19 tài liệu 1.EMP.HRM.SOP.docx: Phân loại 6 nhóm lý do nghỉ việc (Cơ hội khác, Lý do chủ quan, Chế độ phúc lợi, Môi trường làm việc, Áp lực...) phục vụ phỏng vấn thôi việc (Exit Interview).',
-    descriptionEn: 'Section 5.18-5.19 from 1.EMP.HRM.SOP.docx: Exit reason categories (Better opportunity, Compensation, Work pressure, Relationships) for exit interviews.',
-    fields: [
-      { name: 'Mã Loại Nghỉ Việc', nameEn: 'Exit Code', key: 'code', type: 'string', required: true, description: 'Mã loại thôi việc', descriptionEn: 'Exit code' },
-      { name: 'Tên Loại Nghỉ Việc', nameEn: 'Exit Category Name', key: 'name', type: 'string', required: true, description: 'Lý do chính thức', descriptionEn: 'Exit category title' },
-      { name: 'Nhóm Nghỉ Việc', nameEn: 'Exit Group', key: 'group', type: 'select', required: true, description: 'Mất / Nghỉ hưu / Nghỉ việc (Dữ liệu ngầm)', descriptionEn: 'Retirement / Resignation / Deceased' }
+      { id: 'JOB-01', code: 'JOB-HR-SPEC', name: 'Chuyên viên Nhân sự', jobFamily: 'HR', level: 'Officer', salaryGradeCode: 'GRD-OFFICER', status: 'active' },
+      { id: 'JOB-02', code: 'JOB-SR-DEV', name: 'Kỹ sư Phần mềm Cao cấp', jobFamily: 'Technology', level: 'Senior', salaryGradeCode: 'GRD-SENIOR', status: 'active' },
+      { id: 'JOB-03', code: 'JOB-DEPT-MGR', name: 'Trưởng phòng', jobFamily: 'Management', level: 'Manager', salaryGradeCode: 'GRD-MANAGER', status: 'active' }
     ],
-    sampleRecords: [
-      { id: 'OFF-01', code: 'OFF-CAREER', name: 'Có cơ hội nghề nghiệp khác', group: 'Nghỉ việc tự nguyện', status: 'active' },
-      { id: 'OFF-02', code: 'OFF-BENEFIT', name: 'Do chế độ chính sách phúc lợi', group: 'Nghỉ việc tự nguyện', status: 'active' },
-      { id: 'OFF-03', code: 'OFF-RETIRE', name: 'Đến tuổi nghỉ hưu theo quy định', group: 'Nghỉ hưu', status: 'active' },
-      { id: 'OFF-04', code: 'OFF-DISCIPLINE', name: 'Xử lý kỷ luật sa thải', group: 'Chấm dứt HĐLĐ', status: 'active' }
-    ]
+    foreignKeys: [{ field: 'salaryGradeCode', targetCatalogId: 'MD-07', targetField: 'code', relationship: 'many-to-one', required: true }],
+    validationConstraints: [...uniqueCode('MD-06'), { id: 'MD-06-GRADE', field: 'salaryGradeCode', type: 'cross_catalog', rule: 'salaryGradeCode must exist in MD-07', message: 'Chức danh phải thuộc một ngạch lương hợp lệ.' }],
+    relationalRules: [{ id: 'RR-JOB-GRADE', title: 'Chức danh sang Ngạch lương', sourceField: 'salaryGradeCode', targetCatalogId: 'MD-07', targetField: 'code', ruleType: 'range_guard', description: 'Chọn chức danh sẽ tự đề xuất dải lương min/max theo MD-07.' }]
   },
-
-  // =========================================================================
-  // ⏰ TẦNG 2: PHÂN HỆ CHẤM CÔNG (2.ATT.HRM.SOP.DOCX)
-  // =========================================================================
-  {
-    id: 'MD-08',
-    code: 'MD-08',
-    title: 'Danh Mục Ca Làm Việc & Loại Tăng Ca (Overtime)',
-    titleEn: 'Work Shifts & Overtime Rate Classifications',
-    subtitle: 'Loại ca, Khung giờ & Loại tăng ca gán theo từng ca (Mục 5.20 DOCX ATT)',
-    subtitleEn: 'Shifts, Punch Windows & Overtime multipliers per shift',
-    tier: 'tier2_module',
-    moduleId: 'att',
-    moduleName: 'Chấm công (ATT)',
-    moduleNameEn: 'Attendance (ATT)',
-    recordCount: 12,
-    color: 'emerald',
-    iconName: 'Clock',
-    feedsIntoModules: ['Phân ca làm việc', 'Tổng hợp Bảng công (ATT11)', 'Tính lương (PAY)'],
-    feedsIntoWorkflows: ['LIFE-06', 'SOP-ATT-01', 'SOP-ATT-02'],
-    description: 'Trích xuất từ Mục 5.20 tài liệu 2.ATT.HRM.SOP.docx: Danh mục loại tăng ca được gán trực tiếp theo từng Loại ca làm việc và hệ số công.',
-    descriptionEn: 'Section 5.20 from 2.ATT.HRM.SOP.docx: Shift definitions with embedded overtime rate rules and working hour windows.',
-    fields: [
-      { name: 'Mã Ca', nameEn: 'Shift Code', key: 'code', type: 'string', required: true, description: 'Mã ca', descriptionEn: 'Shift code' },
-      { name: 'Tên Ca Làm Việc', nameEn: 'Shift Name', key: 'name', type: 'string', required: true, description: 'Tên ca phân công', descriptionEn: 'Shift title' },
-      { name: 'Khung Giờ Vào - Ra', nameEn: 'Hours', key: 'timeWindow', type: 'string', required: true, description: 'Giờ bắt đầu - Giờ kết thúc', descriptionEn: 'In - Out timing' },
-      { name: 'Số Công Chuẩn', nameEn: 'Man-days', key: 'mandays', type: 'number', required: true, description: 'Số ngày công quy đổi', descriptionEn: 'Standard man-day value' }
-    ],
-    sampleRecords: [
-      { id: 'SFT-01', code: 'CA-HC', name: 'Ca Hành Chính Văn Phòng (Thứ 2 - Thứ 6)', timeWindow: '08:30 - 17:30', mandays: 1.0, status: 'active' },
-      { id: 'SFT-02', code: 'CA-KIP-SANG', name: 'Ca Kíp Sản Xuất Sáng (Kíp 1)', timeWindow: '06:00 - 14:00', mandays: 1.0, status: 'active' },
-      { id: 'SFT-03', code: 'CA-KIP-DEM', name: 'Ca Kíp Đêm (Hưởng phụ cấp ca đêm 30%)', timeWindow: '22:00 - 06:00', mandays: 1.3, status: 'active' }
-    ]
-  },
-  {
-    id: 'MD-LEAVE-DOCS',
-    code: 'MD-LEAVE-DOC',
-    title: 'Danh Mục Chứng Từ Cần Nộp Khi Nghỉ Phép',
-    titleEn: 'Required Leave Attachments & Justification Documents',
-    subtitle: 'Giấy ra viện, Giấy kết hôn, Giấy chứng tử... (Mục 5.21 DOCX ATT)',
-    subtitleEn: 'Hospital Discharge, Marriage Cert, Death Cert (Section 5.21)',
-    tier: 'tier2_module',
-    moduleId: 'att',
-    moduleName: 'Chấm công (ATT)',
-    moduleNameEn: 'Attendance (ATT)',
-    recordCount: 8,
-    color: 'emerald',
-    iconName: 'FileText',
-    feedsIntoModules: ['Đăng ký nghỉ phép Portal', 'Hồ sơ thanh toán Chế độ BHXH (INS05)'],
-    feedsIntoWorkflows: ['LIFE-06', 'SOP-ATT-04', 'SOP-INS-05'],
-    description: 'Trích xuất chính xác Mục 5.21 tài liệu 2.ATT.HRM.SOP.docx: Danh mục chứng từ bắt buộc phải đính kèm tương ứng với từng loại nghỉ phép.',
-    descriptionEn: 'Section 5.21 from 2.ATT.HRM.SOP.docx: Mandatory verification documents required when submitting leave requests on Employee Portal.',
-    fields: [
-      { name: 'Mã Chứng Từ', nameEn: 'Doc Code', key: 'code', type: 'string', required: true, description: 'Mã chứng từ', descriptionEn: 'Document code' },
-      { name: 'Tên Chứng Từ Bắt Buộc', nameEn: 'Document Name', key: 'name', type: 'string', required: true, description: 'Tên giấy tờ cần nộp', descriptionEn: 'Document title' },
-      { name: 'Loại Nghỉ Áp Dụng', nameEn: 'Leave Type Applicable', key: 'leaveType', type: 'string', required: true, description: 'Áp dụng cho loại nghỉ nào', descriptionEn: 'Target leave policy' }
-    ],
-    sampleRecords: [
-      { id: 'DOC-01', code: 'DOC-HOSPITAL-CERT', name: 'Giấy Chứng Nhận Nghỉ Việc Hưởng BHXH (C70a-HD)', leaveType: 'Nghỉ Ốm đau / Thai sản', status: 'active' },
-      { id: 'DOC-02', code: 'DOC-MARRIAGE-CERT', name: 'Bản Sao Giấy Đăng Ký Kết Hôn', leaveType: 'Nghỉ Kết Hôn (Hưởng nguyên lương)', status: 'active' },
-      { id: 'DOC-03', code: 'DOC-DEATH-CERT', name: 'Giấy Báo Tử Tứ Thân Phụ Mẫu', leaveType: 'Nghỉ Tang Chế (Hưởng nguyên lương)', status: 'active' }
-    ]
-  },
-
-  // =========================================================================
-  // 💰 TẦNG 2: PHÂN HỆ TIỀN LƯƠNG & PHỤ CẤP (4.PAY.HRM.SOP.DOCX)
-  // =========================================================================
   {
     id: 'MD-07',
     code: 'MD-07',
-    title: 'Thang Bảng Lương 3P (Thành Tố P1 - Pay for Position)',
-    titleEn: '3P Salary Scale & Pay Bands (P1 Component)',
-    subtitle: 'Ngạch bậc lương, Bậc 1 đến Bậc 10 & Mức lương tối thiểu vùng (Mục 5.22 DOCX)',
-    subtitleEn: 'Pay Grades, Step Multipliers & Regional Wage Minimums (Section 5.22)',
+    title: 'Thang bảng lương 3P & Ngạch bậc',
+    titleEn: '3P Salary Scale & Pay Grades',
+    subtitle: 'Dải lương min/max theo ngạch, bậc, vùng và chức danh',
+    subtitleEn: 'Minimum and maximum salary bands by grade, step, region and job',
     tier: 'tier2_module',
     moduleId: 'pay',
-    moduleName: 'Tiền lương (PAY)',
-    moduleNameEn: 'Payroll (PAY)',
-    recordCount: 15,
+    moduleName: 'PAY',
+    moduleNameEn: 'Payroll',
+    recordCount: 36,
     color: 'amber',
     iconName: 'CircleDollarSign',
-    feedsIntoModules: ['Ký Hợp đồng mới (EMP06)', 'Điều chỉnh Lương (EMP08/09/10)', 'Tính lương (PAY)'],
-    feedsIntoWorkflows: ['LIFE-04', 'LIFE-05', 'SOP-EMP-08', 'SOP-EMP-09', 'SOP-EMP-10', 'SOP-PAY-02'],
-    description: 'Trích xuất chính xác Mục 5.22 tài liệu 4.PAY.HRM.SOP.docx: Danh mục thang bảng lương P1 trong mô hình đãi ngộ 3P, làm căn cứ điều chỉnh thu nhập định kỳ và theo lương tối thiểu vùng (EMP10).',
-    descriptionEn: 'Section 5.22 from 4.PAY.HRM.SOP.docx: 3P salary scale (P1 - Position pay) serving as the foundation for periodic salary adjustments and regional wage compliance.',
-    fields: [
-      { name: 'Mã Ngạch/Bậc', nameEn: 'Grade Code', key: 'code', type: 'string', required: true, description: 'Mã ngạch bậc', descriptionEn: 'Grade code' },
-      { name: 'Tên Ngạch Bậc Lương', nameEn: 'Grade Name', key: 'name', type: 'string', required: true, description: 'Tên ngạch lương 3P', descriptionEn: '3P grade title' },
-      { name: 'Mức Lương Sàn (Min)', nameEn: 'Min Base', key: 'minPay', type: 'number', required: true, description: 'Lương tối thiểu ngạch', descriptionEn: 'Minimum pay floor' },
-      { name: 'Mức Lương Trần (Max)', nameEn: 'Max Base', key: 'maxPay', type: 'number', required: true, description: 'Lương tối đa ngạch', descriptionEn: 'Maximum pay ceiling' }
-    ],
+    feedsIntoModules: ['Core EMP', 'PAY', 'TAX', 'INS'],
+    feedsIntoWorkflows: ['LIFE-00', 'LIFE-04', 'LIFE-05', 'LIFE-07'],
+    description: 'Dải lương dùng để kiểm soát hợp đồng, điều chỉnh lương, đóng bảo hiểm và mô phỏng vượt khung.',
+    descriptionEn: 'Pay bands govern contracts, salary adjustments, insurance base and out-of-range validation.',
+    fields: [field('code', 'Mã ngạch', 'Grade Code', 'string', true, ['required', 'unique']), field('name', 'Tên ngạch', 'Grade Name', 'string'), field('minPay', 'Lương sàn', 'Minimum Pay', 'number', true, ['>=0']), field('maxPay', 'Lương trần', 'Maximum Pay', 'number', true, ['maxPay > minPay']), field('region', 'Vùng', 'Region', 'select')],
     sampleRecords: [
-      { id: 'P1-01', code: 'GRD-P1-OFFICER', name: 'Ngạch Chuyên viên Nghiệp vụ (Officer Band)', minPay: 15000000, maxPay: 25000000, status: 'active' },
-      { id: 'P1-02', code: 'GRD-P1-SENIOR', name: 'Ngạch Chuyên gia / Chuyên viên Cao cấp', minPay: 25000000, maxPay: 42000000, status: 'active' },
-      { id: 'P1-03', code: 'GRD-P1-MANAGER', name: 'Ngạch Quản lý Phòng ban (Manager Band)', minPay: 42000000, maxPay: 68000000, status: 'active' }
-    ]
+      { id: 'PAY-01', code: 'GRD-OFFICER', name: 'Officer Band', minPay: 12000000, maxPay: 24000000, region: 'I', status: 'active' },
+      { id: 'PAY-02', code: 'GRD-SENIOR', name: 'Senior Specialist Band', minPay: 24000000, maxPay: 42000000, region: 'I', status: 'active' },
+      { id: 'PAY-03', code: 'GRD-MANAGER', name: 'Manager Band', minPay: 42000000, maxPay: 70000000, region: 'I', status: 'active' }
+    ],
+    validationConstraints: [...uniqueCode('MD-07'), { id: 'MD-07-RANGE', field: 'maxPay', type: 'range', rule: 'maxPay must be greater than minPay', message: 'Lương trần phải lớn hơn lương sàn.' }]
   },
   {
-    id: 'MD-ALLOWANCES-20',
-    code: 'MD-ALLOWANCE',
-    title: 'Danh Mục 20 Loại Phụ Cấp & Nhóm Phụ Cấp',
-    titleEn: '20 Standard Allowance Types & Categories',
-    subtitle: 'Loại phụ cấp 1 đến 20, Tính chất Chịu Thuế / Miễn Thuế (Mục 5.23 DOCX PAY)',
-    subtitleEn: '20 Allowance Types, Taxable vs Non-Taxable rules (Section 5.23)',
+    id: 'MD-08',
+    code: 'MD-08',
+    title: 'Danh mục Ca làm việc & Tăng ca',
+    titleEn: 'Shift & Overtime Catalog',
+    subtitle: 'Ca hành chính, ca kíp, hệ số công và loại tăng ca',
+    subtitleEn: 'Office shifts, production shifts, man-day factor and overtime class',
     tier: 'tier2_module',
-    moduleId: 'pay',
-    moduleName: 'Tiền lương (PAY)',
-    moduleNameEn: 'Payroll (PAY)',
-    recordCount: 20,
-    color: 'amber',
-    iconName: 'BadgePercent',
-    feedsIntoModules: ['Phụ lục Lương (EMP07)', 'Bảng lương hàng tháng (PAY02)', 'Thuế TNCN'],
-    feedsIntoWorkflows: ['LIFE-04', 'LIFE-05', 'SOP-EMP-07', 'SOP-PAY-02'],
-    description: 'Trích xuất chính xác Mục 5.23 tài liệu 4.PAY.HRM.SOP.docx: Cấu hình chuẩn 20 Loại phụ cấp (từ Phụ cấp 1 đến Phụ cấp 20) kèm quy định miễn thuế TNCN hay chịu thuế.',
-    descriptionEn: 'Section 5.23 from 4.PAY.HRM.SOP.docx: Standard 20 allowance types (Allowance 1 to 20) with strict PIT taxability classifications.',
-    fields: [
-      { name: 'Mã Phụ Cấp', nameEn: 'Allowance Code', key: 'code', type: 'string', required: true, description: 'Mã phụ cấp', descriptionEn: 'Allowance code' },
-      { name: 'Tên Loại Phụ Cấp', nameEn: 'Allowance Name', key: 'name', type: 'string', required: true, description: 'Tên phụ cấp (1 -> 20)', descriptionEn: 'Allowance title' },
-      { name: 'Tính Chịu Thuế TNCN?', nameEn: 'Taxable PIT?', key: 'isTaxable', type: 'boolean', required: true, description: 'Có tính thuế TNCN không?', descriptionEn: 'Subject to PIT' }
-    ],
+    moduleId: 'att',
+    moduleName: 'ATT',
+    moduleNameEn: 'Attendance',
+    recordCount: 18,
+    color: 'emerald',
+    iconName: 'Clock',
+    feedsIntoModules: ['ATT', 'PAY', 'INS'],
+    feedsIntoWorkflows: ['LIFE-03', 'LIFE-06'],
+    description: 'Nguồn ca làm việc cho phân ca, chấm công, tính tăng ca và tính lương.',
+    descriptionEn: 'Shift source for scheduling, attendance, overtime and payroll.',
+    fields: [field('code', 'Mã ca', 'Shift Code', 'string', true, ['required', 'unique']), field('name', 'Tên ca', 'Shift Name', 'string'), field('startTime', 'Giờ vào', 'Start Time', 'string'), field('endTime', 'Giờ ra', 'End Time', 'string'), field('overtimeRate', 'Hệ số tăng ca', 'Overtime Rate', 'number')],
     sampleRecords: [
-      { id: 'ALW-01', code: 'PC-01-AN-TRUA', name: 'Phụ cấp Ăn trưa (Miễn thuế tối đa 730k/tháng)', isTaxable: false, status: 'active' },
-      { id: 'ALW-02', code: 'PC-02-DIEN-THOAI', name: 'Phụ cấp Điện thoại / Liên lạc công vụ', isTaxable: false, status: 'active' },
-      { id: 'ALW-03', code: 'PC-03-XANG-XE', name: 'Phụ cấp Xăng xe / Đi lại công tác', isTaxable: false, status: 'active' },
-      { id: 'ALW-04', code: 'PC-04-TRACH-NHIEM', name: 'Phụ cấp Trách nhiệm Quản lý (Chịu thuế)', isTaxable: true, status: 'active' },
-      { id: 'ALW-05', code: 'PC-05-KIEM-NHIEM', name: 'Phụ cấp Kiêm nhiệm chức vụ (Chịu thuế)', isTaxable: true, status: 'active' }
-    ]
+      { id: 'SHIFT-01', code: 'CA-HC', name: 'Ca hành chính', startTime: '08:30', endTime: '17:30', overtimeRate: 1.5, status: 'active' },
+      { id: 'SHIFT-02', code: 'CA-SANG', name: 'Ca sản xuất sáng', startTime: '06:00', endTime: '14:00', overtimeRate: 1.5, status: 'active' },
+      { id: 'SHIFT-03', code: 'CA-DEM', name: 'Ca đêm', startTime: '22:00', endTime: '06:00', overtimeRate: 2, status: 'active' }
+    ],
+    validationConstraints: uniqueCode('MD-08')
   },
-
-  // =========================================================================
-  // 🛡️ TẦNG 2: PHÂN HỆ BẢO HIỂM XÃ HỘI (3.INS.HRM.SOP.DOCX)
-  // =========================================================================
   {
     id: 'MD-09',
     code: 'MD-09',
-    title: 'Tỷ Lệ Đóng & Khung Mức Đóng Bảo Hiểm (BHXH/BHYT/BHTN)',
-    titleEn: 'Social Insurance Contribution Rates & Ceilings',
-    subtitle: 'BHXH (25.5%), BHYT (4.5%), BHTN (2.0%), BHTNLD-BNN (0.5%) (Mục 5 DOCX INS)',
-    subtitleEn: 'Statutory Rates per 3.INS.HRM.SOP.docx Section 5',
-    tier: 'tier2_module',
+    title: 'Tỷ lệ đóng BHXH/BHYT/BHTN',
+    titleEn: 'Social Insurance Contribution Rates',
+    subtitle: 'Quỹ bảo hiểm, tỷ lệ người lao động, tỷ lệ doanh nghiệp và trần đóng',
+    subtitleEn: 'Insurance funds, employee rate, employer rate and contribution ceiling',
+    tier: 'tier4_governance',
     moduleId: 'ins',
-    moduleName: 'Bảo hiểm (INS)',
-    moduleNameEn: 'Insurance (INS)',
+    moduleName: 'INS',
+    moduleNameEn: 'Insurance',
     recordCount: 4,
     color: 'purple',
     iconName: 'ShieldCheck',
-    feedsIntoModules: ['Báo tăng BHXH (INS02)', 'Tính lương (PAY02)', 'In Mẫu 05-HBS'],
-    feedsIntoWorkflows: ['LIFE-04', 'SOP-INS-01', 'SOP-INS-02', 'SOP-PAY-02'],
-    description: 'Trích xuất từ tài liệu 3.INS.HRM.SOP.docx: Cấu hình 4 quỹ bảo hiểm bắt buộc theo luật Việt Nam và in mẫu 05-HBS gửi Cơ quan Bảo hiểm.',
-    descriptionEn: 'Official specs from 3.INS.HRM.SOP.docx: Statutory insurance funds configuration and automated generation of 05-HBS claim forms.',
-    fields: [
-      { name: 'Tên Quỹ Bảo Hiểm', nameEn: 'Fund Name', key: 'name', type: 'string', required: true, description: 'Tên quỹ bảo hiểm', descriptionEn: 'Insurance fund title' },
-      { name: 'Tỷ lệ Doanh nghiệp', nameEn: 'Employer Rate', key: 'employerRate', type: 'string', required: true, description: '% Doanh nghiệp đóng', descriptionEn: 'Employer contribution' },
-      { name: 'Tỷ lệ Người lao động', nameEn: 'Employee Rate', key: 'employeeRate', type: 'string', required: true, description: '% NLĐ trích nộp', descriptionEn: 'Employee contribution' },
-      { name: 'Tổng Tỷ lệ', nameEn: 'Total Rate', key: 'totalRate', type: 'string', required: true, description: 'Tổng cộng', descriptionEn: 'Total rate' }
-    ],
+    feedsIntoModules: ['INS', 'PAY'],
+    feedsIntoWorkflows: ['LIFE-04', 'LIFE-05', 'LIFE-07'],
+    description: 'Cấu hình tỷ lệ bảo hiểm dùng trong báo tăng, báo giảm, tính lương và quyết toán thôi việc.',
+    descriptionEn: 'Insurance rate setup used by joiner reporting, leaver reporting, payroll and final settlement.',
+    fields: [field('code', 'Mã quỹ', 'Fund Code', 'string', true, ['required', 'unique']), field('name', 'Tên quỹ', 'Fund Name', 'string'), field('employeeRate', 'Tỷ lệ NLĐ', 'Employee Rate', 'number'), field('employerRate', 'Tỷ lệ DN', 'Employer Rate', 'number'), field('salaryCeiling', 'Trần đóng', 'Salary Ceiling', 'number')],
     sampleRecords: [
-      { id: 'INS-01', code: 'SI-BHXH', name: 'Bảo hiểm Xã hội (Hưu trí, Tử tuất, Ốm đau, Thai sản)', employerRate: '17.5%', employeeRate: '8.0%', totalRate: '25.5%', status: 'active' },
-      { id: 'INS-02', code: 'HI-BHYT', name: 'Bảo hiểm Y tế (KCB)', employerRate: '3.0%', employeeRate: '1.5%', totalRate: '4.5%', status: 'active' },
-      { id: 'INS-03', code: 'UI-BHTN', name: 'Bảo hiểm Thất nghiệp', employerRate: '1.0%', employeeRate: '1.0%', totalRate: '2.0%', status: 'active' },
-      { id: 'INS-04', code: 'OAI-BNN', name: 'Bảo hiểm Tai nạn Lao động & Bệnh Nghề nghiệp (BHTNLD&BNN)', employerRate: '0.5%', employeeRate: '0.0%', totalRate: '0.5%', status: 'active' }
-    ]
+      { id: 'INS-01', code: 'BHXH', name: 'Bảo hiểm xã hội', employeeRate: 8, employerRate: 17.5, salaryCeiling: 46800000, status: 'active' },
+      { id: 'INS-02', code: 'BHYT', name: 'Bảo hiểm y tế', employeeRate: 1.5, employerRate: 3, salaryCeiling: 46800000, status: 'active' },
+      { id: 'INS-03', code: 'BHTN', name: 'Bảo hiểm thất nghiệp', employeeRate: 1, employerRate: 1, salaryCeiling: 93600000, status: 'active' }
+    ],
+    validationConstraints: [...uniqueCode('MD-09'), { id: 'MD-09-RATE', field: 'employeeRate', type: 'range', rule: '0 <= rate <= 100', message: 'Tỷ lệ đóng phải nằm trong khoảng 0-100%.' }]
+  },
+  {
+    id: 'MD-10',
+    code: 'MD-10',
+    title: 'Danh mục Phụ cấp & Khoản thu nhập',
+    titleEn: 'Allowance & Income Component Catalog',
+    subtitle: '20 loại phụ cấp, khoản chịu thuế, miễn thuế và căn cứ đóng bảo hiểm',
+    subtitleEn: 'Allowance types, taxable status, non-taxable status and insurance base rules',
+    tier: 'tier2_module',
+    moduleId: 'pay',
+    moduleName: 'PAY',
+    moduleNameEn: 'Payroll',
+    recordCount: 20,
+    color: 'lime',
+    iconName: 'BadgePercent',
+    feedsIntoModules: ['PAY', 'TAX', 'INS'],
+    feedsIntoWorkflows: ['LIFE-04', 'LIFE-05', 'LIFE-07'],
+    description: 'Chuẩn hóa các khoản thu nhập phục vụ phụ lục lương, bảng lương, thuế TNCN và bảo hiểm.',
+    descriptionEn: 'Standardizes income components for salary appendices, payroll, PIT and insurance.',
+    fields: [field('code', 'Mã khoản', 'Component Code', 'string', true, ['required', 'unique']), field('name', 'Tên khoản', 'Component Name', 'string'), field('isTaxable', 'Chịu thuế', 'Taxable', 'boolean'), field('includedInInsurance', 'Tính BHXH', 'Included in Insurance', 'boolean')],
+    sampleRecords: [
+      { id: 'ALW-01', code: 'PC-AN-TRUA', name: 'Phụ cấp ăn trưa', isTaxable: false, includedInInsurance: false, status: 'active' },
+      { id: 'ALW-02', code: 'PC-TRACH-NHIEM', name: 'Phụ cấp trách nhiệm', isTaxable: true, includedInInsurance: true, status: 'active' },
+      { id: 'ALW-03', code: 'BONUS-KPI', name: 'Thưởng KPI', isTaxable: true, includedInInsurance: false, status: 'active' }
+    ],
+    validationConstraints: uniqueCode('MD-10')
+  },
+  {
+    id: 'MD-11',
+    code: 'MD-11',
+    title: 'Danh mục Ngân hàng & Chi nhánh',
+    titleEn: 'Bank & Branch Catalog',
+    subtitle: 'Bank Code, Swift Code, chi nhánh và mẫu file chi lương',
+    subtitleEn: 'Bank code, Swift code, branch and payroll transfer file template',
+    tier: 'tier3_utility',
+    moduleId: 'pay',
+    moduleName: 'PAY',
+    moduleNameEn: 'Payroll',
+    recordCount: 64,
+    color: 'teal',
+    iconName: 'Landmark',
+    feedsIntoModules: ['PAY', 'Core EMP'],
+    feedsIntoWorkflows: ['LIFE-01', 'LIFE-02', 'LIFE-05', 'LIFE-07'],
+    description: 'Danh mục ngân hàng dùng để kiểm tra tài khoản nhận lương và xuất file chuyển khoản.',
+    descriptionEn: 'Bank source for salary account validation and bank transfer file generation.',
+    fields: [field('code', 'Bank Code', 'Bank Code', 'string', true, ['required', 'unique']), field('name', 'Tên ngân hàng', 'Bank Name', 'string'), field('swiftCode', 'Mã Swift', 'Swift Code', 'string', true, ['regex:^[A-Z0-9]{8,11}$']), field('branchName', 'Chi nhánh', 'Branch', 'string'), field('payrollTemplate', 'Mẫu file chi lương', 'Payroll File Template', 'select')],
+    sampleRecords: [
+      { id: 'BANK-01', code: 'VCB', name: 'Vietcombank', swiftCode: 'BFTVVNVX', branchName: 'Hồ Chí Minh', payrollTemplate: 'VCB-Bulk-CSV', status: 'active' },
+      { id: 'BANK-02', code: 'BIDV', name: 'BIDV', swiftCode: 'BIDVVNVX', branchName: 'Hà Nội', payrollTemplate: 'BIDV-XLSX', status: 'active' },
+      { id: 'BANK-03', code: 'TCB', name: 'Techcombank', swiftCode: 'VTCBVNVX', branchName: 'Sài Gòn', payrollTemplate: 'TCB-FAST-CSV', status: 'active' }
+    ],
+    validationConstraints: [...uniqueCode('MD-11'), { id: 'MD-11-SWIFT', field: 'swiftCode', type: 'regex', rule: '^[A-Z0-9]{8,11}$', message: 'Swift Code phải có 8-11 ký tự chữ hoa/số.' }]
+  },
+  {
+    id: 'MD-12',
+    code: 'MD-12',
+    title: 'Danh mục Cơ quan Thuế & Chi cục Thuế',
+    titleEn: 'Tax Authority & District Tax Office Catalog',
+    subtitle: 'Cục Thuế tỉnh/thành, Chi cục Thuế quận/huyện và địa bàn quản lý',
+    subtitleEn: 'Provincial tax authority, district tax office and managed geography',
+    tier: 'tier4_governance',
+    moduleId: 'tax',
+    moduleName: 'TAX',
+    moduleNameEn: 'Tax',
+    recordCount: 712,
+    color: 'orange',
+    iconName: 'Receipt',
+    feedsIntoModules: ['TAX', 'Core EMP', 'PAY'],
+    feedsIntoWorkflows: ['LIFE-02', 'LIFE-05', 'LIFE-07'],
+    description: 'Cơ quan thuế quản lý MST nhân viên, người phụ thuộc và quyết toán thuế.',
+    descriptionEn: 'Tax authority source for employee tax ID, dependents and tax finalization.',
+    fields: [field('code', 'Mã cơ quan thuế', 'Tax Office Code', 'string', true, ['required', 'unique']), field('name', 'Tên cơ quan thuế', 'Tax Office Name', 'string'), field('level', 'Cấp thuế', 'Tax Level', 'select'), field('provinceCode', 'Tỉnh/Thành', 'Province', 'lookup'), field('districtCode', 'Quận/Huyện', 'District', 'lookup', false)],
+    sampleRecords: [
+      { id: 'TAX-01', code: 'TAX-HCM', name: 'Cục Thuế TP. Hồ Chí Minh', level: 'Province', provinceCode: 'HCM', districtCode: '', status: 'active' },
+      { id: 'TAX-02', code: 'TAX-HN', name: 'Cục Thuế TP. Hà Nội', level: 'Province', provinceCode: 'HN', districtCode: '', status: 'active' },
+      { id: 'TAX-03', code: 'TAX-Q1-HCM', name: 'Chi cục Thuế Quận 1', level: 'District', provinceCode: 'HCM', districtCode: 'Q1-HCM', status: 'active' }
+    ],
+    foreignKeys: [{ field: 'provinceCode', targetCatalogId: 'MD-01', targetField: 'code', relationship: 'many-to-one', required: true }],
+    validationConstraints: [...uniqueCode('MD-12'), { id: 'MD-12-GEO', field: 'provinceCode', type: 'cross_catalog', rule: 'provinceCode must exist in MD-01', message: 'Cơ quan thuế phải thuộc địa bàn hợp lệ.' }],
+    relationalRules: [{ id: 'RR-GEO-TAX', title: 'Địa lý sang Cơ quan thuế', sourceField: 'provinceCode', targetCatalogId: 'MD-01', targetField: 'code', ruleType: 'cascade', description: 'Chọn tỉnh thường trú sẽ lọc cơ quan thuế phù hợp.' }]
+  },
+  {
+    id: 'MD-13',
+    code: 'MD-13',
+    title: 'Danh mục Trung tâm chi phí',
+    titleEn: 'Cost Center Catalog',
+    subtitle: 'Cost Center, tài khoản kế toán ERP và đơn vị chịu phí',
+    subtitleEn: 'Cost center, ERP account mapping and owning organization',
+    tier: 'tier3_utility',
+    moduleId: 'admin',
+    moduleName: 'ERP/Admin',
+    moduleNameEn: 'ERP/Admin',
+    recordCount: 42,
+    color: 'slate',
+    iconName: 'WalletCards',
+    feedsIntoModules: ['ERP', 'PAY', 'Core EMP'],
+    feedsIntoWorkflows: ['LIFE-00', 'LIFE-01', 'LIFE-03', 'LIFE-05', 'LIFE-07'],
+    description: 'Trung tâm chi phí phân bổ lương, phụ cấp và chi phí nhân sự về ERP.',
+    descriptionEn: 'Cost centers allocate salary, allowance and workforce cost into ERP.',
+    fields: [field('code', 'Mã Cost Center', 'Cost Center Code', 'string', true, ['required', 'unique']), field('name', 'Tên Cost Center', 'Cost Center Name', 'string'), field('erpAccount', 'Tài khoản ERP', 'ERP Account', 'string', true, ['regex:^6[0-9]{3,}$']), field('ownerDeptCode', 'Phòng ban sở hữu', 'Owner Department', 'lookup'), field('budgetLimit', 'Ngân sách', 'Budget Limit', 'number')],
+    sampleRecords: [
+      { id: 'CC-01', code: 'CC-HR', name: 'Human Resources Cost Center', erpAccount: '6421', ownerDeptCode: 'HR', budgetLimit: 8200000000, status: 'active' },
+      { id: 'CC-02', code: 'CC-TECH', name: 'Technology Cost Center', erpAccount: '6422', ownerDeptCode: 'TECH', budgetLimit: 28000000000, status: 'active' },
+      { id: 'CC-03', code: 'CC-FIN', name: 'Finance Cost Center', erpAccount: '6423', ownerDeptCode: 'FIN', budgetLimit: 6200000000, status: 'active' }
+    ],
+    validationConstraints: [...uniqueCode('MD-13'), { id: 'MD-13-ERP', field: 'erpAccount', type: 'regex', rule: '^6[0-9]{3,}$', message: 'Tài khoản ERP chi phí cần bắt đầu bằng nhóm 6.' }]
+  },
+  {
+    id: 'MD-14',
+    code: 'MD-14',
+    title: 'Khung Từ điển Năng lực',
+    titleEn: 'Competency Framework',
+    subtitle: 'Core, Leadership, Functional competency và cấp độ hành vi',
+    subtitleEn: 'Core, leadership and functional competencies with behavior levels',
+    tier: 'tier2_module',
+    moduleId: 'emp',
+    moduleName: 'Core EMP/L&D',
+    moduleNameEn: 'Core EMP/L&D',
+    recordCount: 96,
+    color: 'violet',
+    iconName: 'Sparkles',
+    feedsIntoModules: ['ATS', 'Core EMP', 'L&D'],
+    feedsIntoWorkflows: ['LIFE-00', 'LIFE-01', 'LIFE-03', 'LIFE-05'],
+    description: 'Khung năng lực dùng cho tuyển dụng, đánh giá thử việc, bổ nhiệm và kế hoạch phát triển.',
+    descriptionEn: 'Competency framework for recruitment, probation review, promotion and development plans.',
+    fields: [field('code', 'Mã năng lực', 'Competency Code', 'string', true, ['required', 'unique']), field('name', 'Tên năng lực', 'Competency Name', 'string'), field('group', 'Nhóm năng lực', 'Competency Group', 'select', true, ['Core|Leadership|Functional']), field('level', 'Cấp độ', 'Level', 'select'), field('jobFamily', 'Nhóm nghề áp dụng', 'Applicable Job Family', 'select')],
+    sampleRecords: [
+      { id: 'COM-01', code: 'CORE-COLLAB', name: 'Hợp tác', group: 'Core', level: 'L2', jobFamily: 'All', status: 'active' },
+      { id: 'COM-02', code: 'LEAD-COACH', name: 'Huấn luyện đội nhóm', group: 'Leadership', level: 'L3', jobFamily: 'Management', status: 'active' },
+      { id: 'COM-03', code: 'FUNC-DEVOPS', name: 'DevOps Engineering', group: 'Functional', level: 'L4', jobFamily: 'Technology', status: 'active' }
+    ],
+    validationConstraints: uniqueCode('MD-14')
+  },
+  {
+    id: 'MD-15',
+    code: 'MD-15',
+    title: 'Cơ sở Khám chữa bệnh ban đầu',
+    titleEn: 'Initial Healthcare Provider Catalog',
+    subtitle: 'Bệnh viện, phòng khám, mã KCB và địa bàn đăng ký BHYT',
+    subtitleEn: 'Hospital, clinic, healthcare code and health insurance registration area',
+    tier: 'tier4_governance',
+    moduleId: 'ins',
+    moduleName: 'INS',
+    moduleNameEn: 'Insurance',
+    recordCount: 1290,
+    color: 'green',
+    iconName: 'Hospital',
+    feedsIntoModules: ['INS', 'Core EMP'],
+    feedsIntoWorkflows: ['LIFE-01', 'LIFE-02', 'LIFE-04', 'LIFE-07'],
+    description: 'Danh mục KCB ban đầu phục vụ đăng ký BHYT và báo tăng bảo hiểm.',
+    descriptionEn: 'Healthcare provider source for health insurance registration and insurance onboarding.',
+    fields: [field('code', 'Mã KCB', 'Healthcare Code', 'string', true, ['required', 'unique']), field('name', 'Tên cơ sở KCB', 'Healthcare Provider', 'string'), field('provinceCode', 'Tỉnh/Thành', 'Province', 'lookup'), field('level', 'Tuyến', 'Level', 'select'), field('acceptsNewRegistration', 'Nhận đăng ký mới', 'Accepts New Registration', 'boolean')],
+    sampleRecords: [
+      { id: 'KCB-01', code: '79024', name: 'Bệnh viện Nhân dân Gia Định', provinceCode: 'HCM', level: 'Province', acceptsNewRegistration: true, status: 'active' },
+      { id: 'KCB-02', code: '01001', name: 'Bệnh viện Bạch Mai', provinceCode: 'HN', level: 'Central', acceptsNewRegistration: false, status: 'active' },
+      { id: 'KCB-03', code: '48015', name: 'Bệnh viện Đà Nẵng', provinceCode: 'DN', level: 'Province', acceptsNewRegistration: true, status: 'active' }
+    ],
+    foreignKeys: [{ field: 'provinceCode', targetCatalogId: 'MD-01', targetField: 'code', relationship: 'many-to-one', required: true }],
+    validationConstraints: [...uniqueCode('MD-15'), { id: 'MD-15-PROV', field: 'provinceCode', type: 'cross_catalog', rule: 'provinceCode must exist in MD-01', message: 'Cơ sở KCB phải thuộc tỉnh/thành hợp lệ.' }]
+  },
+  {
+    id: 'MD-16',
+    code: 'MD-16',
+    title: 'Danh mục Loại Hợp đồng lao động',
+    titleEn: 'Labor Contract Type Catalog',
+    subtitle: 'Thử việc, 12-36 tháng, không thời hạn, cộng tác viên và điều kiện tái ký',
+    subtitleEn: 'Probation, fixed-term, indefinite-term, collaborator and renewal rules',
+    tier: 'tier4_governance',
+    moduleId: 'emp',
+    moduleName: 'Core EMP',
+    moduleNameEn: 'Personnel Core',
+    recordCount: 8,
+    color: 'fuchsia',
+    iconName: 'FileSignature',
+    feedsIntoModules: ['Core EMP', 'PAY', 'INS', 'TAX'],
+    feedsIntoWorkflows: ['LIFE-01', 'LIFE-03', 'LIFE-04', 'LIFE-05', 'LIFE-07'],
+    description: 'Loại hợp đồng kiểm soát thời hạn, điều kiện đóng bảo hiểm, thuế và quy trình tái ký.',
+    descriptionEn: 'Contract types control term, insurance eligibility, tax treatment and renewal workflow.',
+    fields: [field('code', 'Mã loại HĐLĐ', 'Contract Type Code', 'string', true, ['required', 'unique']), field('name', 'Tên loại HĐLĐ', 'Contract Type Name', 'string'), field('durationMonths', 'Thời hạn tháng', 'Duration Months', 'number', false), field('insuranceEligible', 'Đóng bảo hiểm', 'Insurance Eligible', 'boolean'), field('renewalLimit', 'Số lần tái ký tối đa', 'Renewal Limit', 'number', false)],
+    sampleRecords: [
+      { id: 'CON-01', code: 'PROB-02M', name: 'Hợp đồng thử việc 2 tháng', durationMonths: 2, insuranceEligible: false, renewalLimit: 0, status: 'active' },
+      { id: 'CON-02', code: 'FIX-12M', name: 'HĐLĐ xác định thời hạn 12 tháng', durationMonths: 12, insuranceEligible: true, renewalLimit: 1, status: 'active' },
+      { id: 'CON-03', code: 'IND', name: 'HĐLĐ không xác định thời hạn', durationMonths: 0, insuranceEligible: true, renewalLimit: 0, status: 'active' },
+      { id: 'CON-04', code: 'CTV', name: 'Hợp đồng cộng tác viên', durationMonths: 6, insuranceEligible: false, renewalLimit: 0, status: 'active' }
+    ],
+    validationConstraints: [...uniqueCode('MD-16'), { id: 'MD-16-DURATION', field: 'durationMonths', type: 'range', rule: '0 <= durationMonths <= 36 for fixed-term contracts', message: 'Hợp đồng xác định thời hạn không vượt quá 36 tháng.' }]
+  },
+  {
+    id: 'MD-17',
+    code: 'MD-17',
+    title: 'Danh mục Khen thưởng & Kỷ luật lao động',
+    titleEn: 'Reward & Labor Discipline Catalog',
+    subtitle: 'Khen thưởng và 4 hình thức kỷ luật: khiển trách, kéo dài nâng lương, cách chức, sa thải',
+    subtitleEn: 'Rewards and 4 labor discipline forms: reprimand, delayed raise, demotion, dismissal',
+    tier: 'tier4_governance',
+    moduleId: 'emp',
+    moduleName: 'Core EMP',
+    moduleNameEn: 'Personnel Core',
+    recordCount: 14,
+    color: 'red',
+    iconName: 'Scale',
+    feedsIntoModules: ['Core EMP', 'PAY', 'OFF'],
+    feedsIntoWorkflows: ['LIFE-03', 'LIFE-05', 'LIFE-06', 'LIFE-07'],
+    description: 'Danh mục khen thưởng và kỷ luật phục vụ hồ sơ quá trình làm việc, lương thưởng và thôi việc.',
+    descriptionEn: 'Reward and discipline source for employment history, compensation and offboarding.',
+    fields: [field('code', 'Mã hình thức', 'Action Code', 'string', true, ['required', 'unique']), field('name', 'Tên hình thức', 'Action Name', 'string'), field('category', 'Loại', 'Category', 'select', true, ['Reward|Discipline']), field('severity', 'Mức độ', 'Severity', 'select'), field('payrollImpact', 'Ảnh hưởng lương', 'Payroll Impact', 'boolean')],
+    sampleRecords: [
+      { id: 'RW-01', code: 'REWARD-SPOT', name: 'Khen thưởng đột xuất', category: 'Reward', severity: 'Positive', payrollImpact: true, status: 'active' },
+      { id: 'DI-01', code: 'DISC-REPRIMAND', name: 'Khiển trách', category: 'Discipline', severity: 'Low', payrollImpact: false, status: 'active' },
+      { id: 'DI-02', code: 'DISC-DELAY-RAISE', name: 'Kéo dài thời hạn nâng lương', category: 'Discipline', severity: 'Medium', payrollImpact: true, status: 'active' },
+      { id: 'DI-03', code: 'DISC-DISMISSAL', name: 'Sa thải', category: 'Discipline', severity: 'High', payrollImpact: true, status: 'active' }
+    ],
+    validationConstraints: uniqueCode('MD-17'),
+    relationalRules: [{ id: 'RR-DISC-OFF', title: 'Kỷ luật sang Thôi việc', sourceField: 'code', targetCatalogId: 'MD-18', targetField: 'assignedToEmployeeId', ruleType: 'blocking_dependency', description: 'Sa thải hoặc thôi việc chỉ hoàn tất khi tài sản đã bàn giao đủ.' }]
+  },
+  {
+    id: 'MD-18',
+    code: 'MD-18',
+    title: 'Danh mục Tài sản / CCDC cấp phát',
+    titleEn: 'Issued Asset & Tool Catalog',
+    subtitle: 'Laptop, màn hình, thẻ từ, điện thoại, xe và trạng thái bàn giao',
+    subtitleEn: 'Laptop, monitor, access card, phone, vehicle and handover status',
+    tier: 'tier3_utility',
+    moduleId: 'admin',
+    moduleName: 'Admin/OFF',
+    moduleNameEn: 'Admin/Offboarding',
+    recordCount: 520,
+    color: 'zinc',
+    iconName: 'Laptop',
+    feedsIntoModules: ['Core EMP', 'Admin', 'OFF'],
+    feedsIntoWorkflows: ['LIFE-01', 'LIFE-02', 'LIFE-03', 'LIFE-07'],
+    description: 'Danh mục tài sản cấp phát cho onboarding, điều chuyển và kiểm soát bàn giao khi thôi việc.',
+    descriptionEn: 'Issued asset source for onboarding, transfer and offboarding handover control.',
+    fields: [field('code', 'Mã tài sản', 'Asset Code', 'string', true, ['required', 'unique']), field('name', 'Tên tài sản', 'Asset Name', 'string'), field('assetType', 'Loại tài sản', 'Asset Type', 'select'), field('assignedToEmployeeId', 'Nhân viên đang giữ', 'Assigned Employee', 'string', false), field('handoverStatus', 'Trạng thái bàn giao', 'Handover Status', 'select', true, ['Available|Issued|Returned|Lost'])],
+    sampleRecords: [
+      { id: 'AST-01', code: 'LAP-2026-001', name: 'Dell Latitude 7450', assetType: 'Laptop', assignedToEmployeeId: 'EMP-1008', handoverStatus: 'Issued', status: 'active' },
+      { id: 'AST-02', code: 'MON-2026-014', name: 'LG 27 inch Monitor', assetType: 'Monitor', assignedToEmployeeId: 'EMP-1011', handoverStatus: 'Issued', status: 'active' },
+      { id: 'AST-03', code: 'CARD-0098', name: 'Thẻ từ văn phòng', assetType: 'Access Card', assignedToEmployeeId: '', handoverStatus: 'Available', status: 'active' },
+      { id: 'AST-04', code: 'CAR-POOL-02', name: 'Xe công tác Toyota Vios', assetType: 'Vehicle', assignedToEmployeeId: 'EMP-1002', handoverStatus: 'Issued', status: 'active' }
+    ],
+    validationConstraints: [...uniqueCode('MD-18'), { id: 'MD-18-OFFBOARD', field: 'handoverStatus', type: 'cross_catalog', rule: 'employee offboarding cannot close while assigned assets are Issued or Lost', message: 'Không thể hoàn tất thôi việc khi còn tài sản chưa bàn giao.' }],
+    relationalRules: [{ id: 'RR-ASSET-OFFBOARD', title: 'Bàn giao tài sản sang Thôi việc', sourceField: 'handoverStatus', targetCatalogId: 'LIFE-07', targetField: 'offboardingStatus', ruleType: 'blocking_dependency', description: 'LIFE-07 bị chặn nếu còn tài sản trạng thái Issued hoặc Lost.' }]
   }
 ]

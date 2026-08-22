@@ -67,12 +67,12 @@ export const LeftSidebarNav: React.FC<LeftSidebarNavProps> = ({
           id: 'layer-2-lifecycle',
           label: t('sidebar.item.layer2', 'Tầng 2: Vòng đời NV'),
           icon: Layers,
-          badge: t('sidebar.item.layer2Badge', '7 Bước'),
+          badge: t('sidebar.item.layer2Badge', '8 Stage'),
           color: 'text-emerald-500'
         },
         {
           id: 'layer-3-operations',
-          label: t('sidebar.item.layer3', 'Tầng 3: Operational Grid'),
+          label: t('sidebar.item.layer3', 'Tầng 3: Vận hành nhân sự'),
           icon: GitBranch,
           badge: t('sidebar.item.layer3Badge', '8 Module'),
           color: 'text-amber-500'
@@ -99,7 +99,7 @@ export const LeftSidebarNav: React.FC<LeftSidebarNavProps> = ({
         },
         {
           id: 'sop-specs-matrix',
-          label: t('sidebar.item.sopMatrix', 'Ma trận 45 SOP Specs'),
+          label: t('sidebar.item.sopMatrix', 'Bảng kiểm 45 quy trình'),
           icon: ShieldCheck,
           badge: '45 SOPs',
           color: 'text-cyan-500'
@@ -234,4 +234,3 @@ export const LeftSidebarNav: React.FC<LeftSidebarNavProps> = ({
     </aside>
   )
 }
-

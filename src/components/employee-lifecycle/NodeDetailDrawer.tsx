@@ -95,7 +95,7 @@ export const NodeDetailDrawer: React.FC<NodeDetailDrawerProps> = ({
             <div>
               <div className="flex items-center gap-2">
                 <span className="text-[10px] font-bold uppercase tracking-wider text-blue-400">
-                  {item.category.toUpperCase()} NODE SPECIFICATION
+                  {item.category.toUpperCase()} DETAIL
                 </span>
                 {sopNodeData?.sopBadge && (
                   <span className="px-2 py-0.5 text-[10px] font-bold bg-emerald-500/20 text-emerald-300 rounded border border-emerald-500/30">
@@ -312,9 +312,9 @@ export const NodeDetailDrawer: React.FC<NodeDetailDrawerProps> = ({
             <div className="flex items-center justify-between border-b border-slate-800 pb-2">
               <div className="flex items-center gap-1.5 text-xs font-semibold text-blue-400">
                 <Layout className="w-4 h-4 text-blue-400" />
-                <span>Mẫu Form nhập liệu sơ khảo UI Wireframe ({item.id})</span>
+                <span>Màn hình thao tác mẫu ({item.id})</span>
               </div>
-              <span className="text-[10px] text-slate-400 bg-slate-800 px-2 py-0.5 rounded font-mono">Form Schema</span>
+              <span className="text-[10px] text-slate-400 bg-slate-800 px-2 py-0.5 rounded font-mono">Form mẫu</span>
             </div>
 
             {item.uiFields && item.uiFields.length > 0 && (
@@ -335,7 +335,7 @@ export const NodeDetailDrawer: React.FC<NodeDetailDrawerProps> = ({
                 className="w-full flex items-center justify-center gap-2 py-2.5 px-4 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-semibold text-xs rounded-xl shadow-sm transition-all duration-200 transform hover:-translate-y-0.5 cursor-pointer"
               >
                 <Sparkles className="w-4 h-4" />
-                <span>🖥️ Mở Xem & Thao tác Form UI Sơ Khảo (Interactive Form Modal)</span>
+                <span>Mở màn hình thao tác mẫu</span>
                 <ArrowRight className="w-3.5 h-3.5" />
               </button>
             </div>
@@ -351,7 +351,7 @@ export const NodeDetailDrawer: React.FC<NodeDetailDrawerProps> = ({
             className="inline-flex items-center justify-center gap-1.5 px-3.5 py-2.5 sm:py-2 bg-blue-50 dark:bg-blue-950/50 text-blue-700 dark:text-blue-300 hover:bg-blue-100 dark:hover:bg-blue-900/50 rounded-xl text-xs font-semibold border border-blue-200 dark:border-blue-800 transition-colors cursor-pointer"
           >
             <Layout className="w-3.5 h-3.5" />
-            <span>Mở Form UI Sơ khảo</span>
+            <span>Mở màn hình mẫu</span>
           </button>
 
           <button

@@ -46,79 +46,79 @@ export const SystemOverviewDashboard: React.FC = () => {
       {/* TOP KPI STATS METRICS GRID */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
 
-        {/* METRIC 1: PIPELINE STAGES */}
+        {/* METRIC 1: HEADCOUNT FILL RATE */}
         <div
           onClick={() => navigateToTab('lifecycle', 'layer-2-lifecycle')}
           className="bg-white dark:bg-slate-900 border border-slate-200/90 dark:border-slate-800 rounded-2xl p-5 shadow-2xs hover:shadow-md transition-all duration-200 group cursor-pointer"
         >
           <div className="flex items-center justify-between mb-3">
             <span className="text-xs font-extrabold uppercase tracking-wider text-slate-500 dark:text-slate-400">
-              {language === 'vi' ? 'VÒNG ĐỜI NHÂN SỰ' : 'EMPLOYEE LIFECYCLE'}
+              {language === 'vi' ? 'LẤP ĐẦY ĐỊNH BIÊN' : 'HEADCOUNT FILL RATE'}
             </span>
             <div className="w-10 h-10 rounded-xl bg-blue-500/10 border border-blue-500/20 text-blue-600 dark:text-blue-400 flex items-center justify-center group-hover:scale-110 transition-transform">
               <Layers className="w-5 h-5" />
             </div>
           </div>
           <div className="flex items-baseline gap-2 mb-1">
-            <span className="text-2xl font-black text-slate-900 dark:text-white">7/7</span>
+            <span className="text-2xl font-black text-slate-900 dark:text-white">92%</span>
             <span className="text-xs font-bold text-emerald-600 dark:text-emerald-400 flex items-center gap-0.5">
-              <TrendingUp className="w-3.5 h-3.5" /> 100% SOP
+              <TrendingUp className="w-3.5 h-3.5" /> 8 stages
             </span>
           </div>
           <p className="text-xs text-slate-500 dark:text-slate-400 line-clamp-1">
-            {language === 'vi' ? 'Xem chi tiết Tầng 2 Vòng đời' : 'View Layer 2 Lifecycle Details'}
+            {language === 'vi' ? 'Theo dõi từ LIFE-00 Định biên đến LIFE-07 Thôi việc' : 'Track LIFE-00 planning through LIFE-07 offboarding'}
           </p>
         </div>
 
-        {/* METRIC 2: MASTER DATA CATALOGS */}
+        {/* METRIC 2: PROBATION PASS RATE */}
         <div
           onClick={() => navigateToTab('masterdata', 'layer-1-master-data')}
           className="bg-white dark:bg-slate-900 border border-slate-200/90 dark:border-slate-800 rounded-2xl p-5 shadow-2xs hover:shadow-md transition-all duration-200 group cursor-pointer"
         >
           <div className="flex items-center justify-between mb-3">
             <span className="text-xs font-extrabold uppercase tracking-wider text-slate-500 dark:text-slate-400">
-              {language === 'vi' ? 'MASTER DATA TẦNG 1' : 'LAYER 1 MASTER DATA'}
+              {language === 'vi' ? 'ĐẠT THỬ VIỆC' : 'PROBATION PASS RATE'}
             </span>
             <div className="w-10 h-10 rounded-xl bg-purple-500/10 border border-purple-500/20 text-purple-600 dark:text-purple-400 flex items-center justify-center group-hover:scale-110 transition-transform">
               <Database className="w-5 h-5" />
             </div>
           </div>
           <div className="flex items-baseline gap-2 mb-1">
-            <span className="text-2xl font-black text-slate-900 dark:text-white">10</span>
+            <span className="text-2xl font-black text-slate-900 dark:text-white">86%</span>
             <span className="text-xs font-bold text-purple-600 dark:text-purple-400">
-              G01 - G08 Groups
+              KPI + contract gate
             </span>
           </div>
           <p className="text-xs text-slate-500 dark:text-slate-400 line-clamp-1">
-            {language === 'vi' ? 'Xem chi tiết Tầng 1 Master Data' : 'View Layer 1 Master Data Details'}
+            {language === 'vi' ? 'Mở dữ liệu nền chi phối hợp đồng, KPI và hồ sơ' : 'Open master data behind contracts, KPI and profiles'}
           </p>
         </div>
 
-        {/* METRIC 3: OPERATIONAL GRID MODULES */}
+        {/* METRIC 3: TURNOVER RATE */}
         <div
           onClick={() => navigateToTab('lifecycle', 'layer-3-operations')}
           className="bg-white dark:bg-slate-900 border border-slate-200/90 dark:border-slate-800 rounded-2xl p-5 shadow-2xs hover:shadow-md transition-all duration-200 group cursor-pointer"
         >
           <div className="flex items-center justify-between mb-3">
             <span className="text-xs font-extrabold uppercase tracking-wider text-slate-500 dark:text-slate-400">
-              {language === 'vi' ? 'LƯỚI VẬN HÀNH TẦNG 3' : 'LAYER 3 OPERATIONAL GRID'}
+              {language === 'vi' ? 'BIẾN ĐỘNG NHÂN SỰ' : 'TURNOVER RATE'}
             </span>
             <div className="w-10 h-10 rounded-xl bg-amber-500/10 border border-amber-500/20 text-amber-600 dark:text-amber-400 flex items-center justify-center group-hover:scale-110 transition-transform">
               <GitBranch className="w-5 h-5" />
             </div>
           </div>
           <div className="flex items-baseline gap-2 mb-1">
-            <span className="text-2xl font-black text-slate-900 dark:text-white">8</span>
+            <span className="text-2xl font-black text-slate-900 dark:text-white">3.8%</span>
             <span className="text-xs font-bold text-amber-600 dark:text-amber-400">
-              {language === 'vi' ? 'Modules Nghiệp vụ' : 'Business Modules'}
+              {language === 'vi' ? 'Theo kỳ tháng' : 'Monthly'}
             </span>
           </div>
           <p className="text-xs text-slate-500 dark:text-slate-400 line-clamp-1">
-            {language === 'vi' ? 'Xem chi tiết Lưới vận hành Tầng 3' : 'View Layer 3 Operational Grid'}
+            {language === 'vi' ? 'Xem các nghiệp vụ phát sinh: phép, OT, điều chuyển, thôi việc' : 'View operations: leave, OT, movement and offboarding'}
           </p>
         </div>
 
-        {/* METRIC 4: INTEGRATED SOPS & BUSINESS RULES */}
+        {/* METRIC 4: PEOPLE COST CONTROL */}
         <div
           onClick={() => {
             const el = document.getElementById('coverage-wheel')
@@ -128,20 +128,20 @@ export const SystemOverviewDashboard: React.FC = () => {
         >
           <div className="flex items-center justify-between mb-3">
             <span className="text-xs font-extrabold uppercase tracking-wider text-slate-500 dark:text-slate-400">
-              SOP SPECS & RULES
+              {language === 'vi' ? 'KIỂM SOÁT PEOPLE COST' : 'PEOPLE COST CONTROL'}
             </span>
             <div className="w-10 h-10 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-600 dark:text-emerald-400 flex items-center justify-center group-hover:scale-110 transition-transform">
               <ShieldCheck className="w-5 h-5" />
             </div>
           </div>
           <div className="flex items-baseline gap-2 mb-1">
-            <span className="text-2xl font-black text-slate-900 dark:text-white">45</span>
+            <span className="text-2xl font-black text-slate-900 dark:text-white">97%</span>
             <span className="text-xs font-bold text-emerald-600 dark:text-emerald-400">
-              SOPs (EMP/ATT/INS/PAY/TAX)
+              {language === 'vi' ? 'Trong ngân sách' : 'Within budget'}
             </span>
           </div>
           <p className="text-xs text-slate-500 dark:text-slate-400 line-clamp-1">
-            {language === 'vi' ? '20 Quy tắc Nghiệp vụ (BR) & 26 Cảnh báo tự động' : '20 Business Rules (BR) & 26 Automated Alerts'}
+            {language === 'vi' ? 'Theo dõi lương, BHXH, phụ cấp và trần định biên' : 'Payroll, insurance, allowance and headcount cap tracking'}
           </p>
         </div>
       </div>
@@ -153,8 +153,8 @@ export const SystemOverviewDashboard: React.FC = () => {
             <Activity className="w-4 h-4 text-blue-600 dark:text-blue-400" />
             <span>
               {language === 'vi'
-                ? 'TỶ LỆ PHỦ ĐẶC TẢ SOP THEO CÁC PHÂN HỆ DOANH NGHIỆP'
-                : 'SOP SPECIFICATION COVERAGE BY BUSINESS MODULES'}
+                ? 'BẢN ĐỒ ĐỘ PHỦ SOP & DÒNG DỮ LIỆU THEO PHÂN HỆ'
+                : 'SOP COVERAGE & DATA FLOW MAP BY BUSINESS MODULES'}
             </span>
           </h3>
 
@@ -199,7 +199,7 @@ export const SystemOverviewDashboard: React.FC = () => {
             </div>
 
             <span className="hidden md:flex text-xs font-bold text-emerald-600 dark:text-emerald-400 items-center gap-1">
-              <CheckCircle2 className="w-3.5 h-3.5" /> 50/50 SOPs Specs Integrated
+              <CheckCircle2 className="w-3.5 h-3.5" /> 45 SOPs + 8 lifecycle stages
             </span>
 
             {/* Collapse / Expand Dropdown Button */}
@@ -244,7 +244,7 @@ export const SystemOverviewDashboard: React.FC = () => {
             {/* Modal Header */}
             <div className="flex items-center justify-between p-4 border-b border-slate-200 dark:border-slate-800">
               <h3 className="text-sm font-extrabold text-slate-900 dark:text-white uppercase">
-                {activeModal === 'lifecycle' && (language === 'vi' ? '7 Bước Vòng Đời Nhân Sự' : '7 Steps of Employee Lifecycle')}
+                {activeModal === 'lifecycle' && (language === 'vi' ? '8 Giai Đoạn Vòng Đời Nhân Sự' : '8 Stages of Employee Lifecycle')}
                 {activeModal === 'modules' && (language === 'vi' ? '8 Modules Nghiệp Vụ' : '8 Operational Modules')}
                 {activeModal === 'sops' && (language === 'vi' ? 'Tổng Hợp 45 Quy Trình (SOPs)' : '45 Integrated SOPs')}
               </h3>
@@ -263,12 +263,13 @@ export const SystemOverviewDashboard: React.FC = () => {
               {activeModal === 'lifecycle' && (
                 <ul className="space-y-2">
                   {[
+                    { id: 0, name: 'Định biên & Ngân sách nhân sự', nameEn: 'Headcount & People Cost Planning' },
                     { id: 1, name: 'Tuyển dụng', nameEn: 'Recruitment' },
                     { id: 2, name: 'Tiếp nhận & Hội nhập', nameEn: 'Onboarding' },
                     { id: 3, name: 'Quản lý Hồ sơ & Hợp đồng', nameEn: 'Profile & Contract' },
                     { id: 4, name: 'Đào tạo & Đánh giá', nameEn: 'Training & Evaluation' },
                     { id: 5, name: 'Lương, Thưởng & Phúc lợi', nameEn: 'C&B / Payroll' },
-                    { id: 6, name: 'Khen thưởng & Kỷ luật', nameEn: 'Rewards & Discipline' },
+                    { id: 6, name: 'Chấm công & Phúc lợi', nameEn: 'Attendance & Benefits' },
                     { id: 7, name: 'Thuyên chuyển & Thôi việc', nameEn: 'Movements & Offboarding' }
                   ].map((step) => (
                     <li key={step.id} className="flex items-center gap-3 p-3 rounded-xl bg-slate-50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-800">

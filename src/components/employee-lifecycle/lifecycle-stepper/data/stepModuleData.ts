@@ -1,6 +1,21 @@
 import type { ModuleInfo, ModuleFilterOption } from '../types'
 
 export const STEP_MODULE_MAP: Record<string, ModuleInfo> = {
+  'LIFE-00': {
+    name: 'Hoạch định định biên',
+    nameEn: 'Workforce Planning',
+    code: 'HCP',
+    color: 'text-cyan-700 dark:text-cyan-300',
+    bg: 'bg-cyan-50 dark:bg-cyan-950/90',
+    border: 'border-cyan-200 dark:border-cyan-800',
+    desc: 'Thiết lập định biên, ngân sách nhân sự và trần tuyển dụng trước khi phát sinh nhu cầu tuyển mới',
+    descEn: 'Set headcount budget, people cost plan and hiring caps before recruitment begins',
+    coModules: [
+      { name: 'Core EMP (Cơ cấu tổ chức)', nameEn: 'Core EMP (Org Structure)', bg: 'bg-blue-50 dark:bg-blue-950 text-blue-700 dark:text-blue-300', color: 'border-blue-200 dark:border-blue-800' },
+      { name: 'C&B (People Cost)', nameEn: 'C&B (People Cost)', bg: 'bg-amber-50 dark:bg-amber-950 text-amber-700 dark:text-amber-300', color: 'border-amber-200 dark:border-amber-800' },
+      { name: 'ATS (Hiring Cap)', nameEn: 'ATS (Hiring Cap)', bg: 'bg-indigo-50 dark:bg-indigo-950 text-indigo-700 dark:text-indigo-300', color: 'border-indigo-200 dark:border-indigo-800' }
+    ]
+  },
   'LIFE-01': {
     name: 'Phân hệ Tuyển dụng',
     nameEn: 'Recruitment Module',
@@ -104,8 +119,9 @@ export const STEP_MODULE_MAP: Record<string, ModuleInfo> = {
 
 export const MODULE_FILTER_OPTIONS: ModuleFilterOption[] = [
   { id: 'ALL', name: 'Tất cả Phân hệ', nameEn: 'All HR Modules', code: 'ALL' },
-  { id: 'REC', name: 'Tuyển dụng', nameEn: 'Recruitment', code: 'REC', stepIds: ['LIFE-01'] },
-  { id: 'EMP', name: 'Core EMP (Nhân sự)', nameEn: 'Personnel Core', code: 'EMP', stepIds: ['LIFE-01', 'LIFE-02', 'LIFE-03'] },
+  { id: 'HCP', name: 'Hoạch định định biên', nameEn: 'Workforce Planning', code: 'HCP', stepIds: ['LIFE-00'] },
+  { id: 'REC', name: 'Tuyển dụng', nameEn: 'Recruitment', code: 'REC', stepIds: ['LIFE-00', 'LIFE-01'] },
+  { id: 'EMP', name: 'Core EMP (Nhân sự)', nameEn: 'Personnel Core', code: 'EMP', stepIds: ['LIFE-00', 'LIFE-01', 'LIFE-02', 'LIFE-03'] },
   { id: 'CON', name: 'Hợp đồng & Pháp lý', nameEn: 'Contract & Legal', code: 'CON', stepIds: ['LIFE-02', 'LIFE-04'] },
   { id: 'C&B', name: 'C&B Lương & BHXH', nameEn: 'C&B & Insurance', code: 'C&B', stepIds: ['LIFE-04', 'LIFE-05', 'LIFE-06', 'LIFE-07'] },
   { id: 'ATT', name: 'Chấm công (ATT)', nameEn: 'Attendance', code: 'ATT', stepIds: ['LIFE-03', 'LIFE-06'] },

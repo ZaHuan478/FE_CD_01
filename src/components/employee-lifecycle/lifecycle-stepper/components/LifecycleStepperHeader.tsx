@@ -18,10 +18,10 @@ export const LifecycleStepperHeader: React.FC<LifecycleStepperHeaderProps> = ({
       <div>
         <div className="flex flex-wrap items-center gap-2 mb-1">
           <span className="px-2.5 py-0.5 text-[11px] font-bold uppercase tracking-wider text-blue-700 dark:text-blue-300 bg-blue-50 dark:bg-blue-950/80 rounded-md border border-blue-200/60 dark:border-blue-800">
-            Layer 2 · Main Pipeline Flow
+            Hành trình nhân sự · 8 giai đoạn
           </span>
           <span className="text-xs text-slate-500 dark:text-slate-400 font-medium">
-            {language === 'vi' ? '7 Bước Vòng đời Liên hoàn · Master-Detail Tương tác' : '7 Continuous Lifecycle Steps · Interactive Master-Detail'}
+            {language === 'vi' ? 'Từ định biên đến nghỉ việc, có hướng dẫn thao tác theo từng bước' : 'From workforce planning to offboarding, with step-by-step operating guidance'}
           </span>
         </div>
         <h2 className="text-base sm:text-lg font-bold text-slate-900 dark:text-white tracking-tight">

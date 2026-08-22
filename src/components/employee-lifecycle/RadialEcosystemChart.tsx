@@ -1,20 +1,55 @@
 import React, { useState, useRef, useEffect } from 'react'
+import { useSearchParams } from 'react-router-dom'
 import { FIVE_CORE_MODULES, type SopDetailItem } from './data/ecosystemModulesData.tsx'
 import { EcosystemRadialWheel } from './EcosystemRadialWheel'
 import { EcosystemSopWorkbench } from './EcosystemSopWorkbench'
 import { EcosystemSopDetail } from './EcosystemSopDetail'
 
 export const RadialEcosystemChart: React.FC = () => {
+  const [searchParams, setSearchParams] = useSearchParams()
+
+  const urlModule = searchParams.get('module')
+  const urlSop = searchParams.get('sop')
+  const urlStage = searchParams.get('stage')
+  const urlFilter = searchParams.get('type') as 'ALL' | 'N' | 'M' | 'A'
+
+  const initialModule = urlModule && FIVE_CORE_MODULES.some(m => m.id === urlModule) ? urlModule : 'emp'
+  const targetInitialMod = FIVE_CORE_MODULES.find(m => m.id === initialModule) || FIVE_CORE_MODULES[0]
+  const initialSop = urlSop && targetInitialMod.sopList.some(s => s.code === urlSop)
+    ? urlSop
+    : (initialModule === 'emp' ? 'SOP-EMP-02' : targetInitialMod.sopList[0]?.code || 'SOP-EMP-02')
+
   const [hoveredModuleId, setHoveredModuleId] = useState<string | null>(null)
-  const [selectedModuleId, setSelectedModuleId] = useState<string>('emp')
+  const [selectedModuleId, setSelectedModuleId] = useState<string>(initialModule)
   const [isSopListExpanded, setIsSopListExpanded] = useState<boolean>(true)
-  const [activeTypeFilter, setActiveTypeFilter] = useState<'ALL' | 'N' | 'M' | 'A'>('ALL')
-  const [selectedSopCode, setSelectedSopCode] = useState<string>('SOP-EMP-02')
-  const [selectedStageId, setSelectedStageId] = useState<string>('ALL')
+  const [activeTypeFilter, setActiveTypeFilter] = useState<'ALL' | 'N' | 'M' | 'A'>(urlFilter || 'ALL')
+  const [selectedSopCode, setSelectedSopCode] = useState<string>(initialSop)
+  const [selectedStageId, setSelectedStageId] = useState<string>(urlStage || 'ALL')
   const [isStageDropdownOpen, setIsStageDropdownOpen] = useState<boolean>(false)
   const [collapsedStages, setCollapsedStages] = useState<Record<string, boolean>>({})
 
   const stageDropdownRef = useRef<HTMLDivElement | null>(null)
+
+  // Sync state if browser Back / Forward is clicked
+  useEffect(() => {
+    const currentModule = searchParams.get('module')
+    const currentSop = searchParams.get('sop')
+    const currentStage = searchParams.get('stage')
+    const currentFilter = searchParams.get('type') as 'ALL' | 'N' | 'M' | 'A'
+
+    if (currentModule && currentModule !== selectedModuleId && FIVE_CORE_MODULES.some(m => m.id === currentModule)) {
+      setSelectedModuleId(currentModule)
+    }
+    if (currentSop && currentSop !== selectedSopCode) {
+      setSelectedSopCode(currentSop)
+    }
+    if (currentStage && currentStage !== selectedStageId) {
+      setSelectedStageId(currentStage)
+    }
+    if (currentFilter && currentFilter !== activeTypeFilter) {
+      setActiveTypeFilter(currentFilter)
+    }
+  }, [searchParams])
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -38,6 +73,7 @@ export const RadialEcosystemChart: React.FC = () => {
   const activeModuleId = hoveredModuleId || selectedModuleId
   const activeModule = FIVE_CORE_MODULES.find((m) => m.id === activeModuleId) || FIVE_CORE_MODULES[0]
 
+  // Automatically expand the stage containing selectedSopCode on module or SOP change
   useEffect(() => {
     if (activeModule.stages && activeModule.stages.length > 0) {
       const activeStageId = activeModule.stages.find(s => s.sopCodes.includes(selectedSopCode))?.stageId
@@ -47,7 +83,7 @@ export const RadialEcosystemChart: React.FC = () => {
       })
       setCollapsedStages(initialState)
     }
-  }, [activeModule.id])
+  }, [activeModule.id, selectedSopCode])
 
   const filteredSopList = activeModule.sopList.filter((item) => {
     if (activeTypeFilter === 'ALL') return true
@@ -63,13 +99,53 @@ export const RadialEcosystemChart: React.FC = () => {
     setSelectedModuleId(modId)
     setSelectedStageId('ALL')
     const targetMod = FIVE_CORE_MODULES.find((m) => m.id === modId) || FIVE_CORE_MODULES[0]
-    if (targetMod.sopList.length > 0) {
-      if (modId === 'emp') {
-        setSelectedSopCode('SOP-EMP-02')
-      } else {
-        setSelectedSopCode(targetMod.sopList[0].code)
-      }
+    let newSop = targetMod.sopList[0]?.code || 'SOP-EMP-02'
+    if (modId === 'emp') {
+      newSop = 'SOP-EMP-02'
     }
+    setSelectedSopCode(newSop)
+    setSearchParams(prev => {
+      const next = new URLSearchParams(prev)
+      next.set('module', modId)
+      next.set('sop', newSop)
+      next.delete('stage')
+      return next
+    }, { replace: true })
+  }
+
+  const handleSelectSop = (code: string) => {
+    setSelectedSopCode(code)
+    setSearchParams(prev => {
+      const next = new URLSearchParams(prev)
+      next.set('sop', code)
+      return next
+    }, { replace: true })
+  }
+
+  const handleSelectStageId = (stageId: string) => {
+    setSelectedStageId(stageId)
+    setSearchParams(prev => {
+      const next = new URLSearchParams(prev)
+      if (stageId === 'ALL') {
+        next.delete('stage')
+      } else {
+        next.set('stage', stageId)
+      }
+      return next
+    }, { replace: true })
+  }
+
+  const handleTypeFilterChange = (filter: 'ALL' | 'N' | 'M' | 'A') => {
+    setActiveTypeFilter(filter)
+    setSearchParams(prev => {
+      const next = new URLSearchParams(prev)
+      if (filter === 'ALL') {
+        next.delete('type')
+      } else {
+        next.set('type', filter)
+      }
+      return next
+    }, { replace: true })
   }
 
   return (
@@ -88,11 +164,11 @@ export const RadialEcosystemChart: React.FC = () => {
         isSopListExpanded={isSopListExpanded}
         setIsSopListExpanded={setIsSopListExpanded}
         activeTypeFilter={activeTypeFilter}
-        setActiveTypeFilter={setActiveTypeFilter}
+        setActiveTypeFilter={handleTypeFilterChange}
         filteredSopList={filteredSopList}
-        setSelectedSopCode={setSelectedSopCode}
+        setSelectedSopCode={handleSelectSop}
         selectedStageId={selectedStageId}
-        setSelectedStageId={setSelectedStageId}
+        setSelectedStageId={handleSelectStageId}
         isStageDropdownOpen={isStageDropdownOpen}
         setIsStageDropdownOpen={setIsStageDropdownOpen}
         stageDropdownRef={stageDropdownRef}

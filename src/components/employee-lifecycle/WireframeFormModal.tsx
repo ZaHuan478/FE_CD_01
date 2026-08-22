@@ -106,7 +106,7 @@ export const WireframeFormModal: React.FC<WireframeFormModalProps> = ({
             <div>
               <div className="flex items-center gap-2">
                 <span className="text-[10px] font-bold uppercase tracking-wider text-blue-400">
-                  FORM INTERACTIVE WIREFRAME MOCKUP
+                  MÀN HÌNH THAO TÁC MẪU
                 </span>
                 {item.sopIds && item.sopIds.length > 0 && (
                   <span className="px-2 py-0.5 text-[9px] font-mono font-bold bg-emerald-500/20 text-emerald-300 rounded border border-emerald-500/30">
@@ -115,7 +115,7 @@ export const WireframeFormModal: React.FC<WireframeFormModalProps> = ({
                 )}
               </div>
               <h3 className="text-base font-bold text-white leading-tight mt-0.5">
-                Mô phỏng Giao diện Form Thực tế: {item.title}
+                Màn hình thao tác mẫu: {item.title}
               </h3>
             </div>
           </div>
@@ -134,7 +134,7 @@ export const WireframeFormModal: React.FC<WireframeFormModalProps> = ({
           <div className="flex items-center gap-2">
             <ShieldCheck className="w-4 h-4 text-emerald-400 shrink-0" />
             <span>
-              Quy chuẩn Form tuân theo: <strong className="text-white">{item.sopTitles?.[0] || 'Quy trình Chuẩn HR SaaS Enterprise'}</strong>
+              Biểu mẫu này tuân theo: <strong className="text-white">{item.sopTitles?.[0] || 'Quy trình chuẩn HRMS'}</strong>
             </span>
           </div>
           <span className="hidden sm:inline-block text-[11px] font-mono text-slate-400 bg-slate-800/80 px-2 py-1 rounded border border-slate-700">
@@ -167,7 +167,7 @@ export const WireframeFormModal: React.FC<WireframeFormModalProps> = ({
           <div className="flex items-center justify-between pb-2 border-b border-slate-100">
             <div className="text-xs font-bold text-slate-500 uppercase tracking-wider flex items-center gap-1.5">
               <Sparkles className="w-3.5 h-3.5 text-blue-600" />
-              Các trường dữ liệu cần nhập (Input Wireframe Fields)
+              Thông tin cần nhập
             </div>
             <span className="text-xs text-slate-400 italic">* Các trường có dấu (*) là bắt buộc</span>
           </div>
@@ -280,7 +280,7 @@ export const WireframeFormModal: React.FC<WireframeFormModalProps> = ({
               className="flex-1 sm:flex-none inline-flex items-center justify-center gap-2 px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-xs font-semibold shadow-sm transition-all duration-200 transform hover:-translate-y-0.5 cursor-pointer"
             >
               <Save className="w-4 h-4" />
-              <span>Lưu & Phê duyệt Form</span>
+              <span>Lưu & gửi phê duyệt</span>
             </button>
           </div>
         </div>

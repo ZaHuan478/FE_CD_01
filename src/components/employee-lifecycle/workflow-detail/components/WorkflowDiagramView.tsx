@@ -47,7 +47,7 @@ export const WorkflowDiagramView: React.FC<WorkflowDiagramViewProps> = ({
               }`}>
               <GitBranch className="w-4 h-4 text-blue-600 dark:text-blue-400" />
               <span>
-                {language === 'vi' ? 'LƯU ĐỒ SƠ ĐỒ WORKFLOW:' : 'WORKFLOW FLOWCHART:'} {currentProcess.sopTitle}
+                {language === 'vi' ? 'Sơ đồ quy trình:' : 'Workflow diagram:'} {currentProcess.sopTitle}
               </span>
             </h3>
             <p className="text-xs text-slate-500 dark:text-slate-400 mt-1 leading-relaxed">
@@ -308,8 +308,8 @@ export const WorkflowDiagramView: React.FC<WorkflowDiagramViewProps> = ({
                 <FileText className="w-4 h-4" />
                 <span>
                   {language === 'vi'
-                    ? `Mở Form UI Wireframe cho bước ${currentStep.stepCode}`
-                    : `Open Form UI Wireframe for step ${currentStep.stepCode}`}
+                    ? `Mở màn hình thao tác mẫu cho bước ${currentStep.stepCode}`
+                    : `Open sample screen for step ${currentStep.stepCode}`}
                 </span>
               </button>
             </div>

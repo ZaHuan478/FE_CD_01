@@ -16,6 +16,7 @@ export interface ClusterConfig {
 }
 
 export const getStepIcon = (idOrCode: string) => {
+  if (idOrCode.includes('00') || idOrCode.endsWith('0')) return <Sparkles className="w-4 h-4" />
   if (idOrCode.includes('01') || idOrCode.endsWith('1')) return <UserPlus className="w-4 h-4" />
   if (idOrCode.includes('02') || idOrCode.endsWith('2')) return <FileCheck className="w-4 h-4" />
   if (idOrCode.includes('03') || idOrCode.endsWith('3')) return <MapPin className="w-4 h-4" />
@@ -27,6 +28,20 @@ export const getStepIcon = (idOrCode: string) => {
 }
 
 export const CLUSTERS: ClusterConfig[] = [
+  {
+    id: 'cluster-0',
+    title: 'HOẠCH ĐỊNH & ĐỊNH BIÊN',
+    badgeText: 'CỤM 0 · 1 BƯỚC',
+    stepIds: ['LIFE-00'],
+    stepNumbers: [0],
+    colSpan: 'lg:col-span-1',
+    subGridCols: 'grid-cols-1',
+    bgClass: 'bg-cyan-50/50 dark:bg-cyan-950/30',
+    borderClass: 'border-cyan-200/80 dark:border-cyan-900/50',
+    headerTextClass: 'text-cyan-900 dark:text-cyan-300',
+    headerBadgeClass: 'bg-cyan-100/80 dark:bg-cyan-900/60 text-cyan-800 dark:text-cyan-200 border-cyan-200/90 dark:border-cyan-800',
+    sopBadgeColor: 'bg-cyan-50 dark:bg-cyan-950/80 text-cyan-700 dark:text-cyan-300 border-cyan-200 dark:border-cyan-800 group-hover:bg-cyan-100'
+  },
   {
     id: 'cluster-1',
     title: 'TIẾP NHẬN & HỒ SƠ',

@@ -39,7 +39,7 @@ export const OperationsGrid: React.FC<OperationsGridProps> = ({
         <div>
           <div className="flex flex-wrap items-center gap-2 mb-1">
             <span className="px-2.5 py-0.5 text-[10px] sm:text-[11px] font-bold uppercase tracking-wider text-indigo-700 dark:text-indigo-300 bg-indigo-50 dark:bg-indigo-950/80 rounded-md border border-indigo-200/60 dark:border-indigo-800">
-              Layer 3 · Operations Grid
+              Vận hành nhân sự · 8 nhóm nghiệp vụ
             </span>
             <span className="text-[11px] sm:text-xs text-slate-500 dark:text-slate-400 font-medium">
               {language === 'vi' ? '8 Module Nghiệp vụ Phát sinh' : '8 Operational Modules'}

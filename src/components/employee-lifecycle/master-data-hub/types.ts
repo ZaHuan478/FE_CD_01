@@ -1,4 +1,4 @@
-export type CatalogTier = 'tier1_global' | 'tier2_module' | 'tier3_utility'
+export type CatalogTier = 'tier1_global' | 'tier2_module' | 'tier3_utility' | 'tier4_governance'
 
 export type CatalogModuleId =
   | 'global'
@@ -18,6 +18,34 @@ export interface CatalogFieldSchema {
   required: boolean
   description: string
   descriptionEn: string
+  validationRules?: string[]
+  lookupCatalogId?: string
+}
+
+export interface CatalogForeignKey {
+  field: string
+  targetCatalogId: string
+  targetField: string
+  relationship: 'many-to-one' | 'one-to-many' | 'one-to-one'
+  required?: boolean
+}
+
+export interface CatalogValidationConstraint {
+  id: string
+  field: string
+  type: 'required' | 'unique' | 'range' | 'regex' | 'enum' | 'cross_catalog' | 'cascade_filter'
+  rule: string
+  message: string
+}
+
+export interface CatalogRelationalRule {
+  id: string
+  title: string
+  sourceField: string
+  targetCatalogId: string
+  targetField: string
+  ruleType: 'lookup' | 'cascade' | 'range_guard' | 'blocking_dependency' | 'inheritance'
+  description: string
 }
 
 export interface CatalogSampleRecord {
@@ -49,4 +77,7 @@ export interface MasterCatalogItem {
   descriptionEn: string
   fields: CatalogFieldSchema[]
   sampleRecords: CatalogSampleRecord[]
+  foreignKeys?: CatalogForeignKey[]
+  validationConstraints?: CatalogValidationConstraint[]
+  relationalRules?: CatalogRelationalRule[]
 }

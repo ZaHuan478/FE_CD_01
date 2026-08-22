@@ -8,6 +8,7 @@ import {
   Building2,
   ListCheck,
   UserCheck,
+  CheckCircle2,
   Sun,
   Moon,
   ChevronDown,
@@ -155,14 +156,34 @@ export const WorkflowDetailPage: React.FC<WorkflowDetailPageProps> = ({
   const [selectedStepIdx, setSelectedStepIdx] = useState<number>(0)
 
   // Check if current process has a dedicated 5-stage Infographic Blueprint
-  const hasInfographic = ['LIFE-00', 'LIFE-01', 'LIFE-04', 'LIFE-05', 'LIFE-06', 'LIFE-07'].includes(item.id)
+  const hasInfographic = ['LIFE-00', 'LIFE-01', 'LIFE-02', 'LIFE-03', 'LIFE-04', 'LIFE-05', 'LIFE-06', 'LIFE-07'].includes(item.id)
 
   const [viewMode, setViewMode] = useState<'infographic' | 'diagram' | 'table'>(() => {
     if (location.pathname.startsWith('/employee-lifecycle/flowchart/')) return 'diagram'
     if (location.pathname.startsWith('/employee-lifecycle/infographic/')) return 'infographic'
-    if (['LIFE-00', 'LIFE-01', 'LIFE-04', 'LIFE-05', 'LIFE-06', 'LIFE-07'].includes(item.id)) return 'infographic'
+    if (['LIFE-00', 'LIFE-01', 'LIFE-02', 'LIFE-03', 'LIFE-04', 'LIFE-05', 'LIFE-06', 'LIFE-07'].includes(item.id)) return 'infographic'
     return 'diagram'
   })
+
+  const storyCards = [
+    {
+      title: language === 'vi' ? 'Khi nào dùng quy trình này?' : 'When to use this process',
+      icon: Building2,
+      text: item.process?.steps?.[0] || item.subtitle || currentProcess.description
+    },
+    {
+      title: language === 'vi' ? 'Hiểu đơn giản' : 'Plain-language summary',
+      icon: Sparkles,
+      text: language === 'vi'
+        ? `Quy trình này hướng dẫn ai cần làm gì, dữ liệu nào phải nhập, bước nào cần duyệt và hệ thống sẽ tự động cập nhật gì cho ${item.title}.`
+        : `This process shows who does what, which data must be entered, which approvals are needed, and what the system updates for ${item.title}.`
+    },
+    {
+      title: language === 'vi' ? 'Kết quả cuối cùng' : 'Final outcome',
+      icon: CheckCircle2,
+      text: item.outputs?.[0] || currentProcess.steps[currentProcess.steps.length - 1]?.description || currentProcess.description
+    }
+  ]
 
   // Sync state when location.pathname or item.id changes
   useEffect(() => {
@@ -255,13 +276,13 @@ export const WorkflowDetailPage: React.FC<WorkflowDetailPageProps> = ({
                 className="flex items-center gap-1.5 px-3.5 py-1.5 text-xs font-bold text-white bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 rounded-xl shadow-xs transition-all cursor-pointer shrink-0"
               >
                 <FileText className="w-4 h-4" />
-                <span className="hidden sm:inline">{t('common.viewWireframe', 'Xem Form UI')}</span>
+                <span className="hidden sm:inline">{t('common.viewWireframe', 'Mở màn hình mẫu')}</span>
               </button>
             )}
           </div>
         </div>
 
-        {/* WORKFLOW VIEW TABS (DIAGRAM vs ROLES & RACI vs SPECS TABLE) */}
+        {/* WORKFLOW VIEW TABS */}
         <div className="border-t border-slate-200/80 dark:border-slate-800/80 bg-slate-100/60 dark:bg-slate-950/60">
           <div className="w-[92%] max-w-[1920px] mx-auto px-2 sm:px-4 flex items-center justify-between gap-4 overflow-x-auto no-scrollbar py-1.5">
 
@@ -275,7 +296,7 @@ export const WorkflowDetailPage: React.FC<WorkflowDetailPageProps> = ({
                   }`}
               >
                 <Sparkles className="w-3.5 h-3.5 text-amber-500" />
-                <span>{t('workflow.tab.diagram', 'Sơ đồ Quy trình Trực quan')}</span>
+                <span>{t('workflow.tab.diagram', 'Sơ đồ quy trình')}</span>
               </button>
 
               <button
@@ -287,7 +308,7 @@ export const WorkflowDetailPage: React.FC<WorkflowDetailPageProps> = ({
                   }`}
               >
                 <UserCheck className="w-3.5 h-3.5 text-blue-500" />
-                <span>{t('workflow.tab.roles', 'Phân định Vai trò & RACI')}</span>
+                <span>{t('workflow.tab.roles', 'Vai trò & trách nhiệm')}</span>
               </button>
 
               <button
@@ -299,7 +320,7 @@ export const WorkflowDetailPage: React.FC<WorkflowDetailPageProps> = ({
                   }`}
               >
                 <ListCheck className="w-3.5 h-3.5 text-emerald-500" />
-                <span>{t('workflow.tab.specs', 'Bảng Đặc tả & Checklist')}</span>
+                <span>{t('workflow.tab.specs', 'Bảng kiểm & quy định')}</span>
               </button>
             </div>
 
@@ -313,6 +334,27 @@ export const WorkflowDetailPage: React.FC<WorkflowDetailPageProps> = ({
 
       {/* Main Workflow Workspace Content (92% Screen Width) */}
       <main className="w-[92%] max-w-[1920px] mx-auto px-2 sm:px-4 py-5 space-y-5">
+        <section className={`grid grid-cols-1 lg:grid-cols-3 gap-3 ${isDarkMode ? 'text-slate-100' : 'text-slate-800'}`}>
+          {storyCards.map((card) => {
+            const Icon = card.icon
+            return (
+              <div
+                key={card.title}
+                className={`rounded-2xl border p-4 shadow-2xs ${isDarkMode ? 'bg-slate-900 border-slate-800' : 'bg-white border-slate-200/90'}`}
+              >
+                <div className="flex items-center gap-2 mb-2">
+                  <Icon className="w-4 h-4 text-blue-600 dark:text-blue-400 shrink-0" />
+                  <h2 className="text-xs font-bold text-slate-900 dark:text-white">
+                    {card.title}
+                  </h2>
+                </div>
+                <p className="text-xs leading-relaxed text-slate-600 dark:text-slate-400 line-clamp-3">
+                  {card.text}
+                </p>
+              </div>
+            )
+          })}
+        </section>
 
         {/* TAB 1: SƠ ĐỒ QUY TRÌNH TRỰC QUAN (INFOGRAPHIC / FLOWCHART / COMPACT TABLE) */}
         {activeWorkflowTab === 'diagram' && (
@@ -374,7 +416,7 @@ export const WorkflowDetailPage: React.FC<WorkflowDetailPageProps> = ({
                   >
                     <Sparkles className="w-3.5 h-3.5 text-amber-500" />
                     <span>
-                      {language === 'vi' ? '🎨 Sơ đồ Infographic 5 Giai đoạn' : '🎨 5-Stage Infographic'}
+                      {language === 'vi' ? 'Sơ đồ 5 giai đoạn' : '5-stage visual guide'}
                     </span>
                   </button>
                 )}
@@ -390,7 +432,7 @@ export const WorkflowDetailPage: React.FC<WorkflowDetailPageProps> = ({
                   <GitBranch className="w-3.5 h-3.5 text-blue-500" />
                   <span>
                     {language === 'vi'
-                      ? `Sơ đồ Flowchart (${currentProcess.steps.length} Bước)`
+                      ? `Sơ đồ quy trình (${currentProcess.steps.length} bước)`
                       : `Flowchart (${currentProcess.steps.length} Steps)`}
                   </span>
                 </button>
@@ -405,7 +447,7 @@ export const WorkflowDetailPage: React.FC<WorkflowDetailPageProps> = ({
                 >
                   <ListCheck className="w-3.5 h-3.5 text-emerald-500" />
                   <span>
-                    {language === 'vi' ? 'Bảng SOP Specs' : 'SOP Specs Table'}
+                    {language === 'vi' ? 'Bảng kiểm & quy định' : 'Checklist & rules'}
                   </span>
                 </button>
               </div>
@@ -419,6 +461,7 @@ export const WorkflowDetailPage: React.FC<WorkflowDetailPageProps> = ({
             {viewMode === 'infographic' && (
               <SopInfographicFlowView
                 sopCode={currentProcess.sopCode}
+                workflowId={item.id}
                 isDarkMode={isDarkMode}
                 onOpenWireframe={onOpenWireframe ? () => onOpenWireframe(item) : undefined}
               />

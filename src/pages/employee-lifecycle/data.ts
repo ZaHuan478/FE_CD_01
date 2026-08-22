@@ -480,7 +480,7 @@ export const masterData: BusinessNode[] = [
 ]
 
 export const lifecycleProcesses: BusinessNode[] = [
-  'LIFE-01', 'LIFE-02', 'LIFE-03', 'LIFE-04', 'LIFE-05', 'LIFE-06', 'LIFE-07'
+  'LIFE-00', 'LIFE-01', 'LIFE-02', 'LIFE-03', 'LIFE-04', 'LIFE-05', 'LIFE-06', 'LIFE-07'
 ].map(id => {
   const node = lifecycleMockNodes[id]
   return {
@@ -646,6 +646,7 @@ export const relationships: Relationship[] = [
   { source: 'MD-09', target: 'LIFE-05', type: 'used-by' },
   { source: 'MD-10', target: 'LIFE-06', type: 'used-by' },
   { source: 'MD-10', target: 'CROSS-04', type: 'used-by' },
+  { source: 'LIFE-00', target: 'LIFE-01', type: 'feeds' },
   { source: 'LIFE-01', target: 'LIFE-02', type: 'feeds' },
   { source: 'LIFE-02', target: 'LIFE-03', type: 'feeds' },
   { source: 'LIFE-03', target: 'LIFE-04', type: 'feeds' },

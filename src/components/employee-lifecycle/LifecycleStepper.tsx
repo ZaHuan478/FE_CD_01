@@ -69,7 +69,7 @@ export const LifecycleStepper: React.FC<LifecycleStepperProps> = ({
       {/* EXPANDABLE PIPELINE CONTENT */}
       {isExpanded && (
         <div className="pt-1 animate-fadeIn space-y-5">
-          {/* 7-Step Horizontal Pipeline & 3 Cluster Containers */}
+          {/* 8-Stage Horizontal Pipeline & Cluster Containers */}
           <LifecycleClusterGrid
             steps={steps}
             previewStepId={previewStepId}
@@ -93,7 +93,7 @@ export const LifecycleStepper: React.FC<LifecycleStepperProps> = ({
           {/* Footer Note */}
           <div className="text-center pt-2 border-t border-slate-100 dark:border-slate-800/80">
             <p className="text-xs text-slate-400 dark:text-slate-500 font-medium italic">
-              * Bấm chọn bất kỳ bước nào trong 7 bước phía trên để xem nhanh Dữ liệu Đầu vào, Đầu ra và Phân hệ liên quan.
+              * Bấm chọn bất kỳ giai đoạn nào trong 8 giai đoạn phía trên để xem nhanh Dữ liệu Đầu vào, Đầu ra và Phân hệ liên quan.
             </p>
           </div>
         </div>

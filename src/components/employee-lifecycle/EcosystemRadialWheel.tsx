@@ -62,7 +62,7 @@ export const EcosystemRadialWheel: React.FC<EcosystemRadialWheelProps> = ({
             HRMS 6 CORE MODULES
           </h3>
           <span className="text-[8px] sm:text-[10px] md:text-[11px] font-bold text-blue-600 dark:text-blue-400 uppercase tracking-widest mt-1 sm:mt-1.5">
-            50/50 SOP Specs
+            45 Quy trình
           </span>
 
           <p className="text-[10px] md:text-xs text-slate-500 dark:text-slate-400 mt-1 md:mt-2 line-clamp-2 leading-tight hidden sm:block">

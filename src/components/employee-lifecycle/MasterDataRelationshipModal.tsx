@@ -231,7 +231,7 @@ export const MasterDataRelationshipModal: React.FC<MasterDataRelationshipModalPr
 
                 <div className="relative z-10 mt-6 pt-4 border-t border-slate-800/80 text-center">
                   <span className="text-[11px] text-slate-400 font-medium">
-                    ✦ Sẵn sàng cung cấp dữ liệu chuẩn SOP cho 7 bước Vòng đời Nhân viên (Tầng 2)
+                    ✦ Sẵn sàng cung cấp dữ liệu chuẩn SOP cho 8 giai đoạn Vòng đời Nhân viên (Tầng 2)
                   </span>
                 </div>
               </div>
@@ -258,4 +258,3 @@ export const MasterDataRelationshipModal: React.FC<MasterDataRelationshipModalPr
     </div>
   )
 }
-

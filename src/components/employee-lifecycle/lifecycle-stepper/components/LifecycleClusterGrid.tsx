@@ -23,8 +23,8 @@ export const LifecycleClusterGrid: React.FC<LifecycleClusterGridProps> = ({
         {/* Horizontal Connecting Timeline passing across all cards */}
         <div className="absolute top-[110px] left-[55px] right-[55px] h-[3px] bg-slate-300/80 dark:bg-slate-800 z-0 hidden lg:block rounded-full" />
 
-        {/* 7-Column Layout Wrapping the 3 Cluster Grouping Containers */}
-        <div className="grid grid-cols-7 gap-3 sm:gap-4 relative z-10 items-stretch">
+        {/* 8-Column Layout Wrapping the Cluster Grouping Containers */}
+        <div className="grid grid-cols-8 gap-3 sm:gap-4 relative z-10 items-stretch">
           {CLUSTERS.map((cluster) => {
             const clusterSteps = steps.filter((s) =>
               cluster.stepIds.includes(s.id)

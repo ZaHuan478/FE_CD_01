@@ -27,10 +27,18 @@ export const EmployeeLifecyclePage: React.FC = () => {
   const { id: routeId } = useParams<{ id?: string }>()
   const location = useLocation()
   const navigate = useNavigate()
-
   const [searchParams, setSearchParams] = useSearchParams()
-  const initialTab = (searchParams.get('tab') as 'lifecycle' | 'masterdata' | 'reports') || 'lifecycle'
-  const [activeTab, setActiveTab] = useState<'lifecycle' | 'masterdata' | 'reports'>(initialTab)
+
+  const getTabFromLocation = useCallback((): 'lifecycle' | 'masterdata' | 'reports' => {
+    if (location.pathname.includes('/employee-lifecycle/masterdata')) return 'masterdata'
+    if (location.pathname.includes('/employee-lifecycle/reports') || location.pathname.includes('/employee-lifecycle/workbench')) return 'reports'
+    if (location.pathname.includes('/employee-lifecycle/lifecycle')) return 'lifecycle'
+    const tabParam = searchParams.get('tab') as 'lifecycle' | 'masterdata' | 'reports'
+    if (tabParam && ['lifecycle', 'masterdata', 'reports'].includes(tabParam)) return tabParam
+    return 'lifecycle'
+  }, [location.pathname, searchParams])
+
+  const [activeTab, setActiveTab] = useState<'lifecycle' | 'masterdata' | 'reports'>(getTabFromLocation)
   const [isGuideModalOpen, setIsGuideModalOpen] = useState(false)
 
   const [activeSection, setActiveSection] = useState('layer-2-lifecycle')
@@ -50,15 +58,15 @@ export const EmployeeLifecyclePage: React.FC = () => {
     window.scrollTo({ top: 0, behavior: 'smooth' })
   }
 
-  // Effect to sync URL back to state if navigate() is called from child components
+  // Effect to sync URL back to state if navigate() or back button is called
   useEffect(() => {
-    const tabFromUrl = searchParams.get('tab') as 'lifecycle' | 'masterdata' | 'reports'
+    const tabFromUrl = getTabFromLocation()
     if (tabFromUrl && tabFromUrl !== activeTab) {
       startTransition(() => {
         setActiveTab(tabFromUrl)
       })
     }
-  }, [searchParams, activeTab])
+  }, [getTabFromLocation, activeTab])
 
   // Effect to scroll to hash target after tab or hash change
   useEffect(() => {
@@ -418,7 +426,7 @@ export const EmployeeLifecyclePage: React.FC = () => {
                 <Layers className="w-4 h-4" />
                 <span>{t('tabs.lifecycle', 'Vòng đời Nhân sự')}</span>
                 <span className="px-1.5 py-0.2 text-[10px] rounded-md bg-white/20 text-white font-mono">
-                  7 Bước
+                  8 Giai đoạn
                 </span>
               </button>
 
