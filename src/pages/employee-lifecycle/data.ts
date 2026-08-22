@@ -495,8 +495,8 @@ export const lifecycleProcesses: BusinessNode[] = [
       status: 'official',
       phase: 'Lifecycle'
     },
-    inputs: node.inputs.map(inp => ({ name: inp, source: 'SOP Standard', sourceType: 'manual' })),
-    outputs: node.outputs.map(out => ({ name: out, source: 'HRM Core Engine', sourceType: 'system' })),
+    inputs: node.inputs.map((inp: string) => ({ name: inp, source: 'SOP Standard', sourceType: 'manual' })),
+    outputs: node.outputs.map((out: string) => ({ name: out, source: 'HRM Core Engine', sourceType: 'system' })),
     actors: [
       { name: node.actorsMatrix.proposer, role: 'Đề xuất', action: 'Kích hoạt' },
       { name: node.actorsMatrix.approver, role: 'Phê duyệt', action: 'Thẩm định' },
@@ -533,8 +533,8 @@ export const crossFunctionalProcesses: BusinessNode[] = [
       status: 'official',
       phase: 'Cross Functional'
     },
-    inputs: node.inputs.map(inp => ({ name: inp, source: 'SOP Operations', sourceType: 'manual' })),
-    outputs: node.outputs.map(out => ({ name: out, source: 'HRM Core Engine', sourceType: 'system' })),
+    inputs: node.inputs.map((inp: string) => ({ name: inp, source: 'SOP Operations', sourceType: 'manual' })),
+    outputs: node.outputs.map((out: string) => ({ name: out, source: 'HRM Core Engine', sourceType: 'system' })),
     actors: [
       { name: node.actorsMatrix.proposer, role: 'Đề xuất', action: 'Kích hoạt' },
       { name: node.actorsMatrix.approver, role: 'Phê duyệt', action: 'Thẩm định' },
@@ -655,7 +655,44 @@ export const relationships: Relationship[] = [
 ]
 
 export function findNodeById(nodeId: string): BusinessNode | undefined {
-  return allBusinessNodes.find((node) => node.id === nodeId)
+  const found = allBusinessNodes.find((node) => node.id === nodeId)
+  if (found) return found
+  if (nodeId === 'LIFE-00' && lifecycleMockNodes['LIFE-00']) {
+    const node = lifecycleMockNodes['LIFE-00']
+    return {
+      id: node.id,
+      type: 'lifecycle',
+      code: node.code,
+      title: node.title,
+      subtitle: node.subtitle,
+      overview: {
+        purpose: node.contextTrigger,
+        description: node.subtitle,
+        status: 'official',
+        phase: 'Lifecycle'
+      },
+      inputs: node.inputs.map((inp: string) => ({ name: inp, source: 'SOP Standard', sourceType: 'manual' })),
+      outputs: node.outputs.map((out: string) => ({ name: out, source: 'HRM Core Engine', sourceType: 'system' })),
+      actors: [
+        { name: node.actorsMatrix.proposer, role: 'Đề xuất', action: 'Kích hoạt' },
+        { name: node.actorsMatrix.approver, role: 'Phê duyệt', action: 'Thẩm định' },
+        { name: node.actorsMatrix.executor, role: 'Thực thi', action: 'Xử lý hệ thống' }
+      ],
+      masterDataIds: ['MD-05', 'MD-06'],
+      sopIds: node.sopIds,
+      process: node.process,
+      wireframe: {
+        title: node.title,
+        fields: node.uiFields,
+        actions: ['Hủy', 'Lưu', 'Tiếp tục']
+      },
+      source: {
+        note: node.process.source,
+        status: 'official'
+      }
+    }
+  }
+  return undefined
 }
 
 export function getNodeLabel(node: BusinessNode): string {

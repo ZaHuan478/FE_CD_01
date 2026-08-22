@@ -2,6 +2,67 @@ import type { RoleDataFlow } from '../types'
 
 // Role-based Input -> Output Flow Mapping Dictionary
 export const ROLE_FLOW_DATABASE: Record<string, RoleDataFlow[]> = {
+  'LIFE-00': [
+    {
+      roleType: 'candidate',
+      roleTitle: 'Góc nhìn Trưởng bộ phận (Department Head Perspective)',
+      actorLabel: '👔 Trưởng bộ phận (TBP)',
+      badgeColorLight: 'bg-blue-100 text-blue-800 border-blue-300',
+      badgeColorDark: 'bg-blue-500/20 text-blue-300 border-blue-500/30',
+      bgLight: 'bg-blue-50/40',
+      bgDark: 'bg-blue-950/20',
+      borderLight: 'border-blue-200/80',
+      borderDark: 'border-blue-800/60',
+      inputs: {
+        title: 'TBP Lập kế hoạch & Khai báo gì? (Headcount Inputs)',
+        description: 'Thông tin xây dựng định biên nhân sự phòng ban cho năm kế tiếp.',
+        items: [
+          'Năm kế hoạch định biên & Phòng ban phụ trách',
+          'Danh mục Chức vụ & Cấp bậc (Job Grade Level)',
+          'Nhu cầu nhân sự chi tiết 12 tháng',
+          'Mức thu nhập & Chi phí nhân sự dự kiến (People Cost)'
+        ]
+      },
+      outputs: {
+        title: 'TBP Nhận được gì? (Headcount Outputs)',
+        description: 'Kết quả phê duyệt và định biên chính thức làm cơ sở tuyển dụng.',
+        items: [
+          'Bản định biên phòng ban được BOD phê duyệt chính thức',
+          'Chỉ tiêu và hạn mức mở Yêu cầu tuyển dụng mới trong năm',
+          'Báo cáo tổng hợp chi phí nhân sự phòng ban'
+        ]
+      }
+    },
+    {
+      roleType: 'hr',
+      roleTitle: 'Góc nhìn HRBP, C&B & BOD (HR & BOD Governance)',
+      actorLabel: '💼 HRBP / C&B / Ban Giám Đốc (BOD)',
+      badgeColorLight: 'bg-emerald-100 text-emerald-800 border-emerald-300',
+      badgeColorDark: 'bg-emerald-500/20 text-emerald-300 border-emerald-500/30',
+      bgLight: 'bg-emerald-50/40',
+      bgDark: 'bg-emerald-950/20',
+      borderLight: 'border-emerald-200/80',
+      borderDark: 'border-emerald-800/60',
+      inputs: {
+        title: 'HR & BOD Thẩm định & Phê duyệt gì?',
+        description: 'Tham vấn tính khả thi, cân đối ngân sách và phê duyệt chính sách.',
+        items: [
+          'Kế hoạch định biên đệ trình từ các phòng ban',
+          'Khung ngân sách chi phí nhân sự năm của công ty',
+          'Đánh giá tính hợp lý và xu hướng biến động nhân sự'
+        ]
+      },
+      outputs: {
+        title: 'Kết quả Hệ thống HRM cập nhật tự động',
+        description: 'Khóa trần định biên và đồng bộ dữ liệu vào hệ thống Master Data.',
+        items: [
+          'Cập nhật hạn mức định biên vào Master Data (MD-05/MD-06)',
+          'Thiết lập màng lọc kiểm soát tuyển dụng tự động (ATS Filter)',
+          'Báo cáo phân bổ chi phí People Cost toàn công ty'
+        ]
+      }
+    }
+  ],
   'LIFE-01': [
     {
       roleType: 'candidate',

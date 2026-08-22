@@ -7,7 +7,8 @@ import {
   SalaryPromotionFlow,
   OffboardingHandoverFlow,
   OvertimeManagementFlow,
-  LeaveManagementFlow
+  LeaveManagementFlow,
+  HeadcountBudgetFlow
 } from './infographic-flow'
 
 interface SopInfographicFlowViewProps {
@@ -24,12 +25,13 @@ export const SopInfographicFlowView: React.FC<SopInfographicFlowViewProps> = ({
   const [activeStageTab, setActiveStageTab] = useState<number>(0) // 0: All, 1..5: Specific stage
 
   // Identify Active SOP Workflow
-  const isRecruitmentProcess = sopCode.includes('REC') || sopCode.includes('SOP-TD') || sopCode.includes('EMP01') || sopCode.includes('EMP02') || sopCode.includes('LIFE-01')
-  const isProbationProcess = !isRecruitmentProcess && (sopCode.includes('PROB') || sopCode.includes('EVAL') || sopCode.includes('EMP05') || sopCode.includes('EMP06') || sopCode.includes('LIFE-04') || sopCode.includes('SOP-NS-06'))
-  const isPromotionProcess = !isRecruitmentProcess && !isProbationProcess && (sopCode.includes('PROM') || sopCode.includes('EMP08') || sopCode.includes('EMP11') || sopCode.includes('LIFE-05') || sopCode.includes('LIFE-03') || sopCode.includes('SOP-NS-09'))
-  const isOffboardingProcess = !isRecruitmentProcess && !isProbationProcess && !isPromotionProcess && (sopCode.includes('OFF') || sopCode.includes('EMP15') || sopCode.includes('LIFE-07') || sopCode.includes('SOP-NS-16'))
-  const isOvertimeProcess = !isRecruitmentProcess && !isProbationProcess && !isPromotionProcess && !isOffboardingProcess && (sopCode.includes('ATT01') || sopCode.includes('SOP-CC-02') || sopCode.includes('OT'))
-  const isLeaveProcess = !isRecruitmentProcess && !isProbationProcess && !isPromotionProcess && !isOffboardingProcess && !isOvertimeProcess
+  const isHeadcountProcess = sopCode.includes('EMP01')
+  const isRecruitmentProcess = !isHeadcountProcess && (sopCode.includes('REC') || sopCode.includes('SOP-TD') || sopCode.includes('EMP02') || sopCode.includes('LIFE-01'))
+  const isProbationProcess = !isHeadcountProcess && !isRecruitmentProcess && (sopCode.includes('PROB') || sopCode.includes('EVAL') || sopCode.includes('EMP05') || sopCode.includes('EMP06') || sopCode.includes('LIFE-04') || sopCode.includes('SOP-NS-06'))
+  const isPromotionProcess = !isHeadcountProcess && !isRecruitmentProcess && !isProbationProcess && (sopCode.includes('PROM') || sopCode.includes('EMP08') || sopCode.includes('EMP11') || sopCode.includes('LIFE-05') || sopCode.includes('LIFE-03') || sopCode.includes('SOP-NS-09'))
+  const isOffboardingProcess = !isHeadcountProcess && !isRecruitmentProcess && !isProbationProcess && !isPromotionProcess && (sopCode.includes('OFF') || sopCode.includes('EMP15') || sopCode.includes('LIFE-07') || sopCode.includes('SOP-NS-16'))
+  const isOvertimeProcess = !isHeadcountProcess && !isRecruitmentProcess && !isProbationProcess && !isPromotionProcess && !isOffboardingProcess && (sopCode.includes('ATT01') || sopCode.includes('SOP-CC-02') || sopCode.includes('OT'))
+  const isLeaveProcess = !isHeadcountProcess && !isRecruitmentProcess && !isProbationProcess && !isPromotionProcess && !isOffboardingProcess && !isOvertimeProcess
 
   return (
     <div className="space-y-6 animate-fadeIn">
@@ -48,6 +50,13 @@ export const SopInfographicFlowView: React.FC<SopInfographicFlowViewProps> = ({
       />
 
       {/* 3. MODULAR WORKFLOW FLOWS */}
+      {isHeadcountProcess && (
+        <HeadcountBudgetFlow
+          activeStageTab={activeStageTab}
+          isDarkMode={isDarkMode}
+        />
+      )}
+
       {isRecruitmentProcess && (
         <RecruitmentRequisitionFlow
           activeStageTab={activeStageTab}

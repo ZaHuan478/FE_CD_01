@@ -2,6 +2,67 @@ import type { SopSubProcess } from '../types'
 
 // 100% Complete SOP Database mapped for ALL 7 Lifecycle Steps & Cross-Functional Operations from 1.EMP.HRM.SOP.docx
 export const SOP_DATABASE: Record<string, SopSubProcess[]> = {
+  // LIFE-00: ĐỊNH BIÊN NHÂN SỰ (HEADCOUNT BUDGET PLANNING)
+  'LIFE-00': [
+    {
+      sopCode: 'SOP-EMP-01',
+      sopTitle: 'Quy trình Thiết lập định biên nhân sự (Headcount Budget Planning)',
+      sopCategory: 'Hoạch định & Ngân sách Nhân sự',
+      description: 'Quy trình lập kế hoạch định biên nhân sự hàng năm, tham vấn HRBP, điều chỉnh số liệu, phê duyệt BOD và cập nhật Master Data kiểm soát tuyển dụng.',
+      steps: [
+        {
+          stepCode: 'EMP01.01',
+          title: 'Thiết lập định biên nhân sự',
+          actor: 'Trưởng bộ phận (TBP)',
+          location: 'Portal Quản lý',
+          timing: 'Đầu năm / Kế hoạch năm',
+          typeCode: 'N',
+          description: 'TBP xây dựng định biên phòng ban: Năm, Phòng ban, Chức vụ, Cấp độ, Tháng chi tiết 12 tháng, Thu nhập.',
+          fieldsChecklist: ['Năm xây dựng', 'Phòng ban', 'Chức vụ', 'Cấp độ (Level)', 'Kế hoạch 12 tháng', 'Thu nhập / People Cost']
+        },
+        {
+          stepCode: 'EMP01.02',
+          title: 'Tham vấn định biên',
+          actor: 'HRBP',
+          location: 'Portal',
+          timing: 'Sau khi TBP nộp',
+          typeCode: 'M',
+          description: 'HRBP phối hợp kiểm tra, đánh giá tính hợp lý của kế hoạch định biên theo ngân sách và chiến lược công ty.',
+          fieldsChecklist: ['Đánh giá tính hợp lý', 'So khớp khung năng lực', 'Ý kiến tham vấn HRBP']
+        },
+        {
+          stepCode: 'EMP01.03',
+          title: 'Điều chỉnh định biên',
+          actor: 'Trưởng bộ phận (TBP)',
+          location: 'Portal Quản lý',
+          timing: 'Khi nhận phản hồi HRBP',
+          typeCode: 'N',
+          description: 'TBP tiếp nhận phản hồi từ HRBP và thực hiện điều chỉnh lại số liệu định biên (nếu có).',
+          fieldsChecklist: ['Số liệu điều chỉnh', 'Ghi chú giải trình', 'Bản định biên hoàn thiện']
+        },
+        {
+          stepCode: 'EMP01.04',
+          title: 'Duyệt định biên',
+          actor: 'Ban Giám Đốc (BOD)',
+          location: 'Portal & Họp BOD',
+          timing: 'Hạn chót duyệt quý 1',
+          typeCode: 'M',
+          description: 'Ban Giám Đốc (BOD) xem xét và phê duyệt bản định biên cuối cùng của các phòng ban.',
+          fieldsChecklist: ['Quyết định phê duyệt BOD', 'Chữ ký số phê duyệt', 'Trần ngân sách People Cost']
+        },
+        {
+          stepCode: 'EMP01.05',
+          title: 'Cập nhật kết quả duyệt',
+          actor: 'Chuyên viên C&B',
+          location: 'HRM Core Engine',
+          timing: 'Tức thì sau khi BOD duyệt',
+          typeCode: 'A',
+          description: 'Chuyên viên C&B cập nhật bản định biên đã duyệt vào hệ thống Master Data để làm trần giới hạn tuyển dụng và kiểm soát chi phí.',
+          fieldsChecklist: ['Trần hạn mức tuyển dụng ATS', 'Khung định biên phòng ban Master Data', 'Báo cáo tổng hợp People Cost']
+        }
+      ]
+    }
+  ],
   // LIFE-01: TIẾP NHẬN & TUYỂN DỤNG (RECRUITMENT & ONBOARDING)
   'LIFE-01': [
     {

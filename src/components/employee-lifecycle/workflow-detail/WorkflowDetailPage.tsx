@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react'
+import { useLocation } from 'react-router-dom'
 import {
   ArrowLeft,
   Sparkles,
@@ -28,14 +29,19 @@ export const WorkflowDetailPage: React.FC<WorkflowDetailPageProps> = ({
   onOpenWireframe
 }) => {
   const { language, t } = useLanguage()
+  const location = useLocation()
 
   // Always scroll to top when opening or switching workflow detail
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: 'instant' })
   }, [item.id])
 
-  // Active top-level tab in workflow detail
-  const [activeWorkflowTab, setActiveWorkflowTab] = useState<'diagram' | 'roles' | 'specs'>('diagram')
+  // Active top-level tab in workflow detail initialized from URL pathname
+  const [activeWorkflowTab, setActiveWorkflowTab] = useState<'diagram' | 'roles' | 'specs'>(() => {
+    if (location.pathname.startsWith('/employee-lifecycle/raci/')) return 'roles'
+    if (location.pathname.startsWith('/employee-lifecycle/specs/')) return 'specs'
+    return 'diagram'
+  })
 
   // Theme state synced with global document dark mode
   const [isDarkMode, setIsDarkMode] = useState<boolean>(() => {
@@ -149,24 +155,42 @@ export const WorkflowDetailPage: React.FC<WorkflowDetailPageProps> = ({
   const [selectedStepIdx, setSelectedStepIdx] = useState<number>(0)
 
   // Check if current process has a dedicated 5-stage Infographic Blueprint
-  const hasInfographic = ['LIFE-01', 'LIFE-04', 'LIFE-05', 'LIFE-06', 'LIFE-07'].includes(item.id)
+  const hasInfographic = ['LIFE-00', 'LIFE-01', 'LIFE-04', 'LIFE-05', 'LIFE-06', 'LIFE-07'].includes(item.id)
 
   const [viewMode, setViewMode] = useState<'infographic' | 'diagram' | 'table'>(() => {
-    if (['LIFE-01', 'LIFE-04', 'LIFE-05', 'LIFE-06', 'LIFE-07'].includes(item.id)) return 'infographic'
+    if (location.pathname.startsWith('/employee-lifecycle/flowchart/')) return 'diagram'
+    if (location.pathname.startsWith('/employee-lifecycle/infographic/')) return 'infographic'
+    if (['LIFE-00', 'LIFE-01', 'LIFE-04', 'LIFE-05', 'LIFE-06', 'LIFE-07'].includes(item.id)) return 'infographic'
     return 'diagram'
   })
+
+  // Sync state when location.pathname or item.id changes
+  useEffect(() => {
+    if (location.pathname.startsWith('/employee-lifecycle/raci/')) {
+      setActiveWorkflowTab('roles')
+    } else if (location.pathname.startsWith('/employee-lifecycle/specs/')) {
+      setActiveWorkflowTab('specs')
+    } else {
+      setActiveWorkflowTab('diagram')
+      if (location.pathname.startsWith('/employee-lifecycle/flowchart/')) {
+        setViewMode('diagram')
+      } else if (location.pathname.startsWith('/employee-lifecycle/infographic/')) {
+        setViewMode('infographic')
+      }
+    }
+  }, [location.pathname, item.id])
 
   return (
     <div className={`min-h-screen transition-colors duration-300 pb-20 animate-fadeIn ${isDarkMode ? 'bg-slate-950 text-slate-100' : 'bg-slate-50/50 text-slate-800'
       }`}>
-      
+
       {/* COMPACT TOP FIXED HEADER */}
       <header className={`sticky top-0 z-50 border-b backdrop-blur-md transition-colors duration-300 ${isDarkMode ? 'bg-slate-950/95 border-slate-800 text-white' : 'bg-white/95 border-slate-200 text-slate-900 shadow-2xs'
         }`}>
-        
+
         {/* Main Header Bar */}
         <div className="w-[92%] max-w-[1920px] mx-auto px-2 sm:px-4 py-2.5 flex items-center justify-between gap-3">
-          
+
           {/* Left: Back Button & Step Identity */}
           <div className="flex items-center gap-2.5 sm:gap-3 truncate">
             <button
@@ -240,41 +264,41 @@ export const WorkflowDetailPage: React.FC<WorkflowDetailPageProps> = ({
         {/* WORKFLOW VIEW TABS (DIAGRAM vs ROLES & RACI vs SPECS TABLE) */}
         <div className="border-t border-slate-200/80 dark:border-slate-800/80 bg-slate-100/60 dark:bg-slate-950/60">
           <div className="w-[92%] max-w-[1920px] mx-auto px-2 sm:px-4 flex items-center justify-between gap-4 overflow-x-auto no-scrollbar py-1.5">
-            
+
             <div className="flex items-center gap-1.5">
               <button
                 type="button"
                 onClick={() => setActiveWorkflowTab('diagram')}
-                className={`px-3.5 py-1.5 text-xs font-bold rounded-xl transition-all flex items-center gap-2 cursor-pointer shrink-0 ${activeWorkflowTab === 'diagram'
-                    ? 'bg-blue-600 text-white shadow-xs'
-                    : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-200/60 dark:hover:bg-slate-800/60'
+                className={`px-3.5 py-1.5 text-xs font-bold rounded-xl border-2 transition-all flex items-center gap-2 cursor-pointer shrink-0 shadow-2xs ${activeWorkflowTab === 'diagram'
+                    ? 'bg-slate-900 text-white dark:bg-slate-100 dark:text-slate-900 border-slate-900 dark:border-slate-100 shadow-xs'
+                    : 'bg-white hover:bg-slate-100/80 text-slate-900 dark:bg-slate-900 dark:hover:bg-slate-800 dark:text-white border-slate-900 dark:border-slate-200'
                   }`}
               >
-                <Sparkles className="w-3.5 h-3.5" />
+                <Sparkles className="w-3.5 h-3.5 text-amber-500" />
                 <span>{t('workflow.tab.diagram', 'Sơ đồ Quy trình Trực quan')}</span>
               </button>
 
               <button
                 type="button"
                 onClick={() => setActiveWorkflowTab('roles')}
-                className={`px-3.5 py-1.5 text-xs font-bold rounded-xl transition-all flex items-center gap-2 cursor-pointer shrink-0 ${activeWorkflowTab === 'roles'
-                    ? 'bg-indigo-600 text-white shadow-xs'
-                    : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-200/60 dark:hover:bg-slate-800/60'
+                className={`px-3.5 py-1.5 text-xs font-bold rounded-xl border-2 transition-all flex items-center gap-2 cursor-pointer shrink-0 shadow-2xs ${activeWorkflowTab === 'roles'
+                    ? 'bg-slate-900 text-white dark:bg-slate-100 dark:text-slate-900 border-slate-900 dark:border-slate-100 shadow-xs'
+                    : 'bg-white hover:bg-slate-100/80 text-slate-900 dark:bg-slate-900 dark:hover:bg-slate-800 dark:text-white border-slate-900 dark:border-slate-200'
                   }`}
               >
-                <UserCheck className="w-3.5 h-3.5" />
+                <UserCheck className="w-3.5 h-3.5 text-blue-500" />
                 <span>{t('workflow.tab.roles', 'Phân định Vai trò & RACI')}</span>
               </button>
 
               <button
                 type="button"
                 onClick={() => setActiveWorkflowTab('specs')}
-                className={`px-3.5 py-1.5 text-xs font-bold rounded-xl transition-all flex items-center gap-2 cursor-pointer shrink-0 ${activeWorkflowTab === 'specs'
-                    ? 'bg-emerald-600 text-white shadow-xs'
-                    : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-200/60 dark:hover:bg-slate-800/60'
+                className={`px-3.5 py-1.5 text-xs font-bold rounded-xl border-2 transition-all flex items-center gap-2 cursor-pointer shrink-0 shadow-2xs ${activeWorkflowTab === 'specs'
+                    ? 'bg-slate-900 text-white dark:bg-slate-100 dark:text-slate-900 border-slate-900 dark:border-slate-100 shadow-xs'
+                    : 'bg-white hover:bg-slate-100/80 text-slate-900 dark:bg-slate-900 dark:hover:bg-slate-800 dark:text-white border-slate-900 dark:border-slate-200'
                   }`}
               >
-                <ListCheck className="w-3.5 h-3.5" />
+                <ListCheck className="w-3.5 h-3.5 text-emerald-500" />
                 <span>{t('workflow.tab.specs', 'Bảng Đặc tả & Checklist')}</span>
               </button>
             </div>
@@ -293,7 +317,7 @@ export const WorkflowDetailPage: React.FC<WorkflowDetailPageProps> = ({
         {/* TAB 1: SƠ ĐỒ QUY TRÌNH TRỰC QUAN (INFOGRAPHIC / FLOWCHART / COMPACT TABLE) */}
         {activeWorkflowTab === 'diagram' && (
           <div className="space-y-4 animate-fadeIn">
-            
+
             {/* SUB-PROCESS SELECTOR (If multiple SOPs exist) */}
             {availableSopProcesses.length > 1 && (
               <div className={`p-3.5 rounded-2xl border flex flex-wrap items-center justify-between gap-3 shadow-2xs transition-colors ${isDarkMode ? 'bg-slate-900 border-slate-800' : 'bg-white border-slate-200/90'
@@ -313,16 +337,19 @@ export const WorkflowDetailPage: React.FC<WorkflowDetailPageProps> = ({
                           setSelectedProcessIdx(idx)
                           setSelectedStepIdx(0)
                         }}
-                        className={`flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold rounded-xl border transition-all cursor-pointer ${isProcSelected
-                          ? 'bg-blue-600 text-white border-blue-600 shadow-xs'
-                          : isDarkMode
-                            ? 'bg-slate-950 text-slate-300 border-slate-800 hover:bg-slate-800'
-                            : 'bg-slate-100 text-slate-700 border-slate-200 hover:bg-slate-200'
+                        className={`flex items-center gap-1.5 px-3.5 py-1.5 text-xs font-bold rounded-xl border-2 transition-all cursor-pointer shadow-2xs ${isProcSelected
+                            ? 'bg-slate-900 text-white dark:bg-slate-100 dark:text-slate-900 border-slate-900 dark:border-slate-100 shadow-xs'
+                            : 'bg-white hover:bg-slate-100/80 text-slate-900 dark:bg-slate-900 dark:hover:bg-slate-800 dark:text-white border-slate-900 dark:border-slate-200'
                           }`}
                       >
-                        <Building2 className="w-3.5 h-3.5" />
+                        <Building2 className={`w-3.5 h-3.5 ${isProcSelected ? 'text-blue-400 dark:text-blue-600' : 'text-blue-600 dark:text-blue-400'}`} />
                         <span>{proc.sopCode}: {proc.sopTitle}</span>
-                        <span className="text-[10px] font-mono opacity-80 bg-black/20 px-1.5 py-0.2 rounded">
+                        <span
+                          className={`text-[10px] font-mono font-bold px-1.5 py-0.5 rounded ${isProcSelected
+                              ? 'bg-white/20 text-white dark:bg-slate-900/20 dark:text-slate-900'
+                              : 'bg-slate-200/80 dark:bg-slate-800 text-slate-700 dark:text-slate-300'
+                            }`}
+                        >
                           {proc.steps.length}
                         </span>
                       </button>
@@ -340,12 +367,12 @@ export const WorkflowDetailPage: React.FC<WorkflowDetailPageProps> = ({
                   <button
                     type="button"
                     onClick={() => setViewMode('infographic')}
-                    className={`flex items-center gap-1.5 px-3.5 py-1.5 text-xs font-bold rounded-xl transition-all cursor-pointer ${viewMode === 'infographic'
-                      ? 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-xs'
-                      : isDarkMode ? 'bg-slate-950 text-slate-400 hover:bg-slate-800 border border-slate-800' : 'bg-slate-100 text-slate-700 hover:bg-slate-200 border border-slate-200'
+                    className={`flex items-center gap-1.5 px-3.5 py-1.5 text-xs font-bold rounded-xl border-2 transition-all cursor-pointer shadow-2xs ${viewMode === 'infographic'
+                        ? 'bg-slate-900 text-white dark:bg-slate-100 dark:text-slate-900 border-slate-900 dark:border-slate-100 shadow-xs'
+                        : 'bg-white hover:bg-slate-100/80 text-slate-900 dark:bg-slate-900 dark:hover:bg-slate-800 dark:text-white border-slate-900 dark:border-slate-200'
                       }`}
                   >
-                    <Sparkles className="w-3.5 h-3.5 text-amber-300" />
+                    <Sparkles className="w-3.5 h-3.5 text-amber-500" />
                     <span>
                       {language === 'vi' ? '🎨 Sơ đồ Infographic 5 Giai đoạn' : '🎨 5-Stage Infographic'}
                     </span>
@@ -355,12 +382,12 @@ export const WorkflowDetailPage: React.FC<WorkflowDetailPageProps> = ({
                 <button
                   type="button"
                   onClick={() => setViewMode('diagram')}
-                  className={`flex items-center gap-1.5 px-3.5 py-1.5 text-xs font-bold rounded-xl transition-all cursor-pointer ${viewMode === 'diagram'
-                    ? 'bg-blue-600 text-white shadow-xs'
-                    : isDarkMode ? 'bg-slate-950 text-slate-400 hover:bg-slate-800 border border-slate-800' : 'bg-slate-100 text-slate-700 hover:bg-slate-200 border border-slate-200'
+                  className={`flex items-center gap-1.5 px-3.5 py-1.5 text-xs font-bold rounded-xl border-2 transition-all cursor-pointer shadow-2xs ${viewMode === 'diagram'
+                      ? 'bg-slate-900 text-white dark:bg-slate-100 dark:text-slate-900 border-slate-900 dark:border-slate-100 shadow-xs'
+                      : 'bg-white hover:bg-slate-100/80 text-slate-900 dark:bg-slate-900 dark:hover:bg-slate-800 dark:text-white border-slate-900 dark:border-slate-200'
                     }`}
                 >
-                  <GitBranch className="w-3.5 h-3.5" />
+                  <GitBranch className="w-3.5 h-3.5 text-blue-500" />
                   <span>
                     {language === 'vi'
                       ? `Sơ đồ Flowchart (${currentProcess.steps.length} Bước)`
@@ -371,12 +398,12 @@ export const WorkflowDetailPage: React.FC<WorkflowDetailPageProps> = ({
                 <button
                   type="button"
                   onClick={() => setViewMode('table')}
-                  className={`flex items-center gap-1.5 px-3.5 py-1.5 text-xs font-bold rounded-xl transition-all cursor-pointer ${viewMode === 'table'
-                    ? 'bg-blue-600 text-white shadow-xs'
-                    : isDarkMode ? 'bg-slate-950 text-slate-400 hover:bg-slate-800 border border-slate-800' : 'bg-slate-100 text-slate-700 hover:bg-slate-200 border border-slate-200'
+                  className={`flex items-center gap-1.5 px-3.5 py-1.5 text-xs font-bold rounded-xl border-2 transition-all cursor-pointer shadow-2xs ${viewMode === 'table'
+                      ? 'bg-slate-900 text-white dark:bg-slate-100 dark:text-slate-900 border-slate-900 dark:border-slate-100 shadow-xs'
+                      : 'bg-white hover:bg-slate-100/80 text-slate-900 dark:bg-slate-900 dark:hover:bg-slate-800 dark:text-white border-slate-900 dark:border-slate-200'
                     }`}
                 >
-                  <ListCheck className="w-3.5 h-3.5" />
+                  <ListCheck className="w-3.5 h-3.5 text-emerald-500" />
                   <span>
                     {language === 'vi' ? 'Bảng SOP Specs' : 'SOP Specs Table'}
                   </span>
@@ -449,11 +476,10 @@ export const WorkflowDetailPage: React.FC<WorkflowDetailPageProps> = ({
                   <button
                     type="button"
                     onClick={() => setIsActorsExpanded(!isActorsExpanded)}
-                    className={`p-2 rounded-xl border flex items-center gap-1 text-xs font-bold transition-all cursor-pointer ${
-                      isDarkMode
-                        ? 'bg-slate-950 border-slate-800 text-slate-300 hover:bg-slate-800'
-                        : 'bg-slate-100 border-slate-200 text-slate-700 hover:bg-slate-200'
-                    }`}
+                    className={`p-2 rounded-xl border flex items-center gap-1 text-xs font-bold transition-all cursor-pointer ${isDarkMode
+                      ? 'bg-slate-950 border-slate-800 text-slate-300 hover:bg-slate-800'
+                      : 'bg-slate-100 border-slate-200 text-slate-700 hover:bg-slate-200'
+                      }`}
                     title={isActorsExpanded ? (language === 'vi' ? 'Thu gọn' : 'Collapse') : (language === 'vi' ? 'Mở rộng' : 'Expand')}
                   >
                     <span>{isActorsExpanded ? (language === 'vi' ? 'Thu gọn' : 'Collapse') : (language === 'vi' ? 'Mở rộng' : 'Expand')}</span>

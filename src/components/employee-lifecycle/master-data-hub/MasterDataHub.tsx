@@ -77,11 +77,10 @@ export const MasterDataHub: React.FC<MasterDataHubProps> = ({ onOpenERD, isDarkM
       {/* 🏛️ TOP HERO HEADER & ACTIONS */}
       {/* ========================================================================= */}
       <div
-        className={`p-5 sm:p-6 rounded-3xl border shadow-md flex flex-col md:flex-row md:items-center justify-between gap-4 transition-colors ${
-          isDarkMode
-            ? 'bg-slate-900 border-slate-800 text-white'
-            : 'bg-white border-slate-200 text-slate-900'
-        }`}
+        className={`p-5 sm:p-6 rounded-3xl border shadow-md flex flex-col md:flex-row md:items-center justify-between gap-4 transition-colors ${isDarkMode
+          ? 'bg-slate-900 border-slate-800 text-white'
+          : 'bg-white border-slate-200 text-slate-900'
+          }`}
       >
         <div className="flex items-start gap-3.5">
           <div className="p-3 bg-gradient-to-tr from-blue-600 to-indigo-600 text-white rounded-2xl shadow-lg shrink-0">
@@ -141,11 +140,10 @@ export const MasterDataHub: React.FC<MasterDataHubProps> = ({ onOpenERD, isDarkM
       {/* 🔍 SEARCH & 2-LEVEL FILTER CONTROLS */}
       {/* ========================================================================= */}
       <div
-        className={`p-4 sm:p-5 rounded-2xl border space-y-3.5 shadow-sm transition-colors ${
-          isDarkMode
-            ? 'bg-slate-900/90 border-slate-800'
-            : 'bg-white border-slate-200'
-        }`}
+        className={`p-4 sm:p-5 rounded-2xl border space-y-3.5 shadow-sm transition-colors ${isDarkMode
+          ? 'bg-slate-900/90 border-slate-800'
+          : 'bg-white border-slate-200'
+          }`}
       >
         {/* Smart Live Search Bar */}
         <div className="relative">
@@ -159,11 +157,10 @@ export const MasterDataHub: React.FC<MasterDataHubProps> = ({ onOpenERD, isDarkM
                 ? 'Tìm nhanh danh mục (ví dụ: Địa lý, Ngân hàng, Cơ cấu tổ chức, Thang bảng lương, Ca làm việc, BHXH, Thuế...)'
                 : 'Quick search catalogs (e.g. Geography, Bank, Org Chart, Pay Scale, Shift, Insurance, Tax...)'
             }
-            className={`w-full pl-10 pr-4 py-2.5 text-xs sm:text-sm rounded-xl border transition-all ${
-              isDarkMode
-                ? 'bg-slate-950 border-slate-800 text-white placeholder-slate-500 focus:border-blue-500'
-                : 'bg-slate-50 border-slate-200 text-slate-900 placeholder-slate-400 focus:border-blue-500 focus:bg-white'
-            }`}
+            className={`w-full pl-10 pr-4 py-2.5 text-xs sm:text-sm rounded-xl border transition-all ${isDarkMode
+              ? 'bg-slate-950 border-slate-800 text-white placeholder-slate-500 focus:border-blue-500'
+              : 'bg-slate-50 border-slate-200 text-slate-900 placeholder-slate-400 focus:border-blue-500 focus:bg-white'
+              }`}
           />
         </div>
 
@@ -179,13 +176,12 @@ export const MasterDataHub: React.FC<MasterDataHubProps> = ({ onOpenERD, isDarkM
             <button
               type="button"
               onClick={() => setSelectedTier('ALL')}
-              className={`px-3 py-1.5 text-xs font-bold rounded-xl transition-all cursor-pointer ${
-                selectedTier === 'ALL'
-                  ? 'bg-blue-600 text-white shadow-xs'
-                  : isDarkMode
+              className={`px-3 py-1.5 text-xs font-bold rounded-xl transition-all cursor-pointer ${selectedTier === 'ALL'
+                ? 'bg-blue-600 text-white shadow-xs'
+                : isDarkMode
                   ? 'bg-slate-950 text-slate-400 hover:bg-slate-800 border border-slate-800'
                   : 'bg-slate-100 text-slate-700 hover:bg-slate-200 border border-slate-200'
-              }`}
+                }`}
             >
               {language === 'vi' ? 'Tất cả 3 Tầng' : 'All 3 Tiers'} ({MASTER_DATA_HUB_DATABASE.length})
             </button>
@@ -193,13 +189,12 @@ export const MasterDataHub: React.FC<MasterDataHubProps> = ({ onOpenERD, isDarkM
             <button
               type="button"
               onClick={() => setSelectedTier('tier1_global')}
-              className={`px-3 py-1.5 text-xs font-bold rounded-xl transition-all cursor-pointer ${
-                selectedTier === 'tier1_global'
-                  ? 'bg-blue-600 text-white shadow-xs'
-                  : isDarkMode
+              className={`px-3 py-1.5 text-xs font-bold rounded-xl transition-all cursor-pointer ${selectedTier === 'tier1_global'
+                ? 'bg-blue-600 text-white shadow-xs'
+                : isDarkMode
                   ? 'bg-slate-950 text-slate-400 hover:bg-slate-800 border border-slate-800'
                   : 'bg-slate-100 text-slate-700 hover:bg-slate-200 border border-slate-200'
-              }`}
+                }`}
             >
               🏛️ {language === 'vi' ? 'Tầng 1: Toàn hệ thống (Global)' : 'Tier 1: Global'} ({globalCount})
             </button>
@@ -207,13 +202,12 @@ export const MasterDataHub: React.FC<MasterDataHubProps> = ({ onOpenERD, isDarkM
             <button
               type="button"
               onClick={() => setSelectedTier('tier2_module')}
-              className={`px-3 py-1.5 text-xs font-bold rounded-xl transition-all cursor-pointer ${
-                selectedTier === 'tier2_module'
-                  ? 'bg-blue-600 text-white shadow-xs'
-                  : isDarkMode
+              className={`px-3 py-1.5 text-xs font-bold rounded-xl transition-all cursor-pointer ${selectedTier === 'tier2_module'
+                ? 'bg-blue-600 text-white shadow-xs'
+                : isDarkMode
                   ? 'bg-slate-950 text-slate-400 hover:bg-slate-800 border border-slate-800'
                   : 'bg-slate-100 text-slate-700 hover:bg-slate-200 border border-slate-200'
-              }`}
+                }`}
             >
               📦 {language === 'vi' ? 'Tầng 2: Theo Phân hệ' : 'Tier 2: Module-Specific'} ({moduleCount})
             </button>
@@ -221,13 +215,12 @@ export const MasterDataHub: React.FC<MasterDataHubProps> = ({ onOpenERD, isDarkM
             <button
               type="button"
               onClick={() => setSelectedTier('tier3_utility')}
-              className={`px-3 py-1.5 text-xs font-bold rounded-xl transition-all cursor-pointer ${
-                selectedTier === 'tier3_utility'
-                  ? 'bg-blue-600 text-white shadow-xs'
-                  : isDarkMode
+              className={`px-3 py-1.5 text-xs font-bold rounded-xl transition-all cursor-pointer ${selectedTier === 'tier3_utility'
+                ? 'bg-blue-600 text-white shadow-xs'
+                : isDarkMode
                   ? 'bg-slate-950 text-slate-400 hover:bg-slate-800 border border-slate-800'
                   : 'bg-slate-100 text-slate-700 hover:bg-slate-200 border border-slate-200'
-              }`}
+                }`}
             >
               ⚙️ {language === 'vi' ? 'Tầng 3: Tiện ích' : 'Tier 3: Utility'} ({utilityCount})
             </button>
@@ -254,13 +247,12 @@ export const MasterDataHub: React.FC<MasterDataHubProps> = ({ onOpenERD, isDarkM
                   key={m.id}
                   type="button"
                   onClick={() => setSelectedModule(m.id as any)}
-                  className={`px-2.5 py-1 text-[11px] font-bold rounded-lg transition-all flex items-center gap-1 cursor-pointer ${
-                    isSelected
-                      ? 'bg-slate-900 dark:bg-white text-white dark:text-slate-900 shadow-xs'
-                      : isDarkMode
+                  className={`px-2.5 py-1 text-[11px] font-bold rounded-lg transition-all flex items-center gap-1 cursor-pointer ${isSelected
+                    ? 'bg-slate-900 dark:bg-white text-white dark:text-slate-900 shadow-xs'
+                    : isDarkMode
                       ? 'bg-slate-950 text-slate-400 hover:bg-slate-800'
                       : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
-                  }`}
+                    }`}
                 >
                   {m.icon}
                   <span>{language === 'vi' ? m.label : m.labelEn}</span>
@@ -292,11 +284,10 @@ export const MasterDataHub: React.FC<MasterDataHubProps> = ({ onOpenERD, isDarkM
               return (
                 <div
                   key={catalog.id}
-                  className={`p-4 sm:p-5 rounded-2xl border transition-all flex flex-col justify-between group shadow-xs hover:shadow-md ${
-                    isDarkMode
-                      ? 'bg-slate-900 border-slate-800 hover:border-blue-500/50 hover:bg-slate-850'
-                      : 'bg-white border-slate-200/90 hover:border-blue-400 hover:bg-slate-50/40'
-                  }`}
+                  className={`p-4 sm:p-5 rounded-2xl border transition-all flex flex-col justify-between group shadow-xs hover:shadow-md ${isDarkMode
+                    ? 'bg-slate-900 border-slate-800 hover:border-blue-500/50 hover:bg-slate-850'
+                    : 'bg-white border-slate-200/90 hover:border-blue-400 hover:bg-slate-50/40'
+                    }`}
                 >
                   <div className="space-y-3">
                     {/* Top Row: Module Badge + Record Count */}
@@ -307,13 +298,12 @@ export const MasterDataHub: React.FC<MasterDataHubProps> = ({ onOpenERD, isDarkM
                         </span>
 
                         <span
-                          className={`text-[10px] font-extrabold uppercase px-2 py-0.5 rounded ${
-                            catalog.tier === 'tier1_global'
-                              ? 'bg-blue-500/10 text-blue-700 dark:text-blue-300 border border-blue-500/20'
-                              : catalog.tier === 'tier2_module'
+                          className={`text-[10px] font-extrabold uppercase px-2 py-0.5 rounded ${catalog.tier === 'tier1_global'
+                            ? 'bg-blue-500/10 text-blue-700 dark:text-blue-300 border border-blue-500/20'
+                            : catalog.tier === 'tier2_module'
                               ? 'bg-purple-500/10 text-purple-700 dark:text-purple-300 border border-purple-500/20'
                               : 'bg-amber-500/10 text-amber-700 dark:text-amber-300 border border-amber-500/20'
-                          }`}
+                            }`}
                         >
                           {catalog.moduleName}
                         </span>
@@ -337,7 +327,7 @@ export const MasterDataHub: React.FC<MasterDataHubProps> = ({ onOpenERD, isDarkM
                     {/* Consuming / Feeds-into Modules Tags */}
                     <div className="pt-2 border-t border-slate-100 dark:border-slate-800/80 space-y-1">
                       <span className="text-[10px] font-extrabold uppercase text-slate-400 block">
-                        {language === 'vi' ? '🔗 TIỀN ĐỀ NUÔI SỐNG (FEEDS INTO):' : '🔗 FEEDS INTO MODULES:'}
+                        {language === 'vi' ? '🔗 TIỀN ĐỀ NUÔI SỐNG:' : '🔗 FEEDS INTO MODULES:'}
                       </span>
                       <div className="flex flex-wrap gap-1">
                         {catalog.feedsIntoModules.map((mod, idx) => (

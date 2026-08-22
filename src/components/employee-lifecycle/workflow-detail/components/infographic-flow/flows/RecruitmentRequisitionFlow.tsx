@@ -1,9 +1,5 @@
 import React from 'react'
 import {
-  Target,
-  ShieldCheck,
-  Smartphone,
-  GitBranch,
   CheckCircle2,
   AlertTriangle,
   XCircle,
@@ -36,7 +32,6 @@ export const RecruitmentRequisitionFlow: React.FC<FlowStageProps> = ({
               <div className="w-8 h-8 rounded-xl bg-blue-600 text-white flex items-center justify-center font-black text-xs shadow-xs">GĐ 1</div>
               <div>
                 <h3 className="text-sm sm:text-base font-extrabold text-slate-900 dark:text-white uppercase tracking-wider flex items-center gap-2">
-                  <Target className="w-4 h-4 text-blue-600 dark:text-blue-400" />
                   <span>{language === 'vi' ? 'GIAI ĐOẠN 1: ĐỐI CHIẾU ĐỊNH BIÊN & HẠN MỨC NGÂN SÁCH (HEADCOUNT MATRIX)' : 'STAGE 1: HEADCOUNT & BUDGET MATRIX CHECK'}</span>
                 </h3>
                 <p className="text-xs text-slate-500 dark:text-slate-400">{language === 'vi' ? 'Kiểm tra tính khả dụng của Định biên nhân sự (EMP01) và nguồn ngân sách People Cost' : 'Verify Headcount availability (EMP01) and People Cost budget source'}</p>
@@ -49,25 +44,25 @@ export const RecruitmentRequisitionFlow: React.FC<FlowStageProps> = ({
               <thead>
                 <tr className={`border-b ${isDarkMode ? 'bg-slate-900 text-slate-200 border-slate-800' : 'bg-slate-100 text-slate-800 border-slate-200'}`}>
                   <th className="p-3 font-extrabold uppercase">{language === 'vi' ? 'Phân Loại Yêu Cầu Tuyển Dụng' : 'Requisition Category'}</th>
-                  <th className="p-3 font-extrabold uppercase text-blue-600 dark:text-blue-400">{language === 'vi' ? 'Điều Kiện Kích Hoạt' : 'Trigger Condition'}</th>
-                  <th className="p-3 font-extrabold uppercase text-emerald-600 dark:text-emerald-400">{language === 'vi' ? 'Luồng Phê Duyệt & SLA' : 'Approval Route & SLA'}</th>
+                  <th className="p-3 font-extrabold uppercase text-black-600 dark:text-black">{language === 'vi' ? 'Điều Kiện Kích Hoạt' : 'Trigger Condition'}</th>
+                  <th className="p-3 font-extrabold uppercase text-black dark:text-black">{language === 'vi' ? 'Luồng Phê Duyệt & SLA' : 'Approval Route & SLA'}</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-200 dark:divide-slate-800 text-slate-700 dark:text-slate-300 font-medium">
                 <tr className="hover:bg-slate-50 dark:hover:bg-slate-900/50 transition-colors">
-                  <td className="p-3 font-bold text-emerald-600 dark:text-emerald-400">1. Tuyển dụng Trong Định Biên (Within Headcount)</td>
+                  <td className="p-3 font-bold text-black dark:text-black">1. Tuyển dụng Trong Định Biên (Within Headcount)</td>
                   <td className="p-3"><span className="px-2.5 py-1 rounded-lg font-bold text-xs bg-emerald-50 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800">Còn chỉ tiêu Available Headcount &gt; 0</span></td>
                   <td className="p-3 text-slate-700 dark:text-slate-300 font-semibold">Luồng duyệt nhanh (TBP -&gt; HRM duyệt trong 24h -&gt; Mở đăng tuyển)</td>
                 </tr>
                 <tr className="hover:bg-slate-50 dark:hover:bg-slate-900/50 transition-colors">
-                  <td className="p-3 font-bold text-blue-600 dark:text-blue-400">2. Tuyển Thay Thế Nhân Sự Nghỉ Việc (Replacement)</td>
+                  <td className="p-3 font-bold text-black dark:text-black">2. Tuyển Thay Thế Nhân Sự Nghỉ Việc (Replacement)</td>
                   <td className="p-3"><span className="px-2.5 py-1 rounded-lg font-bold text-xs bg-blue-50 dark:bg-blue-950 text-blue-700 dark:text-blue-300 border border-blue-200 dark:border-blue-800">Đã có Đơn thôi việc được duyệt (EMP15)</span></td>
                   <td className="p-3 text-slate-700 dark:text-slate-300 font-semibold">Giữ nguyên Job Grade & khung dải lương cũ của nhân sự tiền nhiệm</td>
                 </tr>
                 <tr className="hover:bg-slate-50 dark:hover:bg-slate-900/50 transition-colors">
-                  <td className="p-3 font-bold text-amber-600 dark:text-amber-400">3. Tuyển Vượt Định Biên / Mở Rộng Dự Án Mới (Over Budget)</td>
+                  <td className="p-3 font-bold text-black dark:text-black">3. Tuyển Vượt Định Biên / Mở Rộng Dự Án Mới (Over Budget)</td>
                   <td className="p-3"><span className="px-2.5 py-1 rounded-lg font-bold text-xs bg-amber-50 dark:bg-amber-950 text-amber-700 dark:text-amber-300 border border-amber-200 dark:border-amber-800">Vượt hạn mức định biên đầu năm</span></td>
-                  <td className="p-3 text-amber-700 dark:text-amber-300 font-semibold">Bắt buộc nộp Tờ trình People Cost -&gt; Trình Ban Giám Đốc (BOM) phê duyệt</td>
+                  <td className="p-3 text-black dark:text-black font-semibold">Bắt buộc nộp Tờ trình People Cost -&gt; Trình Ban Giám Đốc (BOM) phê duyệt</td>
                 </tr>
               </tbody>
             </table>
@@ -83,7 +78,6 @@ export const RecruitmentRequisitionFlow: React.FC<FlowStageProps> = ({
               <div className="w-8 h-8 rounded-xl bg-indigo-600 text-white flex items-center justify-center font-black text-xs shadow-xs">GĐ 2</div>
               <div>
                 <h3 className="text-sm sm:text-base font-extrabold text-slate-900 dark:text-white uppercase tracking-wider flex items-center gap-2">
-                  <ShieldCheck className="w-4 h-4 text-indigo-600 dark:text-indigo-400" />
                   <span>{language === 'vi' ? 'GIAI ĐOẠN 2: VƯỢT QUA MÀNG LỌC KỸ THUẬT TỰ ĐỘNG (AI RÀ SOÁT NGẦM)' : 'STAGE 2: AUTOMATED AI TECHNICAL GATES'}</span>
                 </h3>
                 <p className="text-xs text-slate-500 dark:text-slate-400">{language === 'vi' ? 'Rà soát danh mục chức danh chuẩn, chặn vượt trần ngân sách lương & cảnh báo tỷ lệ biến động' : 'Validate job catalog, enforce salary ceiling & monitor turnover rate'}</p>
@@ -111,7 +105,7 @@ export const RecruitmentRequisitionFlow: React.FC<FlowStageProps> = ({
                 <AlertTriangle className="w-4 h-4 text-rose-500" />
                 <span>Luật Thép 3: Cảnh Báo Tỷ Lệ Biến Động Phòng Ban</span>
               </div>
-              <p className="text-slate-700 dark:text-slate-300 leading-relaxed font-medium">Tự động cảnh báo nếu tỷ lệ nghỉ việc (Turnover Rate) của phòng ban vượt ngưỡng $\ge 15\%$, yêu cầu TBP giải trình nguyên nhân trước khi duyệt thêm định biên.</p>
+              <p className="text-slate-700 dark:text-slate-300 leading-relaxed font-medium">Tự động cảnh báo nếu tỷ lệ nghỉ việc của phòng ban vượt ngưỡng, yêu cầu TBP giải trình nguyên nhân trước khi duyệt thêm định biên.</p>
             </div>
           </div>
         </div>
@@ -125,7 +119,6 @@ export const RecruitmentRequisitionFlow: React.FC<FlowStageProps> = ({
               <div className="w-8 h-8 rounded-xl bg-teal-600 text-white flex items-center justify-center font-black text-xs shadow-xs">GĐ 3</div>
               <div>
                 <h3 className="text-sm sm:text-base font-extrabold text-slate-900 dark:text-white uppercase tracking-wider flex items-center gap-2">
-                  <Smartphone className="w-4 h-4 text-teal-600 dark:text-teal-400" />
                   <span>{language === 'vi' ? 'GIAI ĐOẠN 3: THAO TÁC TRÊN PORTAL HRMS (6 TRƯỜNG BẮT BUỘC)' : 'STAGE 3: REQUISITION DATA DECLARATION'}</span>
                 </h3>
                 <p className="text-xs text-slate-500 dark:text-slate-400">{language === 'vi' ? 'Trưởng bộ phận (TBP) hoàn tất 4 bước tạo yêu cầu tuyển dụng trên Manager Portal' : 'Department Head completes 4 steps on Manager Portal'}</p>
@@ -167,7 +160,6 @@ export const RecruitmentRequisitionFlow: React.FC<FlowStageProps> = ({
               <div className="w-8 h-8 rounded-xl bg-amber-600 text-white flex items-center justify-center font-black text-xs shadow-xs">GĐ 4</div>
               <div>
                 <h3 className="text-sm sm:text-base font-extrabold text-slate-900 dark:text-white uppercase tracking-wider flex items-center gap-2">
-                  <GitBranch className="w-4 h-4 text-amber-600 dark:text-amber-400" />
                   <span>{language === 'vi' ? 'GIAI ĐOẠN 4: CHUỖI PHÊ DUYỆT 4 CẤP (APPROVAL WORKFLOW CHAIN)' : 'STAGE 4: 4-LEVEL APPROVAL CHAIN'}</span>
                 </h3>
                 <p className="text-xs text-slate-500 dark:text-slate-400">{language === 'vi' ? 'Chuỗi rẽ nhánh 4 cấp từ Trưởng bộ phận tới Kích hoạt Job Posting' : '4-Tier approval chain from Line Manager to Job Posting launch'}</p>
@@ -205,7 +197,6 @@ export const RecruitmentRequisitionFlow: React.FC<FlowStageProps> = ({
               <div className="w-8 h-8 rounded-xl bg-emerald-600 text-white flex items-center justify-center font-black text-xs shadow-xs">GĐ 5</div>
               <div>
                 <h3 className="text-sm sm:text-base font-extrabold text-slate-900 dark:text-white uppercase tracking-wider flex items-center gap-2">
-                  <CheckCircle2 className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
                   <span>{language === 'vi' ? 'GIAI ĐOẠN 5: KẾT QUẢ & CẢNH BÁO TỐI QUAN TRỌNG' : 'STAGE 5: OUTCOMES & CRITICAL POLICY NOTICE'}</span>
                 </h3>
                 <p className="text-xs text-slate-500 dark:text-slate-400">{language === 'vi' ? 'Kích hoạt Ticket Requisition ID, phân công Recruiter & quy định pháp lý tuyển dụng' : 'Requisition ID generation, Recruiter assignment and legal compliance notice'}</p>

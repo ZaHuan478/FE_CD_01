@@ -1,7 +1,6 @@
 import React from 'react'
 import {
   Clock,
-  ShieldCheck,
   Smartphone,
   GitBranch,
   CheckCircle2,
@@ -83,7 +82,6 @@ export const ProbationEvaluationFlow: React.FC<FlowStageProps> = ({
               <div className="w-8 h-8 rounded-xl bg-indigo-600 text-white flex items-center justify-center font-black text-xs shadow-xs">GĐ 2</div>
               <div>
                 <h3 className="text-sm sm:text-base font-extrabold text-slate-900 dark:text-white uppercase tracking-wider flex items-center gap-2">
-                  <ShieldCheck className="w-4 h-4 text-indigo-600 dark:text-indigo-400" />
                   <span>{language === 'vi' ? 'GIAI ĐOẠN 2: VƯỢT QUA MÀNG LỌC KỸ THUẬT TỰ ĐỘNG (AI RÀ SOÁT NGẦM)' : 'STAGE 2: AUTOMATED AI TECHNICAL GATES'}</span>
                 </h3>
                 <p className="text-xs text-slate-500 dark:text-slate-400">{language === 'vi' ? 'Kiểm soát bắt buộc đánh giá 2 chiều & trần thời gian thử việc theo Luật Lao động' : 'Enforce mandatory 360 review & statutory probation length limit'}</p>

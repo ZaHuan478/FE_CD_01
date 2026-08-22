@@ -1,5 +1,4 @@
 import React from 'react'
-import { Smartphone } from 'lucide-react'
 import { useLanguage } from '../../../../../../context/LanguageContext'
 
 interface InfographicHeaderBannerProps {
@@ -10,8 +9,7 @@ interface InfographicHeaderBannerProps {
 
 export const InfographicHeaderBanner: React.FC<InfographicHeaderBannerProps> = ({
   sopCode,
-  isDarkMode,
-  onOpenWireframe
+  isDarkMode
 }) => {
   const { language } = useLanguage()
 
@@ -23,11 +21,10 @@ export const InfographicHeaderBanner: React.FC<InfographicHeaderBannerProps> = (
 
   return (
     <div
-      className={`p-5 sm:p-6 rounded-3xl border shadow-md relative overflow-hidden transition-colors duration-300 ${
-        isDarkMode
-          ? 'bg-gradient-to-r from-slate-950 via-blue-950/40 to-slate-950 border-blue-900/50 text-white'
-          : 'bg-gradient-to-r from-blue-900 via-indigo-900 to-slate-900 border-blue-800 text-white'
-      }`}
+      className={`p-5 sm:p-6 rounded-3xl border shadow-md relative overflow-hidden transition-colors duration-300 ${isDarkMode
+        ? 'bg-gradient-to-r from-slate-950 via-blue-950/40 to-slate-950 border-blue-900/50 text-white'
+        : 'bg-gradient-to-r from-blue-900 via-indigo-900 to-slate-900 border-blue-800 text-white'
+        }`}
     >
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 relative z-10">
         <div className="space-y-1.5">
@@ -39,14 +36,14 @@ export const InfographicHeaderBanner: React.FC<InfographicHeaderBannerProps> = (
               {isRecruitmentProcess
                 ? 'SOP REC01 · RECRUITMENT REQUISITION'
                 : isProbationProcess
-                ? 'SOP PROB01 · PROBATION & CONTRACT RENEWAL'
-                : isPromotionProcess
-                ? 'SOP PROM01 · SALARY REVIEW & PROMOTION'
-                : isOffboardingProcess
-                ? 'SOP OFF01 · OFFBOARDING & 4-PARTY HANDOVER'
-                : isOvertimeProcess
-                ? 'SOP ATT01 · OVERTIME (OT) MANAGEMENT'
-                : 'SOP ATT02 · HRMS LEAVE MANAGEMENT'}
+                  ? 'SOP PROB01 · PROBATION & CONTRACT RENEWAL'
+                  : isPromotionProcess
+                    ? 'SOP PROM01 · SALARY REVIEW & PROMOTION'
+                    : isOffboardingProcess
+                      ? 'SOP OFF01 · OFFBOARDING & 4-PARTY HANDOVER'
+                      : isOvertimeProcess
+                        ? 'SOP ATT01 · OVERTIME (OT) MANAGEMENT'
+                        : 'SOP ATT02 · HRMS LEAVE MANAGEMENT'}
             </span>
           </div>
 
@@ -56,24 +53,24 @@ export const InfographicHeaderBanner: React.FC<InfographicHeaderBannerProps> = (
                 ? 'QUY TRÌNH YÊU CẦU & PHÊ DUYỆT TUYỂN DỤNG (RECRUITMENT REQUISITION)'
                 : 'STANDARDIZED RECRUITMENT REQUISITION & APPROVAL PROCESS'
               : isProbationProcess
-              ? language === 'vi'
-                ? 'QUY TRÌNH ĐÁNH GIÁ THỬ VIỆC & TÁI KÝ HỢP ĐỒNG (PROBATION & RENEWAL)'
-                : 'STANDARDIZED PROBATION EVALUATION & CONTRACT RENEWAL PROCESS'
-              : isPromotionProcess
-              ? language === 'vi'
-                ? 'QUY TRÌNH ĐIỀU CHỈNH LƯƠNG & BỔ NHIỆM THĂNG CHỨC (SALARY & PROMOTION)'
-                : 'STANDARDIZED SALARY REVIEW & PROMOTION PROCESS'
-              : isOffboardingProcess
-              ? language === 'vi'
-                ? 'QUY TRÌNH THỦ TỤC THÔI VIỆC & BÀN GIAO 4 BÊN (OFFBOARDING & HANDOVER)'
-                : 'STANDARDIZED OFFBOARDING & 4-PARTY HANDOVER PROCESS'
-              : isOvertimeProcess
-              ? language === 'vi'
-                ? 'QUY TRÌNH ĐĂNG KÝ LÀM THÊM GIỜ / TĂNG CA (OVERTIME - OT)'
-                : 'STANDARDIZED OVERTIME (OT) REGISTRATION & APPROVAL PROCESS'
-              : language === 'vi'
-              ? 'QUY TRÌNH ĐĂNG KÝ NGHỈ PHÉP TRÊN HRMS'
-              : 'STANDARDIZED HRMS LEAVE APPROVAL PROCESS'}
+                ? language === 'vi'
+                  ? 'QUY TRÌNH ĐÁNH GIÁ THỬ VIỆC & TÁI KÝ HỢP ĐỒNG (PROBATION & RENEWAL)'
+                  : 'STANDARDIZED PROBATION EVALUATION & CONTRACT RENEWAL PROCESS'
+                : isPromotionProcess
+                  ? language === 'vi'
+                    ? 'QUY TRÌNH ĐIỀU CHỈNH LƯƠNG & BỔ NHIỆM THĂNG CHỨC (SALARY & PROMOTION)'
+                    : 'STANDARDIZED SALARY REVIEW & PROMOTION PROCESS'
+                  : isOffboardingProcess
+                    ? language === 'vi'
+                      ? 'QUY TRÌNH THỦ TỤC THÔI VIỆC & BÀN GIAO 4 BÊN (OFFBOARDING & HANDOVER)'
+                      : 'STANDARDIZED OFFBOARDING & 4-PARTY HANDOVER PROCESS'
+                    : isOvertimeProcess
+                      ? language === 'vi'
+                        ? 'QUY TRÌNH ĐĂNG KÝ LÀM THÊM GIỜ / TĂNG CA (OVERTIME - OT)'
+                        : 'STANDARDIZED OVERTIME (OT) REGISTRATION & APPROVAL PROCESS'
+                      : language === 'vi'
+                        ? 'QUY TRÌNH ĐĂNG KÝ NGHỈ PHÉP TRÊN HRMS'
+                        : 'STANDARDIZED HRMS LEAVE APPROVAL PROCESS'}
           </h2>
           <p className="text-xs sm:text-sm text-slate-300 font-medium">
             {isRecruitmentProcess
@@ -81,38 +78,25 @@ export const InfographicHeaderBanner: React.FC<InfographicHeaderBannerProps> = (
                 ? 'Từng bước chuẩn hóa: Đối soát định biên, màng lọc trần People Cost & chuỗi duyệt 4 cấp kích hoạt Job Posting'
                 : 'Headcount quota check, People Cost ceiling safeguard & 4-level approval chain to Job Posting'
               : isProbationProcess
-              ? language === 'vi'
-                ? 'Từng bước chuẩn hóa: Tự động cảnh báo trước 30 ngày, rẽ nhánh KPI (Đạt >= 85%, Gia hạn, Dừng) & Báo tăng BHXH'
-                : 'Auto-alert 30 days prior, KPI 3-branch routing (>=85%, Extend, Exit) & Social Insurance enrollment'
-              : isPromotionProcess
-              ? language === 'vi'
-                ? 'Từng bước chuẩn hóa: Đối soát Khung Ngạch Bậc (MD-07), rẽ nhánh Tăng định kỳ vs Tăng vượt khung & cập nhật Org Chart'
-                : 'Salary scale audit (MD-07), 2-branch routing (Merit vs Out-of-grade) & Org Chart sync'
-              : isOffboardingProcess
-              ? language === 'vi'
-                ? 'Từng bước chuẩn hóa: Kiểm tra cam kết đào tạo, chuỗi bàn giao 4 bên (TBP, IT, HC, C&B) & chốt sổ BHXH'
-                : 'Training bond check, 4-stakeholder handover (Manager, IT, Admin, C&B) & Social Insurance exit'
-              : isOvertimeProcess
-              ? language === 'vi'
-                ? 'Từng bước chuẩn hóa: Hệ số tính lương luật định (150%-200%-300%), màng lọc trần giờ & đối soát vân tay'
-                : 'Statutory pay rate (150%-200%-300%), legal cap safeguard & biometric log match'
-              : language === 'vi'
-              ? 'Từng bước chuẩn hóa, kiểm soát màng lọc kỹ thuật tự động & chuỗi phê duyệt 5 cấp'
-              : 'Automated technical gates & 5-level approval chain'}
+                ? language === 'vi'
+                  ? 'Từng bước chuẩn hóa: Tự động cảnh báo trước 30 ngày, rẽ nhánh KPI (Đạt >= 85%, Gia hạn, Dừng) & Báo tăng BHXH'
+                  : 'Auto-alert 30 days prior, KPI 3-branch routing (>=85%, Extend, Exit) & Social Insurance enrollment'
+                : isPromotionProcess
+                  ? language === 'vi'
+                    ? 'Từng bước chuẩn hóa: Đối soát Khung Ngạch Bậc (MD-07), rẽ nhánh Tăng định kỳ vs Tăng vượt khung & cập nhật Org Chart'
+                    : 'Salary scale audit (MD-07), 2-branch routing (Merit vs Out-of-grade) & Org Chart sync'
+                  : isOffboardingProcess
+                    ? language === 'vi'
+                      ? 'Từng bước chuẩn hóa: Kiểm tra cam kết đào tạo, chuỗi bàn giao 4 bên (TBP, IT, HC, C&B) & chốt sổ BHXH'
+                      : 'Training bond check, 4-stakeholder handover (Manager, IT, Admin, C&B) & Social Insurance exit'
+                    : isOvertimeProcess
+                      ? language === 'vi'
+                        ? 'Từng bước chuẩn hóa: Hệ số tính lương luật định (150%-200%-300%), màng lọc trần giờ & đối soát vân tay'
+                        : 'Statutory pay rate (150%-200%-300%), legal cap safeguard & biometric log match'
+                      : language === 'vi'
+                        ? 'Từng bước chuẩn hóa, kiểm soát màng lọc kỹ thuật tự động & chuỗi phê duyệt 5 cấp'
+                        : 'Automated technical gates & 5-level approval chain'}
           </p>
-        </div>
-
-        <div className="flex items-center gap-2 shrink-0">
-          {onOpenWireframe && (
-            <button
-              type="button"
-              onClick={onOpenWireframe}
-              className="px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white text-xs font-bold rounded-2xl shadow-md transition-all cursor-pointer flex items-center gap-1.5"
-            >
-              <Smartphone className="w-4 h-4" />
-              <span>{language === 'vi' ? 'Thử nghiệm Form trên App →' : 'Try App Form Wireframe →'}</span>
-            </button>
-          )}
         </div>
       </div>
     </div>

@@ -222,7 +222,7 @@ export const NodeDetailDrawer: React.FC<NodeDetailDrawerProps> = ({
             </div>
 
             <ul className="space-y-2">
-              {inputsList.map((inputItem, idx) => (
+              {inputsList.map((inputItem: string, idx: number) => (
                 <li
                   key={idx}
                   className="flex items-start gap-2.5 p-2.5 bg-white dark:bg-slate-900 rounded-xl border border-slate-200/80 dark:border-slate-700/80 text-xs shadow-2xs hover:border-sky-300 dark:hover:border-sky-700 transition-colors"
@@ -253,7 +253,7 @@ export const NodeDetailDrawer: React.FC<NodeDetailDrawerProps> = ({
                 Văn bản & Kết quả sinh ra:
               </span>
               <ul className="space-y-2">
-                {outputsList.map((outputItem, idx) => (
+                {outputsList.map((outputItem: string, idx: number) => (
                   <li
                     key={idx}
                     className="flex items-start gap-2.5 p-2.5 bg-emerald-50/60 dark:bg-emerald-950/30 text-emerald-900 dark:text-emerald-200 rounded-xl border border-emerald-200/70 dark:border-emerald-800/50 text-xs font-medium"
@@ -272,7 +272,7 @@ export const NodeDetailDrawer: React.FC<NodeDetailDrawerProps> = ({
                   Liên thông Phân hệ Thực tế:
                 </span>
                 <div className="grid grid-cols-1 gap-2">
-                  {integrationsList.map((integ, idx) => (
+                  {integrationsList.map((integ: IntegrationModule, idx: number) => (
                     <div
                       key={idx}
                       className={`p-2.5 rounded-xl border flex items-start gap-2.5 text-xs ${getModuleBadgeStyle(integ.color)}`}

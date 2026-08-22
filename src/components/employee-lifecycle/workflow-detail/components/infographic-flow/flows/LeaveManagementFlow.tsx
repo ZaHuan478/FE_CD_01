@@ -2,7 +2,6 @@ import React from 'react'
 import {
   Clock,
   ShieldCheck,
-  Smartphone,
   GitBranch,
   CheckCircle2,
   AlertTriangle,
@@ -110,7 +109,7 @@ export const LeaveManagementFlow: React.FC<FlowStageProps> = ({
             <div className="flex items-center gap-2.5">
               <div className="w-8 h-8 rounded-xl bg-teal-600 text-white flex items-center justify-center font-black text-xs shadow-xs">GĐ 3</div>
               <div>
-                <h3 className="text-sm sm:text-base font-extrabold text-slate-900 dark:text-white uppercase tracking-wider flex items-center gap-2"><Smartphone className="w-4 h-4 text-teal-600 dark:text-teal-400" /><span>{language === 'vi' ? 'GIAI ĐOẠN 3: THAO TÁC TRÊN APP HRMS (6 TRƯỜNG BẮT BUỘC)' : 'STAGE 3: HRMS MOBILE APP DECLARATION'}</span></h3>
+                <h3 className="text-sm sm:text-base font-extrabold text-slate-900 dark:text-white uppercase tracking-wider flex items-center gap-2"><span>{language === 'vi' ? 'GIAI ĐOẠN 3: THAO TÁC TRÊN APP HRMS (6 TRƯỜNG BẮT BUỘC)' : 'STAGE 3: HRMS MOBILE APP DECLARATION'}</span></h3>
                 <p className="text-xs text-slate-500 dark:text-slate-400">{language === 'vi' ? 'Nhân viên thực hiện 4 bước khai báo thông tin đơn nghỉ trên Portal / App' : 'Employee completes 4 steps on Employee Self-Service Mobile App'}</p>
               </div>
             </div>
@@ -184,7 +183,7 @@ export const LeaveManagementFlow: React.FC<FlowStageProps> = ({
             <div className="flex items-center gap-2.5">
               <div className="w-8 h-8 rounded-xl bg-emerald-600 text-white flex items-center justify-center font-black text-xs shadow-xs">GĐ 5</div>
               <div>
-                <h3 className="text-sm sm:text-base font-extrabold text-slate-900 dark:text-white uppercase tracking-wider flex items-center gap-2"><CheckCircle2 className="w-4 h-4 text-emerald-600 dark:text-emerald-400" /><span>{language === 'vi' ? 'GIAI ĐOẠN 5: KẾT QUẢ & CẢNH BÁO TỐI QUAN TRỌNG' : 'STAGE 5: OUTCOMES & CRITICAL POLICY NOTICE'}</span></h3>
+                <h3 className="text-sm sm:text-base font-extrabold text-slate-900 dark:text-white uppercase tracking-wider flex items-center gap-2"><span>{language === 'vi' ? 'GIAI ĐOẠN 5: KẾT QUẢ & CẢNH BÁO TỐI QUAN TRỌNG' : 'STAGE 5: OUTCOMES & CRITICAL POLICY NOTICE'}</span></h3>
                 <p className="text-xs text-slate-500 dark:text-slate-400">{language === 'vi' ? 'Kết quả trạng thái đơn & quy định pháp lý bắt buộc khi xin nghỉ phép' : 'Final status outcome and mandatory compliance notice'}</p>
               </div>
             </div>

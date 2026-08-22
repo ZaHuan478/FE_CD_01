@@ -20,6 +20,10 @@ export const AppRoutes: React.FC = () => {
       />
       {/* Employee Lifecycle SPA Routes */}
       <Route path="/employee-lifecycle" element={<EmployeeLifecyclePage />} />
+      <Route path="/employee-lifecycle/infographic/:id" element={<EmployeeLifecyclePage />} />
+      <Route path="/employee-lifecycle/flowchart/:id" element={<EmployeeLifecyclePage />} />
+      <Route path="/employee-lifecycle/raci/:id" element={<EmployeeLifecyclePage />} />
+      <Route path="/employee-lifecycle/specs/:id" element={<EmployeeLifecyclePage />} />
       <Route path="/employee-lifecycle/workflow/:id" element={<EmployeeLifecyclePage />} />
       <Route path="/employee-lifecycle/wireframe/:id" element={<EmployeeLifecyclePage />} />
       <Route path="/employee-lifecycle/erd" element={<EmployeeLifecyclePage />} />

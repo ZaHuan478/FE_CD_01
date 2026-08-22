@@ -1,6 +1,7 @@
 // SOP Mapping Dictionary (Global Constant based on SOP - HRUX.xlsx)
 export const sopDictionary: Record<string, { badge: string; title: string }> = {
-  // 7 Bước Vòng đời Nhân viên (Lifecycle)
+  // 7 Bước Vòng đời Nhân viên (Lifecycle) + Bước 0 Định biên
+  'LIFE-00': { badge: 'SOP-EMP-01', title: 'Thiết lập định biên nhân sự (Headcount Budget Planning)' },
   'LIFE-01': { badge: 'SOP-TD-04', title: 'Tiếp nhận nhân viên mới (Phân hệ Tuyển dụng)' },
   'LIFE-02': { badge: 'SOP-NS-04', title: 'Quản lý thông tin nhân viên (Phân hệ Nhân sự)' },
   'LIFE-03': { badge: 'SOP-ĐG-04', title: 'Quy trình đánh giá thử việc & Điều động/điều chuyển (SOP-NS-12)' },

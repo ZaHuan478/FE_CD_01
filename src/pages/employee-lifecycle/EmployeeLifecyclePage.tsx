@@ -1,20 +1,23 @@
-import React, { useMemo, useState, useEffect, useCallback } from 'react'
+import React, { useMemo, useState, useEffect, useCallback, Suspense, useTransition } from 'react'
 import { useSearchParams, useParams, useLocation, useNavigate } from 'react-router-dom'
-import { Sparkles, Layers, Database, Sun, Moon } from 'lucide-react'
+import { Sparkles, Layers, Database, Sun, Moon, Loader2 } from 'lucide-react'
 
 import { MasterDataRelationshipModal } from '../../components/employee-lifecycle/MasterDataRelationshipModal'
-import { MasterDataHub } from '../../components/employee-lifecycle/master-data-hub/MasterDataHub'
-import { LifecycleStepper } from '../../components/employee-lifecycle/LifecycleStepper'
-import { OperationsGrid } from '../../components/employee-lifecycle/OperationsGrid'
 import { SystemSupportBar } from '../../components/employee-lifecycle/SystemSupportBar'
 import { SystemGuideBanner } from '../../components/employee-lifecycle/SystemGuideBanner'
-import { SystemOverviewDashboard } from '../../components/employee-lifecycle/SystemOverviewDashboard'
 import { LeftSidebarNav } from '../../components/employee-lifecycle/LeftSidebarNav'
 import { WireframeFormDetailPage } from '../../components/employee-lifecycle/WireframeFormDetailPage'
 import { WorkflowDetailPage } from '../../components/employee-lifecycle/WorkflowDetailPage'
+
+// ⚡ LAZY LOAD HEAVY COMPONENTS
+const MasterDataHub = React.lazy(() => import('../../components/employee-lifecycle/master-data-hub/MasterDataHub').then(module => ({ default: module.MasterDataHub })))
+const LifecycleStepper = React.lazy(() => import('../../components/employee-lifecycle/LifecycleStepper').then(module => ({ default: module.LifecycleStepper })))
+const OperationsGrid = React.lazy(() => import('../../components/employee-lifecycle/OperationsGrid').then(module => ({ default: module.OperationsGrid })))
+const SystemOverviewDashboard = React.lazy(() => import('../../components/employee-lifecycle/SystemOverviewDashboard').then(module => ({ default: module.SystemOverviewDashboard })))
 import { LanguageSelector } from '../../components/common/LanguageSelector'
 
-import { masterData, lifecycleProcesses, crossFunctionalProcesses, sharedServices } from './data'
+import { masterData, lifecycleProcesses, crossFunctionalProcesses, sharedServices, findNodeById } from './data'
+import { SOP_DATABASE } from '../../components/employee-lifecycle/workflow-detail/data/sopDatabase'
 import { sopDictionary } from '../../components/employee-lifecycle/data/sopDictionary'
 import type { LifecycleStep, OperationModule, DetailItem } from '../../types/employee-lifecycle'
 import { useLanguage } from '../../context/LanguageContext'
@@ -32,10 +35,13 @@ export const EmployeeLifecyclePage: React.FC = () => {
 
   const [activeSection, setActiveSection] = useState('layer-2-lifecycle')
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false)
+  const [, startTransition] = useTransition()
 
   // Sync tab with URL search parameter
   const handleTabChange = (tab: 'lifecycle' | 'masterdata' | 'reports') => {
-    setActiveTab(tab)
+    startTransition(() => {
+      setActiveTab(tab)
+    })
     setSearchParams((prev) => {
       const next = new URLSearchParams(prev)
       next.set('tab', tab)
@@ -43,6 +49,30 @@ export const EmployeeLifecyclePage: React.FC = () => {
     })
     window.scrollTo({ top: 0, behavior: 'smooth' })
   }
+
+  // Effect to sync URL back to state if navigate() is called from child components
+  useEffect(() => {
+    const tabFromUrl = searchParams.get('tab') as 'lifecycle' | 'masterdata' | 'reports'
+    if (tabFromUrl && tabFromUrl !== activeTab) {
+      startTransition(() => {
+        setActiveTab(tabFromUrl)
+      })
+    }
+  }, [searchParams, activeTab])
+
+  // Effect to scroll to hash target after tab or hash change
+  useEffect(() => {
+    if (location.hash) {
+      const hashId = location.hash.replace('#', '')
+      const timer = setTimeout(() => {
+        const el = document.getElementById(hashId)
+        if (el) {
+          el.scrollIntoView({ behavior: 'smooth' })
+        }
+      }, 150)
+      return () => clearTimeout(timer)
+    }
+  }, [location.hash, activeTab])
 
   // Theme state: dark / light mode toggle
   const [isDarkMode, setIsDarkMode] = useState<boolean>(() => {
@@ -71,7 +101,12 @@ export const EmployeeLifecyclePage: React.FC = () => {
   }, [])
 
   // Check route types
-  const isWorkflowRoute = location.pathname.startsWith('/employee-lifecycle/workflow/')
+  const isWorkflowRoute =
+    location.pathname.startsWith('/employee-lifecycle/workflow/') ||
+    location.pathname.startsWith('/employee-lifecycle/infographic/') ||
+    location.pathname.startsWith('/employee-lifecycle/flowchart/') ||
+    location.pathname.startsWith('/employee-lifecycle/raci/') ||
+    location.pathname.startsWith('/employee-lifecycle/specs/')
   const isWireframeRoute = location.pathname.startsWith('/employee-lifecycle/wireframe/')
   const isERDOpen = location.pathname === '/employee-lifecycle/erd'
 
@@ -87,19 +122,17 @@ export const EmployeeLifecyclePage: React.FC = () => {
     setActiveSection(sectionId)
 
     if (sectionId === 'overview-dashboard' || sectionId === 'sop-specs-matrix') {
-      setActiveTab('reports')
-      window.scrollTo({ top: 0, behavior: 'smooth' })
+      handleTabChange('reports')
       return
     }
 
     if (sectionId === 'layer-1-master-data') {
-      setActiveTab('masterdata')
-      window.scrollTo({ top: 0, behavior: 'smooth' })
+      handleTabChange('masterdata')
       return
     }
 
     if (sectionId === 'layer-2-lifecycle' || sectionId === 'layer-3-operations' || sectionId === 'system-support') {
-      setActiveTab('lifecycle')
+      handleTabChange('lifecycle')
       setTimeout(() => {
         const el = document.getElementById(sectionId)
         if (el) {
@@ -156,6 +189,7 @@ export const EmployeeLifecyclePage: React.FC = () => {
   // Build DetailItem from id
   const getItemById = useCallback((id: string): DetailItem | null => {
     const rawNode =
+      findNodeById(id) ||
       masterData.find((m) => m.id === id) ||
       lifecycleProcesses.find((l) => l.id === id) ||
       crossFunctionalProcesses.find((c) => c.id === id) ||
@@ -177,6 +211,31 @@ export const EmployeeLifecyclePage: React.FC = () => {
         sopIds: sopInfo ? [sopInfo.badge] : rawNode.sopIds,
         sopTitles: sopInfo ? [sopInfo.title] : [],
         uiFields: rawNode.wireframe.fields
+      }
+    }
+
+    // Fallback for items configured in SOP_DATABASE (e.g. LIFE-00, SOP-EMP-01, etc.)
+    const sopDbItem = SOP_DATABASE[id]?.[0]
+    if (sopDbItem) {
+      const sopInfo = sopDictionary[id]
+      return {
+        id: id,
+        title: sopInfo?.title || sopDbItem.sopTitle,
+        subtitle: sopDbItem.description,
+        category: 'lifecycle',
+        sourceStatus: 'official',
+        inputs: ['Bản kế hoạch / Yêu cầu nghiệp vụ', 'Dữ liệu định biên phòng ban'],
+        outputs: ['Kết quả phê duyệt BOD', 'Master Data trần hạn mức tuyển dụng'],
+        actors: sopDbItem.steps.map((s) => ({ name: s.actor, role: 'Thực hiện', action: s.title })),
+        rules: [],
+        process: {
+          steps: sopDbItem.steps.map((s) => s.title),
+          source: 'Quy trình vận hành HR Enterprise Standard',
+          status: 'official'
+        },
+        sopIds: sopInfo ? [sopInfo.badge] : [sopDbItem.sopCode],
+        sopTitles: sopInfo ? [sopInfo.title] : [sopDbItem.sopTitle],
+        uiFields: ['Năm xây dựng', 'Phòng ban', 'Chức vụ', 'Cấp độ (Level)', 'Kế hoạch 12 tháng', 'Thu nhập / People Cost']
       }
     }
 
@@ -424,22 +483,24 @@ export const EmployeeLifecyclePage: React.FC = () => {
         {/* TAB 1: VÒNG ĐỜI NHÂN SỰ & NGHIỆP VỤ VẬN HÀNH (MAIN WORKSPACE) */}
         {activeTab === 'lifecycle' && (
           <div className="space-y-6 animate-fadeIn">
-            {/* TẦNG 2: VÒNG ĐỜI NHÂN VIÊN (Interactive Stepper & Detail Canvas) */}
-            <div id="layer-2-lifecycle" className="scroll-mt-28">
-              <LifecycleStepper
-                steps={lifecycleSteps}
-                activeStepId={selectedItem?.id}
-                onSelectStep={handleOpenItemDetails}
-              />
-            </div>
+            <Suspense fallback={<div className="h-96 flex flex-col items-center justify-center gap-3"><Loader2 className="w-8 h-8 animate-spin text-blue-500" /><span className="text-sm font-bold text-slate-500">Đang tải biểu đồ vòng đời...</span></div>}>
+              {/* TẦNG 2: VÒNG ĐỜI NHÂN VIÊN (Interactive Stepper & Detail Canvas) */}
+              <div id="layer-2-lifecycle" className="scroll-mt-28">
+                <LifecycleStepper
+                  steps={lifecycleSteps}
+                  activeStepId={selectedItem?.id}
+                  onSelectStep={handleOpenItemDetails}
+                />
+              </div>
 
-            {/* TẦNG 3: NGHIỆP VỤ PHÁT SINH (Minimalist Cards Grid 4x2) */}
-            <div id="layer-3-operations" className="scroll-mt-28">
-              <OperationsGrid
-                modules={operationModules}
-                onSelectModule={handleOpenItemDetails}
-              />
-            </div>
+              {/* TẦNG 3: NGHIỆP VỤ PHÁT SINH (Minimalist Cards Grid 4x2) */}
+              <div id="layer-3-operations" className="scroll-mt-28">
+                <OperationsGrid
+                  modules={operationModules}
+                  onSelectModule={handleOpenItemDetails}
+                />
+              </div>
+            </Suspense>
 
             {/* TẦNG HỖ TRỢ XUYÊN SUỐT (System Support Sticky Bar) */}
             <div id="system-support" className="scroll-mt-28">
@@ -455,10 +516,12 @@ export const EmployeeLifecyclePage: React.FC = () => {
           <div className="space-y-6 animate-fadeIn">
             {/* ENTERPRISE MASTER DATA HUB WITH 3 TIERS, SEARCH & MODULE FILTERS */}
             <div id="layer-1-master-data" className="scroll-mt-28">
-              <MasterDataHub
-                onOpenERD={handleOpenERD}
-                isDarkMode={isDarkMode}
-              />
+              <Suspense fallback={<div className="h-96 flex flex-col items-center justify-center gap-3"><Loader2 className="w-8 h-8 animate-spin text-purple-500" /><span className="text-sm font-bold text-slate-500">Đang tải Master Data...</span></div>}>
+                <MasterDataHub
+                  onOpenERD={handleOpenERD}
+                  isDarkMode={isDarkMode}
+                />
+              </Suspense>
             </div>
           </div>
         )}
@@ -468,10 +531,9 @@ export const EmployeeLifecyclePage: React.FC = () => {
           <div className="space-y-6 animate-fadeIn">
             {/* HRMS EXECUTIVE SYSTEM DASHBOARD & RADIAL ECOSYSTEM WHEEL */}
             <div id="overview-dashboard" className="scroll-mt-28">
-              <SystemOverviewDashboard
-                onSelectStep={handleOpenItemDetails}
-                onOpenERD={handleOpenERD}
-              />
+              <Suspense fallback={<div className="h-96 flex flex-col items-center justify-center gap-3"><Loader2 className="w-8 h-8 animate-spin text-emerald-500" /><span className="text-sm font-bold text-slate-500">Đang khởi tạo Dashboard...</span></div>}>
+                <SystemOverviewDashboard />
+              </Suspense>
             </div>
           </div>
         )}

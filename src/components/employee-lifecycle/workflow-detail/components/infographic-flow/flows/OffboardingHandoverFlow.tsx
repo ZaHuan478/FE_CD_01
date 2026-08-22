@@ -1,7 +1,6 @@
 import React from 'react'
 import {
   LogOut,
-  ShieldCheck,
   Smartphone,
   GitBranch,
   CheckCircle2,
@@ -83,7 +82,6 @@ export const OffboardingHandoverFlow: React.FC<FlowStageProps> = ({
               <div className="w-8 h-8 rounded-xl bg-indigo-600 text-white flex items-center justify-center font-black text-xs shadow-xs">GĐ 2</div>
               <div>
                 <h3 className="text-sm sm:text-base font-extrabold text-slate-900 dark:text-white uppercase tracking-wider flex items-center gap-2">
-                  <ShieldCheck className="w-4 h-4 text-indigo-600 dark:text-indigo-400" />
                   <span>{language === 'vi' ? 'GIAI ĐOẠN 2: VƯỢT QUA MÀNG LỌC KỸ THUẬT TỰ ĐỘNG (AI RÀ SOÁT NGẦM)' : 'STAGE 2: AUTOMATED AI TECHNICAL GATES'}</span>
                 </h3>
                 <p className="text-xs text-slate-500 dark:text-slate-400">{language === 'vi' ? 'Quét cam kết đào tạo, thu hồi công nợ tài chính & khóa tài khoản tự động' : 'Scan training bonds, settle financial advances & auto-revoke system access'}</p>
@@ -206,7 +204,6 @@ export const OffboardingHandoverFlow: React.FC<FlowStageProps> = ({
               <div className="w-8 h-8 rounded-xl bg-emerald-600 text-white flex items-center justify-center font-black text-xs shadow-xs">GĐ 5</div>
               <div>
                 <h3 className="text-sm sm:text-base font-extrabold text-slate-900 dark:text-white uppercase tracking-wider flex items-center gap-2">
-                  <CheckCircle2 className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
                   <span>{language === 'vi' ? 'GIAI ĐOẠN 5: KẾT QUẢ & CẢNH BÁO TỐI QUAN TRỌNG' : 'STAGE 5: OUTCOMES & CRITICAL POLICY NOTICE'}</span>
                 </h3>
                 <p className="text-xs text-slate-500 dark:text-slate-400">{language === 'vi' ? 'Quyết toán lương thôi việc, thanh toán phép tồn, báo giảm BHXH (INS04) & chốt sổ' : 'Final pay calculation, unused leave settlement, social insurance exit & book return'}</p>

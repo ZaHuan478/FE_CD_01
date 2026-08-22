@@ -38,32 +38,35 @@ export const InfographicStageNavTabs: React.FC<InfographicStageNavTabsProps> = (
   ]
 
   return (
-    <div className="flex items-center gap-2 overflow-x-auto no-scrollbar p-2 rounded-2xl bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-xs font-bold shadow-2xs">
+    <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar p-2 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200/90 dark:border-slate-800 text-xs font-bold shadow-2xs">
       <button
         type="button"
         onClick={() => setActiveStageTab(0)}
-        className={`px-3.5 py-2 rounded-xl transition-all cursor-pointer whitespace-nowrap ${
+        className={`px-3.5 py-1.5 rounded-xl border-2 transition-all cursor-pointer whitespace-nowrap shadow-2xs ${
           activeStageTab === 0
-            ? 'bg-blue-600 text-white shadow-xs'
-            : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
+            ? 'bg-slate-900 text-white dark:bg-slate-100 dark:text-slate-900 border-slate-900 dark:border-slate-100 shadow-xs'
+            : 'bg-white hover:bg-slate-100/80 text-slate-900 dark:bg-slate-900 dark:hover:bg-slate-800 dark:text-white border-slate-900 dark:border-slate-200'
         }`}
       >
         ⚡ {language === 'vi' ? 'Xem Toàn Bộ 5 Giai Đoạn' : 'Full 5-Stage Overview'}
       </button>
-      {stagesList.map((stg) => (
-        <button
-          key={stg.num}
-          type="button"
-          onClick={() => setActiveStageTab(stg.num)}
-          className={`px-3 py-2 rounded-xl transition-all cursor-pointer whitespace-nowrap ${
-            activeStageTab === stg.num
-              ? 'bg-blue-600 text-white shadow-xs'
-              : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
-          }`}
-        >
-          <span>{language === 'vi' ? stg.label : stg.labelEn}</span>
-        </button>
-      ))}
+      {stagesList.map((stg) => {
+        const isTabActive = activeStageTab === stg.num
+        return (
+          <button
+            key={stg.num}
+            type="button"
+            onClick={() => setActiveStageTab(stg.num)}
+            className={`px-3.5 py-1.5 rounded-xl border-2 transition-all cursor-pointer whitespace-nowrap shadow-2xs ${
+              isTabActive
+                ? 'bg-slate-900 text-white dark:bg-slate-100 dark:text-slate-900 border-slate-900 dark:border-slate-100 shadow-xs'
+                : 'bg-white hover:bg-slate-100/80 text-slate-900 dark:bg-slate-900 dark:hover:bg-slate-800 dark:text-white border-slate-900 dark:border-slate-200'
+            }`}
+          >
+            <span>{language === 'vi' ? stg.label : stg.labelEn}</span>
+          </button>
+        )
+      })}
     </div>
   )
 }

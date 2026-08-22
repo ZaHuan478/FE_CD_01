@@ -3,7 +3,6 @@ import {
   Percent,
   ShieldCheck,
   Smartphone,
-  GitBranch,
   CheckCircle2,
   AlertTriangle,
   XCircle,
@@ -157,7 +156,7 @@ export const OvertimeManagementFlow: React.FC<FlowStageProps> = ({
             <div className="flex items-center gap-2.5">
               <div className="w-8 h-8 rounded-xl bg-amber-600 text-white flex items-center justify-center font-black text-xs shadow-xs">GĐ 4</div>
               <div>
-                <h3 className="text-sm sm:text-base font-extrabold text-slate-900 dark:text-white uppercase tracking-wider flex items-center gap-2"><GitBranch className="w-4 h-4 text-amber-600 dark:text-amber-400" /><span>{language === 'vi' ? 'GIAI ĐOẠN 4: CHUỖI PHÊ DUYỆT 4 CẤP (APPROVAL WORKFLOW CHAIN)' : 'STAGE 4: 4-LEVEL APPROVAL CHAIN'}</span></h3>
+                <h3 className="text-sm sm:text-base font-extrabold text-slate-900 dark:text-white uppercase tracking-wider flex items-center gap-2"><span>{language === 'vi' ? 'GIAI ĐOẠN 4: CHUỖI PHÊ DUYỆT 4 CẤP (APPROVAL WORKFLOW CHAIN)' : 'STAGE 4: 4-LEVEL APPROVAL CHAIN'}</span></h3>
                 <p className="text-xs text-slate-500 dark:text-slate-400">{language === 'vi' ? 'Chuỗi rẽ nhánh 4 tầng kiểm soát từ Quản lý phòng ban tới Chốt lương C&B' : '4-Tier approval chain from line manager to C&B payroll lock'}</p>
               </div>
             </div>

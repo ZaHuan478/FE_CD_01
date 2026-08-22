@@ -36,7 +36,50 @@ export type SOPFullNode = {
   uiFields: string[]
 }
 
-export const lifecycleMockNodes: Record<string, SOPFullNode> = {
+export const lifecycleMockNodes: Record<string, any> = {
+  'LIFE-00': {
+    id: 'LIFE-00',
+    type: 'lifecycle',
+    code: 'EMP01.01',
+    title: 'Thiết lập định biên nhân sự',
+    subtitle: 'Hoạch định, tham vấn, điều chỉnh, phê duyệt và cập nhật định biên phòng ban',
+    contextTrigger: 'Trưởng bộ phận xây dựng kế hoạch định biên vào đầu năm theo chiến lược công ty và ngân sách phê duyệt.',
+    actorsMatrix: {
+      proposer: 'Trưởng bộ phận (TBP - Xây dựng định biên)',
+      approver: 'HRBP (Tham vấn) & BOD (Phê duyệt định biên)',
+      executor: 'Chuyên viên C&B (Cập nhật kết quả duyệt)'
+    },
+    inputs: [
+      'Năm xây dựng & Phòng ban áp dụng',
+      'Chức vụ & Cấp bậc (Level job grade)',
+      'Tháng định biên (kế hoạch chi tiết 12 tháng)',
+      'Thu nhập & Chi phí nhân sự dự kiến (People Cost)'
+    ],
+    outputs: [
+      'Tổng thu nhập (People Cost) trên tổng định biên đã duyệt',
+      'Bản định biên nhân sự chính thức của doanh nghiệp',
+      'Dữ liệu hạn mức tuyển dụng cập nhật vào Master Data'
+    ],
+    integrations: [
+      { module: 'RECRUIT', moduleName: 'Tuyển dụng (ATS)', color: 'blue', description: 'Trần hạn mức yêu cầu tuyển dụng mới' },
+      { module: 'PAY', moduleName: 'Lương thưởng (PAY)', color: 'emerald', description: 'Kiểm soát quỹ lương và chi phí nhân sự kế hoạch' }
+    ],
+    sopBadge: 'SOP-EMP-01',
+    sopIds: ['SOP-EMP-01'],
+    sopTitles: ['Quy trình Thiết lập định biên nhân sự (EMP01.01 - EMP01.05)'],
+    process: {
+      status: 'official',
+      steps: [
+        'EMP01.01: Thiết lập định biên nhân sự (TBP)',
+        'EMP01.02: Tham vấn định biên nhân sự (HRBP)',
+        'EMP01.03: Điều chỉnh định biên nhân sự (TBP)',
+        'EMP01.04: Phê duyệt định biên nhân sự (BOD)',
+        'EMP01.05: Cập nhật kết quả phê duyệt vào hệ thống (C&B)'
+      ],
+      source: '1.ERP.HRM.SOP.docx'
+    },
+    uiFields: ['Năm', 'Phòng ban', 'Chức vụ', 'Cấp độ', 'Số lượng 12 tháng', 'Chi phí dự kiến']
+  },
   // =========================================================================
   // A. TẦNG 2: LUỒNG NGHIỆP VỤ CHÍNH — VÒNG ĐỜI NHÂN VIÊN (LIFECYCLE)
   // =========================================================================
