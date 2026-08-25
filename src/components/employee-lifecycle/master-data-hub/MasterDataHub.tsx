@@ -73,17 +73,23 @@ const getContextModuleName = (moduleId?: string | null, process?: SopSubProcess)
 }
 
 export const MasterDataHub: React.FC<MasterDataHubProps> = ({ onOpenERD, isDarkMode, sopCode, moduleId }) => {
+  const [selectedProcessCode, setSelectedProcessCode] = useState(sopCode || '')
   const contextProcess = useMemo(() => {
-    const target = normalize(sopCode || '')
+    const target = normalize(selectedProcessCode || sopCode || '')
     return target ? allOperationalProcesses.find((item) => normalize(item.sopCode) === target) : undefined
-  }, [sopCode])
+  }, [selectedProcessCode, sopCode])
 
   const [activeTab, setActiveTab] = useState<HubTab>(contextProcess ? 'guide' : 'catalogs')
   const [selectedStepCode, setSelectedStepCode] = useState(contextProcess?.steps[0]?.stepCode || '')
   const [searchTerm, setSearchTerm] = useState('')
+  const [processSearchTerm, setProcessSearchTerm] = useState('')
   const [selectedReference, setSelectedReference] = useState<SopSubProcess | null>(null)
   const [activeItem, setActiveItem] = useState<SopSubProcess | null>(null)
   const [catalogPage, setCatalogPage] = useState(1)
+
+  useEffect(() => {
+    if (sopCode) setSelectedProcessCode(sopCode)
+  }, [sopCode])
 
   useEffect(() => {
     if (!contextProcess) return
@@ -112,6 +118,17 @@ export const MasterDataHub: React.FC<MasterDataHubProps> = ({ onOpenERD, isDarkM
       ...(item.steps.flatMap(getStepRequirement))
     ].join(' ')).includes(query))
   }, [searchTerm, searchableItems])
+
+  const filteredGuideProcesses = useMemo(() => {
+    const query = normalize(processSearchTerm.trim())
+    if (!query) return allOperationalProcesses
+    return allOperationalProcesses.filter((process) => normalize([
+      process.sopCode,
+      process.sopTitle,
+      process.sopCategory,
+      process.description
+    ].join(' ')).includes(query))
+  }, [processSearchTerm])
 
   const pageSize = 6
   const totalPages = Math.max(1, Math.ceil(filteredItems.length / pageSize))
@@ -155,15 +172,53 @@ export const MasterDataHub: React.FC<MasterDataHubProps> = ({ onOpenERD, isDarkM
 
         <div className={`px-3 py-2 border-t flex flex-wrap gap-1.5 ${isDarkMode ? 'bg-slate-950/45 border-slate-800' : 'bg-slate-50 border-slate-100'}`}>
           {[
-            { id: 'guide' as const, label: 'Hướng dẫn theo quy trình', icon: ClipboardList, disabled: !contextProcess },
+            { id: 'guide' as const, label: 'Hướng dẫn theo quy trình', icon: ClipboardList },
             { id: 'catalogs' as const, label: 'Danh mục dùng chung', icon: Database },
             { id: 'management' as const, label: 'Cách quản lý danh mục', icon: ShieldCheck }
           ].map((tab) => {
             const Icon = tab.icon
-            return <button key={tab.id} type="button" disabled={tab.disabled} onClick={() => { setActiveTab(tab.id); setCatalogPage(1) }} className={`px-3.5 py-2 rounded-lg text-xs font-bold flex items-center gap-2 transition-colors ${activeTab === tab.id ? 'bg-blue-600 text-white shadow-sm' : 'text-slate-600 dark:text-slate-300 hover:bg-white dark:hover:bg-slate-800'} ${tab.disabled ? 'opacity-45 cursor-not-allowed' : 'cursor-pointer'}`}><Icon className="w-3.5 h-3.5" />{tab.label}</button>
+            return <button key={tab.id} type="button" onClick={() => { setActiveTab(tab.id); setCatalogPage(1) }} className={`px-3.5 py-2 rounded-lg text-xs font-bold flex items-center gap-2 transition-colors ${activeTab === tab.id ? 'bg-blue-600 text-white shadow-sm' : 'text-slate-600 dark:text-slate-300 hover:bg-white dark:hover:bg-slate-800'} cursor-pointer`}><Icon className="w-3.5 h-3.5" />{tab.label}</button>
           })}
         </div>
       </section>
+
+      {activeTab === 'guide' && <section className={`rounded-2xl border shadow-sm p-4 sm:p-5 ${surface}`}>
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+          <div>
+            <h3 className="text-base font-black">Chọn quy trình</h3>
+            <p className={`text-xs mt-1 ${subdued}`}>Chọn một quy trình để xem lần lượt các bước thực hiện và thông tin cần chuẩn bị.</p>
+          </div>
+          <div className="flex w-full items-center gap-2 sm:w-[560px]">
+            <div className="relative min-w-0 flex-1">
+              <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+              <input
+                value={processSearchTerm}
+                onChange={(event) => setProcessSearchTerm(event.target.value)}
+                placeholder="Tìm mã hoặc tên quy trình..."
+                className={`w-full rounded-xl border py-2.5 pl-9 pr-3 text-sm outline-none focus:border-blue-500 ${isDarkMode ? 'bg-slate-950 border-slate-700 text-white placeholder-slate-500' : 'bg-white border-slate-200 text-slate-900 placeholder-slate-400'}`}
+              />
+            </div>
+            <div className="min-w-0 flex-[1.35]">
+              <label htmlFor="process-guide-selector" className="sr-only">Chọn quy trình</label>
+              <select
+                id="process-guide-selector"
+                value={selectedProcessCode}
+                onChange={(event) => setSelectedProcessCode(event.target.value)}
+                className={`w-full rounded-xl border px-3 py-2.5 text-sm font-semibold outline-none focus:border-blue-500 ${isDarkMode ? 'bg-slate-950 border-slate-700 text-white' : 'bg-white border-slate-200 text-slate-900'}`}
+              >
+                <option value="">-- Chọn quy trình để xem hướng dẫn --</option>
+                {filteredGuideProcesses.map((process) => (
+                  <option key={process.sopCode} value={process.sopCode}>
+                    {process.sopCode} — {process.sopTitle}
+                  </option>
+                ))}
+                {filteredGuideProcesses.length === 0 && <option value="" disabled>Không tìm thấy quy trình phù hợp</option>}
+              </select>
+            </div>
+          </div>
+        </div>
+        {!contextProcess && <p className={`mt-4 rounded-xl border px-4 py-3 text-sm ${isDarkMode ? 'border-slate-800 bg-slate-950/45 text-slate-300' : 'border-blue-100 bg-blue-50 text-slate-600'}`}>Hãy chọn một quy trình ở trên để mở danh sách các bước hướng dẫn.</p>}
+      </section>}
 
       {activeTab === 'guide' && contextProcess && selectedStep && <section className={`rounded-2xl border shadow-sm overflow-hidden ${surface}`}>
         <div className={`p-4 border-b ${isDarkMode ? 'border-slate-800' : 'border-slate-100'}`}>
