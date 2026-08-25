@@ -1,7 +1,9 @@
 import type { SopSubProcess } from '../types'
+import { DOCX_EMPLOYEE_SOP_DATABASE } from './docxEmployeeSopDatabase'
+import { DOCX_OPERATIONAL_SOP_DATABASE } from './docxOperationalSopDatabase'
 
 // 100% Complete SOP Database mapped for ALL 7 Lifecycle Steps & Cross-Functional Operations from 1.EMP.HRM.SOP.docx
-export const SOP_DATABASE: Record<string, SopSubProcess[]> = {
+const SOP_DATABASE_BASE: Record<string, SopSubProcess[]> = {
   // LIFE-00: ĐỊNH BIÊN NHÂN SỰ (HEADCOUNT BUDGET PLANNING)
   'LIFE-00': [
     {
@@ -66,7 +68,7 @@ export const SOP_DATABASE: Record<string, SopSubProcess[]> = {
   // LIFE-01: TIẾP NHẬN & TUYỂN DỤNG (RECRUITMENT & ONBOARDING)
   'LIFE-01': [
     {
-      sopCode: 'SOP REC01',
+      sopCode: 'SOP-REC-01',
       sopTitle: 'Quy trình Yêu cầu & Phê duyệt Tuyển dụng (Recruitment Requisition)',
       sopCategory: 'Tuyển dụng & Định biên',
       description: 'Quy trình tạo yêu cầu tuyển dụng, đối soát hạn mức định biên phòng ban, thẩm định ngân sách People Cost và phê duyệt đăng tuyển.',
@@ -124,72 +126,246 @@ export const SOP_DATABASE: Record<string, SopSubProcess[]> = {
       ]
     },
     {
-      sopCode: 'SOP EMP01',
-      sopTitle: 'Quy trình Thiết lập Định biên Nhân sự (Headcount Planning)',
-      sopCategory: 'Tiền đề & Định biên',
-      description: 'Lập kế hoạch định biên nhân sự, xác định hạn mức số lượng & chi phí people cost cho 12 tháng.',
+      sopCode: 'SOP-REC-02',
+      sopTitle: 'Quy trình Đăng tin Tuyển dụng & Quản lý Job Boards Đối tác (Job Posting & Multi-Channel)',
+      sopCategory: 'Tuyển dụng & Kênh nguồn',
+      description: 'Quy trình biên soạn nội dung tin tuyển dụng, phân bổ ngân sách theo kênh, xuất bản đa nền tảng và tối ưu hóa chi phí Cost-per-Hire.',
       steps: [
         {
-          stepCode: 'EMP01.01',
-          title: 'Xây dựng kế hoạch định biên phòng ban',
-          actor: 'Trưởng bộ phận (TBP)',
-          location: 'Portal',
-          timing: 'Đầu năm',
+          stepCode: 'REC02.01',
+          title: 'Biên soạn nội dung tin tuyển dụng chuẩn theo JD',
+          actor: 'Chuyên viên Tuyển dụng (Recruiter)',
+          location: 'ATS Portal',
+          timing: 'Trong 24h sau khi nhận Requisition ID',
           typeCode: 'N',
-          description: 'TBP phụ trách xây dựng định biên cho phòng ban phụ trách (chi tiết 12 tháng, chức vụ, level job grade, thu nhập people cost). Gửi mail trình duyệt cho HRM/HRD.',
-          fieldsChecklist: ['Năm xây dựng định biên', 'Phòng ban', 'Chức vụ', 'Cấp độ (Job grade)', 'Tháng định biên (12 tháng)', 'Thu nhập (People cost)']
+          description: 'Soạn thảo tiêu đề tin, mô tả công việc, yêu cầu năng lực, chế độ đãi ngộ và thông điệp văn hóa doanh nghiệp chuẩn mực.',
+          fieldsChecklist: ['Mã Requisition ID', 'Tiêu đề tin tuyển dụng (Job Title)', 'Yêu cầu kinh nghiệm & Kỹ năng', 'Mức lương công khai/thỏa thuận', 'Hạn nộp hồ sơ']
         },
         {
-          stepCode: 'EMP01.02',
-          title: 'Tham vấn định biên & Hoạch định nhân sự',
-          actor: 'HRM / HRD',
-          location: 'Bên ngoài (Họp tham vấn)',
-          timing: 'Sau khi nhận từ TBP',
+          stepCode: 'REC02.02',
+          title: 'Phân bổ ngân sách & Lựa chọn kênh đăng tuyển đối tác',
+          actor: 'Trưởng nhóm Tuyển dụng (TA Lead)',
+          location: 'ATS Module / Budget Management',
+          timing: 'Cùng ngày biên soạn tin',
           typeCode: 'M',
-          description: 'HRM/HRD tham vấn định biên nhằm trao đổi định hướng phát triển của Công ty, hoạch định nhân sự phù hợp để TBP có góc nhìn chính xác.',
-          fieldsChecklist: ['Định hướng phát triển công ty', 'Hạn mức ngân sách nhân sự', 'Gợi ý điều chỉnh định biên']
+          description: 'Lựa chọn các kênh: LinkedIn, TopCV, VietnamWorks, Facebook Job, Mạng lưới Referral nội bộ hoặc Hợp đồng với đơn vị Headhunt.',
+          fieldsChecklist: ['Danh sách kênh đối tác lựa chọn', 'Hạn mức chi phí từng kênh', 'Mã tài khoản Job Board API']
         },
         {
-          stepCode: 'EMP01.03',
-          title: 'Điều chỉnh kế hoạch định biên',
-          actor: 'Trưởng bộ phận (TBP)',
-          location: 'Portal',
-          timing: 'Sau khi họp tham vấn',
-          typeCode: 'M',
-          description: 'TBP cập nhật thông tin thống nhất sau khi tham vấn với HRM/HRD. Gửi mail thông báo kế hoạch tới các cấp phê duyệt.',
-          fieldsChecklist: ['Chức vụ điều chỉnh', 'Cấp độ level', 'Tháng định biên điều chỉnh', 'Tổng thu nhập đính kèm']
-        },
-        {
-          stepCode: 'EMP01.04',
-          title: 'Họp bảo vệ & Duyệt định biên',
-          actor: 'Ban Giám Đốc (BOM)',
-          location: 'Portal & Họp BOM',
-          timing: 'Sau khi trình duyệt BOM',
-          typeCode: 'M',
-          description: 'TBP & HRM/HRD họp bảo vệ kế hoạch định biên trước Ban Giám Đốc. BOM xem xét và quyết định phê duyệt chính thức.',
-          fieldsChecklist: ['Biên bản họp bảo vệ định biên', 'Quyết định phê duyệt BOM', 'Thông báo duyệt tới TBP/HRM']
-        },
-        {
-          stepCode: 'EMP01.05',
-          title: 'Cập nhật & Khóa dữ liệu định biên phê duyệt',
-          actor: 'HRM - Nhân sự',
-          location: 'Bên trong (Hệ thống HRM)',
-          timing: 'Sau khi BOM duyệt',
+          stepCode: 'REC02.03',
+          title: 'Xuất bản tin tự động đa kênh qua ATS Multi-Posting API',
+          actor: 'Hệ thống HRM Engine (Auto-Publisher)',
+          location: 'Bên trong / API Gateway',
+          timing: 'Tự động ngay khi TA Lead duyệt kênh',
           typeCode: 'A',
-          description: 'Kết quả duyệt của BOM được lưu trữ và khóa trên phần mềm, làm cơ sở kiểm soát hạn mức tuyển dụng (Available Headcount).',
-          fieldsChecklist: ['Phòng ban xây dựng', 'Chức vụ & Level', 'Định biên 12 tháng', 'Tổng ngân sách People Cost phê duyệt']
+          description: 'Hệ thống tự động đẩy bài đăng đồng thời lên Career Portal công ty và các trang tuyển dụng đối tác thông qua API tích hợp.',
+          fieldsChecklist: ['URL bài đăng trên Career Portal', 'URL tin đăng LinkedIn/TopCV', 'Mã tracking nguồn ứng viên (UTM Code)']
+        },
+        {
+          stepCode: 'REC02.04',
+          title: 'Theo dõi lưu lượng & Tỷ lệ chuyển đổi ứng tuyển (Conversion Rate)',
+          actor: 'Chuyên viên Tuyển dụng & Hệ thống ATS',
+          location: 'ATS Dashboard',
+          timing: 'Hàng tuần trong suốt đợt tuyển',
+          typeCode: 'A',
+          description: 'Hệ thống thống kê số lượt xem tin (Views), số lượt nộp hồ sơ (Applications) và tỷ lệ chuyển đổi của từng kênh đăng tuyển.',
+          fieldsChecklist: ['Lượt view bài đăng', 'Số lượng CV nộp về', 'Tỷ lệ hồ sơ đạt chuẩn (Quality of Hire)']
+        },
+        {
+          stepCode: 'REC02.05',
+          title: 'Đóng bài đăng tuyển dụng & Quyết toán chi phí kênh',
+          actor: 'Chuyên viên Tuyển dụng & Kế toán',
+          location: 'ATS Portal',
+          timing: 'Khi đủ chỉ tiêu hoặc hết hạn tin',
+          typeCode: 'M',
+          description: 'Hạ tin tuyển dụng, khóa tiếp nhận hồ sơ mới và tổng kết báo cáo chi phí trên mỗi ứng viên tuyển dụng thành công (Cost-per-Hire).',
+          fieldsChecklist: ['Trạng thái: Đã đóng tuyển dụng (Closed)', 'Báo cáo Cost-per-Hire', 'Biên bản nghiệm thu dịch vụ Job Board']
         }
       ]
     },
     {
-      sopCode: 'SOP EMP02',
-      sopTitle: 'Quy trình Tăng nhân viên mới không qua Tuyển dụng (EMP02 Onboarding & KPI)',
-      sopCategory: 'Tiếp nhận & Đánh giá Thử việc',
-      description: 'Lưu đồ 6 phân làn: Tiếp nhận nhân sự, chuẩn bị IT/cơ sở vật chất, đào tạo hội nhập, quản trị KPI 60 ngày thử việc và rẽ nhánh Ký HĐLĐ hoặc Thanh lý.',
+      sopCode: 'SOP-REC-03',
+      sopTitle: 'Quy trình Tiếp nhận & Sàng lọc Hồ sơ Ứng viên (Screening & AI Talent Pool)',
+      sopCategory: 'Tuyển dụng & Sàng lọc CV',
+      description: 'Quy trình thu thập hồ sơ đa nguồn, bóc tách CV tự động bằng AI, chấm điểm tương thích năng lực, phỏng vấn sơ loại và phân loại Talent Pool.',
+      steps: [
+        {
+          stepCode: 'REC03.01',
+          title: 'Thu thập hồ sơ tự động từ các nguồn nộp CV',
+          actor: 'Hệ thống HRM Engine (AI CV Ingest)',
+          location: 'Bên trong / Email & API Ingest',
+          timing: 'Real-time 24/7 khi ứng viên nộp',
+          typeCode: 'A',
+          description: 'Tự động gom CV từ Career Portal, Email tuyển dụng, LinkedIn và Job Boards về một cơ sở dữ liệu tập trung duy nhất.',
+          fieldsChecklist: ['File CV gốc (PDF/Docx)', 'Nguồn ứng tuyển (Source Tracking)', 'Thời gian nộp', 'Mã vị trí ứng tuyển']
+        },
+        {
+          stepCode: 'REC03.02',
+          title: 'Bóc tách thông tin CV bằng AI & Chấm điểm tương thích (AI CV Parsing)',
+          actor: 'Hệ thống HRM Engine (AI Matching)',
+          location: 'Bên trong (Hệ thống HRM)',
+          timing: 'Tự động trong 5 giây sau khi nạp CV',
+          typeCode: 'A',
+          description: 'AI tự động trích xuất: Họ tên, Số điện thoại, Email, Học vấn, Kinh nghiệm làm việc và so khớp với Khung tiêu chuẩn chức danh (MD-06) để cho ra điểm Matching Score (0-100%).',
+          fieldsChecklist: ['Dữ liệu hồ sơ trích xuất', 'Điểm Matching Score (%)', 'Mức độ đáp ứng kỹ năng cốt lõi (Skills Matrix)']
+        },
+        {
+          stepCode: 'REC03.03',
+          title: 'Chuyên viên tuyển dụng thẩm định & Phỏng vấn sơ loại qua điện thoại',
+          actor: 'Chuyên viên Tuyển dụng (Recruiter)',
+          location: 'ATS Portal & Tổng đài VOIP',
+          timing: 'Trong 48h sau khi nhận CV',
+          typeCode: 'N',
+          description: 'Recruiter rà soát hồ sơ đạt điểm sàn (>= 70%), gọi điện thoại xác nhận mức độ quan tâm, mức lương mong muốn và thời gian có thể nhận việc.',
+          fieldsChecklist: ['Kết quả phỏng vấn sơ loại', 'Mức lương kỳ vọng', 'Thời gian có thể đi làm', 'Đánh giá thái độ & kỹ năng giao tiếp']
+        },
+        {
+          stepCode: 'REC03.04',
+          title: 'Trưởng bộ phận (TBP) xem xét danh sách hồ sơ Shortlist',
+          actor: 'Trưởng bộ phận (TBP)',
+          location: 'Manager Portal',
+          timing: 'Trong 24h sau khi Recruiter gửi',
+          typeCode: 'M',
+          description: 'Trưởng bộ phận trực tiếp duyệt danh sách Shortlist các ứng viên tiềm năng nhất để chuyển sang vòng phỏng vấn chuyên môn.',
+          fieldsChecklist: ['Trạng thái duyệt: Đồng ý phỏng vấn / Không đạt', 'Ghi chú chuyên môn của TBP']
+        },
+        {
+          stepCode: 'REC03.05',
+          title: 'Phân loại luồng & Lưu trữ cơ sở dữ liệu Talent Pool',
+          actor: 'Hệ thống HRM - Tuyển dụng',
+          location: 'Bên trong / Talent Pool',
+          timing: 'Tức thì sau khi TBP duyệt',
+          typeCode: 'A',
+          description: 'Chuyển ứng viên Đạt sang vòng Lên lịch phỏng vấn (REC-04); Lưu ứng viên tiềm năng vào Talent Pool dự phòng; Tự động gửi email thông báo từ chối lịch sự cho ứng viên không phù hợp.',
+          fieldsChecklist: ['Danh sách ứng viên vào vòng phỏng vấn (Shortlist)', 'Cơ sở dữ liệu Talent Pool dự phòng', 'Log email tự động gửi ứng viên']
+        }
+      ]
+    },
+    {
+      sopCode: 'SOP-REC-04',
+      sopTitle: 'Quy trình Tổ chức Phỏng vấn & Đánh giá Năng lực (Interview & Assessment)',
+      sopCategory: 'Tuyển dụng & Phỏng vấn',
+      description: 'Quy trình xếp lịch phỏng vấn tự động, gửi thư mời & SMS nhắc lịch, hội đồng đánh giá theo Scorecard năng lực và thẩm định tham chiếu.',
+      steps: [
+        {
+          stepCode: 'REC04.01',
+          title: 'Lên lịch phỏng vấn tự động & Đồng bộ Lịch làm việc',
+          actor: 'Chuyên viên Tuyển dụng & Hệ thống ATS',
+          location: 'ATS Portal / Calendar Sync',
+          timing: 'Sau khi có danh sách Shortlist',
+          typeCode: 'N',
+          description: 'Hệ thống tự động kiểm tra lịch trống của Hội đồng phỏng vấn (TBP, HRD, Chuyên gia), đề xuất khung giờ và phòng họp (Online qua Zoom/Meet hoặc Offline).',
+          fieldsChecklist: ['Thời gian phỏng vấn', 'Hình thức: Trực tiếp / Online Meeting', 'Thành phần Hội đồng phỏng vấn (Interviewer Panel)', 'Địa điểm / Link họp']
+        },
+        {
+          stepCode: 'REC04.02',
+          title: 'Tự động gửi Thư mời phỏng vấn & SMS nhắc lịch cho ứng viên',
+          actor: 'Hệ thống HRM Engine (Auto-Messenger)',
+          location: 'Bên trong / Email & SMS Brandname',
+          timing: 'Trước buổi phỏng vấn 48h và nhắc trước 2h',
+          typeCode: 'A',
+          description: 'Gửi email thư mời phỏng vấn chuyên nghiệp kèm đường link xác nhận tham gia (RSVP) và SMS nhắc nhở tự động.',
+          fieldsChecklist: ['Email thư mời phỏng vấn', 'Trạng thái ứng viên xác nhận (RSVP: Confirmed / Reschedule)', 'Tin nhắn SMS nhắc lịch']
+        },
+        {
+          stepCode: 'REC04.03',
+          title: 'Thực hiện phỏng vấn & Chấm điểm theo Phiếu đánh giá (Interview Scorecard)',
+          actor: 'Hội đồng phỏng vấn (TBP & HRD)',
+          location: 'Portal Đánh giá Tuyển dụng',
+          timing: 'Trong và ngay sau buổi phỏng vấn',
+          typeCode: 'M',
+          description: 'Các thành viên hội đồng chấm điểm trực tiếp trên phần mềm theo Bộ khung tiêu chuẩn năng lực (MD-06): Kỹ năng chuyên môn, Tư duy giải quyết vấn đề, Văn hóa doanh nghiệp.',
+          fieldsChecklist: ['Phiếu chấm điểm Scorecard chuẩn', 'Điểm chuyên môn của TBP', 'Điểm văn hóa của HRD', 'Ý kiến kết luận: Tuyển / Dự phòng / Từ chối']
+        },
+        {
+          stepCode: 'REC04.04',
+          title: 'Xác minh thông tin tham chiếu (Reference Check)',
+          actor: 'Chuyên viên Tuyển dụng (Recruiter)',
+          location: 'ATS Portal',
+          timing: 'Đối với ứng viên đề xuất trúng tuyển',
+          typeCode: 'N',
+          description: 'Liên hệ người tham chiếu (Quản lý cũ, Đồng nghiệp cũ) của ứng viên để xác minh lịch sử công tác, thành tích và tính trung thực.',
+          fieldsChecklist: ['Thông tin người tham chiếu', 'Xác nhận chức danh & thời gian làm việc cũ', 'Biên bản đánh giá Reference Check']
+        },
+        {
+          stepCode: 'REC04.05',
+          title: 'Tổng hợp kết quả & Phê duyệt trúng tuyển',
+          actor: 'Trưởng phòng Nhân sự (HRD) & BOM',
+          location: 'Portal',
+          timing: 'Trong 24h sau phỏng vấn',
+          typeCode: 'M',
+          description: 'Tổng hợp điểm trung bình của Hội đồng, lập Tờ trình kết quả phỏng vấn trình HRD và Ban Giám Đốc phê duyệt tuyển dụng chính thức.',
+          fieldsChecklist: ['Bảng tổng hợp điểm phỏng vấn', 'Quyết định phê duyệt trúng tuyển', 'Chuyển trạng thái: Sẵn sàng phát hành Offer']
+        }
+      ]
+    },
+    {
+      sopCode: 'SOP-REC-05',
+      sopTitle: 'Quy trình Thư mời Nhận việc (Offer Letter) & Chuyển giao Onboarding',
+      sopCategory: 'Tuyển dụng & Thư mời Offer',
+      description: 'Quy trình lập thư mời nhận việc từ thang bảng lương MD-07, ký số điện tử, ứng viên ký xác nhận và đẩy dữ liệu sang Phân hệ Hồ sơ Onboarding.',
+      steps: [
+        {
+          stepCode: 'REC05.01',
+          title: 'Lập dự thảo Thư mời nhận việc (Offer Letter Drafting)',
+          actor: 'Chuyên viên Tuyển dụng (Recruiter)',
+          location: 'ATS Portal',
+          timing: 'Ngay khi có phê duyệt trúng tuyển',
+          typeCode: 'N',
+          description: 'Khởi tạo Offer Letter từ biểu mẫu chuẩn, kế thừa chức danh, phòng ban, dải lương cơ bản (MD-07), phụ cấp, thời gian thử việc và ngày bắt đầu làm việc.',
+          fieldsChecklist: ['Mã ứng viên', 'Vị trí công tác & Phòng ban', 'Mức lương cơ bản & Phụ cấp', 'Thời gian thử việc (60 ngày)', 'Ngày bắt đầu nhận việc (Onboarding Date)']
+        },
+        {
+          stepCode: 'REC05.02',
+          title: 'Thẩm định của C&B & Ban Giám Đốc phê duyệt ký số Offer',
+          actor: 'Chuyên viên C&B & Ban Giám Đốc (BOM)',
+          location: 'Portal / Ký số vẹn toàn',
+          timing: 'Trong 24h làm việc',
+          typeCode: 'M',
+          description: 'C&B thẩm định cơ cấu thu nhập đảm bảo công bằng nội bộ, Ban Giám đốc ký số điện tử ban hành Thư mời nhận việc chính thức.',
+          fieldsChecklist: ['Ý kiến thẩm định của C&B', 'Chữ ký số BOM', 'File PDF Offer Letter được niêm phong số']
+        },
+        {
+          stepCode: 'REC05.03',
+          title: 'Phát hành Digital Offer & Ứng viên ký chấp thuận trực tuyến',
+          actor: 'Ứng viên (Candidate) & Hệ thống',
+          location: 'Candidate Portal / Mobile Link',
+          timing: 'Thời hạn phản hồi 48h - 72h',
+          typeCode: 'N',
+          description: 'Hệ thống gửi đường link Offer Letter bảo mật qua Email/SMS. Ứng viên đăng nhập, xem chi tiết và ký số xác nhận đồng ý nhận việc.',
+          fieldsChecklist: ['Trạng thái Offer: Đã chấp thuận (Accepted) / Đàm phán lại / Từ chối', 'Chữ ký điện tử của ứng viên', 'Thời gian xác nhận']
+        },
+        {
+          stepCode: 'REC05.04',
+          title: 'Tự động chuyển giao dữ liệu sang Phân hệ Hồ sơ (Core EMP Handoff)',
+          actor: 'Hệ thống HRM Engine (Auto Execution)',
+          location: 'Bên trong / Core EMP Module',
+          timing: 'Tức thì khi ứng viên ký chấp thuận',
+          typeCode: 'A',
+          description: 'Tự động tạo bản ghi Nhân sự mới trong danh sách chờ nhận việc (Pre-onboarding), chuyển toàn bộ thông tin CV sang Hồ sơ số (Core EMP) mà không cần nhập tay lại.',
+          fieldsChecklist: ['Đồng bộ dữ liệu sang SOP-EMP-02', 'Tự động trừ 1 chỉ tiêu Định biên (Available Headcount - 1)', 'Khóa hoàn tất Requisition ID']
+        },
+        {
+          stepCode: 'REC05.05',
+          title: 'Kích hoạt Checklist chuẩn bị tiếp nhận Onboarding liên phòng ban',
+          actor: 'Hệ thống HRM Engine (Onboarding Workflow)',
+          location: 'Bên trong / Task Automation',
+          timing: 'Tự động trước ngày nhận việc 3 ngày',
+          typeCode: 'A',
+          description: 'Tự động tạo các ticket giao việc: IT chuẩn bị Email & Máy tính; Hành chính chuẩn bị Thẻ nhân viên & Bàn làm việc; Đào tạo chuẩn bị Lịch hội nhập.',
+          fieldsChecklist: ['Ticket IT cấp tài khoản & thiết bị', 'Ticket Hành chính vị trí ngồi', 'Lịch Đào tạo hội nhập văn hóa', 'Thông báo gửi Trưởng bộ phận tiếp đón']
+        }
+      ]
+    },
+    {
+      sopCode: 'SOP-EMP-02',
+      sopTitle: 'Quy trình Tiếp nhận Nhân viên Mới Trực tiếp (Direct Onboarding & KPI)',
+      sopCategory: 'Tiếp nhận & Onboarding',
+      description: 'Quy trình tiếp nhận nhân sự không qua tuyển dụng dài ngày, bàn giao cơ sở vật chất, phân công IT, ký cam kết và quản trị KPI thử việc.',
       steps: [
         {
           stepCode: 'EMP02.01',
-          title: 'Danh sách nhân viên chờ nhận việc',
+          title: 'Cập nhật danh sách nhân viên chờ nhận việc',
           actor: 'HRM - Tuyển dụng',
           location: 'Bên trong (Hệ thống HRM)',
           timing: 'Khi có Offer xác nhận / Tiếp nhận trực tiếp',
@@ -199,301 +375,71 @@ export const SOP_DATABASE: Record<string, SopSubProcess[]> = {
         },
         {
           stepCode: 'EMP02.02',
-          title: 'Thông báo task đến các bộ phận (IT / Hành chính)',
-          actor: 'BP (Bộ phận IT / Hành chính)',
-          location: 'Ticket System / Portal',
-          timing: 'Trước ngày nhận việc',
+          title: 'Thông báo danh sách task cần chuẩn bị tới các bộ phận',
+          actor: 'HRM - Tuyển dụng',
+          location: 'Bên trong (Hệ thống HRM)',
+          timing: 'Trước ngày nhận việc 3 ngày',
           typeCode: 'A',
-          description: 'Tự động phân bổ task chuẩn bị cơ sở vật chất, cấp email, máy tính, thẻ từ ra vào & vị trí chỗ ngồi.',
-          fieldsChecklist: ['Ticket cấp Email công ty', 'Ticket cấp Laptop/PC', 'Thẻ nhân viên & Thẻ từ', 'Vị trí bàn làm việc']
+          description: 'Gửi checklist công việc cần chuẩn bị tới các phòng ban: IT (Máy tính, email, tài khoản), Hành chính (Văn phòng phẩm, chỗ ngồi), TBP (Kế hoạch công việc).',
+          fieldsChecklist: ['Checklist IT', 'Checklist Hành chính', 'Kế hoạch công việc từ TBP']
         },
         {
           stepCode: 'EMP02.03',
-          title: 'Cập nhật kết quả Task chuẩn bị & Gửi mail thông báo',
-          actor: 'BP (Bộ phận IT / Hành chính)',
-          location: 'Portal',
-          timing: 'Trước 08:30 Ngày 1',
-          typeCode: 'M',
-          description: 'Xác nhận đã bàn giao đầy đủ trang thiết bị và tài khoản làm việc. Gửi mail thông báo tới HRM Tuyển dụng.',
-          fieldsChecklist: ['Trạng thái Task = Hoàn thành', 'Tài khoản Email/Domain đã kích hoạt', 'Gửi mail thông báo hoàn tất']
+          title: 'Ký Hợp đồng thử việc & Bàn giao tài nguyên',
+          actor: 'HRM - C&B & Nhân viên mới',
+          location: 'Portal / Văn phòng HR',
+          timing: 'Ngày đầu tiên nhận việc (Day 1)',
+          typeCode: 'N',
+          description: 'Ký kết Hợp đồng lao động thử việc, bàn giao thiết bị làm việc, thẻ nhân viên và tài liệu văn hóa công ty.',
+          fieldsChecklist: ['Hợp đồng thử việc đã ký', 'Biên bản bàn giao tài sản thiết bị', 'Khai báo thông tin cá nhân bổ sung']
         },
         {
           stepCode: 'EMP02.04',
-          title: 'Truy vấn kết quả thực hiện task chuẩn bị',
-          actor: 'HRM - Tuyển dụng',
-          location: 'Portal',
-          timing: '08:30 Ngày 1',
-          typeCode: 'A',
-          description: 'Kiểm tra và xác nhận 100% cơ sở vật chất & tài khoản đã sẵn sàng đón nhân sự mới trong ngày đầu.',
-          fieldsChecklist: ['Checklist Onboarding Ready', 'Xác nhận bàn giao thiết bị']
-        },
-        {
-          stepCode: 'EMP02.05',
-          title: 'Cập nhật hồ sơ nhân viên & Kích hoạt trạng thái',
-          actor: 'HRM - Tuyển dụng',
-          location: 'Core EMP',
-          timing: 'Ngày 1 nhận việc',
-          typeCode: 'A',
-          description: 'Số hóa đầy đủ giấy tờ tùy thân, bằng cấp, thông tin thuế & chuyển trạng thái hồ sơ sang [Đang thử việc].',
-          fieldsChecklist: ['Trạng thái: Đang thử việc', 'Hồ sơ pháp lý số hóa', 'Kích hoạt tài khoản Employee Portal']
-        },
-        {
-          stepCode: 'EMP02.06',
-          title: 'Giao mục tiêu KPI cho NV thử việc (TBP)',
+          title: 'Giao chỉ tiêu KPI thử việc & Phân công Người hướng dẫn (Mentor)',
           actor: 'Trưởng bộ phận (TBP)',
           location: 'Manager Portal',
-          timing: 'Trong 03 ngày đầu',
-          typeCode: 'M',
-          description: 'Trưởng bộ phận thiết lập bộ chỉ tiêu đánh giá 60 ngày thử việc và gửi mail thông báo cho nhân viên mới.',
-          fieldsChecklist: ['Bộ chỉ tiêu KPI thử việc', 'Trọng số đánh giá (%)', 'Tiêu chuẩn chất lượng công việc', 'Gửi mail thông báo']
-        },
-        {
-          stepCode: 'EMP02.07',
-          title: 'Truy vấn & Xác nhận mục tiêu KPI',
-          actor: 'Nhân viên mới (NV)',
-          location: 'Employee Mobile App / Portal',
-          timing: 'Trong 05 ngày đầu',
+          timing: 'Trong tuần đầu tiên',
           typeCode: 'N',
-          description: 'Nhân viên truy cập ứng dụng HRMS để tiếp nhận, làm rõ và bấm cam kết thực hiện mục tiêu thử việc.',
-          fieldsChecklist: ['Xác nhận cam kết KPI điện tử', 'Thời hạn hoàn thành']
-        },
-        {
-          stepCode: 'EMP02.08',
-          title: 'Danh sách NV tham gia đào tạo hội nhập',
-          actor: 'HRM - Đào tạo',
-          location: 'L&D Portal',
-          timing: 'Tuần 1 - Tuần 2',
-          typeCode: 'N',
-          description: 'Lập danh sách và gửi thư mời tham gia khóa đào tạo văn hóa doanh nghiệp & quy chế công ty.',
-          fieldsChecklist: ['Danh sách học viên', 'Lịch đào tạo Onboarding', 'Giảng viên nội bộ']
-        },
-        {
-          stepCode: 'EMP02.09',
-          title: 'Cập nhật kết quả đào tạo hội nhập',
-          actor: 'HRM - Đào tạo',
-          location: 'L&D Portal',
-          timing: 'Sau khóa học 48h',
-          typeCode: 'M',
-          description: 'Chấm điểm bài test kiểm tra hội nhập và ghi nhận kết quả (Yêu cầu đạt >= 80% điểm). Gửi mail thông báo.',
-          fieldsChecklist: ['Điểm bài test trắc nghiệm', 'Chứng chỉ hoàn thành Onboarding', 'Gửi mail thông báo kết quả']
-        },
-        {
-          stepCode: 'EMP02.10',
-          title: 'Cập nhật kết quả tự đánh giá KPI thử việc',
-          actor: 'Nhân viên mới (NV)',
-          location: 'Employee Portal',
-          timing: 'Trước khi hết hạn 10 ngày',
-          typeCode: 'N',
-          description: 'Nhân viên tự chấm điểm và đính kèm báo cáo sản phẩm công việc thực tế trong 60 ngày. Gửi mail tới TBP.',
-          fieldsChecklist: ['Báo cáo kết quả thử việc', 'Điểm tự đánh giá', 'Gửi mail nộp đánh giá']
-        },
-        {
-          stepCode: 'EMP02.11',
-          title: 'Đánh giá kết quả KPI & Quyết định nhân sự (Decision)',
-          actor: 'Trưởng bộ phận (TBP)',
-          location: 'Manager Portal',
-          timing: 'Trước khi hết hạn 07 ngày',
-          typeCode: 'M',
-          description: 'TBP đánh giá, nhận xét và ra quyết định: ĐẠT (>= 85% điểm) chuyển Ký HĐLĐ hoặc KHÔNG ĐẠT chuyển Thanh lý.',
-          fieldsChecklist: ['Điểm đánh giá chính thức của TBP', 'Quyết định: Đạt / Không đạt', 'Gửi mail thông báo & Trả kết quả đánh giá']
-        },
-        {
-          stepCode: 'EMP02.12',
-          title: 'Truy vấn & Xem kết quả đánh giá KPI',
-          actor: 'Nhân viên mới (NV)',
-          location: 'Employee App',
-          timing: 'Trước khi hết hạn 05 ngày',
-          typeCode: 'N',
-          description: 'Nhân viên nhận thông báo kết quả đánh giá chính thức từ Quản lý trực tiếp trên ứng dụng.',
-          fieldsChecklist: ['Xem phiếu kết quả đánh giá', 'Ý kiến phản hồi (nếu có)']
-        },
-        {
-          stepCode: 'EMP02.13',
-          title: 'Ký hợp đồng lao động chính thức (Luồng Đạt)',
-          actor: 'HRM - C&B',
-          location: 'Core HR & E-Sign',
-          timing: 'Trước khi hết hạn 03 ngày',
-          typeCode: 'M',
-          description: 'Phát hành Hợp đồng lao động chính thức, ký số 2 bên, cập nhật Master Data sang [Chính thức] & báo tăng BHXH.',
-          fieldsChecklist: ['HĐLĐ chính thức có chữ ký số', 'Báo tăng BHXH (INS01)', 'Quyết định tiếp nhận chính thức']
-        },
-        {
-          stepCode: 'EMP02.14',
-          title: 'Thanh lý hợp đồng lao động thử việc (Luồng Không đạt)',
-          actor: 'HRM - C&B',
-          location: 'Portal',
-          timing: 'Trước khi hết hạn 03 ngày',
-          typeCode: 'M',
-          description: 'Quyết toán ngày công thử việc, lập biên bản thanh lý hợp đồng và gửi mail thông báo dừng hợp tác.',
-          fieldsChecklist: ['Bảng thanh toán lương thử việc', 'Biên bản thanh lý HĐLĐ', 'Gửi mail thông báo không đạt']
-        },
-        {
-          stepCode: 'EMP02.15',
-          title: 'Giảm lao động & Khóa quyền truy cập hệ thống',
-          actor: 'HRM - C&B',
-          location: 'Core HR',
-          timing: 'Ngày làm việc cuối',
-          typeCode: 'A',
-          description: 'Ban hành Quyết định thôi việc, thu hồi tài sản IT, khóa quyền truy cập hệ thống và chuyển trạng thái Inactive.',
-          fieldsChecklist: ['In Quyết định nghỉ việc', 'Biên bản thu hồi máy tính/thẻ', 'Khóa tài khoản Domain/Email lúc 18h']
+          description: 'TBP thiết lập các mục tiêu KPI 60 ngày thử việc trên hệ thống, phân công cán bộ hướng dẫn kèm cặp nhân viên mới.',
+          fieldsChecklist: ['Bản giao mục tiêu KPI thử việc', 'Thông tin cán bộ hướng dẫn (Mentor)', 'Lịch kiểm tra tiến độ định kỳ']
         }
       ]
     },
     {
-      sopCode: 'SOP EMP03',
-      sopTitle: 'Quy trình Tăng nhân viên từ nhân viên cũ (EMP03 Lấy lại mã NV cũ)',
-      sopCategory: 'Tuyển lại & Tiếp nhận',
-      description: 'Lưu đồ 6 phân làn: Tiếp nhận lại nhân sự cũ, mở lại tài khoản IT cũ, kế thừa lịch sử thâm niên, đào tạo cập nhật, quản lý KPI thử việc và ký HĐLĐ nối tiếp.',
+      sopCode: 'SOP-EMP-03',
+      sopTitle: 'Quy trình Tăng Nhân viên từ Nhân viên Cũ (Rehire - Lấy lại Mã NV cũ)',
+      sopCategory: 'Tiếp nhận & Tái tuyển dụng',
+      description: 'Quy trình tiếp nhận lại nhân sự cũ quay lại làm việc, kế thừa mã số nhân viên cũ, khôi phục lịch sử hồ sơ và tái kích hoạt tài khoản.',
       steps: [
         {
           stepCode: 'EMP03.01',
-          title: 'Danh sách nhân viên chờ nhận việc (Lấy lại mã NV cũ)',
-          actor: 'HRM - Tuyển dụng',
-          location: 'Bên trong (Hệ thống HRM)',
-          timing: 'Khi tiếp nhận đơn đăng ký / Offer lại',
+          title: 'Tra cứu & Kế thừa hồ sơ từ Mã số nhân viên cũ',
+          actor: 'HRM - Tuyển dụng / C&B',
+          location: 'Core EMP Module',
+          timing: 'Khi tiếp nhận nhân sự cũ',
           typeCode: 'N',
-          description: 'Tra cứu hồ sơ nhân sự cũ, giữ nguyên Mã nhân viên cũ và khôi phục thông tin trên hệ thống.',
-          fieldsChecklist: ['Mã NV cũ (Legacy EMP ID)', 'Lịch sử công tác trước đây', 'Lý do nghỉ việc cũ', 'Trạng thái Blacklist (Pass)']
+          description: 'Tra cứu mã số nhân viên cũ trong kho lưu trữ, kiểm tra lý do thôi việc trước đây và kế thừa toàn bộ lịch sử hồ sơ.',
+          fieldsChecklist: ['Mã số nhân viên cũ', 'Lý do thôi việc trước đây', 'Đánh giá lịch sử công tác cũ', 'Vị trí công tác mới']
         },
         {
           stepCode: 'EMP03.02',
-          title: 'Thông báo task đến các bộ phận (Mở lại tài khoản IT)',
-          actor: 'BP (Bộ phận IT / Hành chính)',
-          location: 'Ticket System / Portal',
-          timing: 'Trước ngày nhận việc',
-          typeCode: 'A',
-          description: 'Tự động phân bổ task khôi phục tài khoản Domain/Email cũ, phân quyền mới và chuẩn bị máy tính.',
-          fieldsChecklist: ['Ticket mở lại Email cũ', 'Ticket mở lại tài khoản Domain', 'Bàn giao Laptop & thẻ từ']
+          title: 'Thẩm định hồ sơ tái tuyển dụng & Trình Ban Giám Đốc phê duyệt',
+          actor: 'HRD & Ban Giám Đốc (BOM)',
+          location: 'Portal',
+          timing: 'Trong 2-3 ngày làm việc',
+          typeCode: 'M',
+          description: 'HRD thẩm định trường hợp tái tuyển dụng, Ban Giám Đốc phê duyệt quyết định tiếp nhận lại nhân sự.',
+          fieldsChecklist: ['Tờ trình tiếp nhận nhân viên cũ', 'Quyết định phê duyệt của BOM']
         },
         {
           stepCode: 'EMP03.03',
-          title: 'Cập nhật kết quả Task chuẩn bị & Gửi mail thông báo',
-          actor: 'BP (Bộ phận IT / Hành chính)',
-          location: 'Portal',
-          timing: 'Trước 08:30 Ngày 1',
-          typeCode: 'M',
-          description: 'Xác nhận đã mở lại nick cũ, cài đặt xong máy tính và gửi mail thông báo cho Tuyển dụng.',
-          fieldsChecklist: ['Trạng thái Task = Hoàn thành', 'Tài khoản cũ đã Active', 'Gửi mail thông báo sẵn sàng']
-        },
-        {
-          stepCode: 'EMP03.04',
-          title: 'Truy vấn kết quả thực hiện task chuẩn bị',
-          actor: 'HRM - Tuyển dụng',
-          location: 'Portal',
-          timing: '08:30 Ngày 1',
+          title: 'Tái kích hoạt hồ sơ & Mở lại tài khoản hệ thống',
+          actor: 'Hệ thống HRM Engine & IT Admin',
+          location: 'Bên trong (Hệ thống HRM)',
+          timing: 'Tức thì khi có phê duyệt',
           typeCode: 'A',
-          description: 'Kiểm tra 100% tài khoản cũ đã mở lại và trang thiết bị đã sẵn sàng đón nhân sự.',
-          fieldsChecklist: ['Checklist Onboarding Ready cho người cũ', 'Xác nhận bàn giao thiết bị']
-        },
-        {
-          stepCode: 'EMP03.05',
-          title: 'Cập nhật hồ sơ nhân viên (Tái kích hoạt)',
-          actor: 'HRM - Tuyển dụng',
-          location: 'Core EMP',
-          timing: 'Ngày 1 nhận việc',
-          typeCode: 'A',
-          description: 'Chuyển trạng thái hồ sơ từ [Đã nghỉ việc] sang [Đang thử việc] trên hệ thống Core EMP.',
-          fieldsChecklist: ['Trạng thái: Đang thử việc', 'Kế thừa lịch sử công tác', 'Kích hoạt lại tài khoản Portal']
-        },
-        {
-          stepCode: 'EMP03.06',
-          title: 'Giao mục tiêu KPI cho NV thử việc (TBP)',
-          actor: 'Trưởng bộ phận (TBP)',
-          location: 'Manager Portal',
-          timing: 'Trong 03 ngày đầu',
-          typeCode: 'M',
-          description: 'Trưởng bộ phận thiết lập mục tiêu công việc & chỉ tiêu KPI cho giai đoạn thử việc mới.',
-          fieldsChecklist: ['Bộ chỉ tiêu KPI thử việc', 'Trọng số đánh giá (%)', 'Tiêu chuẩn chất lượng công việc', 'Gửi mail thông báo']
-        },
-        {
-          stepCode: 'EMP03.07',
-          title: 'Truy vấn & Xác nhận mục tiêu KPI',
-          actor: 'Nhân viên cũ (NV)',
-          location: 'Employee Mobile App / Portal',
-          timing: 'Trong 05 ngày đầu',
-          typeCode: 'N',
-          description: 'Nhân viên đăng nhập ứng dụng HRMS bằng tài khoản cũ để xem và cam kết thực hiện KPI.',
-          fieldsChecklist: ['Xác nhận cam kết KPI điện tử', 'Thời hạn hoàn thành']
-        },
-        {
-          stepCode: 'EMP03.08',
-          title: 'Danh sách NV tham gia đào tạo hội nhập',
-          actor: 'HRM - Đào tạo',
-          location: 'L&D Portal',
-          timing: 'Tuần 1 - Tuần 2',
-          typeCode: 'N',
-          description: 'Xếp lịch đào tạo cập nhật các chính sách, quy chế và định hướng mới của doanh nghiệp.',
-          fieldsChecklist: ['Danh sách học viên tái hòa nhập', 'Lịch đào tạo Refresh', 'Tài liệu cập nhật chính sách mới']
-        },
-        {
-          stepCode: 'EMP03.09',
-          title: 'Cập nhật kết quả đào tạo hội nhập',
-          actor: 'HRM - Đào tạo',
-          location: 'L&D Portal',
-          timing: 'Sau khóa học 48h',
-          typeCode: 'M',
-          description: 'Chấm điểm bài test cập nhật quy chế và ghi nhận kết quả vào hồ sơ đào tạo tích lũy.',
-          fieldsChecklist: ['Điểm bài test trắc nghiệm', 'Chứng chỉ hoàn thành', 'Gửi mail thông báo kết quả']
-        },
-        {
-          stepCode: 'EMP03.10',
-          title: 'Cập nhật kết quả tự đánh giá KPI thử việc',
-          actor: 'Nhân viên cũ (NV)',
-          location: 'Employee Portal',
-          timing: 'Trước khi hết hạn 10 ngày',
-          typeCode: 'N',
-          description: 'Nhân viên tự chấm điểm và đính kèm báo cáo sản phẩm công việc trước khi hết hạn 10 ngày.',
-          fieldsChecklist: ['Báo cáo kết quả thử việc', 'Điểm tự đánh giá', 'Gửi mail nộp đánh giá']
-        },
-        {
-          stepCode: 'EMP03.11',
-          title: 'Đánh giá kết quả KPI & Quyết định nhân sự (Decision)',
-          actor: 'Trưởng bộ phận (TBP)',
-          location: 'Manager Portal',
-          timing: 'Trước khi hết hạn 07 ngày',
-          typeCode: 'M',
-          description: 'TBP đánh giá, nhận xét và ra quyết định: ĐẠT (>= 85% điểm) chuyển Ký HĐLĐ hoặc KHÔNG ĐẠT chuyển Thanh lý.',
-          fieldsChecklist: ['Điểm đánh giá chính thức của TBP', 'Quyết định: Đạt / Không đạt', 'Gửi mail thông báo & Trả kết quả đánh giá']
-        },
-        {
-          stepCode: 'EMP03.12',
-          title: 'Truy vấn & Xem kết quả đánh giá KPI',
-          actor: 'Nhân viên cũ (NV)',
-          location: 'Employee App',
-          timing: 'Trước khi hết hạn 05 ngày',
-          typeCode: 'N',
-          description: 'Nhân viên nhận thông báo kết quả đánh giá chính thức từ Quản lý trực tiếp trên ứng dụng.',
-          fieldsChecklist: ['Xem phiếu kết quả đánh giá', 'Ý kiến phản hồi (nếu có)']
-        },
-        {
-          stepCode: 'EMP03.13',
-          title: 'Ký hợp đồng lao động chính thức (Luồng Đạt)',
-          actor: 'HRM - C&B',
-          location: 'Core HR & E-Sign',
-          timing: 'Trước khi hết hạn 03 ngày',
-          typeCode: 'M',
-          description: 'Phát hành Hợp đồng lao động chính thức, ký số 2 bên & làm thủ tục đóng nối tiếp vào sổ BHXH cũ.',
-          fieldsChecklist: ['HĐLĐ chính thức có chữ ký số', 'Báo tăng BHXH tiếp nối sổ cũ', 'Bảo lưu thâm niên cũ']
-        },
-        {
-          stepCode: 'EMP03.14',
-          title: 'Thanh lý hợp đồng lao động thử việc (Luồng Không đạt)',
-          actor: 'HRM - C&B',
-          location: 'Portal',
-          timing: 'Trước khi hết hạn 03 ngày',
-          typeCode: 'M',
-          description: 'Quyết toán ngày công thử việc, lập biên bản thanh lý hợp đồng và gửi mail thông báo dừng hợp tác.',
-          fieldsChecklist: ['Bảng thanh toán lương thử việc', 'Biên bản thanh lý HĐLĐ', 'Gửi mail thông báo không đạt']
-        },
-        {
-          stepCode: 'EMP03.15',
-          title: 'Giảm lao động & Khóa quyền truy cập hệ thống',
-          actor: 'HRM - C&B',
-          location: 'Core HR',
-          timing: 'Ngày làm việc cuối',
-          typeCode: 'A',
-          description: 'Ban hành Quyết định thôi việc, thu hồi tài sản IT, khóa quyền truy cập hệ thống và chuyển trạng thái Inactive.',
-          fieldsChecklist: ['In Quyết định nghỉ việc', 'Biên bản thu hồi máy tính/thẻ', 'Khóa tài khoản Domain/Email lúc 18h']
+          description: 'Khôi phục trạng thái hồ sơ từ Thôi việc sang Đang làm việc, giữ nguyên Mã NV cũ, mở lại tài khoản email và các phân quyền hệ thống.',
+          fieldsChecklist: ['Trạng thái hồ sơ: Đang làm việc (Active)', 'Tài khoản hệ thống được mở lại', 'Đồng bộ danh sách đóng BHXH mới']
         }
       ]
     }
@@ -1149,3 +1095,23 @@ export const SOP_DATABASE: Record<string, SopSubProcess[]> = {
     }
   ]
 }
+
+// Merge DOCX-derived employee processes with the existing recruitment, attendance,
+// payroll and cross-functional processes. Matching SOP codes are replaced by DOCX data.
+const normalizeSopCode = (value: string) => value.toUpperCase().replace(/[^A-Z0-9]/g, '')
+const mergedSopDatabase: Record<string, SopSubProcess[]> = { ...SOP_DATABASE_BASE }
+
+const docxDatabases = [DOCX_EMPLOYEE_SOP_DATABASE, DOCX_OPERATIONAL_SOP_DATABASE]
+
+for (const docxDatabase of docxDatabases) {
+  for (const [lifecycleId, docxProcesses] of Object.entries(docxDatabase)) {
+    const docxCodes = new Set(docxProcesses.map((process) => normalizeSopCode(process.sopCode)))
+    const existingProcesses = mergedSopDatabase[lifecycleId] ?? []
+    mergedSopDatabase[lifecycleId] = [
+      ...existingProcesses.filter((process) => !docxCodes.has(normalizeSopCode(process.sopCode))),
+      ...docxProcesses
+    ]
+  }
+}
+
+export const SOP_DATABASE: Record<string, SopSubProcess[]> = mergedSopDatabase

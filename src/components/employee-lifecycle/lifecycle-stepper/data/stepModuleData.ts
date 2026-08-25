@@ -5,125 +5,132 @@ export const STEP_MODULE_MAP: Record<string, ModuleInfo> = {
     name: 'Hoạch định định biên',
     nameEn: 'Workforce Planning',
     code: 'HCP',
-    color: 'text-cyan-700 dark:text-cyan-300',
-    bg: 'bg-cyan-50 dark:bg-cyan-950/90',
-    border: 'border-cyan-200 dark:border-cyan-800',
-    desc: 'Thiết lập định biên, ngân sách nhân sự và trần tuyển dụng trước khi phát sinh nhu cầu tuyển mới',
-    descEn: 'Set headcount budget, people cost plan and hiring caps before recruitment begins',
+    color: 'text-blue-700 dark:text-blue-300',
+    bg: 'bg-blue-50 dark:bg-blue-950/90',
+    border: 'border-blue-200 dark:border-blue-800',
+    desc: 'Xác định số lượng nhân sự, ngân sách quỹ lương và hạn mức tuyển dụng theo từng phòng ban trước khi phát sinh nhu cầu tuyển dụng mới.',
+    descEn: 'Plan headcount, personnel budget, and hiring limits for each department.',
     coModules: [
-      { name: 'Core EMP (Cơ cấu tổ chức)', nameEn: 'Core EMP (Org Structure)', bg: 'bg-blue-50 dark:bg-blue-950 text-blue-700 dark:text-blue-300', color: 'border-blue-200 dark:border-blue-800' },
-      { name: 'C&B (People Cost)', nameEn: 'C&B (People Cost)', bg: 'bg-amber-50 dark:bg-amber-950 text-amber-700 dark:text-amber-300', color: 'border-amber-200 dark:border-amber-800' },
-      { name: 'ATS (Hiring Cap)', nameEn: 'ATS (Hiring Cap)', bg: 'bg-indigo-50 dark:bg-indigo-950 text-indigo-700 dark:text-indigo-300', color: 'border-indigo-200 dark:border-indigo-800' }
+      { name: 'Cơ cấu tổ chức & Phòng ban', nameEn: 'Org Structure & Departments', bg: 'bg-slate-50 dark:bg-slate-800 text-slate-700 dark:text-slate-300', color: 'border-slate-200 dark:border-slate-700' },
+      { name: 'Quản lý quỹ lương & Chi phí', nameEn: 'Payroll & Cost Planning', bg: 'bg-slate-50 dark:bg-slate-800 text-slate-700 dark:text-slate-300', color: 'border-slate-200 dark:border-slate-700' },
+      { name: 'Tuyển dụng nhân sự', nameEn: 'Recruitment Module', bg: 'bg-slate-50 dark:bg-slate-800 text-slate-700 dark:text-slate-300', color: 'border-slate-200 dark:border-slate-700' }
     ]
   },
   'LIFE-01': {
-    name: 'Phân hệ Tuyển dụng',
-    nameEn: 'Recruitment Module',
+    name: 'Tiếp nhận nhân viên mới',
+    nameEn: 'Recruitment & Onboarding',
     code: 'REC',
-    color: 'text-indigo-700 dark:text-indigo-300',
-    bg: 'bg-indigo-50 dark:bg-indigo-950/90',
-    border: 'border-indigo-200 dark:border-indigo-800',
-    desc: 'Thu thập hồ sơ ứng viên, tạo tài khoản người dùng & cấp Mã nhân viên (EMP ID)',
-    descEn: 'Collect applicant files, issue user accounts & allocate Employee ID',
+    color: 'text-blue-700 dark:text-blue-300',
+    bg: 'bg-blue-50 dark:bg-blue-950/90',
+    border: 'border-blue-200 dark:border-blue-800',
+    desc: 'Tiếp nhận ứng viên trúng tuyển, khởi tạo hồ sơ nhân sự, cấp mã nhân viên và chuẩn bị cơ sở vật chất, tài khoản làm việc.',
+    descEn: 'Onboard new hire, issue employee code, and prepare workplace equipment & accounts.',
     coModules: [
-      { name: '👤 Core EMP (Tạo hồ sơ tạm)', nameEn: '👤 Core EMP (Temp Record)', bg: 'bg-blue-50 dark:bg-blue-950 text-blue-700 dark:text-blue-300', color: 'border-blue-200 dark:border-blue-800' },
-      { name: '💻 IT Systems (Cấp Account)', nameEn: '💻 IT Systems (Account Issue)', bg: 'bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300', color: 'border-slate-300 dark:border-slate-700' }
+      { name: 'Tuyển dụng nhân sự', nameEn: 'Recruitment System', bg: 'bg-slate-50 dark:bg-slate-800 text-slate-700 dark:text-slate-300', color: 'border-slate-200 dark:border-slate-700' },
+      { name: 'Hồ sơ nhân sự', nameEn: 'Personnel Core', bg: 'bg-slate-50 dark:bg-slate-800 text-slate-700 dark:text-slate-300', color: 'border-slate-200 dark:border-slate-700' },
+      { name: 'Hệ thống IT & Hành chính', nameEn: 'IT & Administration', bg: 'bg-slate-50 dark:bg-slate-800 text-slate-700 dark:text-slate-300', color: 'border-slate-200 dark:border-slate-700' }
     ]
   },
   'LIFE-02': {
-    name: 'Phân hệ Nhân sự (Core EMP)',
-    nameEn: 'Personnel Core',
+    name: 'Hồ sơ nhân viên',
+    nameEn: 'Personnel Core Profile',
     code: 'EMP',
     color: 'text-blue-700 dark:text-blue-300',
     bg: 'bg-blue-50 dark:bg-blue-950/90',
     border: 'border-blue-200 dark:border-blue-800',
-    desc: 'Số hóa lý lịch, quá trình đào tạo, người phụ thuộc & giấy tờ tùy thân',
-    descEn: 'Digitize employee master records, background, dependants & ID documents',
+    desc: 'Thu thập và số hóa đầy đủ thông tin lý lịch cá nhân, thông tin liên hệ, người phụ thuộc, bằng cấp chứng chỉ và giấy tờ pháp lý.',
+    descEn: 'Collect and digitize personal records, contact info, dependants, and legal documents.',
     coModules: [
-      { name: '🎯 Tuyển dụng (Kế thừa hồ sơ)', nameEn: '🎯 Recruitment (Inherit Data)', bg: 'bg-indigo-50 dark:bg-indigo-950 text-indigo-700 dark:text-indigo-300', color: 'border-indigo-200 dark:border-indigo-800' },
-      { name: '📁 Số hóa Hồ sơ số', nameEn: '📁 E-Archive Document', bg: 'bg-sky-50 dark:bg-sky-950 text-sky-700 dark:text-sky-300', color: 'border-sky-200 dark:border-sky-800' }
+      { name: 'Hồ sơ nhân sự', nameEn: 'Personnel Core', bg: 'bg-slate-50 dark:bg-slate-800 text-slate-700 dark:text-slate-300', color: 'border-slate-200 dark:border-slate-700' },
+      { name: 'Khai báo thuế & Giảm trừ', nameEn: 'Tax Declaration', bg: 'bg-slate-50 dark:bg-slate-800 text-slate-700 dark:text-slate-300', color: 'border-slate-200 dark:border-slate-700' },
+      { name: 'Lưu trữ tài liệu số', nameEn: 'Digital Document Archive', bg: 'bg-slate-50 dark:bg-slate-800 text-slate-700 dark:text-slate-300', color: 'border-slate-200 dark:border-slate-700' }
     ]
   },
   'LIFE-03': {
-    name: 'Phân hệ HR Core & Đánh giá',
-    nameEn: 'Evaluation & Movement',
-    code: 'EVAL',
-    color: 'text-teal-700 dark:text-teal-300',
-    bg: 'bg-teal-50 dark:bg-teal-950/90',
-    border: 'border-teal-200 dark:border-teal-800',
-    desc: 'Phân công vị trí làm việc, đánh giá đạt thử việc & đề xuất bổ nhiệm',
-    descEn: 'Assign job positions, evaluate probation results & promote employees',
+    name: 'Bố trí công tác & Vị trí',
+    nameEn: 'Position & Work Assignment',
+    code: 'ORG',
+    color: 'text-blue-700 dark:text-blue-300',
+    bg: 'bg-blue-50 dark:bg-blue-950/90',
+    border: 'border-blue-200 dark:border-blue-800',
+    desc: 'Gán nhân viên vào vị trí công tác cụ thể trong sơ đồ tổ chức, xác định phòng ban, chức vụ quản lý, tuyến báo cáo và địa điểm làm việc.',
+    descEn: 'Assign employee to position in org chart, reporting line, and workplace location.',
     coModules: [
-      { name: '👤 Core EMP (Cập nhật vị trí)', nameEn: '👤 Core EMP (Position Shift)', bg: 'bg-blue-50 dark:bg-blue-950 text-blue-700 dark:text-blue-300', color: 'border-blue-200 dark:border-blue-800' },
-      { name: '⏱️ Chấm công ATT (Phân ca)', nameEn: '⏱️ Attendance (Shift Assign)', bg: 'bg-emerald-50 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-300', color: 'border-emerald-200 dark:border-emerald-800' }
+      { name: 'Cơ cấu tổ chức (Org Chart)', nameEn: 'Org Chart', bg: 'bg-slate-50 dark:bg-slate-800 text-slate-700 dark:text-slate-300', color: 'border-slate-200 dark:border-slate-700' },
+      { name: 'Phân hệ Chấm công', nameEn: 'Attendance Module', bg: 'bg-slate-50 dark:bg-slate-800 text-slate-700 dark:text-slate-300', color: 'border-slate-200 dark:border-slate-700' },
+      { name: 'Phân hệ Tiền lương & C&B', nameEn: 'Payroll & C&B', bg: 'bg-slate-50 dark:bg-slate-800 text-slate-700 dark:text-slate-300', color: 'border-slate-200 dark:border-slate-700' }
     ]
   },
   'LIFE-04': {
-    name: 'Phân hệ Hợp đồng & Pháp lý',
-    nameEn: 'Contract & Legal',
+    name: 'Hợp đồng lao động',
+    nameEn: 'Labor Contract',
     code: 'CON',
-    color: 'text-purple-700 dark:text-purple-300',
-    bg: 'bg-purple-50 dark:bg-purple-950/90',
-    border: 'border-purple-200 dark:border-purple-800',
-    desc: 'Thiết lập Hợp đồng chính thức, ký số & lưu trữ phụ lục hợp đồng',
-    descEn: 'Setup official employment contract, e-sign & archive contract annexes',
+    color: 'text-blue-700 dark:text-blue-300',
+    bg: 'bg-blue-50 dark:bg-blue-950/90',
+    border: 'border-blue-200 dark:border-blue-800',
+    desc: 'Tạo lập, giao kết hợp đồng lao động điện tử hoặc văn bản, quản lý thời hạn và theo dõi các phụ lục hợp đồng liên quan.',
+    descEn: 'Create, sign, and manage employment contracts, terms, and appendices.',
     coModules: [
-      { name: '💰 C&B (Mức lương HĐ)', nameEn: '💰 C&B (Contract Salary)', bg: 'bg-amber-50 dark:bg-amber-950 text-amber-700 dark:text-amber-300', color: 'border-amber-200 dark:border-amber-800' },
-      { name: '✍️ Chữ ký số (E-Sign)', nameEn: '✍️ E-Signature Service', bg: 'bg-violet-50 dark:bg-violet-950 text-violet-700 dark:text-violet-300', color: 'border-violet-200 dark:border-violet-800' }
+      { name: 'Quản lý hợp đồng & Pháp lý', nameEn: 'Contract & Legal', bg: 'bg-slate-50 dark:bg-slate-800 text-slate-700 dark:text-slate-300', color: 'border-slate-200 dark:border-slate-700' },
+      { name: 'Bảo hiểm xã hội', nameEn: 'Social Insurance', bg: 'bg-slate-50 dark:bg-slate-800 text-slate-700 dark:text-slate-300', color: 'border-slate-200 dark:border-slate-700' },
+      { name: 'Chữ ký số & Ký duyệt điện tử', nameEn: 'E-Signature', bg: 'bg-slate-50 dark:bg-slate-800 text-slate-700 dark:text-slate-300', color: 'border-slate-200 dark:border-slate-700' }
     ]
   },
   'LIFE-05': {
-    name: 'Phân hệ C&B (Lương & BHXH)',
-    nameEn: 'C&B: Pay & Ins',
+    name: 'Lương & Chế độ phúc lợi',
+    nameEn: 'Payroll & Benefits',
     code: 'C&B',
-    color: 'text-amber-700 dark:text-amber-300',
-    bg: 'bg-amber-50 dark:bg-amber-950/90',
-    border: 'border-amber-200 dark:border-amber-800',
-    desc: 'Cấu hình thang bảng lương, phụ cấp & đăng ký báo tăng BHXH/BHYT',
-    descEn: 'Configure pay scales, allowances & declare new insurance registrations',
+    color: 'text-blue-700 dark:text-blue-300',
+    bg: 'bg-blue-50 dark:bg-blue-950/90',
+    border: 'border-blue-200 dark:border-blue-800',
+    desc: 'Cấu hình ngạch bậc lương, các khoản phụ cấp theo chức danh, thông tin tài khoản ngân hàng và chính sách bảo hiểm bắt buộc.',
+    descEn: 'Configure salary scale, allowances, bank account, and insurance policy.',
     coModules: [
-      { name: '🏛️ Cơ quan BHXH (Báo tăng)', nameEn: '🏛️ Social Insurance Org', bg: 'bg-rose-50 dark:bg-rose-950 text-rose-700 dark:text-rose-300', color: 'border-rose-200 dark:border-rose-800' },
-      { name: '🏦 Ngân hàng (Tài khoản lương)', nameEn: '🏦 Bank Payroll Account', bg: 'bg-amber-50 dark:bg-amber-950 text-amber-700 dark:text-amber-300', color: 'border-amber-200 dark:border-amber-800' }
+      { name: 'Phân hệ Tiền lương & Thu nhập', nameEn: 'Payroll Engine', bg: 'bg-slate-50 dark:bg-slate-800 text-slate-700 dark:text-slate-300', color: 'border-slate-200 dark:border-slate-700' },
+      { name: 'Hồ sơ Bảo hiểm xã hội', nameEn: 'Social Insurance System', bg: 'bg-slate-50 dark:bg-slate-800 text-slate-700 dark:text-slate-300', color: 'border-slate-200 dark:border-slate-700' },
+      { name: 'Hệ thống Ngân hàng chi trả', nameEn: 'Bank Payment System', bg: 'bg-slate-50 dark:bg-slate-800 text-slate-700 dark:text-slate-300', color: 'border-slate-200 dark:border-slate-700' }
     ]
   },
   'LIFE-06': {
-    name: 'Phân hệ Chấm công (ATT)',
-    nameEn: 'Attendance Module',
+    name: 'Quá trình làm việc & Biến động',
+    nameEn: 'Work History & Movement',
     code: 'ATT',
-    color: 'text-emerald-700 dark:text-emerald-300',
-    bg: 'bg-emerald-50 dark:bg-emerald-950/90',
-    border: 'border-emerald-200 dark:border-emerald-800',
-    desc: 'Ghi nhận công daily, quản lý đơn phép, làm thêm giờ OT & nhật ký biến động',
-    descEn: 'Track daily attendance, leave requests, overtime & workplace logs',
+    color: 'text-blue-700 dark:text-blue-300',
+    bg: 'bg-blue-50 dark:bg-blue-950/90',
+    border: 'border-blue-200 dark:border-blue-800',
+    desc: 'Ghi nhận xuyên suốt quá trình công tác, theo dõi điều chuyển nội bộ, thăng tiến, tăng lương, ngày công, khen thưởng và kỷ luật.',
+    descEn: 'Record entire service history, promotions, transfers, pay raises, and performance.',
     coModules: [
-      { name: '💰 C&B (Dữ liệu công ra lương)', nameEn: '💰 C&B (Attendance to Pay)', bg: 'bg-amber-50 dark:bg-amber-950 text-amber-700 dark:text-amber-300', color: 'border-amber-200 dark:border-amber-800' },
-      { name: '📲 Mobile App (Điểm danh GPS)', nameEn: '📲 Mobile App (GPS Checkin)', bg: 'bg-cyan-50 dark:bg-cyan-950 text-cyan-700 dark:text-cyan-300', color: 'border-cyan-200 dark:border-cyan-800' }
+      { name: 'Phân hệ Chấm công & Nghỉ phép', nameEn: 'Time & Attendance', bg: 'bg-slate-50 dark:bg-slate-800 text-slate-700 dark:text-slate-300', color: 'border-slate-200 dark:border-slate-700' },
+      { name: 'Đánh giá hiệu suất & Khen thưởng', nameEn: 'Performance & Rewards', bg: 'bg-slate-50 dark:bg-slate-800 text-slate-700 dark:text-slate-300', color: 'border-slate-200 dark:border-slate-700' },
+      { name: 'Báo cáo quản trị nhân sự', nameEn: 'HR Management Reports', bg: 'bg-slate-50 dark:bg-slate-800 text-slate-700 dark:text-slate-300', color: 'border-slate-200 dark:border-slate-700' }
     ]
   },
   'LIFE-07': {
-    name: 'Phân hệ Thôi việc & Quyết toán',
-    nameEn: 'Offboarding Settlement',
+    name: 'Nghỉ việc, bàn giao & Đóng hồ sơ',
+    nameEn: 'Offboarding & Clearance',
     code: 'OFF',
-    color: 'text-rose-700 dark:text-rose-300',
-    bg: 'bg-rose-50 dark:bg-rose-950/90',
-    border: 'border-rose-200 dark:border-rose-800',
-    desc: 'Thỏa thuận nghỉ việc, bàn giao tài sản IT, báo giảm BHXH & khóa sổ tài khoản',
-    descEn: 'Resignation agreement, IT asset clearance, insurance deregistration & account lock',
+    color: 'text-blue-700 dark:text-blue-300',
+    bg: 'bg-blue-50 dark:bg-blue-950/90',
+    border: 'border-blue-200 dark:border-blue-800',
+    desc: 'Tiếp nhận đơn thôi việc, theo dõi bàn giao công việc & tài sản, thực hiện quyết toán trợ cấp thôi việc, báo giảm BHXH và lưu trữ hồ sơ.',
+    descEn: 'Process resignation, task/asset clearance, severance settlement, and record closure.',
     coModules: [
-      { name: '💰 C&B (Quyết toán trợ cấp)', nameEn: '💰 C&B (Severance Pay)', bg: 'bg-amber-50 dark:bg-amber-950 text-amber-700 dark:text-amber-300', color: 'border-amber-200 dark:border-amber-800' },
-      { name: '💻 IT Asset (Thu hồi máy tính)', nameEn: '💻 IT Asset Clearance', bg: 'bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300', color: 'border-slate-300 dark:border-slate-700' },
-      { name: '🏛️ BHXH (Báo giảm)', nameEn: '🏛️ Insurance Deregistration', bg: 'bg-rose-50 dark:bg-rose-950 text-rose-700 dark:text-rose-300', color: 'border-rose-200 dark:border-rose-800' }
+      { name: 'Quyết toán lương & Trợ cấp thôi việc', nameEn: 'Final Settlement', bg: 'bg-slate-50 dark:bg-slate-800 text-slate-700 dark:text-slate-300', color: 'border-slate-200 dark:border-slate-700' },
+      { name: 'Bàn giao tài sản & Thu hồi quyền', nameEn: 'Asset & Access Clearance', bg: 'bg-slate-50 dark:bg-slate-800 text-slate-700 dark:text-slate-300', color: 'border-slate-200 dark:border-slate-700' },
+      { name: 'Báo giảm Bảo hiểm xã hội', nameEn: 'Insurance Deregistration', bg: 'bg-slate-50 dark:bg-slate-800 text-slate-700 dark:text-slate-300', color: 'border-slate-200 dark:border-slate-700' }
     ]
   }
 }
 
 export const MODULE_FILTER_OPTIONS: ModuleFilterOption[] = [
-  { id: 'ALL', name: 'Tất cả Phân hệ', nameEn: 'All HR Modules', code: 'ALL' },
+  { id: 'ALL', name: 'Tất cả phân hệ', nameEn: 'All HR Modules', code: 'ALL' },
   { id: 'HCP', name: 'Hoạch định định biên', nameEn: 'Workforce Planning', code: 'HCP', stepIds: ['LIFE-00'] },
-  { id: 'REC', name: 'Tuyển dụng', nameEn: 'Recruitment', code: 'REC', stepIds: ['LIFE-00', 'LIFE-01'] },
-  { id: 'EMP', name: 'Core EMP (Nhân sự)', nameEn: 'Personnel Core', code: 'EMP', stepIds: ['LIFE-00', 'LIFE-01', 'LIFE-02', 'LIFE-03'] },
-  { id: 'CON', name: 'Hợp đồng & Pháp lý', nameEn: 'Contract & Legal', code: 'CON', stepIds: ['LIFE-02', 'LIFE-04'] },
-  { id: 'C&B', name: 'C&B Lương & BHXH', nameEn: 'C&B & Insurance', code: 'C&B', stepIds: ['LIFE-04', 'LIFE-05', 'LIFE-06', 'LIFE-07'] },
-  { id: 'ATT', name: 'Chấm công (ATT)', nameEn: 'Attendance', code: 'ATT', stepIds: ['LIFE-03', 'LIFE-06'] },
-  { id: 'OFF', name: 'Thôi việc & Quyết toán', nameEn: 'Offboarding', code: 'OFF', stepIds: ['LIFE-07'] }
+  { id: 'REC', name: 'Tuyển dụng & Tiếp nhận', nameEn: 'Recruitment', code: 'REC', stepIds: ['LIFE-00', 'LIFE-01'] },
+  { id: 'EMP', name: 'Hồ sơ nhân sự', nameEn: 'Personnel Core', code: 'EMP', stepIds: ['LIFE-00', 'LIFE-01', 'LIFE-02', 'LIFE-03'] },
+  { id: 'CON', name: 'Hợp đồng lao động', nameEn: 'Labor Contract', code: 'CON', stepIds: ['LIFE-04'] },
+  { id: 'C&B', name: 'Lương & Chế độ phúc lợi', nameEn: 'Payroll & Benefits', code: 'C&B', stepIds: ['LIFE-04', 'LIFE-05', 'LIFE-06', 'LIFE-07'] },
+  { id: 'ATT', name: 'Chấm công & Biến động', nameEn: 'Attendance & Movement', code: 'ATT', stepIds: ['LIFE-03', 'LIFE-06'] },
+  { id: 'OFF', name: 'Nghỉ việc & Đóng hồ sơ', nameEn: 'Offboarding', code: 'OFF', stepIds: ['LIFE-07'] }
 ]
+

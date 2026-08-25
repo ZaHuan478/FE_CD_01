@@ -21,9 +21,6 @@ export const WorkflowTableView: React.FC<WorkflowTableViewProps> = ({
       <div className="flex items-center justify-between border-b border-slate-200 dark:border-slate-800 pb-3">
         <h3 className={`text-sm font-bold flex items-center gap-2 ${isDarkMode ? 'text-white' : 'text-slate-900'}`}>
           <ListCheck className="w-4 h-4 text-blue-600 dark:text-blue-400" />
-          <span>
-            {language === 'vi' ? 'BẢNG CHI TIẾT CÁC BƯỚC SOP:' : 'DETAILED SOP STEPS SPECIFICATIONS:'} {currentProcess.sopTitle}
-          </span>
         </h3>
 
         {/* Collapse Dropdown Toggle Button */}

@@ -3,7 +3,7 @@ import { BookOpen, ChevronDown, ChevronUp, Database, FileText, Workflow, Refresh
 import { useLanguage } from '../../context/LanguageContext'
 
 export const SystemGuideBanner: React.FC = () => {
-  const [isExpanded, setIsExpanded] = useState<boolean>(true)
+  const [isExpanded, setIsExpanded] = useState<boolean>(false)
   const { language } = useLanguage()
 
   return (
@@ -11,22 +11,22 @@ export const SystemGuideBanner: React.FC = () => {
       {/* Banner Header / Bar */}
       <div
         onClick={() => setIsExpanded(!isExpanded)}
-        className="p-4 bg-gradient-to-r from-slate-900 via-blue-950 to-slate-900 text-white flex items-center justify-between cursor-pointer hover:bg-slate-800 transition-colors select-none"
+        className="p-4 bg-white text-slate-900 border-b border-slate-200 flex items-center justify-between cursor-pointer hover:bg-slate-50 transition-colors select-none"
       >
         <div className="flex items-center gap-3">
-          <div className="p-2 bg-blue-500/20 text-blue-400 rounded-xl border border-blue-400/30">
+          <div className="p-2 bg-blue-50 text-blue-700 rounded-xl border border-blue-200">
             <BookOpen className="w-5 h-5" />
           </div>
           <div>
             <div className="flex items-center gap-2">
-              <span className="px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-blue-300 bg-blue-900/80 rounded border border-blue-700/60">
-                Onboarding Guide
+              <span className="px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-blue-700 bg-blue-50 rounded border border-blue-200">
+                Hướng dẫn
               </span>
-              <span className="text-xs text-slate-300 font-medium">
+              <span className="text-xs text-slate-500 font-medium">
                 {language === 'vi' ? 'Dành cho Người mới bắt đầu' : 'For New Users'}
               </span>
             </div>
-            <h2 className="text-base font-bold text-white tracking-tight mt-0.5">
+            <h2 className="text-base font-bold text-slate-900 tracking-tight mt-0.5">
               {language === 'vi'
                 ? 'HƯỚNG DẪN KHÁI NIỆM & MỐI QUAN HỆ KIẾN TRÚC (MASTER DATA · SOP · PROCESS · LIFE)'
                 : 'CONCEPT & ARCHITECTURAL RELATIONSHIP GUIDE (MASTER DATA · SOP · PROCESS · LIFECYCLE)'}
@@ -35,12 +35,12 @@ export const SystemGuideBanner: React.FC = () => {
         </div>
 
         <div className="flex items-center gap-2">
-          <span className="text-xs text-slate-300 font-medium hidden sm:inline-block">
+          <span className="text-xs text-slate-500 font-medium hidden sm:inline-block">
             {isExpanded
               ? (language === 'vi' ? 'Thu gọn hướng dẫn' : 'Collapse guide')
               : (language === 'vi' ? 'Xem giải thích chi tiết' : 'Expand detailed guide')}
           </span>
-          <div className="p-1.5 bg-slate-800 rounded-lg text-slate-300">
+          <div className="p-1.5 bg-slate-100 rounded-lg text-slate-500">
             {isExpanded ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
           </div>
         </div>

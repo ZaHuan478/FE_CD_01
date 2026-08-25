@@ -1,351 +1,203 @@
-import React, { useState } from 'react'
+import React, { useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import {
-  Layers,
-  Database,
-  GitBranch,
-  ShieldCheck,
-  TrendingUp,
-  Activity,
-  CheckCircle2,
-  PieChart,
-  ChevronDown,
-  ChevronUp,
-  Workflow,
-  X
-} from 'lucide-react'
+import { ChevronDown, ChevronRight, GitBranch, PieChart, Workflow } from 'lucide-react'
 import { RadialEcosystemChart } from './RadialEcosystemChart'
-import { SubsystemMatrixView } from './matrix/SubsystemMatrixView'
-import { DataFlowDiagram } from './data-flow/DataFlowDiagram'
+import { ProcessInputOutputView } from './ProcessInputOutputView'
+import { CompactDataFlowDiagram } from './data-flow/CompactDataFlowDiagram'
 import { useLanguage } from '../../context/LanguageContext'
+import { SOP_DATABASE } from './workflow-detail/data/sopDatabase'
+
+type ModuleId = 'recruitment' | 'employee' | 'attendance' | 'payroll' | 'insurance' | 'tax' | 'shared' | 'configuration'
+interface ModuleMenuItem { label: string; sopCode?: string; workflowId?: string; disabled?: boolean; groupHeader?: boolean }
+interface ModuleMenu { id: ModuleId; label: string; code: string; count: number; items: ModuleMenuItem[] }
+
+const processMenuItems = (workflowId: string): ModuleMenuItem[] =>
+  (SOP_DATABASE[workflowId] ?? []).map((process) => ({
+    label: process.sopTitle.replace(/^Quy trình\s+/i, ''),
+    sopCode: process.sopCode,
+    workflowId
+  }))
+
+let moduleMenus: ModuleMenu[] = [
+  {
+    id: 'recruitment', label: 'Tuyển dụng', code: 'REC', count: 4,
+    items: [{ label: 'Chưa có quy trình chi tiết', disabled: true }]
+  },
+  {
+    id: 'employee', label: 'Nhân sự', code: 'EMP', count: 15,
+    items: [
+      { label: 'EMP08 - Điều chỉnh thu nhập định kỳ', sopCode: 'SOP EMP08', workflowId: 'LIFE-05' },
+      { label: 'EMP09 - Điều chỉnh thu nhập đột xuất', sopCode: 'SOP EMP09', workflowId: 'LIFE-05' },
+      { label: 'EMP10 - Điều chỉnh thu nhập theo lương tối thiểu vùng', sopCode: 'SOP EMP10', workflowId: 'LIFE-05' },
+      { label: 'EMP11 - Thay đổi quá trình công tác', sopCode: 'SOP EMP11', workflowId: 'LIFE-03' },
+      { label: 'EMP12 - Quản lý thông tin kỷ luật', sopCode: 'SOP EMP12' },
+      { label: 'EMP13 - Quản lý khen thưởng', sopCode: 'SOP EMP13' },
+      { label: 'EMP14 - Quản lý công tác', sopCode: 'SOP EMP14' },
+      { label: 'EMP15 - Giảm lao động', sopCode: 'SOP EMP15', workflowId: 'LIFE-07' }
+    ]
+  },
+  {
+    id: 'attendance', label: 'Chấm công', code: 'ATT', count: 15,
+    items: processMenuItems('MODULE-ATT')
+  },
+  {
+    id: 'payroll', label: 'Lương', code: 'PAY', count: 4,
+    items: processMenuItems('MODULE-PAY')
+  },
+  {
+    id: 'insurance', label: 'Bảo hiểm', code: 'INS', count: 8,
+    items: processMenuItems('MODULE-INS')
+  },
+  {
+    id: 'tax', label: 'Thuế', code: 'TAX', count: 3,
+    items: processMenuItems('MODULE-TAX')
+  },
+  {
+    id: 'shared', label: 'Danh mục chung', code: 'MD', count: 54,
+    items: [
+      { label: 'Chức năng quản lý danh mục', groupHeader: true },
+      ...processMenuItems('MODULE-MD-FUNCTIONS'),
+      { label: 'Dữ liệu danh mục dùng chung', groupHeader: true },
+      ...processMenuItems('MODULE-MD')
+    ]
+  },
+  {
+    id: 'configuration', label: 'Cấu hình HRM', code: 'CFG', count: 2,
+    items: [
+      { label: 'Danh sách nhóm người dùng và vai trò' },
+      { label: 'Danh sách cấu hình trong hệ thống HRM' }
+    ]
+  }
+]
+
+const lifecycleSummary = ['Định biên nhân sự', 'Tuyển dụng', 'Tiếp nhận và hội nhập', 'Hồ sơ và hợp đồng', 'Đào tạo và đánh giá', 'Lương, thưởng và phúc lợi', 'Chấm công và quản lý làm việc', 'Thuyên chuyển và thôi việc']
+
+void lifecycleSummary
+
+const normalizeSopCode = (value?: string) => (value ?? '').toUpperCase().replace(/[^A-Z0-9]/g, '')
+
+const formatMenuLabel = (label: string) => label.replace(/^EMP\d+\s*-\s*/, '')
+
+const workflowBySopCode: Record<string, string> = {
+  'SOP EMP05': 'LIFE-04',
+  'SOP EMP07': 'LIFE-04',
+  'SOP EMP09': 'LIFE-05',
+  'SOP EMP10': 'LIFE-05',
+  'SOP EMP12': 'LIFE-05',
+  'SOP EMP13': 'LIFE-05',
+  'SOP EMP14': 'LIFE-03'
+}
+
+moduleMenus = moduleMenus.map((module) => ({
+  ...module,
+  items: (module.id === 'employee'
+    ? [
+        { label: 'EMP01 - Thiết lập định biên nhân sự', sopCode: 'SOP EMP01', workflowId: 'LIFE-00' },
+        { label: 'EMP02 - Tăng nhân viên mới không qua quy trình tuyển dụng', sopCode: 'SOP EMP02', workflowId: 'LIFE-01' },
+        { label: 'EMP03 - Tăng nhân viên từ nhân viên cũ không qua tuyển dụng', sopCode: 'SOP EMP03', workflowId: 'LIFE-01' },
+        { label: 'EMP04 - Quản lý thông tin nhân viên', sopCode: 'SOP EMP04', workflowId: 'LIFE-02' },
+        { label: 'EMP05 - Tái ký hợp đồng lao động', sopCode: 'SOP EMP05', workflowId: 'LIFE-04' },
+        { label: 'EMP06 - Ký hợp đồng với nhân viên mới', sopCode: 'SOP EMP06', workflowId: 'LIFE-04' },
+        { label: 'EMP07 - Ký phụ lục khi thay đổi lương/phụ cấp', sopCode: 'SOP EMP07', workflowId: 'LIFE-04' },
+        ...module.items
+      ]
+    : module.items).map((item) => ({
+      ...item,
+      label: formatMenuLabel(item.label),
+      workflowId: item.workflowId ?? workflowBySopCode[item.sopCode ?? '']
+    }))
+}))
+
+const getProcessForMenuItem = (item: ModuleMenuItem) => {
+  const processes = item.workflowId ? SOP_DATABASE[item.workflowId] ?? [] : []
+  const wantedCode = normalizeSopCode(item.sopCode)
+  return processes.find((process) => normalizeSopCode(process.sopCode) === wantedCode) ?? (processes.length === 1 ? processes[0] : undefined)
+}
 
 export const SystemOverviewDashboard: React.FC = () => {
-  const { language } = useLanguage()
+  useLanguage()
   const navigate = useNavigate()
-  const [coverageViewMode, setCoverageViewMode] = useState<'wheel' | 'matrix' | 'bar' | 'flow'>('wheel')
-  const [isCoverageExpanded, setIsCoverageExpanded] = useState<boolean>(true)
-  const [activeModal, setActiveModal] = useState<'lifecycle' | 'modules' | 'sops' | null>(null)
-
-  const navigateToTab = (tab: 'lifecycle' | 'masterdata' | 'reports', hash?: string) => {
-    setActiveModal(null)
-    navigate(`/employee-lifecycle?tab=${tab}${hash ? `#${hash}` : ''}`)
-    // Need a tiny delay for React Router to render the tab before scrolling to hash if present
-    if (hash) {
-      setTimeout(() => {
-        const el = document.getElementById(hash)
-        if (el) el.scrollIntoView({ behavior: 'smooth' })
-      }, 100)
-    } else {
-      window.scrollTo({ top: 0, behavior: 'smooth' })
+  const [openModule, setOpenModule] = useState<ModuleId | null>(null)
+  const [openProcessKey, setOpenProcessKey] = useState<string | null>(null)
+  const [openProcessTop, setOpenProcessTop] = useState(8)
+  const [coverageViewMode, setCoverageViewMode] = useState<'wheel' | 'matrix' | 'flow'>('wheel')
+  const [isCoverageExpanded, setIsCoverageExpanded] = useState(true)
+  const closeMenuTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const keepMenuOpen = () => {
+    if (closeMenuTimer.current) {
+      clearTimeout(closeMenuTimer.current)
+      closeMenuTimer.current = null
     }
+  }
+  const scheduleMenuClose = () => {
+    keepMenuOpen()
+    closeMenuTimer.current = setTimeout(() => {
+      setOpenModule(null)
+      setOpenProcessKey(null)
+      closeMenuTimer.current = null
+    }, 700)
+  }
+  const openMenuItem = (item: ModuleMenuItem, stepNumber?: number) => {
+    if (!item.workflowId) return
+    const params = new URLSearchParams({ sop: item.sopCode ?? '' })
+    if (stepNumber) params.set('step', String(stepNumber))
+    navigate(`/employee-lifecycle/infographic/${item.workflowId}?${params.toString()}`)
   }
 
   return (
-    <div className="space-y-6">
-
-      {/* TOP KPI STATS METRICS GRID */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-
-        {/* METRIC 1: HEADCOUNT FILL RATE */}
-        <div
-          onClick={() => navigateToTab('lifecycle', 'layer-2-lifecycle')}
-          className="bg-white dark:bg-slate-900 border border-slate-200/90 dark:border-slate-800 rounded-2xl p-5 shadow-2xs hover:shadow-md transition-all duration-200 group cursor-pointer"
-        >
-          <div className="flex items-center justify-between mb-3">
-            <span className="text-xs font-extrabold uppercase tracking-wider text-slate-500 dark:text-slate-400">
-              {language === 'vi' ? 'LẤP ĐẦY ĐỊNH BIÊN' : 'HEADCOUNT FILL RATE'}
-            </span>
-            <div className="w-10 h-10 rounded-xl bg-blue-500/10 border border-blue-500/20 text-blue-600 dark:text-blue-400 flex items-center justify-center group-hover:scale-110 transition-transform">
-              <Layers className="w-5 h-5" />
-            </div>
-          </div>
-          <div className="flex items-baseline gap-2 mb-1">
-            <span className="text-2xl font-black text-slate-900 dark:text-white">92%</span>
-            <span className="text-xs font-bold text-emerald-600 dark:text-emerald-400 flex items-center gap-0.5">
-              <TrendingUp className="w-3.5 h-3.5" /> 8 stages
-            </span>
-          </div>
-          <p className="text-xs text-slate-500 dark:text-slate-400 line-clamp-1">
-            {language === 'vi' ? 'Theo dõi từ LIFE-00 Định biên đến LIFE-07 Thôi việc' : 'Track LIFE-00 planning through LIFE-07 offboarding'}
-          </p>
-        </div>
-
-        {/* METRIC 2: PROBATION PASS RATE */}
-        <div
-          onClick={() => navigateToTab('masterdata', 'layer-1-master-data')}
-          className="bg-white dark:bg-slate-900 border border-slate-200/90 dark:border-slate-800 rounded-2xl p-5 shadow-2xs hover:shadow-md transition-all duration-200 group cursor-pointer"
-        >
-          <div className="flex items-center justify-between mb-3">
-            <span className="text-xs font-extrabold uppercase tracking-wider text-slate-500 dark:text-slate-400">
-              {language === 'vi' ? 'ĐẠT THỬ VIỆC' : 'PROBATION PASS RATE'}
-            </span>
-            <div className="w-10 h-10 rounded-xl bg-purple-500/10 border border-purple-500/20 text-purple-600 dark:text-purple-400 flex items-center justify-center group-hover:scale-110 transition-transform">
-              <Database className="w-5 h-5" />
-            </div>
-          </div>
-          <div className="flex items-baseline gap-2 mb-1">
-            <span className="text-2xl font-black text-slate-900 dark:text-white">86%</span>
-            <span className="text-xs font-bold text-purple-600 dark:text-purple-400">
-              KPI + contract gate
-            </span>
-          </div>
-          <p className="text-xs text-slate-500 dark:text-slate-400 line-clamp-1">
-            {language === 'vi' ? 'Mở dữ liệu nền chi phối hợp đồng, KPI và hồ sơ' : 'Open master data behind contracts, KPI and profiles'}
-          </p>
-        </div>
-
-        {/* METRIC 3: TURNOVER RATE */}
-        <div
-          onClick={() => navigateToTab('lifecycle', 'layer-3-operations')}
-          className="bg-white dark:bg-slate-900 border border-slate-200/90 dark:border-slate-800 rounded-2xl p-5 shadow-2xs hover:shadow-md transition-all duration-200 group cursor-pointer"
-        >
-          <div className="flex items-center justify-between mb-3">
-            <span className="text-xs font-extrabold uppercase tracking-wider text-slate-500 dark:text-slate-400">
-              {language === 'vi' ? 'BIẾN ĐỘNG NHÂN SỰ' : 'TURNOVER RATE'}
-            </span>
-            <div className="w-10 h-10 rounded-xl bg-amber-500/10 border border-amber-500/20 text-amber-600 dark:text-amber-400 flex items-center justify-center group-hover:scale-110 transition-transform">
-              <GitBranch className="w-5 h-5" />
-            </div>
-          </div>
-          <div className="flex items-baseline gap-2 mb-1">
-            <span className="text-2xl font-black text-slate-900 dark:text-white">3.8%</span>
-            <span className="text-xs font-bold text-amber-600 dark:text-amber-400">
-              {language === 'vi' ? 'Theo kỳ tháng' : 'Monthly'}
-            </span>
-          </div>
-          <p className="text-xs text-slate-500 dark:text-slate-400 line-clamp-1">
-            {language === 'vi' ? 'Xem các nghiệp vụ phát sinh: phép, OT, điều chuyển, thôi việc' : 'View operations: leave, OT, movement and offboarding'}
-          </p>
-        </div>
-
-        {/* METRIC 4: PEOPLE COST CONTROL */}
-        <div
-          onClick={() => {
-            const el = document.getElementById('coverage-wheel')
-            if (el) el.scrollIntoView({ behavior: 'smooth' })
-          }}
-          className="bg-white dark:bg-slate-900 border border-slate-200/90 dark:border-slate-800 rounded-2xl p-5 shadow-2xs hover:shadow-md transition-all duration-200 group cursor-pointer"
-        >
-          <div className="flex items-center justify-between mb-3">
-            <span className="text-xs font-extrabold uppercase tracking-wider text-slate-500 dark:text-slate-400">
-              {language === 'vi' ? 'KIỂM SOÁT PEOPLE COST' : 'PEOPLE COST CONTROL'}
-            </span>
-            <div className="w-10 h-10 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-600 dark:text-emerald-400 flex items-center justify-center group-hover:scale-110 transition-transform">
-              <ShieldCheck className="w-5 h-5" />
-            </div>
-          </div>
-          <div className="flex items-baseline gap-2 mb-1">
-            <span className="text-2xl font-black text-slate-900 dark:text-white">97%</span>
-            <span className="text-xs font-bold text-emerald-600 dark:text-emerald-400">
-              {language === 'vi' ? 'Trong ngân sách' : 'Within budget'}
-            </span>
-          </div>
-          <p className="text-xs text-slate-500 dark:text-slate-400 line-clamp-1">
-            {language === 'vi' ? 'Theo dõi lương, BHXH, phụ cấp và trần định biên' : 'Payroll, insurance, allowance and headcount cap tracking'}
-          </p>
-        </div>
-      </div>
-
-      {/* MODULE SOP COVERAGE: TOGGLEABLE RADIAL ECOSYSTEM WHEEL VS BAR CHART */}
-      <div id="coverage-wheel" className="bg-white dark:bg-slate-900 border border-slate-200/90 dark:border-slate-800 rounded-2xl p-5 space-y-4 shadow-2xs scroll-mt-28">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-200 dark:border-slate-800 pb-3">
-          <h3 className="text-xs font-extrabold uppercase tracking-wider text-slate-900 dark:text-white flex items-center gap-2">
-            <Activity className="w-4 h-4 text-blue-600 dark:text-blue-400" />
-            <span>
-              {language === 'vi'
-                ? 'BẢN ĐỒ ĐỘ PHỦ SOP & DÒNG DỮ LIỆU THEO PHÂN HỆ'
-                : 'SOP COVERAGE & DATA FLOW MAP BY BUSINESS MODULES'}
-            </span>
-          </h3>
-
-          <div className="flex items-center gap-2 shrink-0">
-            {/* View Mode Switcher */}
-            <div className="flex items-center p-1 bg-slate-100 dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700">
-              <button
-                type="button"
-                onClick={() => setCoverageViewMode('wheel')}
-                className={`flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold rounded-xl transition-all cursor-pointer ${coverageViewMode === 'wheel'
-                  ? 'bg-blue-600 text-white shadow-xs'
-                  : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
-                  }`}
-              >
-                <PieChart className="w-3.5 h-3.5" />
-                <span>{language === 'vi' ? 'Sơ đồ Vòng tròn 6 Phân hệ' : '6-Module Radial Wheel'}</span>
-              </button>
-
-              <button
-                type="button"
-                onClick={() => setCoverageViewMode('matrix')}
-                className={`flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold rounded-xl transition-all cursor-pointer ${coverageViewMode === 'matrix'
-                  ? 'bg-blue-600 text-white shadow-xs'
-                  : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
-                  }`}
-              >
-                <Workflow className="w-3.5 h-3.5" />
-                <span>{language === 'vi' ? 'Ma Trận Tương Quan I/O' : 'I/O Matrix'}</span>
-              </button>
-
-              <button
-                type="button"
-                onClick={() => setCoverageViewMode('flow')}
-                className={`flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold rounded-xl transition-all cursor-pointer ${coverageViewMode === 'flow'
-                  ? 'bg-blue-600 text-white shadow-xs'
-                  : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
-                  }`}
-              >
-                <GitBranch className="w-3.5 h-3.5" />
-                <span>{language === 'vi' ? 'Dòng Chảy Dữ Liệu' : 'Data Flow'}</span>
-              </button>
-            </div>
-
-            <span className="hidden md:flex text-xs font-bold text-emerald-600 dark:text-emerald-400 items-center gap-1">
-              <CheckCircle2 className="w-3.5 h-3.5" /> 45 SOPs + 8 lifecycle stages
-            </span>
-
-            {/* Collapse / Expand Dropdown Button */}
-            <button
-              type="button"
-              onClick={() => setIsCoverageExpanded(!isCoverageExpanded)}
-              className="p-2 rounded-2xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 transition-colors flex items-center gap-1 text-xs font-bold cursor-pointer"
-              title={isCoverageExpanded ? (language === 'vi' ? 'Thu gọn' : 'Collapse') : (language === 'vi' ? 'Mở rộng' : 'Expand')}
-            >
-              <span>{isCoverageExpanded ? (language === 'vi' ? 'Thu gọn' : 'Collapse') : (language === 'vi' ? 'Mở rộng' : 'Expand')}</span>
-              {isCoverageExpanded ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
-            </button>
-          </div>
-        </div>
-
-        {/* EXPANDABLE BODY CONTENT */}
-        {isCoverageExpanded && (
-          <div className="animate-fadeIn space-y-4">
-            {/* VIEW MODE 1: RADIAL ECOSYSTEM WHEEL */}
-            {coverageViewMode === 'wheel' && (
-              <RadialEcosystemChart />
-            )}
-
-            {/* VIEW MODE 2: INTERACTIVE INPUT-OUTPUT MATRIX VIEW */}
-            {coverageViewMode === 'matrix' && (
-              <SubsystemMatrixView />
-            )}
-
-            {/* VIEW MODE 4: DATA FLOW DIAGRAM */}
-            {coverageViewMode === 'flow' && (
-              <DataFlowDiagram />
-            )}
-          </div>
-        )}
-
-      </div>
-
-      {/* MODAL OVERLAYS FOR METRIC CARDS */}
-      {activeModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-sm animate-fadeIn">
-          <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-xl border border-slate-200 dark:border-slate-800 w-full max-w-lg max-h-[80vh] flex flex-col overflow-hidden">
-            {/* Modal Header */}
-            <div className="flex items-center justify-between p-4 border-b border-slate-200 dark:border-slate-800">
-              <h3 className="text-sm font-extrabold text-slate-900 dark:text-white uppercase">
-                {activeModal === 'lifecycle' && (language === 'vi' ? '8 Giai Đoạn Vòng Đời Nhân Sự' : '8 Stages of Employee Lifecycle')}
-                {activeModal === 'modules' && (language === 'vi' ? '8 Modules Nghiệp Vụ' : '8 Operational Modules')}
-                {activeModal === 'sops' && (language === 'vi' ? 'Tổng Hợp 45 Quy Trình (SOPs)' : '45 Integrated SOPs')}
-              </h3>
-              <button
-                onClick={() => setActiveModal(null)}
-                className="p-1 text-slate-400 hover:text-slate-600 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition-colors cursor-pointer"
-              >
-                <X className="w-5 h-5" />
-              </button>
-            </div>
-
-            {/* Modal Content */}
-            <div className="p-4 overflow-y-auto">
-
-              {/* CONTENT 1: LIFECYCLE */}
-              {activeModal === 'lifecycle' && (
-                <ul className="space-y-2">
-                  {[
-                    { id: 0, name: 'Định biên & Ngân sách nhân sự', nameEn: 'Headcount & People Cost Planning' },
-                    { id: 1, name: 'Tuyển dụng', nameEn: 'Recruitment' },
-                    { id: 2, name: 'Tiếp nhận & Hội nhập', nameEn: 'Onboarding' },
-                    { id: 3, name: 'Quản lý Hồ sơ & Hợp đồng', nameEn: 'Profile & Contract' },
-                    { id: 4, name: 'Đào tạo & Đánh giá', nameEn: 'Training & Evaluation' },
-                    { id: 5, name: 'Lương, Thưởng & Phúc lợi', nameEn: 'C&B / Payroll' },
-                    { id: 6, name: 'Chấm công & Phúc lợi', nameEn: 'Attendance & Benefits' },
-                    { id: 7, name: 'Thuyên chuyển & Thôi việc', nameEn: 'Movements & Offboarding' }
-                  ].map((step) => (
-                    <li key={step.id} className="flex items-center gap-3 p-3 rounded-xl bg-slate-50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-800">
-                      <div className="w-6 h-6 rounded-full bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 font-bold text-xs flex items-center justify-center shrink-0">
-                        {step.id}
-                      </div>
-                      <span className="text-sm font-bold text-slate-700 dark:text-slate-200">
-                        {language === 'vi' ? step.name : step.nameEn}
-                      </span>
-                    </li>
-                  ))}
-                </ul>
-              )}
-
-              {/* CONTENT 2: MODULES */}
-              {activeModal === 'modules' && (
-                <div className="grid grid-cols-2 gap-3">
-                  {[
-                    { id: 'ATS', name: 'Tuyển dụng', color: 'purple' },
-                    { id: 'EMP', name: 'Hồ sơ nhân sự', color: 'blue' },
-                    { id: 'ATT', name: 'Chấm công', color: 'emerald' },
-                    { id: 'PAY', name: 'Tiền lương', color: 'amber' },
-                    { id: 'INS', name: 'Bảo hiểm', color: 'pink' },
-                    { id: 'TAX', name: 'Thuế TNCN', color: 'indigo' },
-                    { id: 'LMS', name: 'Đào tạo', color: 'cyan' },
-                    { id: 'PERF', name: 'Đánh giá KPI/OKR', color: 'rose' }
-                  ].map((mod) => (
-                    <div key={mod.id} className="p-3 rounded-xl border border-slate-200 dark:border-slate-800 flex flex-col gap-1">
-                      <span className={`text-[10px] font-mono font-extrabold text-${mod.color}-500`}>{mod.id}</span>
-                      <span className="text-sm font-bold text-slate-800 dark:text-slate-200">{mod.name}</span>
+    <div className="space-y-5">
+      <section className="relative z-20 overflow-visible rounded-lg border border-slate-300 bg-white shadow-sm">
+        <div className="flex flex-wrap items-start gap-1 overflow-visible bg-[#1f5f86] px-2 py-1.5 text-white">
+          {moduleMenus.map((module) => {
+            const active = openModule === module.id
+            return (
+              <div key={module.id} className="relative shrink-0" onMouseEnter={() => { keepMenuOpen(); setOpenModule(module.id); setOpenProcessKey(null); setOpenProcessTop(8) }} onMouseLeave={scheduleMenuClose}>
+                <button type="button" onClick={() => { setOpenModule(active ? null : module.id); setOpenProcessKey(null) }} aria-expanded={active} className={`flex items-center gap-1.5 border-r border-white/20 px-3 py-2 text-xs font-semibold transition-colors ${active ? 'bg-white/15' : 'hover:bg-white/10'}`}>
+                  <span className="flex h-5 w-5 items-center justify-center rounded-sm bg-cyan-400 text-[10px] font-black text-white">{module.code.slice(0, 1)}</span><span>{module.label}</span><ChevronDown className={`h-3.5 w-3.5 transition-transform ${active ? 'rotate-180' : ''}`} />
+                </button>
+                {active && (
+                  <div onMouseEnter={keepMenuOpen} onMouseLeave={scheduleMenuClose} className="absolute left-0 top-full z-50 mt-1 w-[330px] max-w-[calc(100vw-2rem)] rounded-lg border border-slate-300 bg-white p-2 text-slate-700 shadow-xl">
+                    <div className="relative max-h-64 overflow-y-auto" onScroll={() => setOpenProcessKey(null)}>
+                      {module.items.map((item) => {
+                        if (item.groupHeader) {
+                          return <div key={`${module.id}-${item.label}`} className="sticky top-0 z-10 mt-1 border-b border-slate-200 bg-white px-2 py-1.5 text-[10px] font-bold uppercase tracking-wider text-[#1f5f86] first:mt-0">{item.label}</div>
+                        }
+                        const process = getProcessForMenuItem(item)
+                        const processKey = `${module.id}-${item.sopCode ?? item.label}`
+                        const hasSteps = Boolean(process?.steps?.length)
+                        return <button key={`${module.id}-${item.label}`} type="button" disabled={item.disabled} onMouseEnter={(event) => { if (hasSteps) { const listContainer = event.currentTarget.parentElement; const rowTop = event.currentTarget.offsetTop - (listContainer?.scrollTop ?? 0); setOpenProcessKey(processKey); setOpenProcessTop(Math.max(8, rowTop + 8)) } }} onClick={() => !item.disabled && openMenuItem(item)} className={`flex w-full items-center justify-between gap-2 rounded-md px-2 py-2 text-left text-xs transition-colors ${item.disabled ? 'cursor-not-allowed text-slate-400' : openProcessKey === processKey ? 'bg-[#2e8bbd] text-white' : 'text-slate-700 hover:bg-sky-50 hover:text-[#1f5f86]'}`}>
+                          <span className="min-w-0">{item.label}</span><span className={`flex h-4 w-4 shrink-0 items-center justify-center rounded text-[10px] font-bold ${item.disabled ? 'bg-slate-100 text-slate-400' : openProcessKey === processKey ? 'bg-white/20 text-white' : 'bg-sky-100 text-[#1f5f86]'}`}>{item.disabled ? '–' : hasSteps ? <ChevronRight className="h-3 w-3" /> : '›'}</span>
+                        </button>
+                      })}
                     </div>
-                  ))}
-                </div>
-              )}
-
-              {/* CONTENT 3: SOPs */}
-              {activeModal === 'sops' && (
-                <div className="space-y-3">
-                  <div className="p-3 bg-emerald-50 dark:bg-emerald-900/10 border border-emerald-100 dark:border-emerald-900/30 rounded-xl mb-4">
-                    <p className="text-xs text-emerald-800 dark:text-emerald-300">
-                      {language === 'vi'
-                        ? 'Hệ thống đã số hóa thành công 45 quy trình chuẩn (Standard Operating Procedures) bao phủ toàn bộ 5 phân hệ Core HR, kèm theo các Luật định (Business Rules) tự động cảnh báo.'
-                        : 'System has successfully digitized 45 Standard Operating Procedures covering all 5 Core HR modules, complete with automated Business Rules.'}
-                    </p>
+                    {module.items.map((item) => {
+                      const process = getProcessForMenuItem(item)
+                      const processKey = `${module.id}-${item.sopCode ?? item.label}`
+                      if (!process || openProcessKey !== processKey) return null
+                      return <div key={`steps-${processKey}`} style={{ top: openProcessTop }} className="absolute left-[calc(100%+4px)] z-50 w-[360px] max-w-[calc(100vw-2rem)] rounded-lg border border-slate-300 bg-white p-2 text-slate-700 shadow-xl">
+                        <div className="max-h-64 overflow-y-auto">
+                          {process.steps.map((step, stepIndex) => <button key={step.stepCode} type="button" onClick={() => openMenuItem({ label: step.title, sopCode: process.sopCode, workflowId: item.workflowId }, stepIndex + 1)} className="flex w-full items-start gap-2 rounded-md px-2 py-2 text-left text-xs text-slate-700 hover:bg-sky-50 hover:text-[#1f5f86]"><span className="mt-0.5 rounded bg-sky-100 px-1 py-0.5 font-mono text-[9px] font-bold text-[#1f5f86]">{step.stepCode}</span><span>{step.title}</span></button>)}
+                        </div>
+                      </div>
+                    })}
                   </div>
-                  {[
-                    { module: 'Core EMP (Nhân sự)', count: 15, barColor: 'bg-blue-500' },
-                    { module: 'ATT (Chấm công)', count: 15, barColor: 'bg-emerald-500' },
-                    { module: 'PAY (Tiền lương)', count: 4, barColor: 'bg-amber-500' },
-                    { module: 'INS (Bảo hiểm)', count: 8, barColor: 'bg-pink-500' },
-                    { module: 'TAX (Thuế TNCN)', count: 3, barColor: 'bg-indigo-500' }
-                  ].map((group) => (
-                    <div key={group.module} className="flex items-center gap-3">
-                      <div className="w-32 text-xs font-bold text-slate-600 dark:text-slate-400 shrink-0">
-                        {group.module}
-                      </div>
-                      <div className="flex-1 h-2.5 bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden flex">
-                        <div className={`h-full ${group.barColor} rounded-full`} style={{ width: `${(group.count / 45) * 100}%` }} />
-                      </div>
-                      <div className="w-12 text-right text-xs font-mono font-bold text-slate-900 dark:text-white">
-                        {group.count} SOP
-                      </div>
-                    </div>
-                  ))}
-                  <div className="pt-3 mt-3 border-t border-slate-200 dark:border-slate-800 flex justify-between items-center text-sm font-black">
-                    <span>Tổng cộng:</span>
-                    <span>45 SOPs</span>
-                  </div>
-                </div>
-              )}
-
-            </div>
-          </div>
+                )}
+              </div>
+            )
+          })}
         </div>
-      )}
 
+      </section>
+
+      <section id="coverage-wheel" className="rounded-lg border border-slate-300 bg-white shadow-sm scroll-mt-28">
+        <div className="flex flex-col gap-3 border-b border-slate-200 px-4 py-3 lg:flex-row lg:items-center lg:justify-between"><div><h3 className="flex items-center gap-2 text-sm font-bold text-slate-900"><PieChart className="h-4 w-4 text-[#1f5f86]" /> Tổng quan phân hệ và dữ liệu</h3></div><div className="flex flex-wrap items-center gap-1 rounded border border-slate-200 bg-slate-50 p-1"><ViewButton active={coverageViewMode === 'wheel'} onClick={() => setCoverageViewMode('wheel')} icon={<PieChart className="h-3.5 w-3.5" />}>Quan hệ phân hệ</ViewButton><ViewButton active={coverageViewMode === 'matrix'} onClick={() => setCoverageViewMode('matrix')} icon={<Workflow className="h-3.5 w-3.5" />}>Đầu vào và kết quả</ViewButton><ViewButton active={coverageViewMode === 'flow'} onClick={() => setCoverageViewMode('flow')} icon={<GitBranch className="h-3.5 w-3.5" />}>Luồng liên phân hệ</ViewButton><button type="button" onClick={() => setIsCoverageExpanded((value) => !value)} className="px-2 py-1.5 text-xs font-semibold text-slate-500 hover:text-slate-900">{isCoverageExpanded ? 'Thu gọn' : 'Mở rộng'}</button></div></div>
+        {isCoverageExpanded && <div className="p-4">{coverageViewMode === 'wheel' && <RadialEcosystemChart />}{coverageViewMode === 'matrix' && <ProcessInputOutputView />}{coverageViewMode === 'flow' && <CompactDataFlowDiagram />}</div>}
+      </section>
     </div>
   )
 }
+
+const SummaryTile: React.FC<{ icon: React.ReactNode; label: string; value: string; detail: string }> = ({ icon, label, value, detail }) => <div className="rounded-lg border border-slate-300 bg-white p-4 shadow-sm"><div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wide text-slate-500"><span className="text-[#1f5f86]">{icon}</span>{label}</div><p className="mt-2 text-xl font-bold text-slate-900">{value}</p><p className="mt-1 text-xs leading-relaxed text-slate-500">{detail}</p></div>
+void SummaryTile
+
+const ViewButton: React.FC<{ active: boolean; onClick: () => void; icon: React.ReactNode; children: React.ReactNode }> = ({ active, onClick, icon, children }) => <button type="button" onClick={onClick} className={`flex items-center gap-1.5 px-2.5 py-1.5 text-xs font-semibold ${active ? 'bg-[#1f5f86] text-white' : 'text-slate-600 hover:bg-white'}`}>{icon}{children}</button>

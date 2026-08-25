@@ -35,6 +35,7 @@ export const WorkflowDiagramView: React.FC<WorkflowDiagramViewProps> = ({
   const { language } = useLanguage()
   const [isDiagramExpanded, setIsDiagramExpanded] = useState<boolean>(true)
   const currentStep = currentProcess.steps[selectedStepIdx] || currentProcess.steps[0]
+  const isHeadcountSetupStep = currentStep?.stepCode === 'EMP01.01'
 
   return (
     <div className="space-y-6">
@@ -93,7 +94,7 @@ export const WorkflowDiagramView: React.FC<WorkflowDiagramViewProps> = ({
                   const isLastStep = idx === currentProcess.steps.length - 1
 
                   return (
-                    <React.Fragment key={step.stepCode}>
+                    <React.Fragment key={`${step.stepCode}-${idx}`}>
                       {/* Step Card Node */}
                       <div
                         onClick={() => setSelectedStepIdx(idx)}
@@ -271,6 +272,60 @@ export const WorkflowDiagramView: React.FC<WorkflowDiagramViewProps> = ({
               </p>
             </div>
           </div>
+
+          {isHeadcountSetupStep && (
+            <div className={`rounded-xl border p-4 space-y-4 ${isDarkMode ? 'bg-blue-950/20 border-blue-800/60' : 'bg-blue-50/60 border-blue-200'}`}>
+              <div>
+                <span className="text-[10px] font-bold uppercase tracking-wider text-blue-700 dark:text-blue-300">
+                  {language === 'vi' ? 'Chi tiết bước nghiệp vụ' : 'Business step detail'}
+                </span>
+                <h4 className={`mt-1 text-sm font-extrabold ${isDarkMode ? 'text-white' : 'text-slate-900'}`}>
+                  {language === 'vi' ? 'Thiết lập định biên nhân sự' : 'Set up headcount plan'}
+                </h4>
+              </div>
+
+              <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
+                <div className={`rounded-lg border p-3 ${isDarkMode ? 'border-blue-900/70 bg-slate-950/50' : 'border-blue-100 bg-white'}`}>
+                  <p className="text-[10px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
+                    {language === 'vi' ? 'Nội dung thực hiện' : 'Step activity'}
+                  </p>
+                  <p className="mt-1 text-xs leading-relaxed text-slate-700 dark:text-slate-200">
+                    {currentStep.description}
+                  </p>
+                </div>
+
+                <div className={`rounded-lg border p-3 ${isDarkMode ? 'border-blue-900/70 bg-slate-950/50' : 'border-blue-100 bg-white'}`}>
+                  <p className="text-[10px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
+                    {language === 'vi' ? 'Thông tin cần khai báo' : 'Information to provide'}
+                  </p>
+                  <div className="mt-2 flex flex-wrap gap-1.5">
+                    {currentStep.fieldsChecklist?.map((field) => (
+                      <span key={field} className="rounded-md bg-blue-100 px-2 py-1 text-[11px] font-medium text-blue-800 dark:bg-blue-900/60 dark:text-blue-200">
+                        {field}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+
+                <div className={`rounded-lg border p-3 ${isDarkMode ? 'border-blue-900/70 bg-slate-950/50' : 'border-blue-100 bg-white'}`}>
+                  <p className="text-[10px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
+                    {language === 'vi' ? 'Điều kiện thực hiện' : 'Execution context'}
+                  </p>
+                  <p className="mt-1 text-xs text-slate-700 dark:text-slate-200"><strong>{currentStep.actor}</strong> · {currentStep.location}</p>
+                  <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">{currentStep.timing}</p>
+                </div>
+
+                <div className={`rounded-lg border p-3 ${isDarkMode ? 'border-blue-900/70 bg-slate-950/50' : 'border-blue-100 bg-white'}`}>
+                  <p className="text-[10px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
+                    {language === 'vi' ? 'Bước tiếp theo' : 'Next step'}
+                  </p>
+                  <p className="mt-1 text-xs font-semibold text-blue-700 dark:text-blue-300">
+                    {currentProcess.steps[selectedStepIdx + 1]?.title || (language === 'vi' ? 'Đây là bước cuối của quy trình' : 'This is the final step')}
+                  </p>
+                </div>
+              </div>
+            </div>
+          )}
 
           {/* Checklist Fields in Word Doc */}
           {currentStep.fieldsChecklist && currentStep.fieldsChecklist.length > 0 && (

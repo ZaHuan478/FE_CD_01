@@ -1,5 +1,5 @@
 import React from 'react'
-import { ChevronDown, ChevronUp, ListCheck, GitBranch, Briefcase, ArrowRight } from 'lucide-react'
+import { ChevronDown, ChevronUp, ListCheck, GitBranch } from 'lucide-react'
 import { FIVE_CORE_MODULES, type SopDetailItem } from './data/ecosystemModulesData'
 import { useLanguage } from '../../context/LanguageContext'
 
@@ -45,13 +45,13 @@ export const EcosystemSopWorkbench: React.FC<EcosystemSopWorkbenchProps> = ({
   const { language } = useLanguage()
 
   return (
-    <div className="w-full mt-2 p-4 sm:p-6 rounded-3xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-md transition-all duration-300 space-y-4">
+    <div className="mt-2 w-full space-y-4 rounded-lg border border-slate-200 bg-white p-4 shadow-sm dark:border-slate-800 dark:bg-slate-900 sm:p-5">
       
       {/* QUICK MODULE SWITCHER TABS */}
-      <div className="flex flex-wrap items-center justify-between gap-2 border-b border-slate-100 dark:border-slate-800 pb-3">
+      <div className="flex flex-wrap items-center justify-between gap-3 border-b border-slate-200 pb-3 dark:border-slate-800">
         <div className="flex flex-wrap items-center gap-1.5">
-          <span className="text-xs font-extrabold uppercase text-slate-500 dark:text-slate-400 mr-1">
-            {language === 'vi' ? 'CHỌN PHÂN HỆ:' : 'SELECT MODULE:'}
+          <span className="mr-1 text-[10px] font-extrabold uppercase tracking-wide text-slate-500 dark:text-slate-400">
+            {language === 'vi' ? 'Phân hệ nghiệp vụ' : 'Business module'}
           </span>
           {FIVE_CORE_MODULES.map((mod) => {
             const isCurrSelected = activeModule.id === mod.id
@@ -60,13 +60,13 @@ export const EcosystemSopWorkbench: React.FC<EcosystemSopWorkbenchProps> = ({
                 key={mod.id}
                 type="button"
                 onClick={() => handleSelectModule(mod.id)}
-                className={`px-3.5 py-2 text-xs sm:text-sm font-bold rounded-2xl border transition-all flex items-center gap-1.5 cursor-pointer ${isCurrSelected
-                  ? 'bg-blue-600 text-white border-blue-600 shadow-xs'
-                  : 'bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 border-slate-200 dark:border-slate-700'
+                className={`flex cursor-pointer items-center gap-1.5 rounded-md border px-3 py-2 text-xs font-bold transition-colors ${isCurrSelected
+                  ? 'border-[#1f5f86] bg-[#1f5f86] text-white'
+                  : 'border-slate-200 bg-slate-50 text-slate-700 hover:border-sky-300 hover:bg-sky-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300'
                   }`}
               >
-                <span>{mod.code}</span>
-                <span className="text-xs font-mono opacity-80">({mod.sopList.length})</span>
+                <span>{language === 'vi' ? mod.name.replace(/^Phân hệ\s+/i, '').split('(')[0].trim() : mod.nameEn.replace(/^Module\s+/i, '').split('(')[0].trim()}</span>
+                <span className="font-mono text-[10px] opacity-75">{mod.sopList.length}</span>
               </button>
             )
           })}
@@ -75,112 +75,56 @@ export const EcosystemSopWorkbench: React.FC<EcosystemSopWorkbenchProps> = ({
         <button
           type="button"
           onClick={() => setIsSopListExpanded(!isSopListExpanded)}
-          className="p-2.5 rounded-2xl text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white flex items-center gap-1.5 text-xs sm:text-sm font-extrabold transition-colors cursor-pointer bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700"
+          className="flex cursor-pointer items-center gap-1.5 rounded-md border border-slate-200 bg-slate-50 px-3 py-2 text-xs font-bold text-slate-600 transition-colors hover:bg-slate-100 hover:text-slate-900 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300"
         >
-          <span>{isSopListExpanded ? (language === 'vi' ? 'Thu gọn Bảng điều khiển' : 'Collapse Workbench') : (language === 'vi' ? `Mở rộng ${activeModule.sopList.length} SOPs` : `Expand ${activeModule.sopList.length} SOPs`)}</span>
+          <span>{isSopListExpanded ? (language === 'vi' ? 'Ẩn danh sách quy trình' : 'Hide process list') : (language === 'vi' ? `Hiện ${activeModule.sopList.length} quy trình` : `Show ${activeModule.sopList.length} processes`)}</span>
           {isSopListExpanded ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
         </button>
       </div>
 
-      {/* MODULE SUMMARY HEADER & FILTER CONTROLS */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 animate-fadeIn">
+      {/* ACTIVE MODULE CONTEXT */}
+      <div className="flex items-center justify-between gap-4">
         <div className="flex items-start gap-3">
-          <div className={`p-3.5 rounded-2xl ${activeModule.bgLight} dark:${activeModule.bgDark} border ${activeModule.border} shrink-0`}>
+          <div className="shrink-0 rounded-md border border-sky-100 bg-sky-50 p-2 text-[#1f5f86] dark:border-sky-900 dark:bg-sky-950/40">
             {activeModule.icon}
           </div>
           <div>
-            <div className="flex items-center gap-2">
-              <span className={`text-xs font-mono font-extrabold uppercase px-2.5 py-0.5 rounded-lg ${activeModule.bgLight} dark:${activeModule.bgDark} ${activeModule.textLight} dark:${activeModule.textDark} border ${activeModule.border}`}>
-                {language === 'vi' ? 'MÃ PHÂN HỆ:' : 'MODULE CODE:'} {activeModule.code}
-              </span>
-              <span className="px-2.5 py-0.5 text-xs font-mono font-bold bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 rounded-full border border-emerald-500/30">
-                {activeModule.sopCount}
-              </span>
-            </div>
-            <h4 className="text-base sm:text-lg font-extrabold text-slate-900 dark:text-white mt-1">
+            <h4 className="text-base font-extrabold text-slate-900 dark:text-white sm:text-lg">
               {language === 'vi' ? activeModule.name : activeModule.nameEn}
             </h4>
+            <p className="mt-0.5 text-xs text-slate-500 dark:text-slate-400">
+              {language === 'vi' ? `${activeModule.sopList.length} quy trình có thể tra cứu` : `${activeModule.sopList.length} processes available`}
+            </p>
           </div>
-        </div>
-
-        {/* TYPE FILTER PILLS */}
-        <div className="flex items-center gap-1.5 p-1.5 bg-slate-100 dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 shrink-0 self-start sm:self-auto">
-          <button
-            type="button"
-            onClick={() => setActiveTypeFilter('ALL')}
-            className={`px-3 py-1.5 text-xs font-bold rounded-xl transition-all cursor-pointer ${activeTypeFilter === 'ALL' ? 'bg-blue-600 text-white shadow-xs' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'}`}
-          >
-            {language === 'vi' ? 'Tất cả' : 'All'} ({activeModule.sopList.length})
-          </button>
-          <button
-            type="button"
-            onClick={() => setActiveTypeFilter('N')}
-            className={`px-2.5 py-1.5 text-xs font-bold rounded-xl transition-all cursor-pointer ${activeTypeFilter === 'N' ? 'bg-blue-600 text-white shadow-xs' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'}`}
-            title="Nhập liệu / Khai báo"
-          >
-            N (Input)
-          </button>
-          <button
-            type="button"
-            onClick={() => setActiveTypeFilter('M')}
-            className={`px-2.5 py-1.5 text-xs font-bold rounded-xl transition-all cursor-pointer ${activeTypeFilter === 'M' ? 'bg-amber-600 text-white shadow-xs' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'}`}
-            title="Thẩm định thủ công / Duyệt"
-          >
-            M (Review)
-          </button>
-          <button
-            type="button"
-            onClick={() => setActiveTypeFilter('A')}
-            className={`px-2.5 py-1.5 text-xs font-bold rounded-xl transition-all cursor-pointer ${activeTypeFilter === 'A' ? 'bg-emerald-600 text-white shadow-xs' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'}`}
-            title="Tự động / Hệ thống"
-          >
-            A (Auto)
-          </button>
         </div>
       </div>
 
-      {/* ATS INGESTION BANNER */}
-      {activeModule.id === 'emp' && (
-        <div className="p-3.5 sm:p-4 rounded-2xl bg-gradient-to-r from-blue-900/40 via-indigo-900/30 to-purple-900/40 border border-blue-500/30 text-white shadow-inner animate-fadeIn">
-          <div className="flex flex-col md:flex-row md:items-center justify-between gap-3">
-            <div className="flex items-center gap-3">
-              <div className="p-2.5 bg-blue-600 text-white rounded-2xl shadow-md shrink-0">
-                <Briefcase className="w-5 h-5 text-amber-300" />
-              </div>
-              <div>
-                <div className="flex items-center gap-2">
-                  <span className="text-[10px] font-black uppercase tracking-wider bg-blue-500/30 text-blue-300 px-2 py-0.5 rounded-md border border-blue-400/30">
-                    {language === 'vi' ? '⚡ CỔNG LIÊN THÔNG ĐẦU VÀO' : '⚡ RECRUITMENT INGESTION GATEWAY'}
-                  </span>
-                  <span className="text-xs font-bold text-slate-300 hidden sm:inline">
-                    {language === 'vi' ? 'Kiểm soát hồ sơ ứng viên đầu vào' : 'Candidate Intake Control'}
-                  </span>
-                </div>
-                <p className="text-xs sm:text-sm font-semibold text-slate-200 mt-0.5">
-                  {language === 'vi'
-                    ? 'Dữ liệu ứng viên Trúng tuyển & Ký Offer từ Phân hệ Tuyển dụng (ATS) được TỰ ĐỘNG ĐỒNG BỘ sang Phân hệ Nhân sự (Core EMP) để tiếp nhận Onboarding.'
-                    : 'Passed candidate & signed Offer data from ATS is AUTOMATICALLY INGESTED into Core EMP for Onboarding intake.'}
-                </p>
-              </div>
-            </div>
-
-            <div className="flex items-center gap-1.5 self-start md:self-auto bg-black/40 px-3 py-1.5 rounded-xl border border-white/10 text-[11px] font-mono shrink-0">
-              <span className="text-blue-400 font-bold">1. Tuyển dụng (ATS)</span>
-              <ArrowRight className="w-3.5 h-3.5 text-slate-400 animate-pulse" />
-              <span className="text-emerald-400 font-bold">2. Core EMP (SOP-02)</span>
-              <ArrowRight className="w-3.5 h-3.5 text-slate-400 animate-pulse" />
-              <span className="text-purple-400 font-bold">3. Master Data (SOP-03)</span>
-            </div>
+      {activeModule.id === 'emp' && activeSopItem.isInheritedFromATS && (
+        <div className="flex flex-col justify-between gap-3 rounded-lg border border-sky-200 bg-sky-50/70 p-3 text-slate-700 dark:border-sky-900 dark:bg-sky-950/30 dark:text-slate-200 sm:flex-row sm:items-center">
+          <div>
+            <p className="text-[10px] font-extrabold uppercase tracking-wide text-[#1f5f86] dark:text-sky-200">
+              {language === 'vi' ? 'Liên thông từ Tuyển dụng' : 'Recruitment handoff'}
+            </p>
+            <p className="mt-1 text-xs font-semibold">
+              {language === 'vi'
+                ? 'Quy trình này tiếp nhận dữ liệu ứng viên từ phân hệ Tuyển dụng để thực hiện nghiệp vụ nhân sự tiếp theo.'
+                : 'This process receives candidate data from Recruitment for the next employee operation.'}
+            </p>
+          </div>
+          <div className="flex shrink-0 items-center gap-1.5 rounded-md border border-sky-200 bg-white px-3 py-1.5 text-[11px] font-semibold dark:border-sky-900 dark:bg-slate-900">
+            <span>Tuyển dụng ATS</span>
+            <span aria-hidden="true">→</span>
+            <span>Nhân sự</span>
           </div>
         </div>
       )}
 
       {isSopListExpanded && (
-        <div className="pt-2 animate-fadeIn space-y-4">
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 items-start">
+        <div className="space-y-4 pt-2">
+          <div className="grid grid-cols-1 items-start gap-5 lg:grid-cols-[minmax(300px,0.9fr)_minmax(0,1.5fr)]">
             
             {/* CỘT TRÁI (5 Cols): TIẾN TRÌNH CÁC CHẶNG NGHIỆP VỤ & DANH SÁCH SOPS */}
-            <div className="lg:col-span-5 space-y-3.5 relative">
+            <div className="relative space-y-3.5 lg:max-h-[720px] lg:overflow-y-auto lg:pr-1">
               <div className="flex items-center justify-between text-xs font-extrabold uppercase text-slate-500 dark:text-slate-400 pb-1 border-b border-slate-100 dark:border-slate-800">
                 <span className="flex items-center gap-1.5">
                   <ListCheck className="w-4 h-4 text-blue-600 dark:text-blue-400" />
@@ -188,9 +132,30 @@ export const EcosystemSopWorkbench: React.FC<EcosystemSopWorkbenchProps> = ({
                     ? `CÁC BƯỚC THAO TÁC THEO CHẶNG (${filteredSopList.length} SOPs)`
                     : `STAGE WORKFLOW STEPS (${filteredSopList.length} SOPs)`}
                 </span>
-                <span className="text-[10px] font-mono text-slate-400">
-                  {language === 'vi' ? 'Click để xem Live Preview' : 'Click to inspect'}
+              </div>
+
+              <div className="flex flex-wrap items-center gap-1 rounded-md border border-slate-200 bg-slate-50 p-1 dark:border-slate-700 dark:bg-slate-800">
+                <span className="px-2 text-[10px] font-bold uppercase tracking-wide text-slate-500 dark:text-slate-400">
+                  {language === 'vi' ? 'Loại thao tác' : 'Operation type'}
                 </span>
+                {([
+                  ['ALL', language === 'vi' ? 'Tất cả' : 'All'],
+                  ['N', language === 'vi' ? 'Nhập liệu' : 'Input'],
+                  ['M', language === 'vi' ? 'Duyệt' : 'Review'],
+                  ['A', language === 'vi' ? 'Tự động' : 'Automated']
+                ] as const).map(([filter, label]) => (
+                  <button
+                    key={filter}
+                    type="button"
+                    onClick={() => setActiveTypeFilter(filter)}
+                    className={`rounded px-2 py-1.5 text-[11px] font-semibold transition-colors ${activeTypeFilter === filter
+                      ? 'bg-[#1f5f86] text-white'
+                      : 'text-slate-600 hover:bg-white hover:text-slate-900 dark:text-slate-300 dark:hover:bg-slate-900'
+                    }`}
+                  >
+                    {label}{filter === 'ALL' ? ` (${activeModule.sopList.length})` : ''}
+                  </button>
+                ))}
               </div>
 
               {activeModule.stages && activeModule.stages.length > 0 && (
@@ -206,11 +171,11 @@ export const EcosystemSopWorkbench: React.FC<EcosystemSopWorkbenchProps> = ({
                     <button
                       type="button"
                       onClick={() => setIsStageDropdownOpen(!isStageDropdownOpen)}
-                      className="w-full px-3 py-1.5 text-xs font-bold rounded-2xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-800 dark:text-slate-200 flex items-center justify-between gap-1.5 shadow-2xs hover:border-blue-400 dark:hover:border-blue-500 transition-all cursor-pointer"
+                      className="flex w-full cursor-pointer items-center justify-between gap-1.5 rounded-md border border-slate-200 bg-white px-3 py-1.5 text-xs font-bold text-slate-800 transition-colors hover:border-sky-400 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200"
                     >
                       <span className="truncate">
                         {selectedStageId === 'ALL'
-                          ? (language === 'vi' ? `📂 Tất cả (${activeModule.stages.length} Chặng)` : `📂 All (${activeModule.stages.length} Stages)`)
+                          ? (language === 'vi' ? `Tất cả (${activeModule.stages.length} chặng)` : `All (${activeModule.stages.length} stages)`)
                           : (() => {
                               const curr = activeModule.stages.find((s: any) => s.stageId === selectedStageId)
                               if (!curr) return 'Chọn chặng'
@@ -235,7 +200,6 @@ export const EcosystemSopWorkbench: React.FC<EcosystemSopWorkbenchProps> = ({
                           }`}
                         >
                           <div className="flex items-center gap-2">
-                            <span>📂</span>
                             <span>{language === 'vi' ? 'Tất cả các chặng' : 'All Stages'}</span>
                           </div>
                           <span className="text-[10px] font-mono font-extrabold px-1.5 py-0.2 rounded-full bg-slate-200 dark:bg-slate-800 text-slate-600 dark:text-slate-400">
@@ -341,12 +305,7 @@ export const EcosystemSopWorkbench: React.FC<EcosystemSopWorkbenchProps> = ({
                                     }`}
                                 >
                                   <span
-                                    className={`px-2 py-0.5 text-[11px] font-mono font-extrabold rounded shrink-0 mt-0.5 ${sopItem.type === 'N'
-                                      ? 'bg-blue-500/10 text-blue-700 dark:text-blue-300 border border-blue-500/20'
-                                      : sopItem.type === 'M'
-                                        ? 'bg-amber-500/10 text-amber-700 dark:text-amber-300 border border-amber-500/20'
-                                        : 'bg-emerald-500/10 text-emerald-700 dark:text-emerald-300 border border-emerald-500/20'
-                                      }`}
+                                    className="mt-0.5 shrink-0 rounded border border-slate-200 bg-slate-100 px-2 py-0.5 font-mono text-[11px] font-extrabold text-slate-600 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300"
                                     title={sopItem.type === 'N' ? 'Nhập liệu' : sopItem.type === 'M' ? 'Phê duyệt' : 'Tự động'}
                                   >
                                     {sopItem.type}
@@ -358,8 +317,8 @@ export const EcosystemSopWorkbench: React.FC<EcosystemSopWorkbenchProps> = ({
                                         {sopItem.code}
                                       </span>
                                       {sopItem.isInheritedFromATS && (
-                                        <span className="text-[9px] font-bold px-1.5 py-0.2 rounded bg-purple-500/10 text-purple-600 dark:text-purple-300 border border-purple-500/20">
-                                          ⚡ Kế thừa ATS
+                                        <span className="rounded border border-sky-200 bg-sky-50 px-1.5 py-0.5 text-[9px] font-bold text-[#1f5f86] dark:border-sky-900 dark:bg-sky-950/40 dark:text-sky-200">
+                                          Nhận từ Tuyển dụng
                                         </span>
                                       )}
                                     </div>
@@ -394,12 +353,7 @@ export const EcosystemSopWorkbench: React.FC<EcosystemSopWorkbenchProps> = ({
                           }`}
                       >
                         <span
-                          className={`px-2 py-0.5 text-[11px] font-mono font-extrabold rounded shrink-0 mt-0.5 ${sopItem.type === 'N'
-                            ? 'bg-blue-500/10 text-blue-700 dark:text-blue-300 border border-blue-500/20'
-                            : sopItem.type === 'M'
-                              ? 'bg-amber-500/10 text-amber-700 dark:text-amber-300 border border-amber-500/20'
-                              : 'bg-emerald-500/10 text-emerald-700 dark:text-emerald-300 border border-emerald-500/20'
-                            }`}
+                          className="mt-0.5 shrink-0 rounded border border-slate-200 bg-slate-100 px-2 py-0.5 font-mono text-[11px] font-extrabold text-slate-600 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300"
                         >
                           {sopItem.type}
                         </span>
@@ -420,7 +374,7 @@ export const EcosystemSopWorkbench: React.FC<EcosystemSopWorkbenchProps> = ({
             </div>
 
             {/* CỘT PHẢI (7 Cols): CHI TIẾT QUY TRÌNH (CHILDREN) */}
-            <div className="lg:col-span-7">
+            <div className="min-w-0">
               {children}
             </div>
 

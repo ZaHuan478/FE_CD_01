@@ -8,11 +8,14 @@ export interface WorkflowDetailPageProps {
 
 export interface SopSubStep {
   stepCode: string
+  sourceCode?: string
+  sourceRow?: number
+  sourceTypeCode?: string
   title: string
   actor: string
   location: string
   timing: string
-  typeCode: 'N' | 'A' | 'C' | 'M'
+  typeCode: 'N' | 'A' | 'C' | 'M' | ''
   description: string
   fieldsChecklist?: string[]
 }
@@ -22,7 +25,12 @@ export interface SopSubProcess {
   sopTitle: string
   sopCategory: string
   description: string
+  inputs?: string[]
+  outputs?: string[]
+  rules?: string[]
   steps: SopSubStep[]
+  sourceNote?: string
+  notes?: string[]
 }
 
 export interface RoleDataFlow {

@@ -42,67 +42,67 @@ export const LeftSidebarNav: React.FC<LeftSidebarNavProps> = ({
 
   const menuGroups = [
     {
-      groupTitle: t('sidebar.group.overview', 'TỔNG QUAN'),
+      groupTitle: t('sidebar.group.overview', 'BẮT ĐẦU TỪ ĐÂY'),
       items: [
         {
           id: 'overview-dashboard',
-          label: t('sidebar.item.dashboard', 'Dashboard Chỉ số KPI'),
+          label: t('sidebar.item.dashboard', 'Tổng quan hệ thống'),
           icon: LayoutDashboard,
           badge: t('sidebar.item.dashboardBadge', 'Overview'),
-          color: 'text-blue-500'
+          color: 'text-blue-600'
         }
       ]
     },
     {
-      groupTitle: t('sidebar.group.architecture', 'KIẾN TRÚC PHÂN TẦNG'),
+      groupTitle: t('sidebar.group.architecture', 'NỘI DUNG CHÍNH'),
       items: [
         {
           id: 'layer-1-master-data',
-          label: t('sidebar.item.layer1', 'Tầng 1: Master Data'),
+          label: t('sidebar.item.layer1', 'Danh mục dùng chung'),
           icon: Database,
-          badge: t('sidebar.item.layer1Badge', '10 Catalog'),
-          color: 'text-purple-500'
+          badge: t('sidebar.item.layer1Badge', 'Nền tảng'),
+          color: 'text-blue-600'
         },
         {
           id: 'layer-2-lifecycle',
-          label: t('sidebar.item.layer2', 'Tầng 2: Vòng đời NV'),
+          label: t('sidebar.item.layer2', 'Vòng đời nhân sự'),
           icon: Layers,
-          badge: t('sidebar.item.layer2Badge', '8 Stage'),
-          color: 'text-emerald-500'
+          badge: t('sidebar.item.layer2Badge', '8 giai đoạn'),
+          color: 'text-blue-600'
         },
         {
           id: 'layer-3-operations',
-          label: t('sidebar.item.layer3', 'Tầng 3: Vận hành nhân sự'),
+          label: t('sidebar.item.layer3', 'Nghiệp vụ phát sinh'),
           icon: GitBranch,
-          badge: t('sidebar.item.layer3Badge', '8 Module'),
-          color: 'text-amber-500'
+          badge: t('sidebar.item.layer3Badge', '8 nhóm'),
+          color: 'text-blue-600'
         },
         {
           id: 'system-support',
-          label: t('sidebar.item.support', 'Hỗ trợ Hệ thống'),
+          label: t('sidebar.item.support', 'Tiện ích hỗ trợ'),
           icon: HelpCircle,
-          badge: t('sidebar.item.supportBadge', 'Support'),
-          color: 'text-indigo-500'
+          badge: t('sidebar.item.supportBadge', 'Hỗ trợ'),
+          color: 'text-blue-600'
         }
       ]
     },
     {
-      groupTitle: t('sidebar.group.specs', 'TÀI LIỆU QUY CHUẨN'),
+      groupTitle: t('sidebar.group.specs', 'TRA CỨU CHI TIẾT'),
       items: [
         {
           id: 'open-erd-modal',
-          label: t('sidebar.item.erd', 'Sơ đồ ERD Master Data'),
+          label: t('sidebar.item.erd', 'Sơ đồ dữ liệu'),
           icon: Sparkles,
-          badge: 'ERD View',
-          color: 'text-pink-500',
+          badge: 'Sơ đồ',
+          color: 'text-blue-600',
           onClick: onOpenERD
         },
         {
           id: 'sop-specs-matrix',
-          label: t('sidebar.item.sopMatrix', 'Bảng kiểm 45 quy trình'),
+          label: t('sidebar.item.sopMatrix', 'Danh sách quy trình'),
           icon: ShieldCheck,
-          badge: '45 SOPs',
-          color: 'text-cyan-500'
+          badge: '45 quy trình',
+          color: 'text-blue-600'
         }
       ]
     }
@@ -110,30 +110,30 @@ export const LeftSidebarNav: React.FC<LeftSidebarNavProps> = ({
 
   return (
     <aside
-      className={`fixed left-0 top-0 bottom-0 z-40 bg-slate-900 text-slate-100 border-r border-slate-800 transition-all duration-300 flex flex-col shadow-2xl ${isCollapsed ? 'w-12 sm:w-16' : 'w-56 sm:w-64'
+      className={`fixed left-0 top-0 bottom-0 z-40 bg-white text-slate-800 border-r border-slate-200 transition-all duration-300 flex flex-col shadow-lg ${isCollapsed ? 'w-12 sm:w-16' : 'w-56 sm:w-64'
         }`}
     >
 
       {/* SIDEBAR HEADER LOGO */}
-      <div className="p-4 border-b border-slate-800 flex items-center justify-between gap-2 shrink-0">
+      <div className="p-4 border-b border-slate-200 flex items-center justify-between gap-2 shrink-0">
         {!isCollapsed && (
           <div className="flex items-center gap-2.5 truncate">
-            <div className="p-2 bg-gradient-to-tr from-blue-600 to-indigo-600 text-white rounded-xl shadow-md shrink-0">
+            <div className="p-2 bg-blue-600 text-white rounded-xl shadow-sm shrink-0">
               <Layers className="w-5 h-5" />
             </div>
             <div className="truncate">
               <h2 className="text-xs font-black tracking-wider text-white truncate">
-                HRMS ARCHITECTURE
+                BẢN ĐỒ HRMS
               </h2>
               <p className="text-[10px] font-bold text-blue-400 truncate">
-                Workday / SAP Style
+                Tổng quan nghiệp vụ
               </p>
             </div>
           </div>
         )}
 
         {isCollapsed && (
-          <div className="mx-auto p-2 bg-blue-600 text-white rounded-xl shadow-md">
+            <div className="mx-auto p-2 bg-blue-600 text-white rounded-xl shadow-sm">
             <Layers className="w-5 h-5" />
           </div>
         )}
@@ -142,7 +142,7 @@ export const LeftSidebarNav: React.FC<LeftSidebarNavProps> = ({
         <button
           type="button"
           onClick={handleToggle}
-          className="p-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-white transition-colors cursor-pointer shrink-0"
+          className="p-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-500 hover:text-slate-900 transition-colors cursor-pointer shrink-0"
           title={isCollapsed ? 'Mở rộng Menu' : 'Thu gọn Menu'}
         >
           {isCollapsed ? <ChevronRight className="w-4 h-4" /> : <ChevronLeft className="w-4 h-4" />}
@@ -154,7 +154,7 @@ export const LeftSidebarNav: React.FC<LeftSidebarNavProps> = ({
         {menuGroups.map((group, gIdx) => (
           <div key={gIdx} className="space-y-1.5">
             {!isCollapsed && (
-              <h3 className="px-3 text-[10px] font-extrabold uppercase tracking-widest text-slate-400/90 mb-1">
+              <h3 className="px-3 text-[10px] font-extrabold uppercase tracking-widest text-slate-400 mb-1">
                 {group.groupTitle}
               </h3>
             )}
@@ -176,8 +176,8 @@ export const LeftSidebarNav: React.FC<LeftSidebarNavProps> = ({
                       }
                     }}
                     className={`w-full flex items-center justify-between p-2.5 rounded-xl text-xs font-bold transition-all duration-200 cursor-pointer group relative ${isActive
-                      ? 'bg-blue-600 text-white shadow-md shadow-blue-900/30'
-                      : 'text-slate-300 hover:bg-slate-800/90 hover:text-white'
+                      ? 'bg-blue-600 text-white shadow-sm'
+                      : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900'
                       }`}
                     title={isCollapsed ? item.label : undefined}
                   >
@@ -192,8 +192,8 @@ export const LeftSidebarNav: React.FC<LeftSidebarNavProps> = ({
 
                     {!isCollapsed && item.badge && (
                       <span className={`text-[9px] font-mono px-2 py-0.5 rounded-md font-extrabold shrink-0 border ${isActive
-                        ? 'bg-blue-700/80 text-blue-100 border-blue-500'
-                        : 'bg-slate-800 text-slate-400 border-slate-700'
+                        ? 'bg-blue-700 text-blue-100 border-blue-600'
+                        : 'bg-slate-100 text-slate-500 border-slate-200'
                         }`}>
                         {item.badge}
                       </span>
@@ -201,7 +201,7 @@ export const LeftSidebarNav: React.FC<LeftSidebarNavProps> = ({
 
                     {/* Tooltip for Collapsed Mode */}
                     {isCollapsed && (
-                      <div className="absolute left-full ml-2 px-2.5 py-1.5 bg-slate-800 text-white text-xs font-bold rounded-lg shadow-xl opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity whitespace-nowrap z-50 border border-slate-700">
+                      <div className="absolute left-full ml-2 px-2.5 py-1.5 bg-slate-900 text-white text-xs font-bold rounded-lg shadow-xl opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity whitespace-nowrap z-50 border border-slate-700">
                         {item.label}
                       </div>
                     )}
@@ -214,18 +214,18 @@ export const LeftSidebarNav: React.FC<LeftSidebarNavProps> = ({
       </div>
 
       {/* SIDEBAR FOOTER ROLES & VERSION */}
-      <div className="p-3 border-t border-slate-800 shrink-0 bg-slate-950/60">
+      <div className="p-3 border-t border-slate-200 shrink-0 bg-slate-50">
         {!isCollapsed ? (
-          <div className="flex items-center gap-2.5 p-2 rounded-xl bg-slate-900 border border-slate-800">
-            <div className="w-8 h-8 rounded-lg bg-emerald-500/20 border border-emerald-500/30 text-emerald-400 flex items-center justify-center font-bold text-xs shrink-0">
+          <div className="flex items-center gap-2.5 p-2 rounded-xl bg-white border border-slate-200">
+            <div className="w-8 h-8 rounded-lg bg-blue-50 border border-blue-200 text-blue-700 flex items-center justify-center font-bold text-xs shrink-0">
               HA
             </div>
             <div className="truncate">
-              <h4 className="text-xs font-extrabold text-white truncate leading-tight">{t('sidebar.role', 'Lead HR Architect')}</h4>
+              <h4 className="text-xs font-extrabold text-slate-700 truncate leading-tight">{t('sidebar.role', 'Người xem nghiệp vụ')}</h4>
             </div>
           </div>
         ) : (
-          <div className="w-8 h-8 mx-auto rounded-lg bg-emerald-500/20 border border-emerald-500/30 text-emerald-400 flex items-center justify-center font-bold text-xs">
+          <div className="w-8 h-8 mx-auto rounded-lg bg-blue-50 border border-blue-200 text-blue-700 flex items-center justify-center font-bold text-xs">
             HA
           </div>
         )}

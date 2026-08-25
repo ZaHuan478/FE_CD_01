@@ -134,7 +134,9 @@ export const HeadcountBudgetFlow: React.FC<FlowStageProps> = ({
   const { language } = useLanguage()
 
   const [selectedStep, setSelectedStep] = useState<string>('EMP01.01')
-  const [activeTabMode, setActiveTabMode] = useState<'swimlane' | 'story' | 'specs'>('swimlane')
+  // Story mode is the first view so a non-technical reader sees the business sequence first.
+  // The detailed swimlane and data schema remain available as deliberate secondary views.
+  const [activeTabMode, setActiveTabMode] = useState<'swimlane' | 'story' | 'specs'>('story')
   const [simulationScenario, setSimulationScenario] = useState<'happy' | 'adjust' | null>(null)
   const [simActiveStep, setSimActiveStep] = useState<string | null>(null)
 

@@ -51,14 +51,14 @@ export const InfographicStageNavTabs: React.FC<InfographicStageNavTabsProps> = (
                       : ['Bao truoc', 'Kiem tra', 'Nhap don', 'Phe duyet', 'Ket qua']
 
   return (
-    <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar p-2 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200/90 dark:border-slate-800 text-xs font-bold shadow-2xs">
+    <div className="flex items-center gap-1 overflow-x-auto no-scrollbar p-1.5 rounded-lg bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-800 text-xs font-bold shadow-sm">
       <button
         type="button"
         onClick={() => setActiveStageTab(0)}
-        className={`px-3.5 py-1.5 rounded-xl border-2 transition-all cursor-pointer whitespace-nowrap shadow-2xs ${
+        className={`px-3 py-1.5 rounded-md border transition-all cursor-pointer whitespace-nowrap ${
           activeStageTab === 0
-            ? 'bg-slate-900 text-white dark:bg-slate-100 dark:text-slate-900 border-slate-900 dark:border-slate-100 shadow-xs'
-            : 'bg-white hover:bg-slate-100/80 text-slate-900 dark:bg-slate-900 dark:hover:bg-slate-800 dark:text-white border-slate-900 dark:border-slate-200'
+            ? 'bg-[#1f5f86] text-white border-[#1f5f86]'
+            : 'bg-white hover:bg-slate-100 text-slate-700 dark:bg-slate-900 dark:hover:bg-slate-800 dark:text-white border-slate-300 dark:border-slate-700'
         }`}
       >
         {language === 'vi' ? 'Xem toan bo 5 giai doan' : 'Full 5-stage overview'}
@@ -72,10 +72,10 @@ export const InfographicStageNavTabs: React.FC<InfographicStageNavTabsProps> = (
             key={label}
             type="button"
             onClick={() => setActiveStageTab(stageNum)}
-            className={`px-3.5 py-1.5 rounded-xl border-2 transition-all cursor-pointer whitespace-nowrap shadow-2xs ${
+            className={`px-3 py-1.5 rounded-md border transition-all cursor-pointer whitespace-nowrap ${
               isTabActive
-                ? 'bg-slate-900 text-white dark:bg-slate-100 dark:text-slate-900 border-slate-900 dark:border-slate-100 shadow-xs'
-                : 'bg-white hover:bg-slate-100/80 text-slate-900 dark:bg-slate-900 dark:hover:bg-slate-800 dark:text-white border-slate-900 dark:border-slate-200'
+                ? 'bg-[#1f5f86] text-white border-[#1f5f86]'
+                : 'bg-white hover:bg-slate-100 text-slate-700 dark:bg-slate-900 dark:hover:bg-slate-800 dark:text-white border-slate-300 dark:border-slate-700'
             }`}
           >
             <span>{language === 'vi' ? `GD ${stageNum}: ${label}` : `S${stageNum}: ${label}`}</span>

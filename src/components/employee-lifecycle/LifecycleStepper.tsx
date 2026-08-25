@@ -13,8 +13,9 @@ export const LifecycleStepper: React.FC<LifecycleStepperProps> = ({
 }) => {
   const [isExpanded, setIsExpanded] = useState<boolean>(true)
   const [selectedModuleFilter, setSelectedModuleFilter] = useState<string>('ALL')
+  // Default to LIFE-03 (Bước 4: Bố trí công tác và vị trí) as requested in the demo specification
   const [previewStepId, setPreviewStepId] = useState<string>(
-    activeStepId || (steps[0]?.id ?? 'LIFE-01')
+    activeStepId || 'LIFE-03'
   )
 
   // Sync preview step when activeStepId prop changes
@@ -24,8 +25,8 @@ export const LifecycleStepper: React.FC<LifecycleStepperProps> = ({
     }
   }, [activeStepId])
 
-  const activeStep = steps.find((s) => s.id === previewStepId) || steps[0]
-  const activeModInfo = STEP_MODULE_MAP[activeStep?.id || 'LIFE-01']
+  const activeStep = steps.find((s) => s.id === previewStepId) || steps.find((s) => s.id === 'LIFE-03') || steps[0]
+  const activeModInfo = STEP_MODULE_MAP[activeStep?.id || 'LIFE-03']
   const currentStepIdx = steps.findIndex((s) => s.id === activeStep?.id)
 
   const handlePrevStep = () => {
@@ -53,14 +54,14 @@ export const LifecycleStepper: React.FC<LifecycleStepperProps> = ({
   )
 
   return (
-    <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200/80 dark:border-slate-800 shadow-sm p-4 sm:p-6 space-y-5 transition-all duration-300 hover:shadow-md">
+    <div className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 shadow-2xs p-4 sm:p-6 space-y-4 transition-all">
       {/* HEADER BAR */}
       <LifecycleStepperHeader
         isExpanded={isExpanded}
         onToggleExpand={() => setIsExpanded((prev) => !prev)}
       />
 
-      {/* INTERACTIVE MODULE FILTER LEGEND BAR */}
+      {/* INTERACTIVE MODULE FILTER BAR */}
       <LifecycleModuleFilter
         selectedModuleFilter={selectedModuleFilter}
         onSelectFilter={setSelectedModuleFilter}
@@ -68,8 +69,8 @@ export const LifecycleStepper: React.FC<LifecycleStepperProps> = ({
 
       {/* EXPANDABLE PIPELINE CONTENT */}
       {isExpanded && (
-        <div className="pt-1 animate-fadeIn space-y-5">
-          {/* 8-Stage Horizontal Pipeline & Cluster Containers */}
+        <div className="pt-1 animate-fadeIn space-y-4">
+          {/* 4-Stage Horizontal Pipeline & Cluster Containers (1 - 2 - 3 - 2 ratio) */}
           <LifecycleClusterGrid
             steps={steps}
             previewStepId={previewStepId}
@@ -77,12 +78,12 @@ export const LifecycleStepper: React.FC<LifecycleStepperProps> = ({
             isStepHighlighted={isStepHighlighted}
           />
 
-          {/* DYNAMIC MASTER-DETAIL STEP CANVAS (EXPANDED INSPECTOR) */}
+          {/* DYNAMIC MASTER-DETAIL STEP CANVAS */}
           {activeStep && activeModInfo && (
             <LifecycleStepDetailCanvas
               activeStep={activeStep}
               activeModInfo={activeModInfo}
-              currentStepIdx={currentStepIdx}
+              currentStepIdx={currentStepIdx >= 0 ? currentStepIdx : 3}
               totalSteps={steps.length}
               onPrevStep={handlePrevStep}
               onNextStep={handleNextStep}
@@ -90,10 +91,9 @@ export const LifecycleStepper: React.FC<LifecycleStepperProps> = ({
             />
           )}
 
-          {/* Footer Note */}
           <div className="text-center pt-2 border-t border-slate-100 dark:border-slate-800/80">
-            <p className="text-xs text-slate-400 dark:text-slate-500 font-medium italic">
-              * Bấm chọn bất kỳ giai đoạn nào trong 8 giai đoạn phía trên để xem nhanh Dữ liệu Đầu vào, Đầu ra và Phân hệ liên quan.
+            <p className="text-xs text-slate-400 dark:text-slate-500 font-medium">
+              Chọn một bước ở trên để xem thông tin cần có trước khi thực hiện, kết quả và các hệ thống liên quan.
             </p>
           </div>
         </div>
@@ -101,3 +101,4 @@ export const LifecycleStepper: React.FC<LifecycleStepperProps> = ({
     </div>
   )
 }
+

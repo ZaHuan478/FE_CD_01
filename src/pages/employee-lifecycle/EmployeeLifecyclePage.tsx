@@ -226,24 +226,31 @@ export const EmployeeLifecyclePage: React.FC = () => {
     const sopDbItem = SOP_DATABASE[id]?.[0]
     if (sopDbItem) {
       const sopInfo = sopDictionary[id]
+      const firstStep = sopDbItem.steps[0]
+      const lastStep = sopDbItem.steps[sopDbItem.steps.length - 1]
+      const actors = Array.from(new Set(sopDbItem.steps.map((step) => step.actor).filter(Boolean)))
       return {
         id: id,
         title: sopInfo?.title || sopDbItem.sopTitle,
-        subtitle: sopDbItem.description,
+        subtitle: sopDbItem.description || 'Nội dung được trình bày theo từng bước chi tiết của quy trình.',
         category: 'lifecycle',
         sourceStatus: 'official',
-        inputs: ['Bản kế hoạch / Yêu cầu nghiệp vụ', 'Dữ liệu định biên phòng ban'],
-        outputs: ['Kết quả phê duyệt BOD', 'Master Data trần hạn mức tuyển dụng'],
-        actors: sopDbItem.steps.map((s) => ({ name: s.actor, role: 'Thực hiện', action: s.title })),
+        inputs: sopDbItem.inputs?.filter(Boolean) || (firstStep ? [firstStep.title] : []),
+        outputs: sopDbItem.outputs?.filter(Boolean) || (lastStep ? [lastStep.title] : []),
+        actors: actors.map((actor) => ({
+          name: actor,
+          role: 'Người thực hiện',
+          action: sopDbItem.steps.find((step) => step.actor === actor)?.title || ''
+        })),
         rules: [],
         process: {
           steps: sopDbItem.steps.map((s) => s.title),
-          source: 'Quy trình vận hành HR Enterprise Standard',
+          source: sopDbItem.sopCategory,
           status: 'official'
         },
         sopIds: sopInfo ? [sopInfo.badge] : [sopDbItem.sopCode],
         sopTitles: sopInfo ? [sopInfo.title] : [sopDbItem.sopTitle],
-        uiFields: ['Năm xây dựng', 'Phòng ban', 'Chức vụ', 'Cấp độ (Level)', 'Kế hoạch 12 tháng', 'Thu nhập / People Cost']
+        uiFields: firstStep?.fieldsChecklist || []
       }
     }
 
@@ -354,7 +361,7 @@ export const EmployeeLifecyclePage: React.FC = () => {
       />
 
       {/* Streamlined Compact Top Navigation Header */}
-      <header className="bg-slate-900 text-white border-b border-slate-800 sticky top-0 z-50 shadow-md">
+      <header className="bg-white text-slate-900 border-b border-slate-200 sticky top-0 z-50 shadow-sm">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 py-2.5 sm:py-3 flex items-center justify-between">
           <div className="flex items-center gap-2.5 sm:gap-3">
             <div className="p-1.5 sm:p-2 bg-blue-600 rounded-lg text-white shadow-xs shrink-0">
@@ -362,15 +369,15 @@ export const EmployeeLifecyclePage: React.FC = () => {
             </div>
             <div>
               <div className="flex flex-wrap items-center gap-1.5">
-                <span className="text-[10px] font-bold text-blue-400 uppercase tracking-widest">
-                  {t('header.architecture', 'Enterprise HR SaaS Architecture')}
+                  <span className="text-[10px] font-bold text-blue-700 uppercase tracking-widest">
+                  {t('header.architecture', 'TỔNG QUAN NGHIỆP VỤ NHÂN SỰ')}
                 </span>
-                <span className="px-1.5 py-0.2 text-[9px] font-semibold bg-emerald-500/20 text-emerald-300 rounded border border-emerald-500/30">
-                  {t('header.productionReady', 'Production Ready')}
+                <span className="px-1.5 py-0.2 text-[9px] font-semibold bg-blue-50 text-blue-700 rounded border border-blue-200">
+                  {t('header.productionReady', 'Tổng quan hệ thống')}
                 </span>
               </div>
-              <h1 className="text-sm sm:text-base font-bold tracking-tight text-white mt-0.5 leading-snug">
-                {t('header.title', 'QUẢN LÝ HỒ SƠ & VÒNG ĐỜI NHÂN VIÊN')}
+              <h1 className="text-sm sm:text-base font-bold tracking-tight text-slate-900 mt-0.5 leading-snug">
+                {t('header.title', 'QUẢN LÝ HỒ SƠ VÀ VÒNG ĐỜI NHÂN VIÊN')}
               </h1>
             </div>
           </div>
@@ -384,8 +391,8 @@ export const EmployeeLifecyclePage: React.FC = () => {
               type="button"
               onClick={() => setIsDarkMode(!isDarkMode)}
               className={`px-3 py-2 rounded-2xl border transition-all flex items-center gap-2 text-xs font-bold cursor-pointer ${isDarkMode
-                ? 'bg-slate-800 hover:bg-slate-700 border-slate-700 text-amber-400'
-                : 'bg-slate-800 hover:bg-slate-700 border-slate-700 text-slate-200'
+                ? 'bg-slate-50 hover:bg-slate-100 border-slate-200 text-amber-600'
+                : 'bg-slate-50 hover:bg-slate-100 border-slate-200 text-slate-700'
                 }`}
               title={isDarkMode ? t('header.themeLight', 'Bật Giao diện Sáng') : t('header.themeDark', 'Bật Giao diện Tối')}
             >
@@ -395,22 +402,15 @@ export const EmployeeLifecyclePage: React.FC = () => {
                 </>
               ) : (
                 <>
-                  <Moon className="w-4 h-4 text-slate-300" />
+                  <Moon className="w-4 h-4 text-slate-600" />
                 </>
               )}
             </button>
-
-            <div className="hidden lg:flex items-center gap-2.5 text-xs shrink-0">
-              <span className="text-slate-400 text-[11px]">{t('header.modelStandard', 'Model Standard:')}</span>
-              <span className="font-semibold text-slate-200 bg-slate-800 px-2.5 py-1 rounded-md border border-slate-700 text-[11px]">
-                Workday / SAP SuccessFactors Style
-              </span>
-            </div>
           </div>
         </div>
 
         {/* MODERNIZED SUB-HEADER: 3 MAIN TABS & ARCHITECTURE GUIDE BUTTON */}
-        <div className="bg-slate-950/80 border-t border-slate-800/80 backdrop-blur-sm">
+        <div className="bg-slate-50 border-t border-slate-200">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 flex items-center justify-between overflow-x-auto no-scrollbar gap-4">
 
             {/* Tab Navigation Buttons */}
@@ -420,14 +420,11 @@ export const EmployeeLifecyclePage: React.FC = () => {
                 onClick={() => handleTabChange('lifecycle')}
                 className={`px-3.5 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-2 cursor-pointer shrink-0 ${activeTab === 'lifecycle'
                   ? 'bg-blue-600 text-white shadow-sm'
-                  : 'text-slate-400 hover:text-white hover:bg-slate-800/60'
+                  : 'text-slate-600 hover:text-slate-900 hover:bg-white'
                   }`}
               >
                 <Layers className="w-4 h-4" />
-                <span>{t('tabs.lifecycle', 'Vòng đời Nhân sự')}</span>
-                <span className="px-1.5 py-0.2 text-[10px] rounded-md bg-white/20 text-white font-mono">
-                  8 Giai đoạn
-                </span>
+                <span>{t('tabs.lifecycle', 'Vòng đời nhân sự')}</span>
               </button>
 
               <button
@@ -435,14 +432,11 @@ export const EmployeeLifecyclePage: React.FC = () => {
                 onClick={() => handleTabChange('masterdata')}
                 className={`px-3.5 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-2 cursor-pointer shrink-0 ${activeTab === 'masterdata'
                   ? 'bg-blue-600 text-white shadow-sm'
-                  : 'text-slate-400 hover:text-white hover:bg-slate-800/60'
+                  : 'text-slate-600 hover:text-slate-900 hover:bg-white'
                   }`}
               >
                 <Database className="w-4 h-4" />
-                <span>{t('tabs.masterdata', 'Master Data & ERD')}</span>
-                <span className="px-1.5 py-0.2 text-[10px] rounded-md bg-white/20 text-white font-mono">
-                  10 Nhóm
-                </span>
+                <span>{t('tabs.masterdata', 'Danh mục dùng chung')}</span>
               </button>
 
               <button
@@ -450,14 +444,11 @@ export const EmployeeLifecyclePage: React.FC = () => {
                 onClick={() => handleTabChange('reports')}
                 className={`px-3.5 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-2 cursor-pointer shrink-0 ${activeTab === 'reports'
                   ? 'bg-blue-600 text-white shadow-sm'
-                  : 'text-slate-400 hover:text-white hover:bg-slate-800/60'
+                  : 'text-slate-600 hover:text-slate-900 hover:bg-white'
                   }`}
               >
                 <Sparkles className="w-4 h-4" />
-                <span>{t('tabs.reports', 'Báo cáo & Độ phủ SOP')}</span>
-                <span className="px-1.5 py-0.2 text-[10px] rounded-md bg-white/20 text-white font-mono">
-                  45 SOPs
-                </span>
+                <span>{t('tabs.reports', 'Báo cáo và quy trình')}</span>
               </button>
             </div>
 
@@ -466,11 +457,11 @@ export const EmployeeLifecyclePage: React.FC = () => {
               type="button"
               onClick={() => setIsGuideModalOpen(!isGuideModalOpen)}
               className={`px-3 py-1.5 rounded-xl border text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer shrink-0 ${isGuideModalOpen
-                ? 'bg-indigo-600 text-white border-indigo-500 shadow-xs'
-                : 'bg-slate-800/80 hover:bg-slate-700 text-slate-300 border-slate-700'
+                ? 'bg-blue-600 text-white border-blue-600 shadow-xs'
+                : 'bg-white hover:bg-slate-100 text-slate-700 border-slate-200'
                 }`}
             >
-              <Sparkles className="w-3.5 h-3.5 text-indigo-400" />
+              <Sparkles className="w-3.5 h-3.5 text-blue-600" />
               <span>{t('tabs.guideBtn', 'Hướng dẫn Kiến trúc')}</span>
             </button>
           </div>
@@ -528,6 +519,8 @@ export const EmployeeLifecyclePage: React.FC = () => {
                 <MasterDataHub
                   onOpenERD={handleOpenERD}
                   isDarkMode={isDarkMode}
+                  sopCode={searchParams.get('sop')}
+                  moduleId={searchParams.get('module')}
                 />
               </Suspense>
             </div>

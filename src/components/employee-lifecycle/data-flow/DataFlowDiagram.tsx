@@ -17,7 +17,7 @@ import { useLanguage } from '../../../context/LanguageContext'
 // ============================================================================
 // DATA FLOW CONNECTION DEFINITIONS
 // ============================================================================
-interface DataFlowConnection {
+export interface DataFlowConnection {
   from: string
   to: string
   label: string
@@ -27,7 +27,7 @@ interface DataFlowConnection {
   frequency: 'once' | 'ongoing' | 'monthly'
 }
 
-const DATA_FLOW_CONNECTIONS: DataFlowConnection[] = [
+export const DATA_FLOW_CONNECTIONS: DataFlowConnection[] = [
   {
     from: 'ats',
     to: 'emp',
@@ -105,7 +105,7 @@ const DATA_FLOW_CONNECTIONS: DataFlowConnection[] = [
 // ============================================================================
 // MODULE NODE DEFINITIONS
 // ============================================================================
-interface ModuleNode {
+export interface ModuleNode {
   id: string
   name: string
   nameEn: string
@@ -117,7 +117,7 @@ interface ModuleNode {
   roleEn: string
 }
 
-const MODULE_NODES: ModuleNode[] = [
+export const MODULE_NODES: ModuleNode[] = [
   {
     id: 'ats',
     name: 'Tuyển Dụng',

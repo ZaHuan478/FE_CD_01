@@ -1,12 +1,11 @@
-import React, { useState, useEffect } from 'react'
-import { useLocation } from 'react-router-dom'
+import React, { useState, useEffect, useMemo } from 'react'
+import { useLocation, useSearchParams } from 'react-router-dom'
 import {
   ArrowLeft,
   Sparkles,
   GitBranch,
   FileText,
   Building2,
-  ListCheck,
   UserCheck,
   CheckCircle2,
   Sun,
@@ -16,10 +15,8 @@ import {
 } from 'lucide-react'
 import type { WorkflowDetailPageProps } from './types'
 import { SOP_DATABASE } from './data/sopDatabase'
-import { ROLE_FLOW_DATABASE } from './data/roleFlowDatabase'
 import { RoleFlowSection } from './components/RoleFlowSection'
 import { WorkflowDiagramView } from './components/WorkflowDiagramView'
-import { WorkflowTableView } from './components/WorkflowTableView'
 import { SopInfographicFlowView } from './components/SopInfographicFlowView'
 import { useLanguage } from '../../../context/LanguageContext'
 import { LanguageSelector } from '../../common/LanguageSelector'
@@ -31,6 +28,9 @@ export const WorkflowDetailPage: React.FC<WorkflowDetailPageProps> = ({
 }) => {
   const { language, t } = useLanguage()
   const location = useLocation()
+  const [searchParams, setSearchParams] = useSearchParams()
+  const targetSopParam = searchParams.get('sop')
+  const targetStepParam = Number(searchParams.get('step') || 0)
 
   // Always scroll to top when opening or switching workflow detail
   useEffect(() => {
@@ -76,82 +76,39 @@ export const WorkflowDetailPage: React.FC<WorkflowDetailPageProps> = ({
     }
   }
 
-  const [activeRoleTab, setActiveRoleTab] = useState<'all' | 'candidate' | 'hr'>('all')
   const [isActorsExpanded, setIsActorsExpanded] = useState<boolean>(true)
 
-  // Role flow state
-  const availableRoleFlows = ROLE_FLOW_DATABASE[item.id] || [
-    {
-      roleType: 'candidate',
-      roleTitle: 'Góc nhìn Ứng viên / Nhân viên (Candidate Perspective)',
-      actorLabel: '🧑‍💻 Ứng viên / Nhân viên',
-      badgeColorLight: 'bg-blue-100 text-blue-800 border-blue-300',
-      badgeColorDark: 'bg-blue-500/20 text-blue-300 border-blue-500/30',
-      bgLight: 'bg-blue-50/40',
-      bgDark: 'bg-blue-950/20',
-      borderLight: 'border-blue-200/80',
-      borderDark: 'border-blue-800/60',
-      inputs: {
-        title: 'Thông tin Ứng viên / Nhân viên nhập & khai báo',
-        description: 'Dữ liệu cá nhân, giấy tờ scan & thông tin tài khoản do Nhân viên tự khai báo.',
-        items: item.inputs && item.inputs.length > 0 ? item.inputs : ['CV & Thông tin cá nhân', 'Bằng cấp học vấn', 'Số tài khoản ngân hàng']
-      },
-      outputs: {
-        title: 'Kết quả Ứng viên / Nhân viên nhận được',
-        description: 'Thông báo, tài khoản đăng nhập & tài liệu văn hóa công ty.',
-        items: item.outputs && item.outputs.length > 0 ? item.outputs : ['Tài khoản Portal', 'Lịch Đào tạo hội nhập', 'Bản gán KPI thử việc']
-      }
-    },
-    {
-      roleType: 'hr',
-      roleTitle: 'Góc nhìn HR Admin & Quản lý (HR & Manager Perspective)',
-      actorLabel: '💼 HR Admin / Quản lý',
-      badgeColorLight: 'bg-emerald-100 text-emerald-800 border-emerald-300',
-      badgeColorDark: 'bg-emerald-500/20 text-emerald-300 border-emerald-500/30',
-      bgLight: 'bg-emerald-50/40',
-      bgDark: 'bg-emerald-950/20',
-      borderLight: 'border-emerald-200/80',
-      borderDark: 'border-emerald-800/60',
-      inputs: {
-        title: 'Thông tin HR & Quản lý thiết lập & thẩm định',
-        description: 'Cấu hình định biên, chức danh, ngạch bậc lương & luồng duyệt.',
-        items: ['Kiểm tra Định biên khả dụng (EMP01)', 'Chọn Chức danh & Level Job Grade', 'Dự thảo Mức lương & Phụ cấp']
-      },
-      outputs: {
-        title: 'Kết quả Hệ thống HR tự động sinh & đồng bộ',
-        description: 'Mã số nhân viên, Ticket IT/Hành chính & Báo tăng Bảo hiểm/Thuế.',
-        items: ['Mã NV tự động sinh', 'Ticket cấp Email & Máy tính sang IT', 'Đồng bộ Báo tăng BHXH (INS02)']
-      }
-    }
-  ]
-
   // SOP processes
-  const availableSopProcesses = SOP_DATABASE[item.id] || [
-    {
-      sopCode: item.sopIds?.[0] || 'SOP STANDARD',
-      sopTitle: `Quy trình Chuẩn SOP: ${item.title}`,
-      sopCategory: 'Quy trình Nghiệp vụ Chuẩn',
-      description: item.subtitle || 'Chi tiết các bước thực hiện nghiệp vụ theo chuẩn tài liệu đặc tả SOP.',
-      steps: (item.process?.steps || [
-        'Khởi tạo yêu cầu & kiểm tra tính hợp lệ danh mục',
-        'Kiểm tra định biên & điều kiện kích hoạt nghiệp vụ',
-        'Trưởng bộ phận / HR Manager thẩm định & phê duyệt',
-        'Thực thi hệ thống, cấp phát quyền & lưu vết nhật ký'
-      ]).map((stepTitle, idx) => ({
-        stepCode: `${item.id}.${(idx + 1).toString().padStart(2, '0')}`,
-        title: stepTitle,
-        actor: item.actors?.[idx % (item.actors?.length || 1)]?.name || 'HR Admin / Quản lý',
-        location: 'Portal / Hệ thống',
-        timing: 'Theo chu kỳ nghiệp vụ',
-        typeCode: idx === 0 ? 'N' : idx === 1 ? 'M' : 'A',
-        description: `Thực hiện chi tiết bước ${stepTitle} theo quy định tài liệu đặc tả SOP hệ thống.`,
-        fieldsChecklist: item.uiFields || ['Mã bản ghi', 'Người thực hiện', 'Thời gian kích hoạt', 'Trạng thái phê duyệt']
-      }))
-    }
-  ]
+  const availableSopProcesses = SOP_DATABASE[item.id] ?? []
 
-  const [selectedProcessIdx, setSelectedProcessIdx] = useState<number>(0)
-  const currentProcess = availableSopProcesses[selectedProcessIdx] || availableSopProcesses[0]
+  // Match process from targetSopParam if present
+  const matchingProcessIdx = useMemo(() => {
+    if (!targetSopParam) return 0
+    const cleanParam = targetSopParam.toUpperCase().replace('SOP-', '').replace('-', '').trim()
+    const idx = availableSopProcesses.findIndex(proc => {
+      const cleanCode = proc.sopCode.toUpperCase().replace('SOP-', '').replace('-', '').replace(' ', '').trim()
+      return cleanCode.includes(cleanParam) || cleanParam.includes(cleanCode)
+    })
+    return idx !== -1 ? idx : (targetSopParam ? -1 : 0)
+  }, [targetSopParam, availableSopProcesses])
+
+  const [selectedProcessIdx, setSelectedProcessIdx] = useState<number>(matchingProcessIdx)
+
+  useEffect(() => {
+    setSelectedProcessIdx(matchingProcessIdx)
+  }, [matchingProcessIdx])
+
+  const selectedProcess = selectedProcessIdx >= 0
+    ? availableSopProcesses[selectedProcessIdx] || availableSopProcesses[0]
+    : undefined
+
+  const currentProcess = selectedProcess || {
+      sopCode: targetSopParam || item.sopIds?.[0] || 'SOP',
+      sopTitle: item.title,
+      sopCategory: 'Chưa có dữ liệu SOP chi tiết',
+      description: 'Tài liệu hiện chưa cung cấp các bước chi tiết cho quy trình này.',
+      steps: []
+    }
 
   const [selectedStepIdx, setSelectedStepIdx] = useState<number>(0)
 
@@ -165,41 +122,25 @@ export const WorkflowDetailPage: React.FC<WorkflowDetailPageProps> = ({
     return 'diagram'
   })
 
+  const isInfographicRoute = location.pathname.startsWith('/employee-lifecycle/infographic/')
+
   const storyCards = [
     {
-      title: language === 'vi' ? 'Khi nào dùng quy trình này?' : 'When to use this process',
+      title: language === 'vi' ? 'Mục đích của quy trình' : 'Purpose',
       icon: Building2,
-      text: item.process?.steps?.[0] || item.subtitle || currentProcess.description
+      text: item.subtitle || currentProcess.description
     },
     {
-      title: language === 'vi' ? 'Hiểu đơn giản' : 'Plain-language summary',
+      title: language === 'vi' ? 'Đầu vào cần chuẩn bị' : 'Inputs to prepare',
       icon: Sparkles,
-      text: language === 'vi'
-        ? `Quy trình này hướng dẫn ai cần làm gì, dữ liệu nào phải nhập, bước nào cần duyệt và hệ thống sẽ tự động cập nhật gì cho ${item.title}.`
-        : `This process shows who does what, which data must be entered, which approvals are needed, and what the system updates for ${item.title}.`
+      text: item.inputs?.length ? item.inputs.join(' · ') : 'Chưa có dữ liệu đầu vào được khai báo.'
     },
     {
-      title: language === 'vi' ? 'Kết quả cuối cùng' : 'Final outcome',
+      title: language === 'vi' ? 'Đầu ra sau khi hoàn tất' : 'Outputs',
       icon: CheckCircle2,
-      text: item.outputs?.[0] || currentProcess.steps[currentProcess.steps.length - 1]?.description || currentProcess.description
+      text: item.outputs?.length ? item.outputs.join(' · ') : currentProcess.steps[currentProcess.steps.length - 1]?.description || currentProcess.description
     }
   ]
-
-  // Sync state when location.pathname or item.id changes
-  useEffect(() => {
-    if (location.pathname.startsWith('/employee-lifecycle/raci/')) {
-      setActiveWorkflowTab('roles')
-    } else if (location.pathname.startsWith('/employee-lifecycle/specs/')) {
-      setActiveWorkflowTab('specs')
-    } else {
-      setActiveWorkflowTab('diagram')
-      if (location.pathname.startsWith('/employee-lifecycle/flowchart/')) {
-        setViewMode('diagram')
-      } else if (location.pathname.startsWith('/employee-lifecycle/infographic/')) {
-        setViewMode('infographic')
-      }
-    }
-  }, [location.pathname, item.id])
 
   return (
     <div className={`min-h-screen transition-colors duration-300 pb-20 animate-fadeIn ${isDarkMode ? 'bg-slate-950 text-slate-100' : 'bg-slate-50/50 text-slate-800'
@@ -233,16 +174,14 @@ export const WorkflowDetailPage: React.FC<WorkflowDetailPageProps> = ({
             <div className="truncate">
               <div className="flex items-center gap-2">
                 <span className="px-2 py-0.5 text-[11px] font-mono font-black bg-blue-600 text-white rounded-md shrink-0">
-                  {item.id}
+                  {currentProcess.sopCode || item.id}
                 </span>
                 <h1 className="text-xs sm:text-sm font-bold text-slate-900 dark:text-white truncate">
-                  {item.title}
+                  {currentProcess.sopTitle || item.title}
                 </h1>
-                {item.sopIds && item.sopIds.length > 0 && (
-                  <span className="hidden md:inline-flex px-2 py-0.5 text-[10px] font-mono font-bold bg-emerald-500/10 text-emerald-700 dark:text-emerald-300 rounded border border-emerald-500/30 shrink-0">
-                    📋 {item.sopIds.join(', ')}
-                  </span>
-                )}
+                <span className="hidden md:inline-flex px-2 py-0.5 text-[10px] font-medium bg-emerald-500/10 text-emerald-700 dark:text-emerald-300 rounded border border-emerald-500/30 shrink-0">
+                  📌 {language === 'vi' ? `Chặng ${item.id}: ${item.title}` : `Stage ${item.id}: ${item.title}`}
+                </span>
               </div>
             </div>
           </div>
@@ -273,7 +212,7 @@ export const WorkflowDetailPage: React.FC<WorkflowDetailPageProps> = ({
               <button
                 type="button"
                 onClick={() => onOpenWireframe(item)}
-                className="flex items-center gap-1.5 px-3.5 py-1.5 text-xs font-bold text-white bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 rounded-xl shadow-xs transition-all cursor-pointer shrink-0"
+                className="flex items-center gap-1.5 px-3.5 py-1.5 text-xs font-bold text-white bg-[#1f5f86] hover:bg-[#174968] rounded-md shadow-sm transition-all cursor-pointer shrink-0"
               >
                 <FileText className="w-4 h-4" />
                 <span className="hidden sm:inline">{t('common.viewWireframe', 'Mở màn hình mẫu')}</span>
@@ -291,8 +230,8 @@ export const WorkflowDetailPage: React.FC<WorkflowDetailPageProps> = ({
                 type="button"
                 onClick={() => setActiveWorkflowTab('diagram')}
                 className={`px-3.5 py-1.5 text-xs font-bold rounded-xl border-2 transition-all flex items-center gap-2 cursor-pointer shrink-0 shadow-2xs ${activeWorkflowTab === 'diagram'
-                    ? 'bg-slate-900 text-white dark:bg-slate-100 dark:text-slate-900 border-slate-900 dark:border-slate-100 shadow-xs'
-                    : 'bg-white hover:bg-slate-100/80 text-slate-900 dark:bg-slate-900 dark:hover:bg-slate-800 dark:text-white border-slate-900 dark:border-slate-200'
+                    ? 'bg-[#1f5f86] text-white border-[#1f5f86] shadow-sm'
+                    : 'bg-white hover:bg-slate-100 text-slate-700 dark:bg-slate-900 dark:hover:bg-slate-800 dark:text-white border-slate-300 dark:border-slate-700'
                   }`}
               >
                 <Sparkles className="w-3.5 h-3.5 text-amber-500" />
@@ -303,25 +242,25 @@ export const WorkflowDetailPage: React.FC<WorkflowDetailPageProps> = ({
                 type="button"
                 onClick={() => setActiveWorkflowTab('roles')}
                 className={`px-3.5 py-1.5 text-xs font-bold rounded-xl border-2 transition-all flex items-center gap-2 cursor-pointer shrink-0 shadow-2xs ${activeWorkflowTab === 'roles'
-                    ? 'bg-slate-900 text-white dark:bg-slate-100 dark:text-slate-900 border-slate-900 dark:border-slate-100 shadow-xs'
-                    : 'bg-white hover:bg-slate-100/80 text-slate-900 dark:bg-slate-900 dark:hover:bg-slate-800 dark:text-white border-slate-900 dark:border-slate-200'
+                    ? 'bg-[#1f5f86] text-white border-[#1f5f86] shadow-sm'
+                    : 'bg-white hover:bg-slate-100 text-slate-700 dark:bg-slate-900 dark:hover:bg-slate-800 dark:text-white border-slate-300 dark:border-slate-700'
                   }`}
               >
                 <UserCheck className="w-3.5 h-3.5 text-blue-500" />
                 <span>{t('workflow.tab.roles', 'Vai trò & trách nhiệm')}</span>
               </button>
 
-              <button
+              {/* <button
                 type="button"
                 onClick={() => setActiveWorkflowTab('specs')}
                 className={`px-3.5 py-1.5 text-xs font-bold rounded-xl border-2 transition-all flex items-center gap-2 cursor-pointer shrink-0 shadow-2xs ${activeWorkflowTab === 'specs'
-                    ? 'bg-slate-900 text-white dark:bg-slate-100 dark:text-slate-900 border-slate-900 dark:border-slate-100 shadow-xs'
-                    : 'bg-white hover:bg-slate-100/80 text-slate-900 dark:bg-slate-900 dark:hover:bg-slate-800 dark:text-white border-slate-900 dark:border-slate-200'
+                    ? 'bg-[#1f5f86] text-white border-[#1f5f86] shadow-sm'
+                    : 'bg-white hover:bg-slate-100 text-slate-700 dark:bg-slate-900 dark:hover:bg-slate-800 dark:text-white border-slate-300 dark:border-slate-700'
                   }`}
               >
                 <ListCheck className="w-3.5 h-3.5 text-emerald-500" />
                 <span>{t('workflow.tab.specs', 'Bảng kiểm & quy định')}</span>
-              </button>
+              </button> */}
             </div>
 
             <span className="text-[11px] font-mono text-slate-400 dark:text-slate-500 hidden md:inline shrink-0">
@@ -378,6 +317,11 @@ export const WorkflowDetailPage: React.FC<WorkflowDetailPageProps> = ({
                         onClick={() => {
                           setSelectedProcessIdx(idx)
                           setSelectedStepIdx(0)
+                          setSearchParams(prev => {
+                            prev.set('sop', proc.sopCode)
+                            prev.delete('step')
+                            return prev
+                          }, { replace: true })
                         }}
                         className={`flex items-center gap-1.5 px-3.5 py-1.5 text-xs font-bold rounded-xl border-2 transition-all cursor-pointer shadow-2xs ${isProcSelected
                             ? 'bg-slate-900 text-white dark:bg-slate-100 dark:text-slate-900 border-slate-900 dark:border-slate-100 shadow-xs'
@@ -401,8 +345,8 @@ export const WorkflowDetailPage: React.FC<WorkflowDetailPageProps> = ({
               </div>
             )}
 
-            {/* WORKFLOW VIEW CONTROLLER SWITCHER */}
-            <div className={`p-3 rounded-2xl border flex flex-wrap items-center justify-between gap-3 shadow-2xs transition-colors ${isDarkMode ? 'bg-slate-900 border-slate-800' : 'bg-white border-slate-200/90'
+            {/* WORKFLOW VIEW CONTROLLER SWITCHER. The infographic route is intentionally focused on one readable flow. */}
+            {!isInfographicRoute && <div className={`p-3 rounded-2xl border flex flex-wrap items-center justify-between gap-3 shadow-2xs transition-colors ${isDarkMode ? 'bg-slate-900 border-slate-800' : 'bg-white border-slate-200/90'
               }`}>
               <div className="flex flex-wrap items-center gap-1.5">
                 {hasInfographic && (
@@ -437,7 +381,7 @@ export const WorkflowDetailPage: React.FC<WorkflowDetailPageProps> = ({
                   </span>
                 </button>
 
-                <button
+                {/* <button
                   type="button"
                   onClick={() => setViewMode('table')}
                   className={`flex items-center gap-1.5 px-3.5 py-1.5 text-xs font-bold rounded-xl border-2 transition-all cursor-pointer shadow-2xs ${viewMode === 'table'
@@ -449,19 +393,21 @@ export const WorkflowDetailPage: React.FC<WorkflowDetailPageProps> = ({
                   <span>
                     {language === 'vi' ? 'Bảng kiểm & quy định' : 'Checklist & rules'}
                   </span>
-                </button>
+                </button> */}
               </div>
 
               <span className="text-xs text-slate-500 dark:text-slate-400 font-mono hidden sm:inline">
                 {language === 'vi' ? 'Đang hiển thị:' : 'Viewing:'} <strong className="text-blue-600 dark:text-blue-300">{currentProcess.sopCode}</strong>
               </span>
-            </div>
+            </div>}
 
             {/* VIEW MODE 1: INFOGRAPHIC 5-STAGE BLUEPRINT VIEW */}
             {viewMode === 'infographic' && (
               <SopInfographicFlowView
                 sopCode={currentProcess.sopCode}
                 workflowId={item.id}
+                process={currentProcess}
+                activeStep={targetStepParam}
                 isDarkMode={isDarkMode}
                 onOpenWireframe={onOpenWireframe ? () => onOpenWireframe(item) : undefined}
               />
@@ -479,27 +425,13 @@ export const WorkflowDetailPage: React.FC<WorkflowDetailPageProps> = ({
               />
             )}
 
-            {/* VIEW MODE 3: FULL SOP SPECIFICATIONS TABLE */}
-            {viewMode === 'table' && (
-              <WorkflowTableView
-                currentProcess={currentProcess}
-                isDarkMode={isDarkMode}
-              />
-            )}
           </div>
         )}
 
-        {/* TAB 2: PHÂN ĐỊNH VAI TRÒ & MA TRẬN RACI */}
+        {/* TAB 2: VAI TRÒ VÀ ĐIỂM PHỐI HỢP */}
         {activeWorkflowTab === 'roles' && (
           <div className="space-y-5 animate-fadeIn">
-            {/* ROLE-BASED INPUT -> OUTPUT MAPPING MATRIX */}
-            <RoleFlowSection
-              availableRoleFlows={availableRoleFlows}
-              activeRoleTab={activeRoleTab}
-              setActiveRoleTab={setActiveRoleTab}
-              isDarkMode={isDarkMode}
-              itemId={item.id}
-            />
+            <RoleFlowSection currentProcess={currentProcess} isDarkMode={isDarkMode} />
 
             {/* ACTORS MATRIX BANNER */}
             {item.actors && item.actors.length > 0 && (
@@ -565,17 +497,6 @@ export const WorkflowDetailPage: React.FC<WorkflowDetailPageProps> = ({
             )}
           </div>
         )}
-
-        {/* TAB 3: BẢNG ĐẶC TẢ SOP CHI TIẾT & CHECKLIST */}
-        {activeWorkflowTab === 'specs' && (
-          <div className="space-y-5 animate-fadeIn">
-            <WorkflowTableView
-              currentProcess={currentProcess}
-              isDarkMode={isDarkMode}
-            />
-          </div>
-        )}
-
       </main>
     </div>
   )

@@ -1,405 +1,247 @@
-import React, { useMemo, useState } from 'react'
+import React, { useEffect, useMemo, useState } from 'react'
 import {
-  AlertTriangle,
-  ArrowRight,
-  BadgeCheck,
-  Building2,
+  BookOpen,
   CheckCircle2,
-  CircleDollarSign,
-  Clock,
+  ChevronRight,
+  ClipboardList,
   Database,
+  FileText,
   GitBranch,
-  GitFork,
-  Layers,
-  Link2,
-  PlayCircle,
-  Plus,
-  Receipt,
+  MapPin,
   Search,
   ShieldCheck,
-  SlidersHorizontal,
-  Table,
-  Target
+  UserRound,
+  X
 } from 'lucide-react'
 
-import { MASTER_DATA_HUB_DATABASE } from './data/masterDataHubDatabase'
-import type { CatalogModuleId, CatalogTier, MasterCatalogItem } from './types'
-import { CatalogDataInspectorModal } from './components/CatalogDataInspectorModal'
-import { useLanguage } from '../../../context/LanguageContext'
+import { DOCX_OPERATIONAL_SOP_DATABASE } from '../workflow-detail/data/docxOperationalSopDatabase'
+import type { SopSubProcess, SopSubStep } from '../workflow-detail/types'
 
 interface MasterDataHubProps {
   onOpenERD?: () => void
   isDarkMode: boolean
+  sopCode?: string | null
+  moduleId?: string | null
 }
 
-type HubTab = 'catalogs' | 'erd' | 'tester'
+type HubTab = 'guide' | 'catalogs' | 'management'
 
-const TIER_LABELS: Record<CatalogTier, string> = {
-  tier1_global: 'Tầng 1: Global',
-  tier2_module: 'Tầng 2: Phân hệ',
-  tier3_utility: 'Tầng 3: Tiện ích',
-  tier4_governance: 'Tầng 4: Governance'
+const normalize = (value: string) => value
+  .normalize('NFD')
+  .replace(/[\u0300-\u036f]/g, '')
+  .toLocaleLowerCase('vi')
+
+const allOperationalProcesses = Object.values(DOCX_OPERATIONAL_SOP_DATABASE).flat()
+const commonCatalogs = DOCX_OPERATIONAL_SOP_DATABASE['MODULE-MD'] || []
+const managementFunctions = DOCX_OPERATIONAL_SOP_DATABASE['MODULE-MD-FUNCTIONS'] || []
+
+const getStepRequirement = (step: SopSubStep) => {
+  if (step.fieldsChecklist?.length) return step.fieldsChecklist
+  return step.description ? [step.description] : []
 }
 
-const CORE_RELATIONS = [
-  {
-    title: 'Phân cấp địa lý',
-    nodes: ['MD-01 Địa lý', 'MD-12 Thuế', 'MD-15 KCB'],
-    detail: 'Tỉnh/Thành lọc cơ quan thuế và cơ sở KCB hợp lệ.'
-  },
-  {
-    title: 'Chức danh -> Ngạch lương',
-    nodes: ['MD-06 Chức danh', 'MD-07 Lương 3P', 'LIFE-04 Hợp đồng'],
-    detail: 'Chọn chức danh sẽ khóa dải lương min/max được phép.'
-  },
-  {
-    title: 'Phòng ban -> Cost Center',
-    nodes: ['MD-05 Phòng ban', 'MD-13 Cost Center', 'ERP'],
-    detail: 'Phòng ban hoạt động phải có Cost Center ERP còn hiệu lực.'
-  },
-  {
-    title: 'Thuế -> Người phụ thuộc',
-    nodes: ['MD-03 Quan hệ', 'MD-12 Cơ quan Thuế', 'LIFE-05 Thuế TNCN'],
-    detail: 'Người phụ thuộc hợp lệ cần quan hệ được phép và cơ quan thuế quản lý.'
-  },
-  {
-    title: 'Bàn giao tài sản -> Thôi việc',
-    nodes: ['MD-18 Tài sản', 'LIFE-07 Thôi việc', 'Quyết toán'],
-    detail: 'Không đóng hồ sơ thôi việc khi còn tài sản Issued hoặc Lost.'
+const getRelatedManagementFunctions = (process?: SopSubProcess) => {
+  if (!process) return []
+
+  const processText = normalize([
+    process.sopTitle,
+    process.description,
+    ...(process.inputs || []),
+    ...process.steps.flatMap((step) => [step.title, step.description, ...(step.fieldsChecklist || [])])
+  ].join(' '))
+
+  const rules: Array<{ code: string; matches: string[] }> = [
+    { code: 'MD-05', matches: ['phong ban', 'don vi'] },
+    { code: 'MD-06', matches: ['chuc vu', 'chuc danh', 'cap bac'] },
+    { code: 'MD-08', matches: ['ca lam viec', 'ca ap dung', 'lich lam viec', 'lich di ca', 'nghi phep'] },
+    { code: 'MD-07', matches: ['luong', 'thang bang luong'] },
+    { code: 'MD-09', matches: ['bhxh', 'bhyt', 'kham chua benh'] }
+  ]
+
+  return rules
+    .filter((rule) => rule.matches.some((term) => processText.includes(term)))
+    .map((rule) => managementFunctions.find((item) => item.sopCode === rule.code))
+    .filter((item): item is SopSubProcess => Boolean(item))
+}
+
+const getContextModuleName = (moduleId?: string | null, process?: SopSubProcess) => {
+  if (process?.sopCategory) return process.sopCategory.replace('Phân hệ ', '')
+  const moduleLabels: Record<string, string> = {
+    ats: 'Tuyển dụng', emp: 'Nhân sự', att: 'Chấm công', pay: 'Lương', ins: 'Bảo hiểm', tax: 'Thuế'
   }
-]
+  return moduleLabels[moduleId || ''] || 'Toàn hệ thống HRM'
+}
 
-const PROVINCES = [
-  { code: 'HCM', name: 'Thành phố Hồ Chí Minh', taxOffices: ['TAX-HCM', 'TAX-Q1-HCM'], healthcare: ['79024'] },
-  { code: 'HN', name: 'Thành phố Hà Nội', taxOffices: ['TAX-HN'], healthcare: ['01001'] },
-  { code: 'DN', name: 'Thành phố Đà Nẵng', taxOffices: ['TAX-DN'], healthcare: ['48015'] }
-]
+export const MasterDataHub: React.FC<MasterDataHubProps> = ({ onOpenERD, isDarkMode, sopCode, moduleId }) => {
+  const contextProcess = useMemo(() => {
+    const target = normalize(sopCode || '')
+    return target ? allOperationalProcesses.find((item) => normalize(item.sopCode) === target) : undefined
+  }, [sopCode])
 
-const JOBS = [
-  { code: 'JOB-HR-SPEC', name: 'Chuyên viên Nhân sự', grade: 'GRD-OFFICER', min: 12000000, max: 24000000 },
-  { code: 'JOB-SR-DEV', name: 'Kỹ sư Phần mềm Cao cấp', grade: 'GRD-SENIOR', min: 24000000, max: 42000000 },
-  { code: 'JOB-DEPT-MGR', name: 'Trưởng phòng', grade: 'GRD-MANAGER', min: 42000000, max: 70000000 }
-]
-
-export const MasterDataHub: React.FC<MasterDataHubProps> = ({ onOpenERD, isDarkMode }) => {
-  const { language } = useLanguage()
-
-  const [activeTab, setActiveTab] = useState<HubTab>('catalogs')
+  const [activeTab, setActiveTab] = useState<HubTab>(contextProcess ? 'guide' : 'catalogs')
+  const [selectedStepCode, setSelectedStepCode] = useState(contextProcess?.steps[0]?.stepCode || '')
   const [searchTerm, setSearchTerm] = useState('')
-  const [selectedTier, setSelectedTier] = useState<CatalogTier | 'ALL'>('ALL')
-  const [selectedModule, setSelectedModule] = useState<CatalogModuleId | 'ALL'>('ALL')
-  const [inspectingCatalog, setInspectingCatalog] = useState<MasterCatalogItem | null>(null)
-  const [isModalOpen, setIsModalOpen] = useState(false)
+  const [selectedReference, setSelectedReference] = useState<SopSubProcess | null>(null)
+  const [activeItem, setActiveItem] = useState<SopSubProcess | null>(null)
+  const [catalogPage, setCatalogPage] = useState(1)
 
-  const [provinceCode, setProvinceCode] = useState('HCM')
-  const [jobCode, setJobCode] = useState('JOB-SR-DEV')
-  const [salary, setSalary] = useState(45000000)
-  const [assetStatus, setAssetStatus] = useState<'Returned' | 'Issued' | 'Lost'>('Issued')
+  useEffect(() => {
+    if (!contextProcess) return
+    setActiveTab('guide')
+    setSelectedStepCode(contextProcess.steps[0]?.stepCode || '')
+    setSelectedReference(null)
+    setActiveItem(null)
+  }, [contextProcess])
 
-  const filteredCatalogs = useMemo(() => {
-    const q = searchTerm.trim().toLowerCase()
-    return MASTER_DATA_HUB_DATABASE.filter((cat) => {
-      const matchesSearch = !q || [cat.code, cat.title, cat.titleEn, cat.subtitle, cat.subtitleEn, cat.moduleName].some((value) => value.toLowerCase().includes(q))
-      const matchesTier = selectedTier === 'ALL' || cat.tier === selectedTier
-      const matchesModule = selectedModule === 'ALL' || cat.moduleId === selectedModule
-      return matchesSearch && matchesTier && matchesModule
-    })
-  }, [searchTerm, selectedTier, selectedModule])
+  const selectedStep = contextProcess?.steps.find((step) => step.stepCode === selectedStepCode) || contextProcess?.steps[0]
+  const relatedManagementFunctions = useMemo(() => getRelatedManagementFunctions(contextProcess), [contextProcess])
+  const allRequirements = useMemo(() => {
+    if (!contextProcess) return []
+    return Array.from(new Set(contextProcess.steps.flatMap(getStepRequirement))).slice(0, 12)
+  }, [contextProcess])
 
-  const tierCounts = useMemo(() => {
-    return MASTER_DATA_HUB_DATABASE.reduce<Record<CatalogTier, number>>(
-      (acc, catalog) => ({ ...acc, [catalog.tier]: acc[catalog.tier] + 1 }),
-      { tier1_global: 0, tier2_module: 0, tier3_utility: 0, tier4_governance: 0 }
-    )
-  }, [])
+  const searchableItems = activeTab === 'management' ? managementFunctions : commonCatalogs
+  const filteredItems = useMemo(() => {
+    const query = normalize(searchTerm.trim())
+    if (!query) return searchableItems
+    return searchableItems.filter((item) => normalize([
+      item.sopCode,
+      item.sopTitle,
+      item.description,
+      ...(item.inputs || []),
+      ...(item.steps.flatMap(getStepRequirement))
+    ].join(' ')).includes(query))
+  }, [searchTerm, searchableItems])
 
-  const selectedProvince = PROVINCES.find((province) => province.code === provinceCode) || PROVINCES[0]
-  const selectedJob = JOBS.find((job) => job.code === jobCode) || JOBS[0]
-  const salaryStatus = salary < selectedJob.min ? 'below' : salary > selectedJob.max ? 'above' : 'valid'
-  const canCloseOffboarding = assetStatus === 'Returned'
+  const pageSize = 6
+  const totalPages = Math.max(1, Math.ceil(filteredItems.length / pageSize))
+  const visibleItems = filteredItems.slice((catalogPage - 1) * pageSize, catalogPage * pageSize)
 
-  const handleOpenInspector = (catalog: MasterCatalogItem) => {
-    setInspectingCatalog(catalog)
-    setIsModalOpen(true)
+  useEffect(() => {
+    setCatalogPage(1)
+  }, [activeTab, searchTerm])
+
+  useEffect(() => {
+    if (catalogPage > totalPages) setCatalogPage(totalPages)
+  }, [catalogPage, totalPages])
+
+  const surface = isDarkMode ? 'bg-slate-900 border-slate-800 text-slate-100' : 'bg-white border-slate-200 text-slate-900'
+  const subdued = isDarkMode ? 'text-slate-400' : 'text-slate-500'
+
+  const openReference = (item: SopSubProcess) => {
+    setSelectedReference(item)
+    setActiveItem(item)
   }
 
   return (
     <div className="w-full space-y-5 animate-fadeIn">
-      <div className={`p-5 sm:p-6 rounded-2xl border shadow-sm flex flex-col lg:flex-row lg:items-center justify-between gap-4 transition-colors ${isDarkMode ? 'bg-slate-900 border-slate-800 text-white' : 'bg-white border-slate-200 text-slate-900'}`}>
-        <div className="flex items-start gap-3.5">
-          <div className="p-3 bg-blue-600 text-white rounded-2xl shadow-lg shrink-0">
-            <Database className="w-6 h-6" />
+      <section className={`rounded-2xl border shadow-sm overflow-hidden ${surface}`}>
+        <div className="p-5 sm:p-6 flex flex-col xl:flex-row xl:items-center justify-between gap-5">
+          <div className="flex items-start gap-3.5 min-w-0">
+            <div className="p-3 bg-blue-600 text-white rounded-xl shadow-sm shrink-0">
+              <BookOpen className="w-6 h-6" />
+            </div>
+            <div className="min-w-0">
+              <div className="flex flex-wrap items-center gap-2 mb-1.5">
+                <span className="px-2.5 py-1 text-[11px] font-extrabold rounded-md bg-blue-50 text-blue-700 border border-blue-200 dark:bg-blue-500/10 dark:text-blue-300 dark:border-blue-500/25">HƯỚNG DẪN NGHIỆP VỤ</span>
+                <span className="px-2.5 py-1 text-[11px] font-bold rounded-md bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-300">{getContextModuleName(moduleId, contextProcess)}</span>
+              </div>
+              <h2 className="text-lg sm:text-2xl font-black tracking-tight leading-tight">{contextProcess ? contextProcess.sopTitle : 'Danh mục dùng chung và cách vận hành'}</h2>
+              <p className={`text-sm mt-1.5 max-w-3xl ${subdued}`}>{contextProcess ? 'Xem lần lượt từng việc cần làm, thông tin cần chuẩn bị và danh mục hỗ trợ cho quy trình này.' : 'Chọn một quy trình để xem dữ liệu cần chuẩn bị trước khi thực hiện nghiệp vụ.'}</p>
+            </div>
           </div>
+          {onOpenERD && <button type="button" onClick={onOpenERD} className="self-start xl:self-center px-4 py-2.5 rounded-xl border border-slate-300 dark:border-slate-700 text-xs sm:text-sm font-bold flex items-center gap-2 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors cursor-pointer"><GitBranch className="w-4 h-4 text-emerald-500" />Xem quan hệ dữ liệu</button>}
+        </div>
+
+        <div className={`px-3 py-2 border-t flex flex-wrap gap-1.5 ${isDarkMode ? 'bg-slate-950/45 border-slate-800' : 'bg-slate-50 border-slate-100'}`}>
+          {[
+            { id: 'guide' as const, label: 'Hướng dẫn theo quy trình', icon: ClipboardList, disabled: !contextProcess },
+            { id: 'catalogs' as const, label: 'Danh mục dùng chung', icon: Database },
+            { id: 'management' as const, label: 'Cách quản lý danh mục', icon: ShieldCheck }
+          ].map((tab) => {
+            const Icon = tab.icon
+            return <button key={tab.id} type="button" disabled={tab.disabled} onClick={() => { setActiveTab(tab.id); setCatalogPage(1) }} className={`px-3.5 py-2 rounded-lg text-xs font-bold flex items-center gap-2 transition-colors ${activeTab === tab.id ? 'bg-blue-600 text-white shadow-sm' : 'text-slate-600 dark:text-slate-300 hover:bg-white dark:hover:bg-slate-800'} ${tab.disabled ? 'opacity-45 cursor-not-allowed' : 'cursor-pointer'}`}><Icon className="w-3.5 h-3.5" />{tab.label}</button>
+          })}
+        </div>
+      </section>
+
+      {activeTab === 'guide' && contextProcess && selectedStep && <section className={`rounded-2xl border shadow-sm overflow-hidden ${surface}`}>
+        <div className={`p-4 border-b ${isDarkMode ? 'border-slate-800' : 'border-slate-100'}`}>
+          <div className="flex items-center justify-between gap-4 mb-3"><div><h3 className="font-extrabold text-sm">Các bước thực hiện</h3><p className={`text-xs mt-0.5 ${subdued}`}>Chọn một bước để xem hướng dẫn tương ứng.</p></div><span className={`text-xs font-bold ${subdued}`}>{contextProcess.steps.length} bước</span></div>
+          <div className="flex gap-2 overflow-x-auto pb-1 [scrollbar-width:thin]">
+            {contextProcess.steps.map((step, index) => {
+              const selected = step.stepCode === selectedStep.stepCode
+              return <button key={step.stepCode} type="button" onClick={() => setSelectedStepCode(step.stepCode)} className={`min-w-[188px] max-w-[260px] shrink-0 text-left px-3 py-2.5 rounded-xl border transition-colors cursor-pointer ${selected ? 'border-blue-500 bg-blue-50 text-blue-900 dark:bg-blue-500/15 dark:text-blue-100 dark:border-blue-400' : isDarkMode ? 'border-slate-700 hover:bg-slate-800' : 'border-slate-200 hover:bg-slate-50'}`}><span className={`inline-flex w-5 h-5 items-center justify-center rounded-full text-[10px] font-black mr-1.5 ${selected ? 'bg-blue-600 text-white' : 'bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-300'}`}>{index + 1}</span><span className="text-xs font-bold leading-snug">{step.title}</span></button>
+            })}
+          </div>
+        </div>
+
+        <div className="p-4 sm:p-5 grid grid-cols-1 xl:grid-cols-[minmax(0,1.35fr)_minmax(280px,.65fr)] gap-5">
           <div>
-            <div className="flex flex-wrap items-center gap-2 mb-1">
-              <span className="px-2.5 py-0.5 text-xs font-black uppercase rounded-md bg-blue-500/10 text-blue-600 dark:text-blue-400 border border-blue-500/20">
-                MASTER DATA SETTINGS HUB
-              </span>
-              <span className="px-2 py-0.5 text-xs font-bold rounded-md bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20">
-                {MASTER_DATA_HUB_DATABASE.length} {language === 'vi' ? 'Danh mục Enterprise' : 'Enterprise Catalogs'}
-              </span>
+            <div className="flex items-start gap-3"><span className="w-8 h-8 shrink-0 rounded-lg bg-blue-600 text-white flex items-center justify-center text-sm font-black">{contextProcess.steps.findIndex((item) => item.stepCode === selectedStep.stepCode) + 1}</span><div><p className="text-[11px] font-extrabold tracking-wide text-blue-600 uppercase">Việc cần thực hiện</p><h3 className="text-base sm:text-lg font-black mt-0.5">{selectedStep.title}</h3></div></div>
+            <div className={`mt-4 rounded-xl p-4 ${isDarkMode ? 'bg-slate-950/55 border border-slate-800' : 'bg-slate-50 border border-slate-100'}`}>
+              <div className="flex items-center gap-2 text-xs font-extrabold mb-2"><FileText className="w-4 h-4 text-blue-600" />Mô tả yêu cầu</div>
+              <p className={`text-sm leading-6 ${subdued}`}>{selectedStep.description || 'Thực hiện theo các thông tin cần chuẩn bị ở bên dưới.'}</p>
+              {getStepRequirement(selectedStep).length > 0 && <div className="mt-3 flex flex-wrap gap-2">{getStepRequirement(selectedStep).map((item) => <span key={item} className={`px-2.5 py-1.5 rounded-lg text-xs ${isDarkMode ? 'bg-slate-800 text-slate-200' : 'bg-white text-slate-700 border border-slate-200'}`}>{item}</span>)}</div>}
             </div>
-            <h2 className="text-lg sm:text-2xl font-black tracking-tight">
-              {language === 'vi' ? 'Trung Tâm Quản Trị Master Data & Ràng Buộc Quan Hệ' : 'Enterprise Master Data & Relational Validation Hub'}
-            </h2>
-            <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-1 max-w-3xl">
-              {language === 'vi'
-                ? '18 danh mục chuẩn Enterprise với khóa ngoại, validation constraint và mô phỏng cascade/cảnh báo dữ liệu liên phân hệ.'
-                : '18 enterprise catalogs with foreign keys, validation constraints and live cross-catalog rule simulation.'}
-            </p>
           </div>
+          <aside className="space-y-3">
+            <div className={`p-3.5 rounded-xl border ${isDarkMode ? 'border-slate-800 bg-slate-950/35' : 'border-slate-200 bg-white'}`}><div className="flex items-center gap-2 text-xs font-extrabold mb-1"><UserRound className="w-4 h-4 text-blue-600" />Người thực hiện</div><p className={`text-sm font-semibold ${subdued}`}>{selectedStep.actor || 'Chưa nêu trong quy trình'}</p></div>
+            <div className={`p-3.5 rounded-xl border ${isDarkMode ? 'border-slate-800 bg-slate-950/35' : 'border-slate-200 bg-white'}`}><div className="flex items-center gap-2 text-xs font-extrabold mb-1"><MapPin className="w-4 h-4 text-blue-600" />Nơi thực hiện</div><p className={`text-sm font-semibold ${subdued}`}>{selectedStep.location || 'Chưa nêu trong quy trình'}</p></div>
+            {selectedStep.timing && <div className={`p-3.5 rounded-xl border ${isDarkMode ? 'border-slate-800 bg-slate-950/35' : 'border-slate-200 bg-white'}`}><div className="flex items-center gap-2 text-xs font-extrabold mb-1"><CheckCircle2 className="w-4 h-4 text-emerald-600" />Thời điểm</div><p className={`text-sm font-semibold ${subdued}`}>{selectedStep.timing}</p></div>}
+          </aside>
         </div>
 
-        <div className="flex items-center gap-2.5 shrink-0">
-          {onOpenERD && (
-            <button type="button" onClick={onOpenERD} className="px-4 py-2.5 bg-slate-800 hover:bg-slate-700 text-white rounded-xl text-xs sm:text-sm font-bold flex items-center gap-2 shadow-xs transition-all cursor-pointer">
-              <GitFork className="w-4 h-4 text-emerald-400" />
-              <span>{language === 'vi' ? 'Mở ERD tổng' : 'Open ERD'}</span>
+        <div className={`p-4 sm:p-5 border-t ${isDarkMode ? 'border-slate-800 bg-slate-950/30' : 'border-slate-100 bg-slate-50/70'}`}>
+          <h3 className="font-extrabold text-sm">Thông tin và danh mục cần chuẩn bị</h3><p className={`text-xs mt-0.5 ${subdued}`}>Các thông tin này xuất hiện trong các bước của quy trình đang xem.</p>
+          <div className="mt-3 flex flex-wrap gap-2">{allRequirements.map((requirement) => <span key={requirement} className={`px-2.5 py-1.5 rounded-lg text-xs font-medium ${isDarkMode ? 'bg-slate-800 text-slate-200' : 'bg-white border border-slate-200 text-slate-700'}`}>{requirement}</span>)}</div>
+          {relatedManagementFunctions.length > 0 && <div className="mt-5"><h4 className="text-xs font-extrabold text-slate-700 dark:text-slate-200">Danh mục cần sẵn sàng</h4><div className="mt-2 grid grid-cols-1 md:grid-cols-2 gap-2.5">{relatedManagementFunctions.map((item) => <button key={item.sopCode} type="button" onClick={() => openReference(item)} className={`p-3 text-left rounded-xl border transition-colors flex items-center justify-between gap-3 cursor-pointer ${isDarkMode ? 'border-slate-700 hover:bg-slate-800' : 'bg-white border-slate-200 hover:border-blue-400 hover:bg-blue-50/40'}`}><div><p className="text-xs font-extrabold">{item.sopTitle}</p><p className={`text-[11px] mt-1 line-clamp-2 ${subdued}`}>{item.outputs?.[0] || item.inputs?.[0]}</p></div><ChevronRight className="w-4 h-4 shrink-0 text-blue-600" /></button>)}</div></div>}
+        </div>
+      </section>}
+
+      {(activeTab === 'catalogs' || activeTab === 'management') && <section className={`rounded-2xl border shadow-sm p-4 sm:p-5 ${surface}`}>
+        <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-3"><div><h3 className="text-base font-black">{activeTab === 'management' ? 'Cách quản lý danh mục trong HRM' : 'Danh mục dùng chung trong HRM'}</h3><p className={`text-xs mt-1 ${subdued}`}>{activeTab === 'management' ? 'Chọn một nội dung để xem điều kiện và kết quả của thao tác quản lý.' : 'Chọn một danh mục để xem mục đích và các thông tin cần khai báo.'}</p></div><div className="relative w-full sm:w-80"><Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" /><input value={searchTerm} onChange={(event) => setSearchTerm(event.target.value)} placeholder="Tìm danh mục..." className={`w-full pl-9 pr-3 py-2.5 text-xs rounded-xl border outline-none focus:border-blue-500 ${isDarkMode ? 'bg-slate-950 border-slate-800 text-white placeholder-slate-500' : 'bg-slate-50 border-slate-200 text-slate-900 placeholder-slate-400'}`} /></div></div>
+        {selectedReference && activeTab === 'catalogs' && <div className={`mt-4 p-4 rounded-xl border ${isDarkMode ? 'border-blue-500/30 bg-blue-500/10' : 'border-blue-200 bg-blue-50'}`}><div className="flex items-start justify-between gap-3"><div><p className="text-[11px] font-extrabold text-blue-700 dark:text-blue-300 uppercase">Danh mục hỗ trợ quy trình đang xem</p><h4 className="font-black mt-1">{selectedReference.sopTitle}</h4><p className={`text-xs leading-5 mt-1.5 ${subdued}`}>{selectedReference.outputs?.[0] || selectedReference.description}</p></div><button type="button" onClick={() => setSelectedReference(null)} className="text-xs font-bold text-blue-700 dark:text-blue-300 hover:underline cursor-pointer">Đóng</button></div></div>}
+        <div className="mt-4 flex items-center justify-between gap-3 text-xs">
+          <span className={subdued}>Hiển thị {filteredItems.length === 0 ? 0 : (catalogPage - 1) * pageSize + 1}-{Math.min(catalogPage * pageSize, filteredItems.length)} trong số {filteredItems.length} nội dung</span>
+          <span className={`font-semibold ${subdued}`}>Mỗi trang 6 danh mục</span>
+        </div>
+        <div className="mt-3 grid grid-cols-1 lg:grid-cols-2 gap-3">
+          {visibleItems.map((item) => (
+            <button key={item.sopCode} type="button" onClick={() => setActiveItem(item)} className={`group text-left min-h-[108px] p-4 rounded-xl border transition-colors flex items-center justify-between gap-3 cursor-pointer ${isDarkMode ? 'border-slate-800 bg-slate-950/25 hover:border-blue-500/70 hover:bg-slate-800' : 'border-slate-200 bg-white hover:border-blue-400 hover:bg-blue-50/40'}`}>
+              <div className="min-w-0">
+                <p className={`text-[11px] font-bold ${subdued}`}>{item.sopCategory}</p>
+                <h4 className="text-sm font-extrabold mt-1 leading-snug group-hover:text-blue-700 dark:group-hover:text-blue-300">{item.sopTitle}</h4>
+                <p className={`text-xs mt-2 line-clamp-2 ${subdued}`}>{item.outputs?.[0] || item.description}</p>
+              </div>
+              <ChevronRight className="w-4 h-4 shrink-0 text-blue-600" />
             </button>
-          )}
-          <button type="button" onClick={() => handleOpenInspector(MASTER_DATA_HUB_DATABASE[0])} className="px-4 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-xs sm:text-sm font-bold flex items-center gap-2 shadow-md transition-all cursor-pointer">
-            <Plus className="w-4 h-4" />
-            <span>{language === 'vi' ? 'Thêm Danh Mục' : 'Add Catalog'}</span>
-          </button>
+          ))}
         </div>
-      </div>
+        {filteredItems.length === 0 && <p className={`py-10 text-center text-sm ${subdued}`}>Không tìm thấy nội dung phù hợp.</p>}
+        {filteredItems.length > pageSize && <div className="mt-5 flex items-center justify-center gap-3">
+          <button type="button" disabled={catalogPage === 1} onClick={() => setCatalogPage((page) => Math.max(1, page - 1))} className="px-3 py-2 text-xs font-bold rounded-lg border border-slate-200 dark:border-slate-700 disabled:opacity-40 disabled:cursor-not-allowed hover:bg-slate-50 dark:hover:bg-slate-800 cursor-pointer">Trang trước</button>
+          <span className={`text-xs font-bold ${subdued}`}>Trang {catalogPage}/{totalPages}</span>
+          <button type="button" disabled={catalogPage === totalPages} onClick={() => setCatalogPage((page) => Math.min(totalPages, page + 1))} className="px-3 py-2 text-xs font-bold rounded-lg border border-slate-200 dark:border-slate-700 disabled:opacity-40 disabled:cursor-not-allowed hover:bg-slate-50 dark:hover:bg-slate-800 cursor-pointer">Trang sau</button>
+        </div>}
+      </section>}
 
-      <div className={`p-2 rounded-2xl border flex flex-col md:flex-row gap-2 ${isDarkMode ? 'bg-slate-900 border-slate-800' : 'bg-white border-slate-200'}`}>
-        {[
-          { id: 'catalogs' as const, icon: Table, label: language === 'vi' ? 'Danh Mục Master Data (18 Catalogs)' : 'Master Data Catalogs (18)' },
-          { id: 'erd' as const, icon: GitBranch, label: language === 'vi' ? 'Sơ Đồ Quan Hệ Dữ Liệu' : 'ERD & Cross-Catalog Rules' },
-          { id: 'tester' as const, icon: PlayCircle, label: language === 'vi' ? 'Trình Giả Lập Ràng Buộc' : 'Live Validation Tester' }
-        ].map((tab) => {
-          const Icon = tab.icon
-          return (
-            <button key={tab.id} type="button" onClick={() => setActiveTab(tab.id)} className={`flex-1 px-3 py-2.5 rounded-xl text-xs font-black flex items-center justify-center gap-2 transition-all cursor-pointer ${activeTab === tab.id ? 'bg-blue-600 text-white shadow-sm' : 'text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800 dark:text-slate-400'}`}>
-              <Icon className="w-4 h-4" />
-              <span>{tab.label}</span>
-            </button>
-          )
-        })}
-      </div>
-
-      {activeTab === 'catalogs' && (
-        <>
-          <div className={`p-4 sm:p-5 rounded-2xl border space-y-3.5 shadow-sm transition-colors ${isDarkMode ? 'bg-slate-900/90 border-slate-800' : 'bg-white border-slate-200'}`}>
-            <div className="relative">
-              <Search className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
-              <input type="text" value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} placeholder={language === 'vi' ? 'Tìm nhanh danh mục, mã, phân hệ hoặc mô tả...' : 'Quick search catalogs, codes, modules or descriptions...'} className={`w-full pl-10 pr-4 py-2.5 text-xs sm:text-sm rounded-xl border transition-all ${isDarkMode ? 'bg-slate-950 border-slate-800 text-white placeholder-slate-500 focus:border-blue-500' : 'bg-slate-50 border-slate-200 text-slate-900 placeholder-slate-400 focus:border-blue-500 focus:bg-white'}`} />
+      {activeItem && <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 sm:p-6 bg-slate-950/55 backdrop-blur-[2px]" role="dialog" aria-modal="true" aria-labelledby="master-data-detail-title" onMouseDown={() => setActiveItem(null)}>
+        <div onMouseDown={(event) => event.stopPropagation()} className={`w-full max-w-2xl max-h-[calc(100dvh-2rem)] overflow-y-auto rounded-2xl shadow-2xl border ${surface}`}>
+          <div className={`sticky top-0 z-10 p-5 sm:p-6 border-b flex items-start justify-between gap-4 ${isDarkMode ? 'bg-slate-900 border-slate-800' : 'bg-white border-slate-100'}`}>
+            <div>
+              <p className="text-[11px] font-extrabold text-blue-700 dark:text-blue-300 uppercase">{activeItem.sopCategory}</p>
+              <h3 id="master-data-detail-title" className="text-lg sm:text-xl font-black mt-1">{activeItem.sopTitle}</h3>
             </div>
-
-            <div className="flex flex-col xl:flex-row xl:items-center justify-between gap-3 pt-1 border-t border-slate-100 dark:border-slate-800/80">
-              <div className="flex flex-wrap items-center gap-1.5">
-                <span className="text-[11px] font-extrabold uppercase text-slate-400 mr-1 flex items-center gap-1">
-                  <SlidersHorizontal className="w-3 h-3" />
-                  {language === 'vi' ? 'Phân tầng:' : 'Tier:'}
-                </span>
-                <button type="button" onClick={() => setSelectedTier('ALL')} className={`px-3 py-1.5 text-xs font-bold rounded-xl transition-all cursor-pointer ${selectedTier === 'ALL' ? 'bg-blue-600 text-white' : 'bg-slate-100 dark:bg-slate-950 text-slate-700 dark:text-slate-400 border border-slate-200 dark:border-slate-800'}`}>
-                  All ({MASTER_DATA_HUB_DATABASE.length})
-                </button>
-                {(Object.keys(TIER_LABELS) as CatalogTier[]).map((tier) => (
-                  <button key={tier} type="button" onClick={() => setSelectedTier(tier)} className={`px-3 py-1.5 text-xs font-bold rounded-xl transition-all cursor-pointer ${selectedTier === tier ? 'bg-blue-600 text-white' : 'bg-slate-100 dark:bg-slate-950 text-slate-700 dark:text-slate-400 border border-slate-200 dark:border-slate-800'}`}>
-                    {TIER_LABELS[tier]} ({tierCounts[tier]})
-                  </button>
-                ))}
-              </div>
-
-              <div className="flex flex-wrap items-center gap-1">
-                {[
-                  { id: 'ALL', label: 'All', icon: <Layers className="w-3 h-3" /> },
-                  { id: 'ats', label: 'ATS', icon: <Target className="w-3 h-3" /> },
-                  { id: 'emp', label: 'EMP', icon: <Building2 className="w-3 h-3" /> },
-                  { id: 'att', label: 'ATT', icon: <Clock className="w-3 h-3" /> },
-                  { id: 'pay', label: 'PAY', icon: <CircleDollarSign className="w-3 h-3" /> },
-                  { id: 'ins', label: 'INS', icon: <ShieldCheck className="w-3 h-3" /> },
-                  { id: 'tax', label: 'TAX', icon: <Receipt className="w-3 h-3" /> },
-                  { id: 'admin', label: 'ADMIN', icon: <BadgeCheck className="w-3 h-3" /> }
-                ].map((m) => (
-                  <button key={m.id} type="button" onClick={() => setSelectedModule(m.id as CatalogModuleId | 'ALL')} className={`px-2.5 py-1 text-[11px] font-bold rounded-lg transition-all flex items-center gap-1 cursor-pointer ${selectedModule === m.id ? 'bg-slate-900 dark:bg-white text-white dark:text-slate-900' : 'bg-slate-100 dark:bg-slate-950 text-slate-700 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-800'}`}>
-                    {m.icon}
-                    <span>{m.label}</span>
-                  </button>
-                ))}
-              </div>
-            </div>
+            <button type="button" onClick={() => setActiveItem(null)} aria-label="Đóng chi tiết danh mục" className="p-2 rounded-lg text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800 cursor-pointer"><X className="w-5 h-5" /></button>
           </div>
-
-          <div className="space-y-3">
-            <div className="flex items-center justify-between text-xs font-bold text-slate-500 dark:text-slate-400 px-1">
-              <span>{language === 'vi' ? `Hiển thị ${filteredCatalogs.length}/${MASTER_DATA_HUB_DATABASE.length} danh mục` : `Showing ${filteredCatalogs.length}/${MASTER_DATA_HUB_DATABASE.length} catalogs`}</span>
-              <span className="text-[11px] font-mono text-slate-400">{language === 'vi' ? 'Click thẻ để xem schema, sample và rules' : 'Click card to inspect schema, samples and rules'}</span>
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
-              {filteredCatalogs.map((catalog) => (
-                <div key={catalog.id} className={`p-4 sm:p-5 rounded-2xl border transition-all flex flex-col justify-between group shadow-xs hover:shadow-md ${isDarkMode ? 'bg-slate-900 border-slate-800 hover:border-blue-500/50' : 'bg-white border-slate-200/90 hover:border-blue-400 hover:bg-slate-50/40'}`}>
-                  <div className="space-y-3">
-                    <div className="flex items-center justify-between gap-2">
-                      <span className="font-mono font-black text-xs px-2 py-0.5 rounded bg-blue-500/10 text-blue-600 dark:text-blue-400 border border-blue-500/20">{catalog.code}</span>
-                      <span className="text-[11px] font-mono font-bold px-2 py-0.5 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-700">{catalog.recordCount.toLocaleString()} rows</span>
-                    </div>
-
-                    <div>
-                      <h4 className="text-sm sm:text-base font-extrabold text-slate-900 dark:text-white group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors leading-tight">
-                        {language === 'vi' ? catalog.title : catalog.titleEn}
-                      </h4>
-                      <p className="text-xs text-slate-500 dark:text-slate-400 mt-1 line-clamp-2">{language === 'vi' ? catalog.subtitle : catalog.subtitleEn}</p>
-                    </div>
-
-                    <div className="grid grid-cols-3 gap-2 text-center">
-                      <div className="rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-100 dark:border-slate-800 p-2">
-                        <div className="text-sm font-black">{catalog.fields.length}</div>
-                        <div className="text-[10px] text-slate-400 font-bold">fields</div>
-                      </div>
-                      <div className="rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-100 dark:border-slate-800 p-2">
-                        <div className="text-sm font-black">{catalog.foreignKeys?.length || 0}</div>
-                        <div className="text-[10px] text-slate-400 font-bold">FK</div>
-                      </div>
-                      <div className="rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-100 dark:border-slate-800 p-2">
-                        <div className="text-sm font-black">{catalog.validationConstraints?.length || 0}</div>
-                        <div className="text-[10px] text-slate-400 font-bold">rules</div>
-                      </div>
-                    </div>
-
-                    <div className="pt-2 border-t border-slate-100 dark:border-slate-800/80 space-y-1">
-                      <span className="text-[10px] font-extrabold uppercase text-slate-400 block">{language === 'vi' ? 'Nuôi sống workflow:' : 'Feeds workflows:'}</span>
-                      <div className="flex flex-wrap gap-1">
-                        {(catalog.feedsIntoWorkflows || []).slice(0, 6).map((workflow) => (
-                          <span key={workflow} className="text-[10px] font-bold px-2 py-0.5 rounded-md bg-slate-100 dark:bg-slate-800/80 text-slate-700 dark:text-slate-300">{workflow}</span>
-                        ))}
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="pt-4 mt-3 border-t border-slate-100 dark:border-slate-800/80 flex items-center justify-between gap-2">
-                    <button type="button" onClick={() => handleOpenInspector(catalog)} className="px-3 py-1.5 bg-blue-50 dark:bg-blue-950/60 hover:bg-blue-100 dark:hover:bg-blue-900 text-blue-700 dark:text-blue-300 rounded-xl text-xs font-bold flex items-center gap-1.5 transition-colors cursor-pointer">
-                      <Table className="w-3.5 h-3.5" />
-                      <span>{language === 'vi' ? 'Xem dữ liệu' : 'View Data'}</span>
-                    </button>
-                    <button type="button" onClick={() => setActiveTab('erd')} className="px-3 py-1.5 text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white rounded-xl text-xs font-bold flex items-center gap-1 transition-colors cursor-pointer">
-                      <GitBranch className="w-3.5 h-3.5 text-emerald-500" />
-                      <span>ERD</span>
-                      <ArrowRight className="w-3 h-3" />
-                    </button>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        </>
-      )}
-
-      {activeTab === 'erd' && (
-        <div className="space-y-4">
-          <div className={`p-5 rounded-2xl border ${isDarkMode ? 'bg-slate-900 border-slate-800' : 'bg-white border-slate-200'}`}>
-            <div className="flex items-center gap-2 text-sm font-black text-slate-900 dark:text-white">
-              <Link2 className="w-4 h-4 text-blue-500" />
-              <span>{language === 'vi' ? 'Ma trận quan hệ ERD & ràng buộc chéo cốt lõi' : 'Core ERD Matrix & Cross-Catalog Rules'}</span>
-            </div>
-            <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
-              {language === 'vi' ? 'Các luồng dưới đây là ràng buộc nghiệp vụ Enterprise được khai báo trong database và mô phỏng tại tab Validation Tester.' : 'These enterprise business relations are declared in the database and simulated in the Validation Tester tab.'}
-            </p>
-          </div>
-
-          <div className="grid grid-cols-1 xl:grid-cols-2 gap-4">
-            {CORE_RELATIONS.map((relation) => (
-              <div key={relation.title} className={`p-4 rounded-2xl border shadow-sm ${isDarkMode ? 'bg-slate-900 border-slate-800' : 'bg-white border-slate-200'}`}>
-                <h3 className="text-sm font-black text-slate-900 dark:text-white mb-3">{relation.title}</h3>
-                <div className="flex flex-col sm:flex-row sm:items-center gap-2">
-                  {relation.nodes.map((node, index) => (
-                    <React.Fragment key={node}>
-                      <div className="flex-1 min-h-20 p-3 rounded-xl border border-blue-500/20 bg-blue-50 dark:bg-blue-950/30 flex items-center justify-center text-center text-xs font-black text-blue-700 dark:text-blue-300">
-                        {node}
-                      </div>
-                      {index < relation.nodes.length - 1 && <ArrowRight className="w-4 h-4 text-slate-400 mx-auto rotate-90 sm:rotate-0" />}
-                    </React.Fragment>
-                  ))}
-                </div>
-                <div className="mt-3 flex items-start gap-2 text-xs text-slate-500 dark:text-slate-400">
-                  <CheckCircle2 className="w-4 h-4 text-emerald-500 shrink-0" />
-                  <span>{relation.detail}</span>
-                </div>
-              </div>
-            ))}
-          </div>
-
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-            {MASTER_DATA_HUB_DATABASE.filter((catalog) => (catalog.foreignKeys?.length || 0) > 0 || (catalog.relationalRules?.length || 0) > 0).map((catalog) => (
-              <div key={catalog.id} className={`p-4 rounded-2xl border ${isDarkMode ? 'bg-slate-900 border-slate-800' : 'bg-white border-slate-200'}`}>
-                <div className="font-mono text-xs font-black text-blue-600 dark:text-blue-400">{catalog.code}</div>
-                <div className="text-sm font-black text-slate-900 dark:text-white">{language === 'vi' ? catalog.title : catalog.titleEn}</div>
-                <div className="mt-3 space-y-2">
-                  {(catalog.relationalRules || []).map((rule) => (
-                    <div key={rule.id} className="text-xs p-2 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-100 dark:border-slate-800">
-                      <div className="font-bold text-slate-800 dark:text-slate-200">{rule.title}</div>
-                      <div className="text-slate-500 dark:text-slate-400">{rule.description}</div>
-                    </div>
-                  ))}
-                  {(catalog.foreignKeys || []).map((fk) => (
-                    <div key={`${fk.field}-${fk.targetCatalogId}`} className="text-xs font-mono text-slate-500 dark:text-slate-400">
-                      {fk.field} {'->'} {fk.targetCatalogId}.{fk.targetField}
-                    </div>
-                  ))}
-                </div>
-              </div>
-            ))}
+          <div className="p-5 sm:p-6 space-y-5">
+            {(activeItem.outputs?.[0] || activeItem.description) && <section><h4 className="text-xs font-extrabold text-slate-700 dark:text-slate-200">Mục đích và ý nghĩa</h4><p className={`text-sm leading-6 mt-2 ${subdued}`}>{activeItem.outputs?.[0] || activeItem.description}</p></section>}
+            {activeItem.inputs?.length ? <section><h4 className="text-xs font-extrabold text-slate-700 dark:text-slate-200">Thông tin cần khai báo</h4><div className="mt-2 flex flex-wrap gap-2">{activeItem.inputs.map((input) => <span key={input} className={`px-2.5 py-1.5 rounded-lg text-xs ${isDarkMode ? 'bg-slate-800 text-slate-200' : 'bg-slate-100 text-slate-700'}`}>{input}</span>)}</div></section> : activeItem.steps.flatMap(getStepRequirement).length > 0 ? <section><h4 className="text-xs font-extrabold text-slate-700 dark:text-slate-200">Thông tin cần khai báo</h4><div className="mt-2 flex flex-wrap gap-2">{activeItem.steps.flatMap(getStepRequirement).map((input) => <span key={input} className={`px-2.5 py-1.5 rounded-lg text-xs ${isDarkMode ? 'bg-slate-800 text-slate-200' : 'bg-slate-100 text-slate-700'}`}>{input}</span>)}</div></section> : null}
+            {activeItem.rules?.[0] && <section className={`p-4 rounded-xl ${isDarkMode ? 'bg-amber-500/10 text-amber-100' : 'bg-amber-50 text-amber-900'}`}><h4 className="text-xs font-extrabold">Điều kiện áp dụng</h4><p className="text-sm leading-6 mt-1.5">{activeItem.rules[0]}</p></section>}
           </div>
         </div>
-      )}
-
-      {activeTab === 'tester' && (
-        <div className="grid grid-cols-1 xl:grid-cols-3 gap-4">
-          <div className={`p-5 rounded-2xl border space-y-4 ${isDarkMode ? 'bg-slate-900 border-slate-800' : 'bg-white border-slate-200'}`}>
-            <h3 className="text-sm font-black text-slate-900 dark:text-white">{language === 'vi' ? 'Cascade Filter: Địa lý' : 'Cascade Filter: Geography'}</h3>
-            <select value={provinceCode} onChange={(e) => setProvinceCode(e.target.value)} className="w-full px-3 py-2 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950 text-sm">
-              {PROVINCES.map((province) => <option key={province.code} value={province.code}>{province.name}</option>)}
-            </select>
-            <div className="grid grid-cols-2 gap-3 text-xs">
-              <div className="p-3 rounded-xl bg-blue-50 dark:bg-blue-950/30 border border-blue-500/20">
-                <div className="font-black text-blue-700 dark:text-blue-300">Tax Offices</div>
-                <div className="mt-1 font-mono">{selectedProvince.taxOffices.join(', ')}</div>
-              </div>
-              <div className="p-3 rounded-xl bg-emerald-50 dark:bg-emerald-950/30 border border-emerald-500/20">
-                <div className="font-black text-emerald-700 dark:text-emerald-300">KCB</div>
-                <div className="mt-1 font-mono">{selectedProvince.healthcare.join(', ')}</div>
-              </div>
-            </div>
-          </div>
-
-          <div className={`p-5 rounded-2xl border space-y-4 ${isDarkMode ? 'bg-slate-900 border-slate-800' : 'bg-white border-slate-200'}`}>
-            <h3 className="text-sm font-black text-slate-900 dark:text-white">{language === 'vi' ? 'Range Guard: Lương theo chức danh' : 'Range Guard: Job Salary Band'}</h3>
-            <select value={jobCode} onChange={(e) => setJobCode(e.target.value)} className="w-full px-3 py-2 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950 text-sm">
-              {JOBS.map((job) => <option key={job.code} value={job.code}>{job.name}</option>)}
-            </select>
-            <input type="number" value={salary} onChange={(e) => setSalary(Number(e.target.value))} className="w-full px-3 py-2 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950 text-sm font-mono" />
-            <div className={`p-3 rounded-xl border text-xs ${salaryStatus === 'valid' ? 'bg-emerald-50 dark:bg-emerald-950/30 border-emerald-500/20 text-emerald-700 dark:text-emerald-300' : 'bg-amber-50 dark:bg-amber-950/30 border-amber-500/20 text-amber-700 dark:text-amber-300'}`}>
-              <div className="font-black flex items-center gap-2">
-                {salaryStatus === 'valid' ? <CheckCircle2 className="w-4 h-4" /> : <AlertTriangle className="w-4 h-4" />}
-                {salaryStatus === 'valid' ? 'Hợp lệ trong dải lương' : salaryStatus === 'above' ? 'Cảnh báo vượt trần lương' : 'Cảnh báo dưới sàn lương'}
-              </div>
-              <div className="mt-1 font-mono">{selectedJob.grade}: {selectedJob.min.toLocaleString()} - {selectedJob.max.toLocaleString()} VND</div>
-            </div>
-          </div>
-
-          <div className={`p-5 rounded-2xl border space-y-4 ${isDarkMode ? 'bg-slate-900 border-slate-800' : 'bg-white border-slate-200'}`}>
-            <h3 className="text-sm font-black text-slate-900 dark:text-white">{language === 'vi' ? 'Blocking Rule: Bàn giao tài sản' : 'Blocking Rule: Asset Handover'}</h3>
-            <select value={assetStatus} onChange={(e) => setAssetStatus(e.target.value as 'Returned' | 'Issued' | 'Lost')} className="w-full px-3 py-2 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950 text-sm">
-              <option value="Returned">Returned</option>
-              <option value="Issued">Issued</option>
-              <option value="Lost">Lost</option>
-            </select>
-            <div className={`p-3 rounded-xl border text-xs ${canCloseOffboarding ? 'bg-emerald-50 dark:bg-emerald-950/30 border-emerald-500/20 text-emerald-700 dark:text-emerald-300' : 'bg-rose-50 dark:bg-rose-950/30 border-rose-500/20 text-rose-700 dark:text-rose-300'}`}>
-              <div className="font-black flex items-center gap-2">
-                {canCloseOffboarding ? <CheckCircle2 className="w-4 h-4" /> : <AlertTriangle className="w-4 h-4" />}
-                {canCloseOffboarding ? 'Cho phép hoàn tất LIFE-07' : 'Chặn hoàn tất LIFE-07'}
-              </div>
-              <div className="mt-1">{canCloseOffboarding ? 'Tài sản đã bàn giao đủ.' : 'Còn tài sản chưa bàn giao hoặc mất, cần xử lý trước quyết toán.'}</div>
-            </div>
-          </div>
-        </div>
-      )}
-
-      <CatalogDataInspectorModal catalog={inspectingCatalog} isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} isDarkMode={isDarkMode} />
+      </div>}
     </div>
   )
 }

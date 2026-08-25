@@ -12,13 +12,12 @@ export const AppRoutes: React.FC = () => {
           <>
             <style>{`
               .field select { border-radius: 12px; }
-              .select-wrap::after { content: '▼'; top: 50%; transform: translateY(-52%); font-size: 11px; color: #178277; }
+              .select-wrap::after { content: 'â–¼'; top: 50%; transform: translateY(-52%); font-size: 11px; color: #178277; }
             `}</style>
             <CreateEmployeePage />
           </>
         }
       />
-      {/* Employee Lifecycle SPA Routes */}
       <Route path="/employee-lifecycle" element={<EmployeeLifecyclePage />} />
       <Route path="/employee-lifecycle/lifecycle" element={<EmployeeLifecyclePage />} />
       <Route path="/employee-lifecycle/masterdata" element={<EmployeeLifecyclePage />} />

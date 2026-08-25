@@ -70,7 +70,7 @@ export const RadialEcosystemChart: React.FC = () => {
     }))
   }
 
-  const activeModuleId = hoveredModuleId || selectedModuleId
+  const activeModuleId = selectedModuleId
   const activeModule = FIVE_CORE_MODULES.find((m) => m.id === activeModuleId) || FIVE_CORE_MODULES[0]
 
   // Automatically expand the stage containing selectedSopCode on module or SOP change
@@ -155,7 +155,6 @@ export const RadialEcosystemChart: React.FC = () => {
         setHoveredModuleId={setHoveredModuleId}
         selectedModuleId={selectedModuleId}
         handleSelectModule={handleSelectModule}
-        activeModule={activeModule}
       />
 
       <EcosystemSopWorkbench
@@ -176,7 +175,7 @@ export const RadialEcosystemChart: React.FC = () => {
         toggleStageCollapse={toggleStageCollapse}
         activeSopItem={activeSopItem}
       >
-        <EcosystemSopDetail activeSopItem={activeSopItem} />
+        <EcosystemSopDetail activeSopItem={activeSopItem} moduleId={activeModule.id} />
       </EcosystemSopWorkbench>
     </div>
   )
