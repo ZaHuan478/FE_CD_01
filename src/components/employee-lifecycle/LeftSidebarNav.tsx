@@ -110,19 +110,19 @@ export const LeftSidebarNav: React.FC<LeftSidebarNavProps> = ({
 
   return (
     <aside
-      className={`fixed left-0 top-0 bottom-0 z-40 bg-white text-slate-800 border-r border-slate-200 transition-all duration-300 flex flex-col shadow-lg ${isCollapsed ? 'w-12 sm:w-16' : 'w-56 sm:w-64'
+      className={`fixed left-0 top-0 bottom-0 z-40 bg-white text-slate-800 border-r border-slate-200 transition-all duration-300 flex flex-col shadow-lg dark:bg-slate-900 dark:text-slate-100 dark:border-slate-800 ${isCollapsed ? 'w-12 sm:w-16' : 'w-56 sm:w-64'
         }`}
     >
 
       {/* SIDEBAR HEADER LOGO */}
-      <div className="p-4 border-b border-slate-200 flex items-center justify-between gap-2 shrink-0">
+      <div className="p-4 border-b border-slate-200 flex items-center justify-between gap-2 shrink-0 dark:border-slate-800">
         {!isCollapsed && (
           <div className="flex items-center gap-2.5 truncate">
             <div className="p-2 bg-blue-600 text-white rounded-xl shadow-sm shrink-0">
               <Layers className="w-5 h-5" />
             </div>
             <div className="truncate">
-              <h2 className="text-xs font-black tracking-wider text-white truncate">
+              <h2 className="text-xs font-black tracking-wider text-slate-900 dark:text-white truncate">
                 BẢN ĐỒ HRMS
               </h2>
               <p className="text-[10px] font-bold text-blue-400 truncate">
@@ -142,7 +142,7 @@ export const LeftSidebarNav: React.FC<LeftSidebarNavProps> = ({
         <button
           type="button"
           onClick={handleToggle}
-          className="p-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-500 hover:text-slate-900 transition-colors cursor-pointer shrink-0"
+          className="p-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-500 hover:text-slate-900 transition-colors cursor-pointer shrink-0 dark:bg-slate-800 dark:hover:bg-slate-700 dark:text-slate-400 dark:hover:text-white"
           title={isCollapsed ? 'Mở rộng Menu' : 'Thu gọn Menu'}
         >
           {isCollapsed ? <ChevronRight className="w-4 h-4" /> : <ChevronLeft className="w-4 h-4" />}
@@ -177,7 +177,7 @@ export const LeftSidebarNav: React.FC<LeftSidebarNavProps> = ({
                     }}
                     className={`w-full flex items-center justify-between p-2.5 rounded-xl text-xs font-bold transition-all duration-200 cursor-pointer group relative ${isActive
                       ? 'bg-blue-600 text-white shadow-sm'
-                      : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900'
+                      : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900 dark:text-slate-300 dark:hover:bg-slate-800 dark:hover:text-white'
                       }`}
                     title={isCollapsed ? item.label : undefined}
                   >
@@ -193,7 +193,7 @@ export const LeftSidebarNav: React.FC<LeftSidebarNavProps> = ({
                     {!isCollapsed && item.badge && (
                       <span className={`text-[9px] font-mono px-2 py-0.5 rounded-md font-extrabold shrink-0 border ${isActive
                         ? 'bg-blue-700 text-blue-100 border-blue-600'
-                        : 'bg-slate-100 text-slate-500 border-slate-200'
+                        : 'bg-slate-100 text-slate-500 border-slate-200 dark:bg-slate-800 dark:text-slate-400 dark:border-slate-700'
                         }`}>
                         {item.badge}
                       </span>
@@ -214,9 +214,9 @@ export const LeftSidebarNav: React.FC<LeftSidebarNavProps> = ({
       </div>
 
       {/* SIDEBAR FOOTER ROLES & VERSION */}
-      <div className="p-3 border-t border-slate-200 shrink-0 bg-slate-50">
+      <div className="p-3 border-t border-slate-200 shrink-0 bg-slate-50 dark:border-slate-800 dark:bg-slate-950/60">
         {!isCollapsed ? (
-          <div className="flex items-center gap-2.5 p-2 rounded-xl bg-white border border-slate-200">
+          <div className="flex items-center gap-2.5 p-2 rounded-xl bg-white border border-slate-200 dark:bg-slate-900 dark:border-slate-700">
             <div className="w-8 h-8 rounded-lg bg-blue-50 border border-blue-200 text-blue-700 flex items-center justify-center font-bold text-xs shrink-0">
               HA
             </div>

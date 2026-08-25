@@ -11,7 +11,7 @@ export const SystemGuideBanner: React.FC = () => {
       {/* Banner Header / Bar */}
       <div
         onClick={() => setIsExpanded(!isExpanded)}
-        className="p-4 bg-white text-slate-900 border-b border-slate-200 flex items-center justify-between cursor-pointer hover:bg-slate-50 transition-colors select-none"
+        className="p-4 bg-white text-slate-900 border-b border-slate-200 flex items-center justify-between cursor-pointer hover:bg-slate-50 transition-colors select-none dark:bg-slate-900 dark:text-slate-100 dark:border-slate-800 dark:hover:bg-slate-800"
       >
         <div className="flex items-center gap-3">
           <div className="p-2 bg-blue-50 text-blue-700 rounded-xl border border-blue-200">
@@ -26,7 +26,7 @@ export const SystemGuideBanner: React.FC = () => {
                 {language === 'vi' ? 'Dành cho Người mới bắt đầu' : 'For New Users'}
               </span>
             </div>
-            <h2 className="text-base font-bold text-slate-900 tracking-tight mt-0.5">
+            <h2 className="text-base font-bold text-slate-900 tracking-tight mt-0.5 dark:text-white">
               {language === 'vi'
                 ? 'HƯỚNG DẪN KHÁI NIỆM & MỐI QUAN HỆ KIẾN TRÚC (MASTER DATA · SOP · PROCESS · LIFE)'
                 : 'CONCEPT & ARCHITECTURAL RELATIONSHIP GUIDE (MASTER DATA · SOP · PROCESS · LIFECYCLE)'}

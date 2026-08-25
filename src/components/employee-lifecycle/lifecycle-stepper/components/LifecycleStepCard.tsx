@@ -38,7 +38,7 @@ export const LifecycleStepCard: React.FC<LifecycleStepCardProps> = ({
           ? 'opacity-35 grayscale bg-slate-50 dark:bg-slate-900 border-slate-200 dark:border-slate-800'
           : isSelected
             ? 'bg-blue-600 text-white border-blue-600 shadow-md ring-2 ring-blue-600/20'
-            : 'bg-white dark:bg-slate-850 hover:bg-slate-50/80 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-200 border-slate-200 dark:border-slate-750 hover:border-blue-300 dark:hover:border-blue-700 hover:shadow-2xs'
+            : 'bg-white dark:bg-slate-900 hover:bg-slate-50/80 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-100 border-slate-200 dark:border-slate-700 hover:border-blue-300 dark:hover:border-blue-500 hover:shadow-2xs'
       }`}
     >
       {/* Top row: Step Number */}
@@ -76,4 +76,3 @@ export const LifecycleStepCard: React.FC<LifecycleStepCardProps> = ({
     </button>
   )
 }
-

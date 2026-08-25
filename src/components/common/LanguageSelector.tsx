@@ -71,7 +71,7 @@ export const LanguageSelector: React.FC<LanguageSelectorProps> = ({
           role="listbox"
         >
           <div className="px-2 py-1.5 text-[10px] font-extrabold uppercase tracking-wider text-slate-400 border-b border-slate-800/60 mb-1">
-            Chọn ngôn ngữ / Select Language
+            {language === 'vi' ? 'Chọn ngôn ngữ / Select Language' : 'Select language / Chọn ngôn ngữ'}
           </div>
 
           {options.map((option) => {

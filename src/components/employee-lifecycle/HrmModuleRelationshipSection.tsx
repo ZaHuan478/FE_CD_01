@@ -243,7 +243,7 @@ export const HrmModuleRelationshipSection: React.FC<HrmModuleRelationshipSection
               onClick={() => setIsRotating(prev => !prev)}
               className={`px-3 py-1.5 text-xs font-semibold rounded-lg border transition-colors flex items-center gap-1.5 cursor-pointer ${
                 isRotating
-                  ? 'bg-slate-50 dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-750 text-slate-700 dark:text-slate-200 border-slate-200 dark:border-slate-700'
+                  ? 'bg-slate-50 dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-100 border-slate-200 dark:border-slate-700'
                   : 'bg-blue-50 dark:bg-blue-950/60 text-blue-700 dark:text-blue-300 border-blue-200 dark:border-blue-800'
               }`}
               title={isRotating ? 'Tạm dừng chuyển động quỹ đạo' : 'Tiếp tục chuyển động quỹ đạo'}
@@ -413,7 +413,7 @@ export const HrmModuleRelationshipSection: React.FC<HrmModuleRelationshipSection
                   className={`w-[172px] rounded-xl p-2.5 text-left transition-all duration-200 cursor-pointer border select-none ${
                     isSelectedOrHovered
                       ? 'bg-blue-600 text-white border-blue-600 shadow-md ring-3 ring-blue-600/20 scale-105'
-                      : 'bg-white dark:bg-slate-850 text-slate-800 dark:text-slate-100 border-slate-200 dark:border-slate-750 hover:border-blue-400 hover:shadow-2xs hover:scale-102'
+                      : 'bg-white dark:bg-slate-900 text-slate-800 dark:text-slate-100 border-slate-200 dark:border-slate-700 hover:border-blue-400 dark:hover:border-blue-500 hover:shadow-2xs hover:scale-102'
                   }`}
                 >
                   <div className="flex items-center gap-2">
@@ -461,7 +461,7 @@ export const HrmModuleRelationshipSection: React.FC<HrmModuleRelationshipSection
         </div>
 
         {/* Hover / Active Module Inspector Panel */}
-        <div className="w-full xl:w-[380px] bg-slate-50/80 dark:bg-slate-850/70 rounded-xl border border-slate-200/90 dark:border-slate-800 p-4 sm:p-5 space-y-4 shrink-0 shadow-2xs">
+        <div className="w-full xl:w-[380px] bg-slate-50/80 dark:bg-slate-900 rounded-xl border border-slate-200/90 dark:border-slate-700 p-4 sm:p-5 space-y-4 shrink-0 shadow-2xs">
           {/* Panel Header */}
           <div className="flex items-start justify-between gap-3 border-b border-slate-200/70 dark:border-slate-800 pb-3">
             <div className="flex items-center gap-2.5">
@@ -481,7 +481,7 @@ export const HrmModuleRelationshipSection: React.FC<HrmModuleRelationshipSection
             <button
               type="button"
               onClick={() => handleOpenWorkflow(currentInspectedModule)}
-              className="px-2.5 py-1 text-[11px] font-semibold text-blue-700 dark:text-blue-300 bg-white dark:bg-slate-800 hover:bg-blue-50 dark:hover:bg-slate-750 border border-slate-200 dark:border-slate-700 rounded-lg transition-colors flex items-center gap-1 cursor-pointer shrink-0"
+              className="px-2.5 py-1 text-[11px] font-semibold text-blue-700 dark:text-blue-200 bg-white dark:bg-slate-800 hover:bg-blue-50 dark:hover:bg-slate-700 border border-slate-200 dark:border-slate-700 rounded-lg transition-colors flex items-center gap-1 cursor-pointer shrink-0"
             >
               <span>Xem quy trình</span>
               <ArrowRight className="w-3 h-3" />
@@ -552,7 +552,7 @@ export const HrmModuleRelationshipSection: React.FC<HrmModuleRelationshipSection
                   className={`w-full p-3 rounded-xl border text-left transition-colors flex items-start gap-3 cursor-pointer ${
                     isSelected
                       ? 'bg-blue-600 text-white border-blue-600 shadow-sm'
-                      : 'bg-white dark:bg-slate-850 text-slate-800 dark:text-slate-100 border-slate-200 dark:border-slate-750'
+                      : 'bg-white dark:bg-slate-900 text-slate-800 dark:text-slate-100 border-slate-200 dark:border-slate-700'
                   }`}
                 >
                   <div
@@ -611,7 +611,7 @@ export const HrmModuleRelationshipSection: React.FC<HrmModuleRelationshipSection
           {SUMMARY_STEPS.map((item, idx) => (
             <div
               key={idx}
-              className="flex items-center gap-2 p-2.5 rounded-lg bg-slate-50/80 dark:bg-slate-850/60 border border-slate-200/70 dark:border-slate-800"
+              className="flex items-center gap-2 p-2.5 rounded-lg bg-slate-50/80 dark:bg-slate-900 border border-slate-200/70 dark:border-slate-700"
             >
               <span className="w-5 h-5 rounded-md bg-white dark:bg-slate-800 text-blue-600 dark:text-blue-400 border border-slate-200 dark:border-slate-700 flex items-center justify-center font-bold text-[10px] shrink-0">
                 {idx + 1}

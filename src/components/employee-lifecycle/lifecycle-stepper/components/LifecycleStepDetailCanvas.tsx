@@ -236,8 +236,8 @@ export const LifecycleStepDetailCanvas: React.FC<LifecycleStepDetailCanvasProps>
             disabled={currentStepIdx === 0}
             className={`px-3 py-1.5 text-xs font-semibold rounded-lg border transition-colors cursor-pointer ${
               currentStepIdx === 0
-                ? 'opacity-40 cursor-not-allowed bg-slate-50 dark:bg-slate-850 text-slate-400 border-slate-200 dark:border-slate-800'
-                : 'bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-750 text-slate-700 dark:text-slate-200 border-slate-200 dark:border-slate-700'
+                ? 'opacity-40 cursor-not-allowed bg-slate-50 dark:bg-slate-900 text-slate-400 border-slate-200 dark:border-slate-800'
+                : 'bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-100 border-slate-200 dark:border-slate-700'
             }`}
           >
             ← Bước trước
@@ -249,8 +249,8 @@ export const LifecycleStepDetailCanvas: React.FC<LifecycleStepDetailCanvasProps>
             disabled={currentStepIdx === totalSteps - 1}
             className={`px-3 py-1.5 text-xs font-semibold rounded-lg border transition-colors cursor-pointer ${
               currentStepIdx === totalSteps - 1
-                ? 'opacity-40 cursor-not-allowed bg-slate-50 dark:bg-slate-850 text-slate-400 border-slate-200 dark:border-slate-800'
-                : 'bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-750 text-slate-700 dark:text-slate-200 border-slate-200 dark:border-slate-700'
+                ? 'opacity-40 cursor-not-allowed bg-slate-50 dark:bg-slate-900 text-slate-400 border-slate-200 dark:border-slate-800'
+                : 'bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-100 border-slate-200 dark:border-slate-700'
             }`}
           >
             Bước tiếp →
@@ -270,8 +270,8 @@ export const LifecycleStepDetailCanvas: React.FC<LifecycleStepDetailCanvasProps>
       {/* 3 Detail Zones */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-3.5">
         {/* Zone 1: Thông tin cần có trước khi thực hiện */}
-        <div className="bg-slate-50/70 dark:bg-slate-850/60 rounded-xl p-3.5 border border-slate-200/80 dark:border-slate-800 space-y-2.5">
-          <div className="flex items-center gap-2 text-xs font-bold text-slate-800 dark:text-slate-200">
+        <div className="bg-slate-50/70 dark:bg-slate-900 rounded-xl p-3.5 border border-slate-200/80 dark:border-slate-700 space-y-2.5">
+          <div className="flex items-center gap-2 text-xs font-bold text-slate-800 dark:text-slate-100">
             <FileQuestion className="w-4 h-4 text-blue-600 dark:text-blue-400" />
             <span>Thông tin cần có trước khi thực hiện</span>
           </div>
@@ -279,7 +279,7 @@ export const LifecycleStepDetailCanvas: React.FC<LifecycleStepDetailCanvasProps>
             {detailData.prerequisites.map((item, idx) => (
               <span
                 key={idx}
-                className="text-[11px] font-medium bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 px-2.5 py-1 rounded-md border border-slate-200 dark:border-slate-700 shadow-2xs"
+                className="text-[11px] font-medium bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-100 px-2.5 py-1 rounded-md border border-slate-200 dark:border-slate-700 shadow-2xs"
               >
                 {item}
               </span>
@@ -288,8 +288,8 @@ export const LifecycleStepDetailCanvas: React.FC<LifecycleStepDetailCanvasProps>
         </div>
 
         {/* Zone 2: Kết quả nhận được sau khi hoàn tất */}
-        <div className="bg-slate-50/70 dark:bg-slate-850/60 rounded-xl p-3.5 border border-slate-200/80 dark:border-slate-800 space-y-2.5">
-          <div className="flex items-center gap-2 text-xs font-bold text-slate-800 dark:text-slate-200">
+        <div className="bg-slate-50/70 dark:bg-slate-900 rounded-xl p-3.5 border border-slate-200/80 dark:border-slate-700 space-y-2.5">
+          <div className="flex items-center gap-2 text-xs font-bold text-slate-800 dark:text-slate-100">
             <CheckCircle2 className="w-4 h-4 text-blue-600 dark:text-blue-400" />
             <span>Kết quả nhận được sau khi hoàn tất</span>
           </div>
@@ -297,7 +297,7 @@ export const LifecycleStepDetailCanvas: React.FC<LifecycleStepDetailCanvasProps>
             {detailData.deliverables.map((item, idx) => (
               <span
                 key={idx}
-                className="text-[11px] font-medium bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 px-2.5 py-1 rounded-md border border-slate-200 dark:border-slate-700 shadow-2xs"
+                className="text-[11px] font-medium bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-100 px-2.5 py-1 rounded-md border border-slate-200 dark:border-slate-700 shadow-2xs"
               >
                 {item}
               </span>
@@ -306,8 +306,8 @@ export const LifecycleStepDetailCanvas: React.FC<LifecycleStepDetailCanvasProps>
         </div>
 
         {/* Zone 3: Hệ thống hoặc phân hệ liên quan */}
-        <div className="bg-slate-50/70 dark:bg-slate-850/60 rounded-xl p-3.5 border border-slate-200/80 dark:border-slate-800 space-y-2.5">
-          <div className="flex items-center gap-2 text-xs font-bold text-slate-800 dark:text-slate-200">
+        <div className="bg-slate-50/70 dark:bg-slate-900 rounded-xl p-3.5 border border-slate-200/80 dark:border-slate-700 space-y-2.5">
+          <div className="flex items-center gap-2 text-xs font-bold text-slate-800 dark:text-slate-100">
             <Link2 className="w-4 h-4 text-blue-600 dark:text-blue-400" />
             <span>Hệ thống hoặc phân hệ liên quan</span>
           </div>
@@ -315,7 +315,7 @@ export const LifecycleStepDetailCanvas: React.FC<LifecycleStepDetailCanvasProps>
             {detailData.relatedSystems.map((sys, idx) => (
               <span
                 key={idx}
-                className="text-[11px] font-medium bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 px-2.5 py-1 rounded-md border border-slate-200 dark:border-slate-700 shadow-2xs"
+                className="text-[11px] font-medium bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-100 px-2.5 py-1 rounded-md border border-slate-200 dark:border-slate-700 shadow-2xs"
               >
                 {sys}
               </span>
@@ -326,4 +326,3 @@ export const LifecycleStepDetailCanvas: React.FC<LifecycleStepDetailCanvasProps>
     </div>
   )
 }
-

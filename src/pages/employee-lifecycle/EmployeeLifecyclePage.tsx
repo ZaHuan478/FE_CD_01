@@ -361,7 +361,7 @@ export const EmployeeLifecyclePage: React.FC = () => {
       />
 
       {/* Streamlined Compact Top Navigation Header */}
-      <header className="bg-white text-slate-900 border-b border-slate-200 sticky top-0 z-50 shadow-sm">
+      <header className="bg-white text-slate-900 border-b border-slate-200 sticky top-0 z-50 shadow-sm dark:bg-slate-900 dark:text-slate-100 dark:border-slate-800">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 py-2.5 sm:py-3 flex items-center justify-between">
           <div className="flex items-center gap-2.5 sm:gap-3">
             <div className="p-1.5 sm:p-2 bg-blue-600 rounded-lg text-white shadow-xs shrink-0">
@@ -376,7 +376,7 @@ export const EmployeeLifecyclePage: React.FC = () => {
                   {t('header.productionReady', 'Tổng quan hệ thống')}
                 </span>
               </div>
-              <h1 className="text-sm sm:text-base font-bold tracking-tight text-slate-900 mt-0.5 leading-snug">
+              <h1 className="text-sm sm:text-base font-bold tracking-tight text-slate-900 mt-0.5 leading-snug dark:text-white">
                 {t('header.title', 'QUẢN LÝ HỒ SƠ VÀ VÒNG ĐỜI NHÂN VIÊN')}
               </h1>
             </div>
@@ -391,8 +391,8 @@ export const EmployeeLifecyclePage: React.FC = () => {
               type="button"
               onClick={() => setIsDarkMode(!isDarkMode)}
               className={`px-3 py-2 rounded-2xl border transition-all flex items-center gap-2 text-xs font-bold cursor-pointer ${isDarkMode
-                ? 'bg-slate-50 hover:bg-slate-100 border-slate-200 text-amber-600'
-                : 'bg-slate-50 hover:bg-slate-100 border-slate-200 text-slate-700'
+                ? 'bg-slate-800 hover:bg-slate-700 border-slate-700 text-amber-400'
+                : 'bg-slate-50 hover:bg-slate-100 border-slate-200 text-slate-700 dark:bg-slate-800 dark:hover:bg-slate-700 dark:border-slate-700 dark:text-slate-200'
                 }`}
               title={isDarkMode ? t('header.themeLight', 'Bật Giao diện Sáng') : t('header.themeDark', 'Bật Giao diện Tối')}
             >
@@ -410,7 +410,7 @@ export const EmployeeLifecyclePage: React.FC = () => {
         </div>
 
         {/* MODERNIZED SUB-HEADER: 3 MAIN TABS & ARCHITECTURE GUIDE BUTTON */}
-        <div className="bg-slate-50 border-t border-slate-200">
+        <div className="bg-slate-50 border-t border-slate-200 dark:bg-slate-950/75 dark:border-slate-800">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 flex items-center justify-between overflow-x-auto no-scrollbar gap-4">
 
             {/* Tab Navigation Buttons */}
@@ -420,7 +420,7 @@ export const EmployeeLifecyclePage: React.FC = () => {
                 onClick={() => handleTabChange('lifecycle')}
                 className={`px-3.5 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-2 cursor-pointer shrink-0 ${activeTab === 'lifecycle'
                   ? 'bg-blue-600 text-white shadow-sm'
-                  : 'text-slate-600 hover:text-slate-900 hover:bg-white'
+                  : 'text-slate-600 hover:text-slate-900 hover:bg-white dark:text-slate-300 dark:hover:text-white dark:hover:bg-slate-800'
                   }`}
               >
                 <Layers className="w-4 h-4" />
@@ -432,7 +432,7 @@ export const EmployeeLifecyclePage: React.FC = () => {
                 onClick={() => handleTabChange('masterdata')}
                 className={`px-3.5 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-2 cursor-pointer shrink-0 ${activeTab === 'masterdata'
                   ? 'bg-blue-600 text-white shadow-sm'
-                  : 'text-slate-600 hover:text-slate-900 hover:bg-white'
+                  : 'text-slate-600 hover:text-slate-900 hover:bg-white dark:text-slate-300 dark:hover:text-white dark:hover:bg-slate-800'
                   }`}
               >
                 <Database className="w-4 h-4" />
@@ -444,7 +444,7 @@ export const EmployeeLifecyclePage: React.FC = () => {
                 onClick={() => handleTabChange('reports')}
                 className={`px-3.5 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-2 cursor-pointer shrink-0 ${activeTab === 'reports'
                   ? 'bg-blue-600 text-white shadow-sm'
-                  : 'text-slate-600 hover:text-slate-900 hover:bg-white'
+                  : 'text-slate-600 hover:text-slate-900 hover:bg-white dark:text-slate-300 dark:hover:text-white dark:hover:bg-slate-800'
                   }`}
               >
                 <Sparkles className="w-4 h-4" />
@@ -458,7 +458,7 @@ export const EmployeeLifecyclePage: React.FC = () => {
               onClick={() => setIsGuideModalOpen(!isGuideModalOpen)}
               className={`px-3 py-1.5 rounded-xl border text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer shrink-0 ${isGuideModalOpen
                 ? 'bg-blue-600 text-white border-blue-600 shadow-xs'
-                : 'bg-white hover:bg-slate-100 text-slate-700 border-slate-200'
+                : 'bg-white hover:bg-slate-100 text-slate-700 border-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 dark:text-slate-200 dark:border-slate-700'
                 }`}
             >
               <Sparkles className="w-3.5 h-3.5 text-blue-600" />
