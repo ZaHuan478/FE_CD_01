@@ -55,6 +55,9 @@ export const LifecycleStepper: React.FC<LifecycleStepperProps> = ({
 
   return (
     <div className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 shadow-2xs p-4 sm:p-6 space-y-4 transition-all">
+      <div className="rounded-xl border border-violet-100 bg-violet-50/70 px-3 py-2.5 text-xs leading-relaxed text-slate-700 dark:border-violet-900/50 dark:bg-violet-950/25 dark:text-slate-200">
+        <strong>Hành trình nhân viên:</strong> chọn từng chặng để xem công việc cần làm, người tham gia, dữ liệu vào và kết quả. Mã <strong>LIFE</strong> chỉ là tên kỹ thuật của từng chặng.
+      </div>
       {/* HEADER BAR */}
       <LifecycleStepperHeader
         isExpanded={isExpanded}
@@ -101,4 +104,3 @@ export const LifecycleStepper: React.FC<LifecycleStepperProps> = ({
     </div>
   )
 }
-

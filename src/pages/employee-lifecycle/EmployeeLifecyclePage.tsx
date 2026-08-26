@@ -472,6 +472,20 @@ export const EmployeeLifecyclePage: React.FC = () => {
       {/* Main Container Workspace (92% Screen Width for maximum viewability) */}
       <main className="w-[92%] max-w-[1920px] mx-auto px-2 sm:px-4 lg:px-6 py-5 sm:py-6 space-y-6">
 
+        <section className={`rounded-2xl border p-4 sm:p-5 ${isDarkMode ? 'border-sky-900/70 bg-sky-950/25' : 'border-sky-200 bg-sky-50/70'}`}>
+          <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
+            <div className="max-w-3xl"><p className="text-[10px] font-black uppercase tracking-[0.16em] text-sky-700 dark:text-sky-300">BẢN DEMO NGHIỆP VỤ · DÀNH CHO NGƯỜI MỚI</p><h2 className="mt-1 text-base font-black text-slate-900 dark:text-white">HRMS quản lý hành trình nhân viên: từ lúc cần người đến khi nghỉ việc.</h2><p className="mt-1 text-xs leading-relaxed text-slate-600 dark:text-slate-300">Mô phỏng phạm vi, luồng xử lý và màn hình dự kiến; không kết nối dữ liệu hay phát sinh giao dịch thật.</p></div>
+            <button type="button" onClick={() => setIsGuideModalOpen(!isGuideModalOpen)} className="shrink-0 self-start rounded-xl border border-sky-200 bg-white px-3 py-2 text-xs font-bold text-sky-800 transition-colors hover:bg-sky-100 dark:border-sky-800 dark:bg-slate-900 dark:text-sky-200 dark:hover:bg-slate-800">{isGuideModalOpen ? 'Ẩn giải thích thuật ngữ' : 'Giải thích LIFE · MD · SOP · RACI'}</button>
+          </div>
+          <div className="mt-4 grid grid-cols-1 gap-3 md:grid-cols-3">
+            {[
+              ['1. Xem toàn hệ thống', 'Theo 8 chặng từ định biên, tiếp nhận, hồ sơ, hợp đồng đến nghỉ việc.', () => handleTabChange('lifecycle')],
+              ['2. Xem một nghiệp vụ', 'Chọn một chặng hoặc nghiệp vụ phát sinh để biết khi nào dùng, ai làm và kết quả.', () => handleTabChange('lifecycle')],
+              ['3. Xem dữ liệu & quy tắc', 'Tra cứu danh mục dùng chung, SOP, vai trò và quan hệ dữ liệu.', () => handleTabChange('masterdata')]
+            ].map(([title, description, action]) => <button key={title as string} type="button" onClick={action as () => void} className={`rounded-xl border p-3 text-left transition-colors ${isDarkMode ? 'border-slate-800 bg-slate-900/80 hover:border-sky-700' : 'border-white bg-white/90 hover:border-sky-300 hover:bg-white'}`}><p className="text-xs font-black text-slate-900 dark:text-white">{title as string}</p><p className="mt-1 text-xs leading-relaxed text-slate-600 dark:text-slate-300">{description as string}</p></button>)}
+          </div>
+        </section>
+
         {/* Collapsible Architecture Guide Banner */}
         {isGuideModalOpen && (
           <div className="animate-fadeIn">

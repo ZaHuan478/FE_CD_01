@@ -101,7 +101,7 @@ export const LeftSidebarNav: React.FC<LeftSidebarNavProps> = ({
           id: 'sop-specs-matrix',
           label: t('sidebar.item.sopMatrix', 'Danh sách quy trình'),
           icon: ShieldCheck,
-          badge: '45 quy trình',
+          badge: 'Tra cứu',
           color: 'text-blue-600'
         }
       ]

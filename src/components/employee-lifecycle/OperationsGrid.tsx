@@ -66,6 +66,10 @@ export const OperationsGrid: React.FC<OperationsGridProps> = ({
       </div>
 
 
+      <div className="rounded-xl border border-blue-100 bg-blue-50/70 px-3 py-2.5 text-xs leading-relaxed text-slate-700 dark:border-blue-900/50 dark:bg-blue-950/25 dark:text-slate-200">
+        <strong>Hiểu đơn giản:</strong> đây là các việc phát sinh trong lúc nhân viên làm việc, như nghỉ phép, tăng ca, điều chuyển, thưởng/phạt hoặc đào tạo; chúng không nhất thiết diễn ra theo thứ tự.
+      </div>
+
       {/* EXPANDABLE BODY CONTENT */}
       {isExpanded && (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 animate-fadeIn">

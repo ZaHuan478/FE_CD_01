@@ -77,7 +77,7 @@ export const MasterDataRelationshipModal: React.FC<MasterDataRelationshipModalPr
               <Database className="w-5 h-5 text-blue-400 shrink-0" />
               <span>
                 {language === 'vi'
-                  ? <>Tất cả 10 danh mục <strong>Master Data (Tầng 1)</strong> chuẩn hóa theo <strong>SOP Quy trình</strong> chảy trực tiếp qua các Visual Connectors để hội tụ vào <strong>Bảng Hồ sơ Nhân viên Trung tâm</strong>.</>
+                  ? <>Hiểu đơn giản: các danh mục nền như phòng ban, chức danh và lương được dùng bởi các quy trình; kết quả cuối cùng cập nhật vào <strong>hồ sơ nhân viên trung tâm</strong>. Bấm một ô để xem nghiệp vụ liên quan.</>
                   : <>All 10 <strong>Master Data (Layer 1)</strong> catalogs standardized by <strong>SOP Workflows</strong> flow directly via Visual Connectors into the <strong>Central Employee Profile Table</strong>.</>}
               </span>
             </div>

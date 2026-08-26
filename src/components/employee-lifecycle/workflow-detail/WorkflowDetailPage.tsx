@@ -8,6 +8,7 @@ import {
   Building2,
   UserCheck,
   CheckCircle2,
+  CircleHelp,
   Sun,
   Moon,
   ChevronDown,
@@ -77,6 +78,7 @@ export const WorkflowDetailPage: React.FC<WorkflowDetailPageProps> = ({
   }
 
   const [isActorsExpanded, setIsActorsExpanded] = useState<boolean>(true)
+  const [isGlossaryOpen, setIsGlossaryOpen] = useState(false)
 
   // SOP processes
   const availableSopProcesses = SOP_DATABASE[item.id] ?? []
@@ -141,6 +143,21 @@ export const WorkflowDetailPage: React.FC<WorkflowDetailPageProps> = ({
       text: item.outputs?.length ? item.outputs.join(' · ') : currentProcess.steps[currentProcess.steps.length - 1]?.description || currentProcess.description
     }
   ]
+
+  const quickBrief = {
+    when: language === 'vi'
+      ? `Dùng khi phát sinh nhu cầu “${item.title}” trong hành trình của nhân viên.`
+      : `Use this when “${item.title}” is needed during an employee's journey.`,
+    who: item.actors?.length
+      ? item.actors.map((actor) => actor.name).slice(0, 3).join(' · ')
+      : (language === 'vi' ? 'HR Admin và các cấp quản lý liên quan.' : 'HR Admin and the relevant managers.'),
+    system: language === 'vi'
+      ? 'Hệ thống hướng dẫn dữ liệu cần chuẩn bị, kiểm tra theo SOP và theo dõi các bước xử lý.'
+      : 'The system guides required data, SOP-based checks, and processing steps.',
+    result: item.outputs?.length
+      ? item.outputs.slice(0, 3).join(' · ')
+      : (language === 'vi' ? 'Thông tin nhân viên và trạng thái nghiệp vụ được cập nhật.' : 'Employee information and the process status are updated.')
+  }
 
   return (
     <div className={`min-h-screen transition-colors duration-300 pb-20 animate-fadeIn ${isDarkMode ? 'bg-slate-950 text-slate-100' : 'bg-slate-50/50 text-slate-800'
@@ -221,6 +238,12 @@ export const WorkflowDetailPage: React.FC<WorkflowDetailPageProps> = ({
           </div>
         </div>
 
+        <div className={`border-t px-4 py-1.5 text-center text-[11px] font-medium ${isDarkMode ? 'border-slate-800 bg-amber-500/10 text-amber-200' : 'border-amber-100 bg-amber-50 text-amber-900'}`}>
+          <strong>{language === 'vi' ? 'BẢN DEMO NGHIỆP VỤ' : 'BUSINESS DEMO'}</strong>
+          <span className="mx-1.5 opacity-50">•</span>
+          {language === 'vi' ? 'Mô phỏng luồng xử lý và màn hình dự kiến; không phát sinh dữ liệu thật.' : 'Simulates expected flows and screens; no real data is created.'}
+        </div>
+
         {/* WORKFLOW VIEW TABS */}
         <div className="border-t border-slate-200/80 dark:border-slate-800/80 bg-slate-100/60 dark:bg-slate-950/60">
           <div className="w-[92%] max-w-[1920px] mx-auto px-2 sm:px-4 flex items-center justify-between gap-4 overflow-x-auto no-scrollbar py-1.5">
@@ -273,6 +296,39 @@ export const WorkflowDetailPage: React.FC<WorkflowDetailPageProps> = ({
 
       {/* Main Workflow Workspace Content (92% Screen Width) */}
       <main className="w-[92%] max-w-[1920px] mx-auto px-2 sm:px-4 py-5 space-y-5">
+        <section className={`rounded-2xl border p-4 sm:p-5 ${isDarkMode ? 'border-sky-900/70 bg-sky-950/25' : 'border-sky-200 bg-sky-50/70'}`}>
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+            <div>
+              <p className="text-[10px] font-black uppercase tracking-[0.16em] text-sky-700 dark:text-sky-300">{language === 'vi' ? 'Hiểu nhanh trong 30 giây' : 'Understand it in 30 seconds'}</p>
+              <h2 className="mt-1 text-base font-black text-slate-900 dark:text-white">{item.title}</h2>
+              <p className="mt-1 text-xs leading-relaxed text-slate-600 dark:text-slate-300">{item.subtitle}</p>
+            </div>
+            <button type="button" onClick={() => setIsGlossaryOpen(!isGlossaryOpen)} className="inline-flex shrink-0 items-center gap-1.5 self-start rounded-lg border border-sky-200 bg-white px-3 py-2 text-xs font-bold text-sky-800 transition-colors hover:bg-sky-100 dark:border-sky-800 dark:bg-slate-900 dark:text-sky-200 dark:hover:bg-slate-800">
+              <CircleHelp className="h-4 w-4" />
+              {language === 'vi' ? 'Giải thích thuật ngữ' : 'Explain terms'}
+            </button>
+          </div>
+          <div className="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-4">
+            {[
+              [language === 'vi' ? 'Khi nào dùng?' : 'When is it used?', quickBrief.when],
+              [language === 'vi' ? 'Ai tham gia?' : 'Who is involved?', quickBrief.who],
+              [language === 'vi' ? 'Hệ thống hỗ trợ gì?' : 'How does the system help?', quickBrief.system],
+              [language === 'vi' ? 'Hoàn tất sẽ có gì?' : 'What is the result?', quickBrief.result]
+            ].map(([label, value]) => (
+              <div key={label} className={`rounded-xl border p-3 ${isDarkMode ? 'border-slate-800 bg-slate-900/80' : 'border-white bg-white/90'}`}>
+                <p className="text-[10px] font-black uppercase tracking-wide text-sky-700 dark:text-sky-300">{label}</p>
+                <p className="mt-1 text-xs leading-relaxed text-slate-700 dark:text-slate-200">{value}</p>
+              </div>
+            ))}
+          </div>
+          {isGlossaryOpen && <div className={`mt-3 grid grid-cols-1 gap-2 rounded-xl border p-3 text-xs sm:grid-cols-2 lg:grid-cols-4 ${isDarkMode ? 'border-slate-800 bg-slate-950/60 text-slate-300' : 'border-sky-100 bg-white text-slate-600'}`}>
+            <p><strong className="text-slate-900 dark:text-white">LIFE:</strong> {language === 'vi' ? 'một chặng trong hành trình nhân viên.' : 'a stage in the employee journey.'}</p>
+            <p><strong className="text-slate-900 dark:text-white">MD:</strong> {language === 'vi' ? 'danh mục dữ liệu dùng chung.' : 'shared reference data.'}</p>
+            <p><strong className="text-slate-900 dark:text-white">SOP:</strong> {language === 'vi' ? 'hướng dẫn và quy tắc thao tác chuẩn.' : 'standard instructions and rules.'}</p>
+            <p><strong className="text-slate-900 dark:text-white">RACI:</strong> {language === 'vi' ? 'ai thực hiện, chịu trách nhiệm và phối hợp.' : 'who performs, owns, and supports work.'}</p>
+          </div>}
+        </section>
+
         <section className={`grid grid-cols-1 lg:grid-cols-3 gap-3 ${isDarkMode ? 'text-slate-100' : 'text-slate-800'}`}>
           {storyCards.map((card) => {
             const Icon = card.icon

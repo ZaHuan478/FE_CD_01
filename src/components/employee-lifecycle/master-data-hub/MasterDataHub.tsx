@@ -170,6 +170,10 @@ export const MasterDataHub: React.FC<MasterDataHubProps> = ({ onOpenERD, isDarkM
           {onOpenERD && <button type="button" onClick={onOpenERD} className="self-start xl:self-center px-4 py-2.5 rounded-xl border border-slate-300 dark:border-slate-700 text-xs sm:text-sm font-bold flex items-center gap-2 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors cursor-pointer"><GitBranch className="w-4 h-4 text-emerald-500" />Xem quan hệ dữ liệu</button>}
         </div>
 
+        <div className={`mx-5 mb-4 rounded-xl border px-3 py-2.5 text-xs leading-relaxed ${isDarkMode ? 'border-blue-900/60 bg-blue-950/25 text-slate-200' : 'border-blue-100 bg-blue-50/70 text-slate-700'}`}>
+          <strong>Danh mục dùng chung là gì?</strong> Đây là dữ liệu nền như phòng ban, chức danh, thang lương và loại nghỉ phép. Các quy trình lấy dữ liệu này để chọn đúng thông tin và áp dụng đúng quy tắc.
+        </div>
+
         <div className={`px-3 py-2 border-t flex flex-wrap gap-1.5 ${isDarkMode ? 'bg-slate-950/45 border-slate-800' : 'bg-slate-50 border-slate-100'}`}>
           {[
             { id: 'guide' as const, label: 'Hướng dẫn theo quy trình', icon: ClipboardList },

@@ -146,6 +146,9 @@ export const SystemOverviewDashboard: React.FC = () => {
 
   return (
     <div className="space-y-5">
+      <section className="rounded-lg border border-emerald-200 bg-emerald-50/70 px-4 py-3 text-xs leading-relaxed text-slate-700 dark:border-emerald-900/60 dark:bg-emerald-950/25 dark:text-slate-200">
+        <strong>Tổng quan hệ thống:</strong> chọn một phân hệ để xem nhóm nghiệp vụ mà HRMS hỗ trợ. Mỗi quy trình có thể mở chi tiết các bước, vai trò và dữ liệu liên quan. Đây là bản mô phỏng nghiệp vụ, không phải số liệu vận hành thực tế.
+      </section>
       <section className="relative z-20 overflow-visible rounded-lg border border-slate-300 bg-white shadow-sm dark:border-slate-700 dark:bg-slate-900">
         <div className="flex flex-wrap items-start gap-1 overflow-visible bg-[#1f5f86] px-2 py-1.5 text-white">
           {moduleMenus.map((module) => {

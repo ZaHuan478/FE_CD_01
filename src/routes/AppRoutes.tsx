@@ -1,6 +1,5 @@
 import React from 'react'
 import { Routes, Route, Navigate } from 'react-router-dom'
-import { CreateEmployeePage } from '../pages/employees/CreateEmployeePage'
 import { EmployeeLifecyclePage } from '../pages/employee-lifecycle/EmployeeLifecyclePage'
 
 export const AppRoutes: React.FC = () => {
@@ -14,7 +13,7 @@ export const AppRoutes: React.FC = () => {
               .field select { border-radius: 12px; }
               .select-wrap::after { content: 'â–¼'; top: 50%; transform: translateY(-52%); font-size: 11px; color: #178277; }
             `}</style>
-            <CreateEmployeePage />
+            <EmployeeLifecyclePage />
           </>
         }
       />

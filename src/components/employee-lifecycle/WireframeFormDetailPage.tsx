@@ -289,6 +289,9 @@ export const WireframeFormDetailPage: React.FC<WireframeFormDetailPageProps> = (
 
       {/* MAIN CONTAINER (92% Screen Width) */}
       <main className="w-[92%] max-w-[1920px] mx-auto p-4 sm:p-6 lg:p-8 space-y-6">
+        <div className={`rounded-xl border px-4 py-3 text-xs leading-relaxed ${isDarkMode ? 'border-amber-900/60 bg-amber-950/25 text-amber-100' : 'border-amber-200 bg-amber-50 text-amber-900'}`}>
+          <strong>MÀN HÌNH MÔ PHỎNG:</strong> dùng để minh họa các thông tin cần nhập, quy tắc và bước phê duyệt dự kiến. Các nút lưu, gửi phê duyệt và đính kèm tệp không tạo dữ liệu thật.
+        </div>
 
         {/* GOVERNANCE SOP CONTEXT BANNER */}
         <div className={`p-4 rounded-2xl border shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-3 ${isDarkMode
@@ -352,7 +355,7 @@ export const WireframeFormDetailPage: React.FC<WireframeFormDetailPageProps> = (
               <CheckCircle2 className="w-6 h-6 text-emerald-500 shrink-0" />
               <div>
                 <h4 className="font-extrabold text-sm">{language === 'vi' ? 'Đã lưu và gửi phê duyệt thành công' : 'Saved and submitted successfully'}</h4>
-                <p className="text-xs opacity-90">{language === 'vi' ? 'Bản ghi đã được lưu vào hồ sơ HRMS và sẵn sàng cho bước xử lý tiếp theo.' : 'The record has been saved to HRMS and is ready for the next workflow step.'}</p>
+                <p className="text-xs opacity-90">{language === 'vi' ? 'Đã mô phỏng lưu và gửi phê duyệt. Không có dữ liệu thật được tạo trong bản demo.' : 'Save and approval submission were simulated. No real data was created.'}</p>
               </div>
             </div>
             <button
@@ -471,7 +474,7 @@ export const WireframeFormDetailPage: React.FC<WireframeFormDetailPageProps> = (
               {/* FILE ATTACHMENT DROPZONE SECTION */}
               <div className="space-y-3 pt-4 border-t border-slate-200 dark:border-slate-800">
                 <label className="block text-xs font-extrabold text-slate-700 dark:text-slate-300">
-                  Đính kèm Tài liệu / Hồ sơ liên quan (SOP Attachment)
+                  Đính kèm Tài liệu minh họa (SOP Attachment)
                 </label>
 
                 {/* Dropzone mockup */}
@@ -486,7 +489,7 @@ export const WireframeFormDetailPage: React.FC<WireframeFormDetailPageProps> = (
                     <UploadCloud className="w-6 h-6" />
                   </div>
                   <p className="text-xs font-bold text-slate-700 dark:text-slate-200">
-                    Kéo thả tệp vào đây hoặc <span className="text-blue-600 dark:text-blue-400 underline">Bấm để tải lên</span>
+                    Chọn tệp minh họa hoặc <span className="text-blue-600 dark:text-blue-400 underline">bấm để mô phỏng tải lên</span>
                   </p>
                   <p className="text-[11px] text-slate-400 mt-1">
                     Hỗ trợ định dạng PDF, DOCX, PNG (Tối đa 15MB)
