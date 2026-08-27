@@ -8,6 +8,7 @@ import { SystemGuideBanner } from '../../components/employee-lifecycle/SystemGui
 import { LeftSidebarNav } from '../../components/employee-lifecycle/LeftSidebarNav'
 import { WireframeFormDetailPage } from '../../components/employee-lifecycle/WireframeFormDetailPage'
 import { WorkflowDetailPage } from '../../components/employee-lifecycle/WorkflowDetailPage'
+import type { BusinessClusterId } from '../../components/employee-lifecycle/SystemOverviewDashboard'
 
 // ⚡ LAZY LOAD HEAVY COMPONENTS
 const MasterDataHub = React.lazy(() => import('../../components/employee-lifecycle/master-data-hub/MasterDataHub').then(module => ({ default: module.MasterDataHub })))
@@ -21,6 +22,16 @@ import { SOP_DATABASE } from '../../components/employee-lifecycle/workflow-detai
 import { sopDictionary } from '../../components/employee-lifecycle/data/sopDictionary'
 import type { LifecycleStep, OperationModule, DetailItem } from '../../types/employee-lifecycle'
 import { useLanguage } from '../../context/LanguageContext'
+
+const headerBusinessClusters: Array<{ id: BusinessClusterId; label: string }> = [
+  { id: 'core', label: 'Vận hành lõi' },
+  { id: 'people', label: 'Phát triển con người' },
+  { id: 'organization', label: 'Quản trị tổ chức' },
+  { id: 'platform', label: 'Nền tảng' }
+]
+
+const isBusinessClusterId = (value: string | null): value is BusinessClusterId =>
+  Boolean(value && headerBusinessClusters.some((cluster) => cluster.id === value))
 
 export const EmployeeLifecyclePage: React.FC = () => {
   const { t } = useLanguage()
@@ -39,6 +50,10 @@ export const EmployeeLifecyclePage: React.FC = () => {
   }, [location.pathname, searchParams])
 
   const [activeTab, setActiveTab] = useState<'lifecycle' | 'masterdata' | 'reports'>(getTabFromLocation)
+  const [activeBusinessCluster, setActiveBusinessCluster] = useState<BusinessClusterId>(() => {
+    const clusterParam = searchParams.get('cluster')
+    return isBusinessClusterId(clusterParam) ? clusterParam : 'core'
+  })
   const [isGuideModalOpen] = useState(false)
   const [globalSearchTerm, setGlobalSearchTerm] = useState('')
   const [isGlobalSearchOpen, setIsGlobalSearchOpen] = useState(false)
@@ -84,6 +99,20 @@ export const EmployeeLifecyclePage: React.FC = () => {
     window.scrollTo({ top: 0, behavior: 'smooth' })
   }
 
+  const handleBusinessClusterChange = (cluster: BusinessClusterId) => {
+    setActiveBusinessCluster(cluster)
+    if (activeTab !== 'reports') {
+      startTransition(() => setActiveTab('reports'))
+    }
+    setSearchParams((prev) => {
+      const next = new URLSearchParams(prev)
+      next.set('tab', 'reports')
+      next.set('cluster', cluster)
+      return next
+    })
+    window.scrollTo({ top: 0, behavior: 'smooth' })
+  }
+
   // Effect to sync URL back to state if navigate() or back button is called
   useEffect(() => {
     const tabFromUrl = getTabFromLocation()
@@ -93,6 +122,13 @@ export const EmployeeLifecyclePage: React.FC = () => {
       })
     }
   }, [getTabFromLocation, activeTab])
+
+  useEffect(() => {
+    const clusterFromUrl = searchParams.get('cluster')
+    if (isBusinessClusterId(clusterFromUrl) && clusterFromUrl !== activeBusinessCluster) {
+      setActiveBusinessCluster(clusterFromUrl)
+    }
+  }, [searchParams, activeBusinessCluster])
 
   // Effect to scroll to hash target after tab or hash change
   useEffect(() => {
@@ -388,26 +424,48 @@ export const EmployeeLifecyclePage: React.FC = () => {
 
       {/* Streamlined Compact Top Navigation Header */}
       <header className="bg-white text-slate-900 border-b border-slate-200 sticky top-0 z-50 shadow-sm dark:bg-slate-900 dark:text-slate-100 dark:border-slate-800">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 py-2.5 sm:py-3 flex items-center justify-between">
-          <div className="flex items-center gap-2.5 sm:gap-3">
-            <div className="p-1.5 sm:p-2 bg-blue-600 rounded-lg text-white shadow-xs shrink-0">
+        <div className="w-[96%] max-w-[1920px] mx-auto px-2 sm:px-4 py-2 sm:py-2.5 flex items-center justify-between gap-4">
+          {/* CỘT TRÁI: LOGO VÀ TIÊU ĐỀ HỆ THỐNG */}
+          <div className="flex min-w-0 items-center gap-2.5 sm:gap-3 shrink-0">
+            <div className="p-1.5 sm:p-2 bg-[#1f5f86] rounded-lg text-white shadow-xs shrink-0">
               <Layers className="w-4 h-4 sm:w-5 sm:h-5" />
             </div>
             <div>
               <div className="flex flex-wrap items-center gap-1.5">
-                <span className="text-[10px] font-bold text-blue-700 uppercase tracking-widest">
-                  {t('header.architecture', 'TỔNG QUAN NGHIỆP VỤ NHÂN SỰ')}
+                <span className="text-[10px] font-extrabold text-[#1f5f86] dark:text-sky-300 uppercase tracking-widest">
+                  {t('header.architecture', 'ENTERPRISE HR SAAS ARCHITECTURE')}
                 </span>
-                {/* <span className="px-1.5 py-0.2 text-[9px] font-semibold bg-blue-50 text-blue-700 rounded border border-blue-200">
-                  {t('header.productionReady', 'Tổng quan hệ thống')}
-                </span> */}
               </div>
-              <h1 className="text-sm sm:text-base font-bold tracking-tight text-slate-900 mt-0.5 leading-snug dark:text-white">
-                {t('header.title', 'QUẢN LÝ HỒ SƠ VÀ VÒNG ĐỜI NHÂN VIÊN')}
+              <h1 className="text-xs sm:text-sm lg:text-base font-black tracking-tight text-slate-900 mt-0.5 leading-snug dark:text-white whitespace-nowrap">
+                {t('header.title', 'QUẢN LÝ HỒ SƠ & VÒNG ĐỜI NHÂN VIÊN')}
               </h1>
             </div>
           </div>
 
+          {/* CỘT GIỮA: CỤM NGHIỆP VỤ HRM (CĂN GIỮA & CHỮ TO RÕ RÀNG) */}
+          <nav
+            className="hidden md:flex flex-1 items-center justify-center gap-1.5 max-w-[720px] rounded-xl"
+            aria-label="Cụm nghiệp vụ HRM"
+          >
+            {headerBusinessClusters.map((cluster) => {
+              const active = activeBusinessCluster === cluster.id
+              return (
+                <button
+                  key={cluster.id}
+                  type="button"
+                  onClick={() => handleBusinessClusterChange(cluster.id)}
+                  className={`whitespace-nowrap rounded-lg px-3.5 py-1.5 text-xs sm:text-[13px] font-bold transition-all cursor-pointer ${active
+                      ? 'bg-[#1f5f86] text-white shadow-2xs'
+                      : 'text-slate-700 hover:bg-white hover:text-[#1f5f86] dark:text-slate-300 dark:hover:bg-slate-800 dark:hover:text-white'
+                    }`}
+                >
+                  {cluster.label}
+                </button>
+              )
+            })}
+          </nav>
+
+          {/* CỘT PHẢI: TÌM KIẾM, NGÔN NGỮ & GIAO DIỆN TỐI */}
           <div className="flex items-center gap-2.5 text-xs shrink-0">
             <div className="relative hidden lg:block">
               <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
@@ -542,7 +600,7 @@ export const EmployeeLifecyclePage: React.FC = () => {
             {/* HRMS EXECUTIVE SYSTEM DASHBOARD & RADIAL ECOSYSTEM WHEEL */}
             <div id="overview-dashboard" className="scroll-mt-28">
               <Suspense fallback={<div className="h-96 flex flex-col items-center justify-center gap-3"><Loader2 className="w-8 h-8 animate-spin text-emerald-500" /><span className="text-sm font-bold text-slate-500">Đang khởi tạo Dashboard...</span></div>}>
-                <SystemOverviewDashboard />
+                <SystemOverviewDashboard activeCluster={activeBusinessCluster} />
               </Suspense>
             </div>
           </div>

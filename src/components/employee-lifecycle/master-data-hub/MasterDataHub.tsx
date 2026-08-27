@@ -191,7 +191,7 @@ export const MasterDataHub: React.FC<MasterDataHubProps> = ({ onOpenERD, isDarkM
             <h3 className="text-base font-black">Chọn quy trình</h3>
             <p className={`text-xs mt-1 ${subdued}`}>Chọn một quy trình để xem lần lượt các bước thực hiện và thông tin cần chuẩn bị.</p>
           </div>
-          <div className="flex w-full items-center gap-2 sm:w-[560px]">
+          <div className="flex w-full items-center gap-2 sm:w-560px">
             <div className="relative min-w-0 flex-1">
               <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
               <input

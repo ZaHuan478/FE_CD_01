@@ -1,9 +1,14 @@
 import React, { useState, useRef, useEffect } from 'react'
 import { useSearchParams } from 'react-router-dom'
-import { FIVE_CORE_MODULES, type SopDetailItem } from './data/ecosystemModulesData.tsx'
+import {
+  CORE_OPERATION_MODULES,
+  type SopDetailItem,
+  type ModuleEcosystemItem
+} from './data/ecosystemModulesData'
 import { EcosystemRadialWheel } from './EcosystemRadialWheel'
 import { EcosystemSopWorkbench } from './EcosystemSopWorkbench'
 import { EcosystemSopDetail } from './EcosystemSopDetail'
+import { canonicalizeSopCode } from './utils/coreOperationsSelectors'
 
 export const RadialEcosystemChart: React.FC = () => {
   const [searchParams, setSearchParams] = useSearchParams()
@@ -11,18 +16,27 @@ export const RadialEcosystemChart: React.FC = () => {
   const urlModule = searchParams.get('module')
   const urlSop = searchParams.get('sop')
   const urlStage = searchParams.get('stage')
-  const urlFilter = searchParams.get('type') as 'ALL' | 'N' | 'M' | 'A'
+  const urlFilter = searchParams.get('type') as 'ALL' | 'N' | 'M' | 'C' | 'A'
 
-  const initialModule = urlModule && FIVE_CORE_MODULES.some(m => m.id === urlModule) ? urlModule : 'emp'
-  const targetInitialMod = FIVE_CORE_MODULES.find(m => m.id === initialModule) || FIVE_CORE_MODULES[0]
-  const initialSop = urlSop && targetInitialMod.sopList.some(s => s.code === urlSop)
-    ? urlSop
-    : (initialModule === 'emp' ? 'SOP-EMP-02' : targetInitialMod.sopList[0]?.code || 'SOP-EMP-02')
+  const initialModule = urlModule && CORE_OPERATION_MODULES.some(m => m.id === urlModule)
+    ? urlModule
+    : 'emp'
+
+  const targetInitialMod: ModuleEcosystemItem =
+    CORE_OPERATION_MODULES.find(m => m.id === initialModule) || CORE_OPERATION_MODULES[0]
+
+  const canonicalUrlSop = urlSop ? canonicalizeSopCode(urlSop) : ''
+
+  const initialSop = canonicalUrlSop && targetInitialMod.sopList.some(s => s.code === canonicalUrlSop)
+    ? canonicalUrlSop
+    : (targetInitialMod.sopList[0]?.code || 'SOP-EMP-01')
 
   const [hoveredModuleId, setHoveredModuleId] = useState<string | null>(null)
   const [selectedModuleId, setSelectedModuleId] = useState<string>(initialModule)
   const [isSopListExpanded, setIsSopListExpanded] = useState<boolean>(true)
-  const [activeTypeFilter, setActiveTypeFilter] = useState<'ALL' | 'N' | 'M' | 'A'>(urlFilter || 'ALL')
+  const [activeTypeFilter, setActiveTypeFilter] = useState<'ALL' | 'N' | 'M' | 'C' | 'A'>(
+    ['ALL', 'N', 'M', 'C', 'A'].includes(urlFilter) ? urlFilter : 'ALL'
+  )
   const [selectedSopCode, setSelectedSopCode] = useState<string>(initialSop)
   const [selectedStageId, setSelectedStageId] = useState<string>(urlStage || 'ALL')
   const [isStageDropdownOpen, setIsStageDropdownOpen] = useState<boolean>(false)
@@ -35,18 +49,24 @@ export const RadialEcosystemChart: React.FC = () => {
     const currentModule = searchParams.get('module')
     const currentSop = searchParams.get('sop')
     const currentStage = searchParams.get('stage')
-    const currentFilter = searchParams.get('type') as 'ALL' | 'N' | 'M' | 'A'
+    const currentFilter = searchParams.get('type') as 'ALL' | 'N' | 'M' | 'C' | 'A'
 
-    if (currentModule && currentModule !== selectedModuleId && FIVE_CORE_MODULES.some(m => m.id === currentModule)) {
+    if (currentModule && currentModule !== selectedModuleId && CORE_OPERATION_MODULES.some(m => m.id === currentModule)) {
       setSelectedModuleId(currentModule)
     }
-    if (currentSop && currentSop !== selectedSopCode) {
-      setSelectedSopCode(currentSop)
+
+    if (currentSop) {
+      const canonical = canonicalizeSopCode(currentSop)
+      if (canonical && canonical !== selectedSopCode) {
+        setSelectedSopCode(canonical)
+      }
     }
+
     if (currentStage && currentStage !== selectedStageId) {
       setSelectedStageId(currentStage)
     }
-    if (currentFilter && currentFilter !== activeTypeFilter) {
+
+    if (currentFilter && currentFilter !== activeTypeFilter && ['ALL', 'N', 'M', 'C', 'A'].includes(currentFilter)) {
       setActiveTypeFilter(currentFilter)
     }
   }, [searchParams])
@@ -70,8 +90,7 @@ export const RadialEcosystemChart: React.FC = () => {
     }))
   }
 
-  const activeModuleId = selectedModuleId
-  const activeModule = FIVE_CORE_MODULES.find((m) => m.id === activeModuleId) || FIVE_CORE_MODULES[0]
+  const activeModule = CORE_OPERATION_MODULES.find((m) => m.id === selectedModuleId) || CORE_OPERATION_MODULES[0]
 
   // Automatically expand the stage containing selectedSopCode on module or SOP change
   useEffect(() => {
@@ -87,7 +106,8 @@ export const RadialEcosystemChart: React.FC = () => {
 
   const filteredSopList = activeModule.sopList.filter((item) => {
     if (activeTypeFilter === 'ALL') return true
-    return item.type === activeTypeFilter
+    const types = item.stepTypes || [item.type]
+    return types.includes(activeTypeFilter)
   })
 
   const activeSopItem: SopDetailItem =
@@ -98,14 +118,13 @@ export const RadialEcosystemChart: React.FC = () => {
   const handleSelectModule = (modId: string) => {
     setSelectedModuleId(modId)
     setSelectedStageId('ALL')
-    const targetMod = FIVE_CORE_MODULES.find((m) => m.id === modId) || FIVE_CORE_MODULES[0]
-    let newSop = targetMod.sopList[0]?.code || 'SOP-EMP-02'
-    if (modId === 'emp') {
-      newSop = 'SOP-EMP-02'
-    }
+    const targetMod = CORE_OPERATION_MODULES.find((m) => m.id === modId) || CORE_OPERATION_MODULES[0]
+    const newSop = targetMod.sopList[0]?.code || 'SOP-REC-01'
+
     setSelectedSopCode(newSop)
     setSearchParams(prev => {
       const next = new URLSearchParams(prev)
+      next.set('cluster', 'core')
       next.set('module', modId)
       next.set('sop', newSop)
       next.delete('stage')
@@ -114,10 +133,13 @@ export const RadialEcosystemChart: React.FC = () => {
   }
 
   const handleSelectSop = (code: string) => {
-    setSelectedSopCode(code)
+    const canonical = canonicalizeSopCode(code)
+    setSelectedSopCode(canonical)
     setSearchParams(prev => {
       const next = new URLSearchParams(prev)
-      next.set('sop', code)
+      next.set('cluster', 'core')
+      next.set('module', selectedModuleId)
+      next.set('sop', canonical)
       return next
     }, { replace: true })
   }
@@ -126,6 +148,8 @@ export const RadialEcosystemChart: React.FC = () => {
     setSelectedStageId(stageId)
     setSearchParams(prev => {
       const next = new URLSearchParams(prev)
+      next.set('cluster', 'core')
+      next.set('module', selectedModuleId)
       if (stageId === 'ALL') {
         next.delete('stage')
       } else {
@@ -135,10 +159,12 @@ export const RadialEcosystemChart: React.FC = () => {
     }, { replace: true })
   }
 
-  const handleTypeFilterChange = (filter: 'ALL' | 'N' | 'M' | 'A') => {
+  const handleTypeFilterChange = (filter: 'ALL' | 'N' | 'M' | 'C' | 'A') => {
     setActiveTypeFilter(filter)
     setSearchParams(prev => {
       const next = new URLSearchParams(prev)
+      next.set('cluster', 'core')
+      next.set('module', selectedModuleId)
       if (filter === 'ALL') {
         next.delete('type')
       } else {
@@ -149,7 +175,7 @@ export const RadialEcosystemChart: React.FC = () => {
   }
 
   return (
-    <div className="relative w-full overflow-hidden py-4 flex flex-col items-center justify-center space-y-4">
+    <div className="relative w-full overflow-hidden py-2 flex flex-col items-center justify-center space-y-6">
       <EcosystemRadialWheel
         hoveredModuleId={hoveredModuleId}
         setHoveredModuleId={setHoveredModuleId}

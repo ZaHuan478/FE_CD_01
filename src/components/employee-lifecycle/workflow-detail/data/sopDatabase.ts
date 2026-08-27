@@ -1,6 +1,10 @@
 import type { SopSubProcess } from '../types'
 import { DOCX_EMPLOYEE_SOP_DATABASE } from './docxEmployeeSopDatabase'
 import { DOCX_OPERATIONAL_SOP_DATABASE } from './docxOperationalSopDatabase'
+import { PEOPLE_DEVELOPMENT_SOP_DATABASE } from './peopleDevelopmentSopDatabase'
+import { ORGANIZATION_MANAGEMENT_SOP_DATABASE } from './organizationManagementSopDatabase'
+import { PLATFORM_FOUNDATION_SOP_DATABASE } from './platformFoundationSopDatabase'
+import { CORE_EXPERIENCE_SOP_DATABASE } from './coreExperienceSopDatabase'
 
 // 100% Complete SOP Database mapped for ALL 7 Lifecycle Steps & Cross-Functional Operations from 1.EMP.HRM.SOP.docx
 const SOP_DATABASE_BASE: Record<string, SopSubProcess[]> = {
@@ -1209,7 +1213,13 @@ const recruitmentDetailedProcesses: SopSubProcess[] = [
   }
 ]
 
-const mergedSopDatabase: Record<string, SopSubProcess[]> = { ...SOP_DATABASE_BASE }
+const mergedSopDatabase: Record<string, SopSubProcess[]> = {
+  ...SOP_DATABASE_BASE,
+  ...PEOPLE_DEVELOPMENT_SOP_DATABASE,
+  ...ORGANIZATION_MANAGEMENT_SOP_DATABASE,
+  ...PLATFORM_FOUNDATION_SOP_DATABASE,
+  ...CORE_EXPERIENCE_SOP_DATABASE
+}
 
 const docxDatabases = [DOCX_EMPLOYEE_SOP_DATABASE, DOCX_OPERATIONAL_SOP_DATABASE]
 

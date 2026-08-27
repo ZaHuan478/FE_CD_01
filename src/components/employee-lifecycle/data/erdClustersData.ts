@@ -6,7 +6,7 @@ export const erdClustersData: ERDCluster[] = [
     title: 'CỤM 1: DANH MỤC CÁ NHÂN & ĐỊA LÝ',
     subtitle: 'Địa giới hành chính, trình độ, dân tộc, tôn giáo',
     targetField: 'SƠ YẾU LÝ LỊCH',
-    color: 'from-sky-500 to-blue-600',
+    color: 'from-[#1f5f86] to-[#2e8bbd]',
     badgeBg: 'bg-sky-500/15 text-sky-300 border-sky-500/30',
     sopIds: ['SOP-NS-04'],
     items: [
@@ -21,8 +21,8 @@ export const erdClustersData: ERDCluster[] = [
     title: 'CỤM 2: CƠ CẤU & VỊ TRÍ CÔNG TÁC',
     subtitle: 'Đơn vị, phòng ban, chức danh, chức vụ, level',
     targetField: 'VỊ TRÍ CÔNG TÁC',
-    color: 'from-indigo-500 to-purple-600',
-    badgeBg: 'bg-indigo-500/15 text-indigo-300 border-indigo-500/30',
+    color: 'from-[#1f5f86] to-[#2e8bbd]',
+    badgeBg: 'bg-sky-500/15 text-sky-300 border-sky-500/30',
     sopIds: ['SOP-NS-01', 'SOP-NS-09'],
     items: [
       { id: 'MD-05', code: 'MD-05', title: 'Cơ cấu tổ chức', subtitle: 'Sơ đồ cây Đơn vị / Phòng ban', sopBadge: 'SOP-NS-01' },
@@ -34,8 +34,8 @@ export const erdClustersData: ERDCluster[] = [
     title: 'CỤM 3: CHÍNH SÁCH & CHẾ ĐỘ LABOUR',
     subtitle: 'Thang lương, ca làm việc, bảo hiểm & kỷ luật',
     targetField: 'HỢP ĐỒNG & CHẾ ĐỘ',
-    color: 'from-emerald-500 to-teal-600',
-    badgeBg: 'bg-emerald-500/15 text-emerald-300 border-emerald-500/30',
+    color: 'from-[#1f5f86] to-[#2e8bbd]',
+    badgeBg: 'bg-sky-500/15 text-sky-300 border-sky-500/30',
     sopIds: ['SOP-L-02', 'SOP-CC-01', 'SOP-BH-01', 'SOP-NS-14'],
     items: [
       { id: 'MD-07', code: 'MD-07', title: 'Thang / Bậc lương', subtitle: 'Mức lương cơ bản & Hệ số', sopBadge: 'SOP-L-02' },

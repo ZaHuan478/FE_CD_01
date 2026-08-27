@@ -124,7 +124,7 @@ export const MODULE_NODES: ModuleNode[] = [
     nameEn: 'Recruitment',
     shortName: 'ATS',
     icon: <Target className="w-4 h-4" />,
-    color: 'bg-purple-100 text-purple-600 dark:bg-purple-500/20 dark:text-purple-400',
+    color: 'bg-sky-50 text-[#1f5f86] dark:bg-sky-950/60 dark:text-sky-300',
     sopCount: 5,
     role: '🚪 Cổng đầu vào duy nhất',
     roleEn: '🚪 Single entry gate'
@@ -135,7 +135,7 @@ export const MODULE_NODES: ModuleNode[] = [
     nameEn: 'Personnel',
     shortName: 'Core EMP',
     icon: <Users className="w-4 h-4" />,
-    color: 'bg-blue-100 text-blue-600 dark:bg-blue-500/20 dark:text-blue-400',
+    color: 'bg-sky-50 text-[#1f5f86] dark:bg-sky-950/60 dark:text-sky-300',
     sopCount: 15,
     role: '🏛️ Trung tâm dữ liệu gốc (Hub)',
     roleEn: '🏛️ Master data hub (SSOT)'
@@ -146,7 +146,7 @@ export const MODULE_NODES: ModuleNode[] = [
     nameEn: 'Attendance',
     shortName: 'ATT',
     icon: <Clock className="w-4 h-4" />,
-    color: 'bg-emerald-100 text-emerald-600 dark:bg-emerald-500/20 dark:text-emerald-400',
+    color: 'bg-sky-50 text-[#1f5f86] dark:bg-sky-950/60 dark:text-sky-300',
     sopCount: 15,
     role: '⏱️ Đo lường thời gian thực tế',
     roleEn: '⏱️ Time measurement engine'
@@ -157,7 +157,7 @@ export const MODULE_NODES: ModuleNode[] = [
     nameEn: 'Payroll',
     shortName: 'PAY',
     icon: <DollarSign className="w-4 h-4" />,
-    color: 'bg-amber-100 text-amber-600 dark:bg-amber-500/20 dark:text-amber-400',
+    color: 'bg-sky-50 text-[#1f5f86] dark:bg-sky-950/60 dark:text-sky-300',
     sopCount: 4,
     role: '💰 Hub tổng hợp tính lương',
     roleEn: '💰 Payroll aggregation hub'
@@ -168,7 +168,7 @@ export const MODULE_NODES: ModuleNode[] = [
     nameEn: 'Insurance',
     shortName: 'INS',
     icon: <Shield className="w-4 h-4" />,
-    color: 'bg-pink-100 text-pink-600 dark:bg-pink-500/20 dark:text-pink-400',
+    color: 'bg-sky-50 text-[#1f5f86] dark:bg-sky-950/60 dark:text-sky-300',
     sopCount: 8,
     role: '🛡️ Nghĩa vụ pháp lý BHXH/BHYT',
     roleEn: '🛡️ Legal SI/HI obligations'
@@ -179,7 +179,7 @@ export const MODULE_NODES: ModuleNode[] = [
     nameEn: 'Personal Tax',
     shortName: 'TAX',
     icon: <Receipt className="w-4 h-4" />,
-    color: 'bg-indigo-100 text-indigo-600 dark:bg-indigo-500/20 dark:text-indigo-400',
+    color: 'bg-sky-50 text-[#1f5f86] dark:bg-sky-950/60 dark:text-sky-300',
     sopCount: 3,
     role: '🧾 Khấu trừ thuế lũy tiến',
     roleEn: '🧾 Progressive tax withholding'

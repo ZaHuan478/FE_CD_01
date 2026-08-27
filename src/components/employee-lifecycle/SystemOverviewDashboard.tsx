@@ -4,10 +4,45 @@ import { ChevronDown, ChevronRight, GitBranch, PieChart, Workflow } from 'lucide
 import { RadialEcosystemChart } from './RadialEcosystemChart'
 import { ProcessInputOutputView } from './ProcessInputOutputView'
 import { CompactDataFlowDiagram } from './data-flow/CompactDataFlowDiagram'
+import { PeopleDevelopmentCoverage } from './PeopleDevelopmentCoverage'
+import { OrganizationManagementCoverage } from './OrganizationManagementCoverage'
+import { PlatformFoundationCoverage } from './PlatformFoundationCoverage'
+import { ClusterProcessExplorer } from './ClusterProcessExplorer'
 import { useLanguage } from '../../context/LanguageContext'
 import { SOP_DATABASE } from './workflow-detail/data/sopDatabase'
 
-type ModuleId = 'recruitment' | 'employee' | 'attendance' | 'payroll' | 'insurance' | 'tax' | 'shared' | 'configuration'
+type ModuleId =
+  | 'recruitment'
+  | 'onboarding'
+  | 'employee'
+  | 'attendance'
+  | 'leave'
+  | 'payroll'
+  | 'insurance'
+  | 'tax'
+  | 'selfService'
+  | 'kpi'
+  | 'review'
+  | 'competency'
+  | 'learning'
+  | 'talent'
+  | 'engagement'
+  | 'headcount'
+  | 'organizationStructure'
+  | 'job'
+  | 'position'
+  | 'workforceReport'
+  | 'shared'
+  | 'configuration'
+  | 'workflow'
+  | 'document'
+  | 'signature'
+  | 'notification'
+  | 'integration'
+  | 'security'
+  | 'audit'
+
+export type BusinessClusterId = 'core' | 'people' | 'organization' | 'platform'
 interface ModuleMenuItem { label: string; sopCode?: string; workflowId?: string; stepNumber?: number; disabled?: boolean; groupHeader?: boolean }
 interface ModuleMenu { id: ModuleId; label: string; code: string; count: number; items: ModuleMenuItem[] }
 
@@ -23,7 +58,9 @@ const processMenuItems = (workflowId: string): ModuleMenuItem[] =>
 const recruitmentProcessMenuItems = (): ModuleMenuItem[] =>
   processMenuItems('LIFE-01').filter((process) => normalizeSopCode(process.sopCode).startsWith('SOPREC'))
 
-const attendanceProcessMenuItems = (): ModuleMenuItem[] => processMenuItems('MODULE-ATT').flatMap((process) => {
+const leaveSopCodes = new Set(['SOPATT06', 'SOPATT07', 'SOPATT11', 'SOPATT12', 'SOPATT13', 'SOPATT14', 'SOPATT15'])
+
+const formatAttendanceMenuItems = (processes: ModuleMenuItem[]): ModuleMenuItem[] => processes.flatMap((process) => {
   const code = normalizeSopCode(process.sopCode)
   if (code === 'SOPATT01') {
     return [
@@ -40,10 +77,26 @@ const attendanceProcessMenuItems = (): ModuleMenuItem[] => processMenuItems('MOD
   return [{ ...process, label: `${process.label.charAt(0).toLocaleUpperCase('vi-VN')}${process.label.slice(1)}` }]
 })
 
+const attendanceProcessMenuItems = (): ModuleMenuItem[] => formatAttendanceMenuItems(
+  processMenuItems('MODULE-ATT').filter((process) => !leaveSopCodes.has(normalizeSopCode(process.sopCode)))
+)
+
+const leaveProcessMenuItems = (): ModuleMenuItem[] => formatAttendanceMenuItems(
+  processMenuItems('MODULE-ATT').filter((process) => leaveSopCodes.has(normalizeSopCode(process.sopCode)))
+)
+
+const performanceProcessMenuItems = processMenuItems('MODULE-PFM')
+const kpiProcessMenuItems = performanceProcessMenuItems.filter((process) => ['PFM02', 'PFM03'].includes(normalizeSopCode(process.sopCode)))
+const reviewProcessMenuItems = performanceProcessMenuItems.filter((process) => !['PFM02', 'PFM03'].includes(normalizeSopCode(process.sopCode)))
+
 let moduleMenus: ModuleMenu[] = [
   {
     id: 'recruitment', label: 'Tuyển dụng', code: 'REC', count: 11,
     items: recruitmentProcessMenuItems()
+  },
+  {
+    id: 'onboarding', label: 'Onboarding', code: 'ONB', count: 7,
+    items: processMenuItems('MODULE-ONB')
   },
   {
     id: 'employee', label: 'Nhân sự', code: 'EMP', count: 15,
@@ -59,8 +112,12 @@ let moduleMenus: ModuleMenu[] = [
     ]
   },
   {
-    id: 'attendance', label: 'Chấm công', code: 'ATT', count: 15,
+    id: 'attendance', label: 'Chấm công', code: 'ATT', count: 8,
     items: attendanceProcessMenuItems()
+  },
+  {
+    id: 'leave', label: 'Nghỉ phép', code: 'LEV', count: 7,
+    items: leaveProcessMenuItems()
   },
   {
     id: 'payroll', label: 'Lương', code: 'PAY', count: 4,
@@ -75,22 +132,122 @@ let moduleMenus: ModuleMenu[] = [
     items: processMenuItems('MODULE-TAX')
   },
   {
-    id: 'shared', label: 'Danh mục chung', code: 'MD', count: 54,
-    items: [
-      { label: 'Chức năng quản lý danh mục', groupHeader: true },
-      ...processMenuItems('MODULE-MD-FUNCTIONS'),
-      { label: 'Dữ liệu danh mục dùng chung', groupHeader: true },
-      ...processMenuItems('MODULE-MD')
-    ]
+    id: 'selfService', label: 'ESS/MSS', code: 'ESS', count: 8,
+    items: processMenuItems('MODULE-ESS')
   },
   {
-    id: 'configuration', label: 'Cấu hình HRM', code: 'CFG', count: 2,
-    items: [
-      { label: 'Danh sách nhóm người dùng và vai trò' },
-      { label: 'Danh sách cấu hình trong hệ thống HRM' }
-    ]
+    id: 'kpi', label: 'KPI', code: 'KPI', count: 2,
+    items: kpiProcessMenuItems
+  },
+  {
+    id: 'review', label: 'Đánh giá', code: 'DG', count: 4,
+    items: reviewProcessMenuItems
+  },
+  {
+    id: 'competency', label: 'Năng lực', code: 'CMP', count: 4,
+    items: processMenuItems('MODULE-CMP')
+  },
+  {
+    id: 'learning', label: 'Đào tạo', code: 'LND', count: 5,
+    items: processMenuItems('MODULE-LND')
+  },
+  {
+    id: 'talent', label: 'Kế nhiệm', code: 'TAL', count: 3,
+    items: processMenuItems('MODULE-TAL')
+  },
+  {
+    id: 'engagement', label: 'Ghi nhận & Phúc lợi', code: 'ENG', count: 2,
+    items: processMenuItems('MODULE-ENG')
+  },
+  {
+    id: 'headcount', label: 'Định biên', code: 'HC', count: 8,
+    items: processMenuItems('MODULE-ORG-HC')
+  },
+  {
+    id: 'organizationStructure', label: 'Cơ cấu tổ chức', code: 'OST', count: 8,
+    items: processMenuItems('MODULE-ORG-ST')
+  },
+  {
+    id: 'job', label: 'Chức danh', code: 'JOB', count: 5,
+    items: processMenuItems('MODULE-ORG-JOB')
+  },
+  {
+    id: 'position', label: 'Vị trí', code: 'POS', count: 6,
+    items: processMenuItems('MODULE-ORG-POS')
+  },
+  {
+    id: 'workforceReport', label: 'Báo cáo nhân sự', code: 'RPT', count: 8,
+    items: processMenuItems('MODULE-ORG-RPT')
+  },
+  {
+    id: 'shared', label: 'Danh mục chung', code: 'MD', count: 8,
+    items: processMenuItems('MODULE-PLT-MD')
+  },
+  {
+    id: 'configuration', label: 'Cấu hình HRM', code: 'CFG', count: 8,
+    items: processMenuItems('MODULE-PLT-CFG')
+  },
+  {
+    id: 'workflow', label: 'Workflow phê duyệt', code: 'WFL', count: 9,
+    items: processMenuItems('MODULE-PLT-WFL')
+  },
+  {
+    id: 'document', label: 'Tài liệu', code: 'DOC', count: 8,
+    items: processMenuItems('MODULE-PLT-DOC')
+  },
+  {
+    id: 'signature', label: 'Ký số', code: 'SIG', count: 8,
+    items: processMenuItems('MODULE-PLT-SIG')
+  },
+  {
+    id: 'notification', label: 'Thông báo', code: 'NTF', count: 8,
+    items: processMenuItems('MODULE-PLT-NTF')
+  },
+  {
+    id: 'integration', label: 'Tích hợp', code: 'INT', count: 10,
+    items: processMenuItems('MODULE-PLT-INT')
+  },
+  {
+    id: 'security', label: 'Phân quyền', code: 'SEC', count: 10,
+    items: processMenuItems('MODULE-PLT-SEC')
+  },
+  {
+    id: 'audit', label: 'Audit log', code: 'AUD', count: 8,
+    items: processMenuItems('MODULE-PLT-AUD')
   }
 ]
+
+const moduleClusterById: Record<ModuleId, BusinessClusterId> = {
+  recruitment: 'core',
+  onboarding: 'core',
+  employee: 'core',
+  attendance: 'core',
+  leave: 'core',
+  payroll: 'core',
+  insurance: 'core',
+  tax: 'core',
+  selfService: 'core',
+  kpi: 'people',
+  review: 'people',
+  competency: 'people',
+  learning: 'people',
+  talent: 'people',
+  engagement: 'people',
+  headcount: 'organization',
+  organizationStructure: 'organization',
+  job: 'organization',
+  position: 'organization',
+  workforceReport: 'organization',
+  shared: 'platform',
+  configuration: 'platform',
+  workflow: 'platform',
+  document: 'platform',
+  signature: 'platform',
+  notification: 'platform',
+  integration: 'platform',
+  security: 'platform',
+  audit: 'platform'
+}
 
 const lifecycleSummary = ['Định biên nhân sự', 'Tuyển dụng', 'Tiếp nhận và hội nhập', 'Hồ sơ và hợp đồng', 'Đào tạo và đánh giá', 'Lương, thưởng và phúc lợi', 'Chấm công và quản lý làm việc', 'Thuyên chuyển và thôi việc']
 
@@ -148,6 +305,15 @@ const sortEmployeeItemsByLifecycle = (items: ModuleMenuItem[]) => [...items].sor
   return orderA - orderB
 })
 
+const processOrderedModules = new Set<ModuleId>([
+  'onboarding', 'leave', 'selfService',
+  'kpi', 'review', 'competency', 'learning', 'talent', 'engagement',
+  'headcount', 'organizationStructure', 'job', 'position', 'workforceReport',
+  'shared', 'configuration', 'workflow', 'document', 'signature', 'notification', 'integration', 'security', 'audit'
+])
+
+const sortModuleItemsByProcess = (items: ModuleMenuItem[]) => [...items].sort((a, b) => getMenuItemOrder(a) - getMenuItemOrder(b))
+
 const workflowBySopCode: Record<string, string> = {
   'SOP EMP05': 'LIFE-04',
   'SOP EMP07': 'LIFE-04',
@@ -161,15 +327,15 @@ const workflowBySopCode: Record<string, string> = {
 moduleMenus = moduleMenus.map((module) => {
   const items = (module.id === 'employee'
     ? [
-        { label: 'EMP01 - Thiết lập định biên nhân sự', sopCode: 'SOP EMP01', workflowId: 'LIFE-00' },
-        { label: 'EMP02 - Tăng nhân viên mới không qua quy trình tuyển dụng', sopCode: 'SOP EMP02', workflowId: 'LIFE-01' },
-        { label: 'EMP03 - Tăng nhân viên từ nhân viên cũ không qua tuyển dụng', sopCode: 'SOP EMP03', workflowId: 'LIFE-01' },
-        { label: 'EMP04 - Quản lý thông tin nhân viên', sopCode: 'SOP EMP04', workflowId: 'LIFE-02' },
-        { label: 'EMP05 - Tái ký hợp đồng lao động', sopCode: 'SOP EMP05', workflowId: 'LIFE-04' },
-        { label: 'EMP06 - Ký hợp đồng với nhân viên mới', sopCode: 'SOP EMP06', workflowId: 'LIFE-04' },
-        { label: 'EMP07 - Ký phụ lục khi thay đổi lương/phụ cấp', sopCode: 'SOP EMP07', workflowId: 'LIFE-04' },
-        ...module.items
-      ]
+      { label: 'EMP01 - Thiết lập định biên nhân sự', sopCode: 'SOP EMP01', workflowId: 'LIFE-00' },
+      { label: 'EMP02 - Tăng nhân viên mới không qua quy trình tuyển dụng', sopCode: 'SOP EMP02', workflowId: 'LIFE-01' },
+      { label: 'EMP03 - Tăng nhân viên từ nhân viên cũ không qua tuyển dụng', sopCode: 'SOP EMP03', workflowId: 'LIFE-01' },
+      { label: 'EMP04 - Quản lý thông tin nhân viên', sopCode: 'SOP EMP04', workflowId: 'LIFE-02' },
+      { label: 'EMP05 - Tái ký hợp đồng lao động', sopCode: 'SOP EMP05', workflowId: 'LIFE-04' },
+      { label: 'EMP06 - Ký hợp đồng với nhân viên mới', sopCode: 'SOP EMP06', workflowId: 'LIFE-04' },
+      { label: 'EMP07 - Ký phụ lục khi thay đổi lương/phụ cấp', sopCode: 'SOP EMP07', workflowId: 'LIFE-04' },
+      ...module.items
+    ]
     : module.items).map((item) => ({
       ...item,
       label: formatMenuLabel(item.label),
@@ -178,7 +344,11 @@ moduleMenus = moduleMenus.map((module) => {
 
   return {
     ...module,
-    items: module.id === 'employee' ? sortEmployeeItemsByLifecycle(items) : sortModuleItemsNewestFirst(items)
+    items: module.id === 'employee'
+      ? sortEmployeeItemsByLifecycle(items)
+      : processOrderedModules.has(module.id)
+        ? sortModuleItemsByProcess(items)
+        : sortModuleItemsNewestFirst(items)
   }
 })
 
@@ -188,7 +358,7 @@ const getProcessForMenuItem = (item: ModuleMenuItem) => {
   return processes.find((process) => normalizeSopCode(process.sopCode) === wantedCode) ?? (processes.length === 1 ? processes[0] : undefined)
 }
 
-export const SystemOverviewDashboard: React.FC = () => {
+export const SystemOverviewDashboard: React.FC<{ activeCluster: BusinessClusterId }> = ({ activeCluster }) => {
   useLanguage()
   const navigate = useNavigate()
   const [openModule, setOpenModule] = useState<ModuleId | null>(null)
@@ -219,11 +389,13 @@ export const SystemOverviewDashboard: React.FC = () => {
     navigate(`/employee-lifecycle/${isRecruitmentProcess ? 'flowchart' : 'infographic'}/${item.workflowId}?${params.toString()}`)
   }
 
+  const visibleModuleMenus = moduleMenus.filter((module) => moduleClusterById[module.id] === activeCluster)
+
   return (
     <div className="space-y-5">
-      <section className="sticky top-[65px] z-40 overflow-visible rounded-lg border border-slate-300 bg-white shadow-sm dark:border-slate-700 dark:bg-slate-900">
+      <section className="sticky top-60px z-40 overflow-visible rounded-lg border border-slate-300 bg-white shadow-sm dark:border-slate-700 dark:bg-slate-900">
         <div className="flex flex-wrap items-start gap-1 overflow-visible bg-[#1f5f86] px-2 py-1.5 text-white">
-          {moduleMenus.map((module) => {
+          {visibleModuleMenus.map((module) => {
             const active = openModule === module.id
             return (
               <div key={module.id} className="relative shrink-0" onMouseEnter={() => { keepMenuOpen(); setOpenModule(module.id); setOpenProcessKey(null); setOpenProcessTop(8) }} onMouseLeave={scheduleMenuClose}>
@@ -241,7 +413,7 @@ export const SystemOverviewDashboard: React.FC = () => {
                         const processKey = `${module.id}-${item.sopCode ?? item.label}-${item.stepNumber ?? item.label}`
                         const hasSteps = Boolean(process?.steps?.length)
                         return <button key={`${module.id}-${item.label}`} type="button" disabled={item.disabled} onMouseEnter={(event) => { if (hasSteps) { const listContainer = event.currentTarget.parentElement; const rowTop = event.currentTarget.offsetTop - (listContainer?.scrollTop ?? 0); setOpenProcessKey(processKey); setOpenProcessTop(Math.max(8, rowTop + 8)) } }} onClick={() => !item.disabled && openMenuItem(item, item.stepNumber)} className={`flex w-full items-center justify-between gap-2 rounded-md px-2 py-2 text-left text-xs transition-colors ${item.disabled ? 'cursor-not-allowed text-slate-400' : openProcessKey === processKey ? 'bg-[#2e8bbd] text-white' : 'text-slate-700 hover:bg-sky-50 hover:text-[#1f5f86] dark:text-slate-200 dark:hover:bg-sky-500/15 dark:hover:text-sky-300'}`}>
-                          <span className="min-w-0">{item.label}</span><span className={`flex h-4 w-4 shrink-0 items-center justify-center rounded text-[10px] font-bold ${item.disabled ? 'bg-slate-100 text-slate-400' : openProcessKey === processKey ? 'bg-white/20 text-white' : 'bg-sky-100 text-[#1f5f86]'}`}>{item.disabled ? '–' : hasSteps ? <ChevronRight className="h-3 w-3" /> : '›'}</span>
+                          <span className="min-w-0">{item.label}</span><span className={`flex h-4 w-4 shrink-0 items-center justify-center rounded text-[10px] font-bold ${item.disabled ? 'bg-slate-100 text-slate-400' : openProcessKey === processKey ? 'bg-white/20 text-white' : 'bg-sky-100 text-[#1f5f86]'}`}>{item.disabled ? '-' : hasSteps ? <ChevronRight className="h-3 w-3" /> : '›'}</span>
                         </button>
                       })}
                     </div>
@@ -266,8 +438,26 @@ export const SystemOverviewDashboard: React.FC = () => {
 
       <section id="coverage-wheel" className="mx-auto w-[92%] max-w-[1920px] rounded-lg border border-slate-300 bg-white shadow-sm scroll-mt-28 dark:border-slate-700 dark:bg-slate-900">
         <div className="flex flex-col gap-3 border-b border-slate-200 px-4 py-3 lg:flex-row lg:items-center lg:justify-between dark:border-slate-700"><div><h3 className="flex items-center gap-2 text-sm font-bold text-slate-900 dark:text-white"><PieChart className="h-4 w-4 text-[#1f5f86] dark:text-sky-300" /> Tổng quan phân hệ và dữ liệu</h3></div><div className="flex flex-wrap items-center gap-1 rounded border border-slate-200 bg-slate-50 p-1 dark:border-slate-700 dark:bg-slate-800"><ViewButton active={coverageViewMode === 'wheel'} onClick={() => setCoverageViewMode('wheel')} icon={<PieChart className="h-3.5 w-3.5" />}>Quan hệ phân hệ</ViewButton><ViewButton active={coverageViewMode === 'matrix'} onClick={() => setCoverageViewMode('matrix')} icon={<Workflow className="h-3.5 w-3.5" />}>Đầu vào và kết quả</ViewButton><ViewButton active={coverageViewMode === 'flow'} onClick={() => setCoverageViewMode('flow')} icon={<GitBranch className="h-3.5 w-3.5" />}>Luồng liên phân hệ</ViewButton><button type="button" onClick={() => setIsCoverageExpanded((value) => !value)} className="px-2 py-1.5 text-xs font-semibold text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white">{isCoverageExpanded ? 'Thu gọn' : 'Mở rộng'}</button></div></div>
-        {isCoverageExpanded && <div className="p-4">{coverageViewMode === 'wheel' && <RadialEcosystemChart />}{coverageViewMode === 'matrix' && <ProcessInputOutputView />}{coverageViewMode === 'flow' && <CompactDataFlowDiagram />}</div>}
+        {isCoverageExpanded && (
+          <div className="p-4">
+            {activeCluster === 'people' ? (
+              <PeopleDevelopmentCoverage mode={coverageViewMode} />
+            ) : activeCluster === 'organization' ? (
+              <OrganizationManagementCoverage mode={coverageViewMode} />
+            ) : activeCluster === 'platform' ? (
+              <PlatformFoundationCoverage mode={coverageViewMode} />
+            ) : (
+              <>
+                {coverageViewMode === 'wheel' && <RadialEcosystemChart />}
+                {coverageViewMode === 'matrix' && <ProcessInputOutputView />}
+                {coverageViewMode === 'flow' && <CompactDataFlowDiagram />}
+              </>
+            )}
+          </div>
+        )}
       </section>
+
+      {activeCluster !== 'core' && <ClusterProcessExplorer cluster={activeCluster} />}
     </div>
   )
 }

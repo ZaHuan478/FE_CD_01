@@ -3,9 +3,13 @@ import { useNavigate } from 'react-router-dom'
 import {
   UserPlus,
   FileText,
+  ClipboardCheck,
+  CalendarDays,
+  PanelsTopLeft,
   Clock,
   Wallet,
   ShieldCheck,
+  Receipt,
   UserCheck,
   ArrowRight,
   Pause,
@@ -32,7 +36,7 @@ interface ModuleNode {
   workflowPath: string
 }
 
-const FIVE_MODULES: ModuleNode[] = [
+const CORE_MODULES: ModuleNode[] = [
   {
     id: 'ats',
     code: 'REC',
@@ -58,6 +62,18 @@ const FIVE_MODULES: ModuleNode[] = [
     workflowPath: '/employee-lifecycle/infographic/LIFE-02'
   },
   {
+    id: 'onb',
+    code: 'ONB',
+    name: 'Onboarding',
+    outcome: 'Nhân viên sẵn sàng làm việc',
+    icon: <ClipboardCheck className="w-4 h-4" strokeWidth={1.8} />,
+    color: '#2563EB',
+    receivesFrom: 'Hồ sơ trúng tuyển, offer đã chấp thuận và ngày nhận việc từ Tuyển dụng',
+    sendsTo: 'Hồ sơ đã kích hoạt, checklist hội nhập và tài khoản chuyển sang Nhân sự, Chấm công và ESS/MSS',
+    businessMeaning: 'Chuẩn bị liên phòng ban, tiếp nhận ngày đầu, đào tạo hội nhập và bàn giao nhân viên mới sang vận hành thường xuyên.',
+    workflowPath: '/employee-lifecycle/infographic/MODULE-ONB'
+  },
+  {
     id: 'att',
     code: 'ATT',
     name: 'Chấm công',
@@ -65,9 +81,21 @@ const FIVE_MODULES: ModuleNode[] = [
     icon: <Clock className="w-4 h-4" strokeWidth={1.8} />,
     color: '#2563EB',
     receivesFrom: 'Phân ca làm việc, đối tượng chấm công từ phân hệ Nhân sự',
-    sendsTo: 'Bảng tổng hợp ngày công, giờ OT và phép tồn chuyển sang phân hệ Lương',
-    businessMeaning: 'Ghi nhận thời gian làm việc thực tế, quản lý đơn từ nghỉ phép và lịch làm việc.',
-    workflowPath: '/employee-lifecycle/infographic/LIFE-06'
+    sendsTo: 'Bảng tổng hợp ngày công và giờ OT chuyển sang Lương; vắng mặt đối soát với Nghỉ phép',
+    businessMeaning: 'Ghi nhận thời gian làm việc thực tế, lịch ca, tăng ca và xử lý công bất thường trước khi chốt kỳ.',
+    workflowPath: '/employee-lifecycle/infographic/MODULE-ATT'
+  },
+  {
+    id: 'leave',
+    code: 'LEV',
+    name: 'Nghỉ phép',
+    outcome: 'Đơn nghỉ và số dư phép',
+    icon: <CalendarDays className="w-4 h-4" strokeWidth={1.8} />,
+    color: '#2563EB',
+    receivesFrom: 'Hồ sơ nhân viên, lịch làm việc, chính sách nghỉ và chứng từ nghỉ chế độ',
+    sendsTo: 'Ngày nghỉ đã duyệt sang Chấm công; nghỉ không lương sang Lương; nghỉ chế độ sang Bảo hiểm',
+    businessMeaning: 'Quản lý đơn nghỉ, luồng phê duyệt, số dư phép, quyết toán cuối năm và các chế độ nghỉ đặc thù.',
+    workflowPath: '/employee-lifecycle/infographic/MODULE-ATT?sop=SOP-ATT-06'
   },
   {
     id: 'pay',
@@ -77,9 +105,9 @@ const FIVE_MODULES: ModuleNode[] = [
     icon: <Wallet className="w-4 h-4" strokeWidth={1.8} />,
     color: '#2563EB',
     receivesFrom: 'Mức lương hợp đồng từ Nhân sự & Dữ liệu ngày công từ Chấm công',
-    sendsTo: 'Mức đóng bảo hiểm sang Bảo hiểm; Lệnh chi trả sang Ngân hàng',
+    sendsTo: 'Mức đóng bảo hiểm sang Bảo hiểm; Thu nhập chịu thuế sang Thuế; Lệnh chi trả sang Ngân hàng',
     businessMeaning: 'Tự động tính toán thu nhập, các khoản khấu trừ, thuế TNCN và phát hành phiếu lương.',
-    workflowPath: '/employee-lifecycle/infographic/LIFE-05'
+    workflowPath: '/employee-lifecycle/infographic/MODULE-PAY'
   },
   {
     id: 'ins',
@@ -91,16 +119,47 @@ const FIVE_MODULES: ModuleNode[] = [
     receivesFrom: 'Mức lương trích nộp từ Lương & Thông tin nhân thân từ Nhân sự',
     sendsTo: 'Hồ sơ điện tử nộp Cơ quan BHXH & thực hiện chế độ bảo hiểm',
     businessMeaning: 'Quản lý thủ tục tăng giảm BHXH, BHYT, BHTN và giải quyết chế độ ốm đau thai sản.',
-    workflowPath: '/employee-lifecycle/infographic/LIFE-04'
+    workflowPath: '/employee-lifecycle/infographic/MODULE-INS'
+  },
+  {
+    id: 'tax',
+    code: 'TAX',
+    name: 'Thuế',
+    outcome: 'Hồ sơ thuế & Nghĩa vụ',
+    icon: <Receipt className="w-4 h-4" strokeWidth={1.8} />,
+    color: '#2563EB',
+    receivesFrom: 'Thu nhập chịu thuế từ Lương & Thông tin người phụ thuộc từ Nhân sự',
+    sendsTo: 'Hồ sơ kê khai điện tử & chứng từ khấu trừ nộp Cơ quan Thuế',
+    businessMeaning: 'Quản lý mã số thuế, đăng ký người phụ thuộc, khấu trừ và quyết toán thuế TNCN.',
+    workflowPath: '/employee-lifecycle/infographic/MODULE-TAX'
+  },
+  {
+    id: 'ess',
+    code: 'ESS',
+    name: 'ESS/MSS',
+    outcome: 'Yêu cầu tự phục vụ',
+    icon: <PanelsTopLeft className="w-4 h-4" strokeWidth={1.8} />,
+    color: '#2563EB',
+    receivesFrom: 'Hồ sơ, công, phép, lương, tài liệu, workflow và quan hệ quản lý từ HRMS',
+    sendsTo: 'Yêu cầu và quyết định được định tuyến về đúng phân hệ nguồn, Workflow và Audit log',
+    businessMeaning: 'Nhân viên tự tra cứu và gửi yêu cầu; quản lý phê duyệt, theo dõi đội ngũ và khởi tạo giao dịch theo thẩm quyền.',
+    workflowPath: '/employee-lifecycle/infographic/MODULE-ESS'
   }
 ]
 
+const coreModuleOrder = ['ats', 'onb', 'emp', 'att', 'leave', 'pay', 'ins', 'tax', 'ess']
+CORE_MODULES.sort((a, b) => coreModuleOrder.indexOf(a.id) - coreModuleOrder.indexOf(b.id))
+
 const SUMMARY_STEPS = [
   { step: 'Tuyển người', desc: 'Thu hút & tuyển chọn' },
+  { step: 'Onboarding', desc: 'Chuẩn bị & hội nhập' },
   { step: 'Quản lý hồ sơ', desc: 'Lưu trữ & bố trí' },
   { step: 'Ghi nhận thời gian làm việc', desc: 'Chấm công & phân ca' },
+  { step: 'Quản lý nghỉ phép', desc: 'Đơn nghỉ & số dư' },
   { step: 'Tính lương', desc: 'Tổng hợp & chi trả' },
-  { step: 'Thực hiện chế độ bảo hiểm', desc: 'Trích nộp & giải quyết chế độ' }
+  { step: 'Thực hiện chế độ bảo hiểm', desc: 'Trích nộp & giải quyết chế độ' },
+  { step: 'Khấu trừ & quyết toán thuế', desc: 'Kê khai & quyết toán TNCN' },
+  { step: 'Tự phục vụ', desc: 'ESS & MSS' }
 ]
 
 export const HrmModuleRelationshipSection: React.FC<HrmModuleRelationshipSectionProps> = ({
@@ -111,10 +170,10 @@ export const HrmModuleRelationshipSection: React.FC<HrmModuleRelationshipSection
   const navigate = useNavigate()
   const arrowMarkerId = useId()
   const activeArrowMarkerId = useId()
-  
+
   const [hoveredModule, setHoveredModule] = useState<ModuleNode | null>(null)
   const [activeModule, setActiveModule] = useState<ModuleNode>(
-    FIVE_MODULES.find(m => m.id === selectedModuleId) || FIVE_MODULES[1]
+    CORE_MODULES.find(m => m.id === selectedModuleId) || CORE_MODULES[1]
   )
   const [isRotating, setIsRotating] = useState<boolean>(true)
   const [rotationAngle, setRotationAngle] = useState<number>(0)
@@ -142,7 +201,7 @@ export const HrmModuleRelationshipSection: React.FC<HrmModuleRelationshipSection
   // Sync active module with prop
   useEffect(() => {
     if (selectedModuleId) {
-      const match = FIVE_MODULES.find(m => m.id === selectedModuleId)
+      const match = CORE_MODULES.find(m => m.id === selectedModuleId)
       if (match) {
         setActiveModule(match)
       }
@@ -197,11 +256,11 @@ export const HrmModuleRelationshipSection: React.FC<HrmModuleRelationshipSection
   // Geometry dimensions for SVG orbit
   const svgSize = 640
   const center = svgSize / 2
-  const orbitRadius = 220
+  const orbitRadius = 235
 
-  // 5 nodes spaced at 72 degrees starting at -90deg (top)
-  const nodePositions = FIVE_MODULES.map((mod, idx) => {
-    const baseAngle = -90 + idx * 72 // degrees: -90, -18, 54, 126, 198
+  // Nodes spaced evenly starting at -90deg (top)
+  const nodePositions = CORE_MODULES.map((mod, idx) => {
+    const baseAngle = -90 + idx * (360 / CORE_MODULES.length)
     const currentAngle = prefersReducedMotion ? baseAngle : baseAngle + rotationAngle
     const rad = (currentAngle * Math.PI) / 180
     const x = center + orbitRadius * Math.cos(rad)
@@ -230,9 +289,6 @@ export const HrmModuleRelationshipSection: React.FC<HrmModuleRelationshipSection
           <h2 className="text-lg sm:text-xl font-bold text-slate-900 dark:text-white tracking-tight">
             Dữ liệu nhân sự được kế thừa xuyên suốt
           </h2>
-          <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-0.5">
-            Mỗi phân hệ tiếp nhận kết quả từ bước trước để tiếp tục vận hành nghiệp vụ.
-          </p>
         </div>
 
         {/* Orbit Motion Controls (Accessibility & Inspection) */}
@@ -241,11 +297,10 @@ export const HrmModuleRelationshipSection: React.FC<HrmModuleRelationshipSection
             <button
               type="button"
               onClick={() => setIsRotating(prev => !prev)}
-              className={`px-3 py-1.5 text-xs font-semibold rounded-lg border transition-colors flex items-center gap-1.5 cursor-pointer ${
-                isRotating
-                  ? 'bg-slate-50 dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-100 border-slate-200 dark:border-slate-700'
-                  : 'bg-blue-50 dark:bg-blue-950/60 text-blue-700 dark:text-blue-300 border-blue-200 dark:border-blue-800'
-              }`}
+              className={`px-3 py-1.5 text-xs font-semibold rounded-lg border transition-colors flex items-center gap-1.5 cursor-pointer ${isRotating
+                ? 'bg-slate-50 dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-100 border-slate-200 dark:border-slate-700'
+                : 'bg-blue-50 dark:bg-blue-950/60 text-blue-700 dark:text-blue-300 border-blue-200 dark:border-blue-800'
+                }`}
               title={isRotating ? 'Tạm dừng chuyển động quỹ đạo' : 'Tiếp tục chuyển động quỹ đạo'}
             >
               {isRotating ? (
@@ -337,11 +392,10 @@ export const HrmModuleRelationshipSection: React.FC<HrmModuleRelationshipSection
                   {/* Subtle directional connector line along orbit */}
                   <path
                     d={`M ${pos.x} ${pos.y} A ${orbitRadius} ${orbitRadius} 0 0 1 ${nextPos.x} ${nextPos.y}`}
-                    className={`transition-colors duration-300 ${
-                      isHoveredFlow
-                        ? 'stroke-blue-500/80 dark:stroke-blue-400'
-                        : 'stroke-slate-300/80 dark:stroke-slate-700'
-                    }`}
+                    className={`transition-colors duration-300 ${isHoveredFlow
+                      ? 'stroke-blue-500/80 dark:stroke-blue-400'
+                      : 'stroke-slate-300/80 dark:stroke-slate-700'
+                      }`}
                     strokeWidth={isHoveredFlow ? '2' : '1.5'}
                     strokeDasharray={isHoveredFlow ? 'none' : '5 4'}
                     markerEnd={`url(#${isHoveredFlow ? activeArrowMarkerId : arrowMarkerId})`}
@@ -362,11 +416,10 @@ export const HrmModuleRelationshipSection: React.FC<HrmModuleRelationshipSection
                   y1={center}
                   x2={pos.x}
                   y2={pos.y}
-                  className={`transition-all duration-300 ${
-                    isHighlighted
-                      ? 'stroke-blue-600 dark:stroke-blue-500'
-                      : 'stroke-slate-200 dark:stroke-slate-800'
-                  }`}
+                  className={`transition-all duration-300 ${isHighlighted
+                    ? 'stroke-blue-600 dark:stroke-blue-500'
+                    : 'stroke-slate-200 dark:stroke-slate-800'
+                    }`}
                   strokeWidth={isHighlighted ? '2.5' : '1.25'}
                   strokeDasharray={isHighlighted ? 'none' : '3 3'}
                 />
@@ -389,7 +442,7 @@ export const HrmModuleRelationshipSection: React.FC<HrmModuleRelationshipSection
             </span>
           </div>
 
-          {/* 5 Orbit Module Nodes (Absolute positioned HTML cards over SVG for crisp typography & click/hover) */}
+          {/* Orbit Module Nodes (Absolute positioned HTML cards over SVG for crisp typography & click/hover) */}
           {nodePositions.map(({ mod, x, y }) => {
             const isHovered = hoveredModule?.id === mod.id
             const isActive = activeModule.id === mod.id
@@ -410,45 +463,32 @@ export const HrmModuleRelationshipSection: React.FC<HrmModuleRelationshipSection
                   onClick={() => handleModuleClick(mod)}
                   onMouseEnter={() => setHoveredModule(mod)}
                   onMouseLeave={() => setHoveredModule(null)}
-                  className={`w-[172px] rounded-xl p-2.5 text-left transition-all duration-200 cursor-pointer border select-none ${
-                    isSelectedOrHovered
-                      ? 'bg-blue-600 text-white border-blue-600 shadow-md ring-3 ring-blue-600/20 scale-105'
-                      : 'bg-white dark:bg-slate-900 text-slate-800 dark:text-slate-100 border-slate-200 dark:border-slate-700 hover:border-blue-400 dark:hover:border-blue-500 hover:shadow-2xs hover:scale-102'
-                  }`}
+                  className={`w-[142px] rounded-xl p-2 text-left transition-all duration-200 cursor-pointer border select-none ${isSelectedOrHovered
+                    ? 'bg-blue-600 text-white border-blue-600 shadow-md ring-3 ring-blue-600/20 scale-105'
+                    : 'bg-white dark:bg-slate-900 text-slate-800 dark:text-slate-100 border-slate-200 dark:border-slate-700 hover:border-blue-400 dark:hover:border-blue-500 hover:shadow-2xs hover:scale-102'
+                    }`}
                 >
                   <div className="flex items-center gap-2">
                     <div
-                      className={`w-7 h-7 rounded-lg flex items-center justify-center shrink-0 transition-colors ${
-                        isSelectedOrHovered
-                          ? 'bg-white/20 text-white'
-                          : 'bg-blue-50 dark:bg-slate-800 text-blue-600 dark:text-blue-400 border border-slate-200/70 dark:border-slate-700'
-                      }`}
+                      className={`w-7 h-7 rounded-lg flex items-center justify-center shrink-0 transition-colors ${isSelectedOrHovered
+                        ? 'bg-white/20 text-white'
+                        : 'bg-blue-50 dark:bg-slate-800 text-blue-600 dark:text-blue-400 border border-slate-200/70 dark:border-slate-700'
+                        }`}
                     >
                       {mod.icon}
                     </div>
                     <div className="min-w-0 flex-1">
-                      <div className="flex items-center justify-between">
+                      <div className="flex items-center">
                         <span
-                          className={`text-xs font-bold truncate ${
-                            isSelectedOrHovered ? 'text-white' : 'text-slate-900 dark:text-white'
-                          }`}
+                          className={`text-[11px] font-bold truncate ${isSelectedOrHovered ? 'text-white' : 'text-slate-900 dark:text-white'
+                            }`}
                         >
                           {mod.name}
                         </span>
-                        <span
-                          className={`text-[9px] font-semibold font-mono uppercase px-1 rounded ${
-                            isSelectedOrHovered
-                              ? 'bg-white/25 text-white'
-                              : 'bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400'
-                          }`}
-                        >
-                          {mod.code}
-                        </span>
                       </div>
                       <p
-                        className={`text-[10px] leading-tight truncate mt-0.5 ${
-                          isSelectedOrHovered ? 'text-blue-100' : 'text-slate-500 dark:text-slate-400'
-                        }`}
+                        className={`text-[10px] leading-tight truncate mt-0.5 ${isSelectedOrHovered ? 'text-blue-100' : 'text-slate-500 dark:text-slate-400'
+                          }`}
                       >
                         {mod.outcome}
                       </p>
@@ -542,23 +582,21 @@ export const HrmModuleRelationshipSection: React.FC<HrmModuleRelationshipSection
 
         {/* Vertical Connected Flow */}
         <div className="space-y-2 relative">
-          {FIVE_MODULES.map((mod, idx) => {
+          {CORE_MODULES.map((mod, idx) => {
             const isSelected = activeModule.id === mod.id
             return (
               <div key={mod.id} className="space-y-1">
                 <button
                   type="button"
                   onClick={() => handleModuleClick(mod)}
-                  className={`w-full p-3 rounded-xl border text-left transition-colors flex items-start gap-3 cursor-pointer ${
-                    isSelected
-                      ? 'bg-blue-600 text-white border-blue-600 shadow-sm'
-                      : 'bg-white dark:bg-slate-900 text-slate-800 dark:text-slate-100 border-slate-200 dark:border-slate-700'
-                  }`}
+                  className={`w-full p-3 rounded-xl border text-left transition-colors flex items-start gap-3 cursor-pointer ${isSelected
+                    ? 'bg-blue-600 text-white border-blue-600 shadow-sm'
+                    : 'bg-white dark:bg-slate-900 text-slate-800 dark:text-slate-100 border-slate-200 dark:border-slate-700'
+                    }`}
                 >
                   <div
-                    className={`w-8 h-8 rounded-lg flex items-center justify-center shrink-0 ${
-                      isSelected ? 'bg-white/20 text-white' : 'bg-blue-50 dark:bg-slate-800 text-blue-600 dark:text-blue-400'
-                    }`}
+                    className={`w-8 h-8 rounded-lg flex items-center justify-center shrink-0 ${isSelected ? 'bg-white/20 text-white' : 'bg-blue-50 dark:bg-slate-800 text-blue-600 dark:text-blue-400'
+                      }`}
                   >
                     {mod.icon}
                   </div>
@@ -568,9 +606,8 @@ export const HrmModuleRelationshipSection: React.FC<HrmModuleRelationshipSection
                         {idx + 1}. {mod.name}
                       </span>
                       <span
-                        className={`text-[9px] font-mono font-bold px-1.5 py-0.5 rounded ${
-                          isSelected ? 'bg-white/25 text-white' : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300'
-                        }`}
+                        className={`text-[9px] font-mono font-bold px-1.5 py-0.5 rounded ${isSelected ? 'bg-white/25 text-white' : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300'
+                          }`}
                       >
                         {mod.code}
                       </span>
@@ -603,11 +640,11 @@ export const HrmModuleRelationshipSection: React.FC<HrmModuleRelationshipSection
       <div className="pt-2 border-t border-slate-100 dark:border-slate-800">
         <div className="flex items-center justify-between mb-2">
           <span className="text-[11px] font-bold text-slate-600 dark:text-slate-400 uppercase tracking-tight">
-            Luồng nghiệp vụ xuyên suốt 5 phân hệ
+            Luồng nghiệp vụ xuyên suốt {CORE_MODULES.length} phân hệ Vận hành lõi
           </span>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-2">
+        <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-5 2xl:grid-cols-9">
           {SUMMARY_STEPS.map((item, idx) => (
             <div
               key={idx}

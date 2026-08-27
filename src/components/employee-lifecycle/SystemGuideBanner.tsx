@@ -160,23 +160,23 @@ export const SystemGuideBanner: React.FC = () => {
 
               {/* Step 2: Process */}
               <div className="flex items-center gap-3 bg-slate-800 p-3 rounded-lg border border-slate-700 w-full lg:w-auto">
-                <Workflow className="w-5 h-5 text-indigo-400 shrink-0" />
+                <Workflow className="w-5 h-5 text-sky-400 shrink-0" />
                 <div>
-                  <div className="text-xs font-bold text-indigo-300">PROCESS ({language === 'vi' ? 'Quy trình' : 'Workflow'})</div>
+                  <div className="text-xs font-bold text-sky-300">PROCESS ({language === 'vi' ? 'Quy trình' : 'Workflow'})</div>
                   <div className="text-[11px] text-slate-400">{language === 'vi' ? 'Nhập dữ liệu, Kiểm tra & Phê duyệt' : 'Data Entry, Validation & Approval'}</div>
                 </div>
               </div>
 
-              <div className="text-purple-400 font-bold flex items-center gap-1">
+              <div className="text-sky-400 font-bold flex items-center gap-1">
                 <ArrowRight className="w-5 h-5 rotate-90 lg:rotate-0 transition-transform" />
               </div>
 
               {/* Step 3: Life Output */}
-              <div className="flex items-center gap-3 bg-gradient-to-r from-purple-900 to-indigo-900 p-3 rounded-lg border border-purple-500/50 w-full lg:w-auto">
-                <RefreshCw className="w-5 h-5 text-purple-300 shrink-0" />
+              <div className="flex items-center gap-3 bg-gradient-to-r from-[#1f5f86] to-[#2e8bbd] p-3 rounded-lg border border-sky-400/50 w-full lg:w-auto text-white">
+                <RefreshCw className="w-5 h-5 text-sky-200 shrink-0" />
                 <div>
-                  <div className="text-xs font-bold text-purple-200">{language === 'vi' ? 'VÒNG ĐỜI NHÂN VIÊN' : 'EMPLOYEE LIFECYCLE'} (LIFE-00..07)</div>
-                  <div className="text-[11px] text-purple-300">{language === 'vi' ? 'Cập nhật vào Hồ sơ Nhân viên Trung tâm' : 'Updates Central Employee Master Profile'}</div>
+                  <div className="text-xs font-bold text-white">{language === 'vi' ? 'VÒNG ĐỜI NHÂN VIÊN' : 'EMPLOYEE LIFECYCLE'} (LIFE-00..07)</div>
+                  <div className="text-[11px] text-sky-100">{language === 'vi' ? 'Cập nhật vào Hồ sơ Nhân viên Trung tâm' : 'Updates Central Employee Master Profile'}</div>
                 </div>
               </div>
 
