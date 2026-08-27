@@ -13,6 +13,30 @@ export const translations: TranslationDict = {
     vi: 'Enterprise HR SaaS Architecture',
     en: 'Enterprise HR SaaS Architecture'
   },
+  'header.layer1Subtitle': {
+    vi: 'TẦNG 1 · DỮ LIỆU NỀN TẢNG',
+    en: 'LAYER 1 · MASTER DATA'
+  },
+  'header.layer1Title': {
+    vi: 'Trung tâm Master Data',
+    en: 'Master Data Hub'
+  },
+  'header.layer2Subtitle': {
+    vi: 'TẦNG 2 · VÒNG ĐỜI NHÂN VIÊN',
+    en: 'LAYER 2 · EMPLOYEE LIFECYCLE'
+  },
+  'header.layer2Title': {
+    vi: 'Hành trình vòng đời nhân viên',
+    en: 'Employee Lifecycle Journey'
+  },
+  'header.layer3Subtitle': {
+    vi: 'TẦNG 3 · NGHIỆP VỤ PHÁT SINH',
+    en: 'LAYER 3 · OPERATIONAL PROCESSES'
+  },
+  'header.layer3Title': {
+    vi: 'Nghiệp vụ phát sinh & Vận hành',
+    en: 'Operational Processes'
+  },
   'header.productionReady': {
     vi: 'Sẵn sàng Vận hành',
     en: 'Production Ready'

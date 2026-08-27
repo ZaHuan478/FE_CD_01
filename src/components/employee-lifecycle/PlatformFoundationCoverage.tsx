@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react'
+import React, { useEffect, useRef, useState, useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
 import {
   ArrowRight,
@@ -245,16 +245,18 @@ export const PlatformFoundationCoverage: React.FC<{ mode: PlatformCoverageMode }
   const center = svgSize / 2
   const orbitRadius = 235
 
-  const nodePositions = PLATFORM_MODULES.map((module, index) => {
-    const baseAngle = -90 + index * (360 / PLATFORM_MODULES.length)
-    const angle = prefersReducedMotion ? baseAngle : baseAngle + rotationAngle
-    const radians = (angle * Math.PI) / 180
-    return {
-      module,
-      x: center + orbitRadius * Math.cos(radians),
-      y: center + orbitRadius * Math.sin(radians)
-    }
-  })
+  const nodePositions = useMemo(() => {
+    return PLATFORM_MODULES.map((module, index) => {
+      const baseAngle = -90 + index * (360 / PLATFORM_MODULES.length)
+      const angle = prefersReducedMotion ? baseAngle : baseAngle + rotationAngle
+      const radians = (angle * Math.PI) / 180
+      return {
+        module,
+        x: center + orbitRadius * Math.cos(radians),
+        y: center + orbitRadius * Math.sin(radians)
+      }
+    })
+  }, [prefersReducedMotion, rotationAngle, center, orbitRadius])
 
   const openModule = (module: PlatformModule) => {
     navigate(`/employee-lifecycle/infographic/${module.workflowId}?sop=${encodeURIComponent(module.firstSopCode)}`)

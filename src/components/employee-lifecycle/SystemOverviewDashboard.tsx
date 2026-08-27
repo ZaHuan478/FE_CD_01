@@ -2,7 +2,7 @@ import React, { useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { ChevronDown, ChevronRight, GitBranch, PieChart, Workflow } from 'lucide-react'
 import { RadialEcosystemChart } from './RadialEcosystemChart'
-import { ProcessInputOutputView } from './ProcessInputOutputView'
+import { UnifiedProcessInputOutputView } from './UnifiedProcessInputOutputView'
 import { CompactDataFlowDiagram } from './data-flow/CompactDataFlowDiagram'
 import { PeopleDevelopmentCoverage } from './PeopleDevelopmentCoverage'
 import { OrganizationManagementCoverage } from './OrganizationManagementCoverage'
@@ -440,7 +440,9 @@ export const SystemOverviewDashboard: React.FC<{ activeCluster: BusinessClusterI
         <div className="flex flex-col gap-3 border-b border-slate-200 px-4 py-3 lg:flex-row lg:items-center lg:justify-between dark:border-slate-700"><div><h3 className="flex items-center gap-2 text-sm font-bold text-slate-900 dark:text-white"><PieChart className="h-4 w-4 text-[#1f5f86] dark:text-sky-300" /> Tổng quan phân hệ và dữ liệu</h3></div><div className="flex flex-wrap items-center gap-1 rounded border border-slate-200 bg-slate-50 p-1 dark:border-slate-700 dark:bg-slate-800"><ViewButton active={coverageViewMode === 'wheel'} onClick={() => setCoverageViewMode('wheel')} icon={<PieChart className="h-3.5 w-3.5" />}>Quan hệ phân hệ</ViewButton><ViewButton active={coverageViewMode === 'matrix'} onClick={() => setCoverageViewMode('matrix')} icon={<Workflow className="h-3.5 w-3.5" />}>Đầu vào và kết quả</ViewButton><ViewButton active={coverageViewMode === 'flow'} onClick={() => setCoverageViewMode('flow')} icon={<GitBranch className="h-3.5 w-3.5" />}>Luồng liên phân hệ</ViewButton><button type="button" onClick={() => setIsCoverageExpanded((value) => !value)} className="px-2 py-1.5 text-xs font-semibold text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white">{isCoverageExpanded ? 'Thu gọn' : 'Mở rộng'}</button></div></div>
         {isCoverageExpanded && (
           <div className="p-4">
-            {activeCluster === 'people' ? (
+            {coverageViewMode === 'matrix' ? (
+              <UnifiedProcessInputOutputView cluster={activeCluster} />
+            ) : activeCluster === 'people' ? (
               <PeopleDevelopmentCoverage mode={coverageViewMode} />
             ) : activeCluster === 'organization' ? (
               <OrganizationManagementCoverage mode={coverageViewMode} />
@@ -449,7 +451,6 @@ export const SystemOverviewDashboard: React.FC<{ activeCluster: BusinessClusterI
             ) : (
               <>
                 {coverageViewMode === 'wheel' && <RadialEcosystemChart />}
-                {coverageViewMode === 'matrix' && <ProcessInputOutputView />}
                 {coverageViewMode === 'flow' && <CompactDataFlowDiagram />}
               </>
             )}

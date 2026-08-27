@@ -1,0 +1,39 @@
+import { SOP_DATABASE } from '../workflow-detail/data/sopDatabase'
+import type { SopSubProcess } from '../workflow-detail/types'
+import { LIFECYCLE_STAGES, LIFECYCLE_STAGE_ORDER, LIFECYCLE_SCENARIOS } from './lifecycleJourneyData'
+import type { LifecycleStageId, ScenarioId, LifecycleStageDefinition, ScenarioDefinition } from './types'
+
+export function getStageDefinition(stageId: LifecycleStageId): LifecycleStageDefinition {
+  return LIFECYCLE_STAGES[stageId] ?? LIFECYCLE_STAGES['LIFE-00']
+}
+
+export function getStageSops(stageId: LifecycleStageId): SopSubProcess[] {
+  return SOP_DATABASE[stageId] ?? []
+}
+
+export function getTotalDynamicSops(): number {
+  return LIFECYCLE_STAGE_ORDER.reduce((total, stageId) => {
+    return total + (SOP_DATABASE[stageId]?.length ?? 0)
+  }, 0)
+}
+
+export function getScenario(scenarioId: ScenarioId): ScenarioDefinition {
+  return LIFECYCLE_SCENARIOS.find((s) => s.id === scenarioId) ?? LIFECYCLE_SCENARIOS[0]
+}
+
+export function isStageHighlightedInScenario(stageId: LifecycleStageId, scenarioId: ScenarioId): boolean {
+  if (scenarioId === 'all') return true
+  const scenario = getScenario(scenarioId)
+  return scenario.highlightStages.includes(stageId)
+}
+
+export function getDistinctSubsystemsCount(): number {
+  const subsystems = new Set<string>()
+  for (const stage of Object.values(LIFECYCLE_STAGES)) {
+    subsystems.add(stage.primarySubsystem)
+    for (const rel of stage.relatedSubsystems) {
+      subsystems.add(rel)
+    }
+  }
+  return subsystems.size
+}

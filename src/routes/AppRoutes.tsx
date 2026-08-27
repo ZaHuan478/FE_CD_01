@@ -18,6 +18,7 @@ export const AppRoutes: React.FC = () => {
         }
       />
       <Route path="/employee-lifecycle" element={<EmployeeLifecyclePage />} />
+      <Route path="/employee-lifecycle/journey" element={<EmployeeLifecyclePage />} />
       <Route path="/employee-lifecycle/lifecycle" element={<EmployeeLifecyclePage />} />
       <Route path="/employee-lifecycle/masterdata" element={<EmployeeLifecyclePage />} />
       <Route path="/employee-lifecycle/reports" element={<EmployeeLifecyclePage />} />

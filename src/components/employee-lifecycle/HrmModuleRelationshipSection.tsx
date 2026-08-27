@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, useId } from 'react'
+import React, { useState, useEffect, useRef, useId, useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
 import {
   UserPlus,
@@ -259,20 +259,22 @@ export const HrmModuleRelationshipSection: React.FC<HrmModuleRelationshipSection
   const orbitRadius = 235
 
   // Nodes spaced evenly starting at -90deg (top)
-  const nodePositions = CORE_MODULES.map((mod, idx) => {
-    const baseAngle = -90 + idx * (360 / CORE_MODULES.length)
-    const currentAngle = prefersReducedMotion ? baseAngle : baseAngle + rotationAngle
-    const rad = (currentAngle * Math.PI) / 180
-    const x = center + orbitRadius * Math.cos(rad)
-    const y = center + orbitRadius * Math.sin(rad)
-    return {
-      mod,
-      idx,
-      angle: currentAngle,
-      x,
-      y
-    }
-  })
+  const nodePositions = useMemo(() => {
+    return CORE_MODULES.map((mod, idx) => {
+      const baseAngle = -90 + idx * (360 / CORE_MODULES.length)
+      const currentAngle = prefersReducedMotion ? baseAngle : baseAngle + rotationAngle
+      const rad = (currentAngle * Math.PI) / 180
+      const x = center + orbitRadius * Math.cos(rad)
+      const y = center + orbitRadius * Math.sin(rad)
+      return {
+        mod,
+        idx,
+        angle: currentAngle,
+        x,
+        y
+      }
+    })
+  }, [prefersReducedMotion, rotationAngle, center, orbitRadius])
 
   const currentInspectedModule = hoveredModule || activeModule
 

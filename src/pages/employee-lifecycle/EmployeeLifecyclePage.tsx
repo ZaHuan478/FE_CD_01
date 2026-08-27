@@ -1,6 +1,6 @@
 import React, { useMemo, useState, useEffect, useCallback, Suspense, useTransition } from 'react'
 import { useSearchParams, useParams, useLocation, useNavigate } from 'react-router-dom'
-import { Layers, Sun, Moon, Loader2, Search, X } from 'lucide-react'
+import { Layers, Database, GitBranch, Sun, Moon, Loader2, Search, X } from 'lucide-react'
 
 import { MasterDataRelationshipModal } from '../../components/employee-lifecycle/MasterDataRelationshipModal'
 import { SystemSupportBar } from '../../components/employee-lifecycle/SystemSupportBar'
@@ -11,10 +11,11 @@ import { WorkflowDetailPage } from '../../components/employee-lifecycle/Workflow
 import type { BusinessClusterId } from '../../components/employee-lifecycle/SystemOverviewDashboard'
 
 // ⚡ LAZY LOAD HEAVY COMPONENTS
-const MasterDataHub = React.lazy(() => import('../../components/employee-lifecycle/master-data-hub/MasterDataHub').then(module => ({ default: module.MasterDataHub })))
+const MasterDataStudio = React.lazy(() => import('../../components/employee-lifecycle/master-data-hub/MasterDataStudio').then(module => ({ default: module.MasterDataStudio })))
 const LifecycleStepper = React.lazy(() => import('../../components/employee-lifecycle/LifecycleStepper').then(module => ({ default: module.LifecycleStepper })))
 const OperationsGrid = React.lazy(() => import('../../components/employee-lifecycle/OperationsGrid').then(module => ({ default: module.OperationsGrid })))
 const SystemOverviewDashboard = React.lazy(() => import('../../components/employee-lifecycle/SystemOverviewDashboard').then(module => ({ default: module.SystemOverviewDashboard })))
+const EmployeeLifecycleJourneyView = React.lazy(() => import('../../components/employee-lifecycle/lifecycle-journey/EmployeeLifecycleJourneyView').then(module => ({ default: module.EmployeeLifecycleJourneyView })))
 import { LanguageSelector } from '../../components/common/LanguageSelector'
 
 import { masterData, lifecycleProcesses, crossFunctionalProcesses, sharedServices, findNodeById } from './data'
@@ -40,16 +41,19 @@ export const EmployeeLifecyclePage: React.FC = () => {
   const navigate = useNavigate()
   const [searchParams, setSearchParams] = useSearchParams()
 
-  const getTabFromLocation = useCallback((): 'lifecycle' | 'masterdata' | 'reports' => {
+  const getTabFromLocation = useCallback((): 'lifecycle' | 'masterdata' | 'reports' | 'journey' => {
+    const tabParam = searchParams.get('tab') as 'lifecycle' | 'masterdata' | 'reports' | 'journey'
+    if (tabParam && ['lifecycle', 'masterdata', 'reports', 'journey'].includes(tabParam)) {
+      return tabParam === 'lifecycle' ? 'journey' : tabParam
+    }
+    if (location.pathname.includes('/employee-lifecycle/journey')) return 'journey'
     if (location.pathname.includes('/employee-lifecycle/masterdata')) return 'masterdata'
     if (location.pathname.includes('/employee-lifecycle/reports') || location.pathname.includes('/employee-lifecycle/workbench')) return 'reports'
-    if (location.pathname.includes('/employee-lifecycle/lifecycle')) return 'lifecycle'
-    const tabParam = searchParams.get('tab') as 'lifecycle' | 'masterdata' | 'reports'
-    if (tabParam && ['lifecycle', 'masterdata', 'reports'].includes(tabParam)) return tabParam
+    if (location.pathname.includes('/employee-lifecycle/lifecycle')) return 'journey'
     return 'reports'
   }, [location.pathname, searchParams])
 
-  const [activeTab, setActiveTab] = useState<'lifecycle' | 'masterdata' | 'reports'>(getTabFromLocation)
+  const [activeTab, setActiveTab] = useState<'lifecycle' | 'masterdata' | 'reports' | 'journey'>(getTabFromLocation)
   const [activeBusinessCluster, setActiveBusinessCluster] = useState<BusinessClusterId>(() => {
     const clusterParam = searchParams.get('cluster')
     return isBusinessClusterId(clusterParam) ? clusterParam : 'core'
@@ -86,16 +90,20 @@ export const EmployeeLifecyclePage: React.FC = () => {
     navigate(`/employee-lifecycle/workflow/${workflowId}?sop=${encodeURIComponent(sopCode)}`)
   }
 
-  // Sync tab with URL search parameter
-  const handleTabChange = (tab: 'lifecycle' | 'masterdata' | 'reports') => {
+  // Sync tab with URL search parameter & navigation
+  const handleTabChange = (tab: 'lifecycle' | 'masterdata' | 'reports' | 'journey') => {
     startTransition(() => {
       setActiveTab(tab)
     })
-    setSearchParams((prev) => {
-      const next = new URLSearchParams(prev)
-      next.set('tab', tab)
-      return next
-    })
+    if (tab === 'journey') {
+      navigate('/employee-lifecycle/journey?stage=LIFE-00&scenario=all')
+    } else if (tab === 'masterdata') {
+      navigate('/employee-lifecycle/masterdata')
+    } else if (tab === 'reports') {
+      navigate('/employee-lifecycle')
+    } else if (tab === 'lifecycle') {
+      navigate('/employee-lifecycle?tab=lifecycle')
+    }
     window.scrollTo({ top: 0, behavior: 'smooth' })
   }
 
@@ -121,7 +129,14 @@ export const EmployeeLifecyclePage: React.FC = () => {
         setActiveTab(tabFromUrl)
       })
     }
-  }, [getTabFromLocation, activeTab])
+    if (tabFromUrl === 'journey' || location.pathname.includes('/employee-lifecycle/journey')) {
+      setActiveSection('layer-2-lifecycle')
+    } else if (tabFromUrl === 'masterdata') {
+      setActiveSection('layer-1-master-data')
+    } else if (tabFromUrl === 'reports') {
+      setActiveSection('overview-dashboard')
+    }
+  }, [getTabFromLocation, activeTab, location.pathname])
 
   useEffect(() => {
     const clusterFromUrl = searchParams.get('cluster')
@@ -201,7 +216,12 @@ export const EmployeeLifecyclePage: React.FC = () => {
       return
     }
 
-    if (sectionId === 'layer-2-lifecycle' || sectionId === 'layer-3-operations' || sectionId === 'system-support') {
+    if (sectionId === 'layer-2-lifecycle') {
+      handleTabChange('journey')
+      return
+    }
+
+    if (sectionId === 'layer-3-operations' || sectionId === 'system-support') {
       handleTabChange('lifecycle')
       setTimeout(() => {
         const el = document.getElementById(sectionId)
@@ -408,6 +428,44 @@ export const EmployeeLifecyclePage: React.FC = () => {
     )
   }
 
+  const currentHeaderInfo = useMemo(() => {
+    if (activeTab === 'masterdata' || activeSection === 'layer-1-master-data') {
+      return {
+        subtitle: t('header.layer1Subtitle', 'TẦNG 1 · DỮ LIỆU NỀN TẢNG'),
+        title: t('header.layer1Title', 'Trung tâm Master Data'),
+        icon: Database
+      }
+    }
+    if (activeTab === 'journey' || activeSection === 'layer-2-lifecycle') {
+      return {
+        subtitle: t('header.layer2Subtitle', 'TẦNG 2 · VÒNG ĐỜI NHÂN VIÊN'),
+        title: t('header.layer2Title', 'Hành trình vòng đời nhân viên'),
+        icon: Layers
+      }
+    }
+    if (activeTab === 'lifecycle') {
+      if (activeSection === 'layer-3-operations') {
+        return {
+          subtitle: t('header.layer3Subtitle', 'TẦNG 3 · NGHIỆP VỤ PHÁT SINH'),
+          title: t('header.layer3Title', 'Nghiệp vụ phát sinh & Vận hành'),
+          icon: GitBranch
+        }
+      }
+      return {
+        subtitle: t('header.layer2Subtitle', 'TẦNG 2 · VÒNG ĐỜI NHÂN VIÊN'),
+        title: t('header.layer2Title', 'Hành trình vòng đời nhân viên'),
+        icon: Layers
+      }
+    }
+    return {
+      subtitle: t('header.architecture', 'ENTERPRISE HR SAAS ARCHITECTURE'),
+      title: t('header.title', 'QUẢN LÝ HỒ SƠ & VÒNG ĐỜI NHÂN VIÊN'),
+      icon: Layers
+    }
+  }, [activeTab, activeSection, t])
+
+  const HeaderIcon = currentHeaderInfo.icon
+
   return (
     <div className={`min-h-screen transition-all duration-300 pb-20 ${isDarkMode ? 'bg-slate-950 text-slate-100' : 'bg-slate-50/50 text-slate-800'
       } ${isSidebarCollapsed ? 'pl-12 sm:pl-16' : 'pl-12 sm:pl-16 md:pl-64'
@@ -428,42 +486,44 @@ export const EmployeeLifecyclePage: React.FC = () => {
           {/* CỘT TRÁI: LOGO VÀ TIÊU ĐỀ HỆ THỐNG */}
           <div className="flex min-w-0 items-center gap-2.5 sm:gap-3 shrink-0">
             <div className="p-1.5 sm:p-2 bg-[#1f5f86] rounded-lg text-white shadow-xs shrink-0">
-              <Layers className="w-4 h-4 sm:w-5 sm:h-5" />
+              <HeaderIcon className="w-4 h-4 sm:w-5 sm:h-5" />
             </div>
             <div>
               <div className="flex flex-wrap items-center gap-1.5">
                 <span className="text-[10px] font-extrabold text-[#1f5f86] dark:text-sky-300 uppercase tracking-widest">
-                  {t('header.architecture', 'ENTERPRISE HR SAAS ARCHITECTURE')}
+                  {currentHeaderInfo.subtitle}
                 </span>
               </div>
               <h1 className="text-xs sm:text-sm lg:text-base font-black tracking-tight text-slate-900 mt-0.5 leading-snug dark:text-white whitespace-nowrap">
-                {t('header.title', 'QUẢN LÝ HỒ SƠ & VÒNG ĐỜI NHÂN VIÊN')}
+                {currentHeaderInfo.title}
               </h1>
             </div>
           </div>
 
-          {/* CỘT GIỮA: CỤM NGHIỆP VỤ HRM (CĂN GIỮA & CHỮ TO RÕ RÀNG) */}
-          <nav
-            className="hidden md:flex flex-1 items-center justify-center gap-1.5 max-w-[720px] rounded-xl"
-            aria-label="Cụm nghiệp vụ HRM"
-          >
-            {headerBusinessClusters.map((cluster) => {
-              const active = activeBusinessCluster === cluster.id
-              return (
-                <button
-                  key={cluster.id}
-                  type="button"
-                  onClick={() => handleBusinessClusterChange(cluster.id)}
-                  className={`whitespace-nowrap rounded-lg px-3.5 py-1.5 text-xs sm:text-[13px] font-bold transition-all cursor-pointer ${active
-                      ? 'bg-[#1f5f86] text-white shadow-2xs'
-                      : 'text-slate-700 hover:bg-white hover:text-[#1f5f86] dark:text-slate-300 dark:hover:bg-slate-800 dark:hover:text-white'
-                    }`}
-                >
-                  {cluster.label}
-                </button>
-              )
-            })}
-          </nav>
+          {/* CỘT GIỮA: CỤM NGHIỆP VỤ HRM (CHỈ HIỂN THỊ KHI Ở MÀN HÌNH DASHBOARD CHỈ SỐ) */}
+          {activeTab === 'reports' && (
+            <nav
+              className="hidden md:flex flex-1 items-center justify-center gap-1.5 max-w-[720px] rounded-xl animate-fadeIn"
+              aria-label="Cụm nghiệp vụ HRM"
+            >
+              {headerBusinessClusters.map((cluster) => {
+                const active = activeBusinessCluster === cluster.id
+                return (
+                  <button
+                    key={cluster.id}
+                    type="button"
+                    onClick={() => handleBusinessClusterChange(cluster.id)}
+                    className={`whitespace-nowrap rounded-lg px-3.5 py-1.5 text-xs sm:text-[13px] font-bold transition-all cursor-pointer ${active
+                        ? 'bg-[#1f5f86] text-white shadow-2xs'
+                        : 'text-slate-700 hover:bg-white hover:text-[#1f5f86] dark:text-slate-300 dark:hover:bg-slate-800 dark:hover:text-white'
+                      }`}
+                  >
+                    {cluster.label}
+                  </button>
+                )
+              })}
+            </nav>
+          )}
 
           {/* CỘT PHẢI: TÌM KIẾM, NGÔN NGỮ & GIAO DIỆN TỐI */}
           <div className="flex items-center gap-2.5 text-xs shrink-0">
@@ -523,7 +583,7 @@ export const EmployeeLifecyclePage: React.FC = () => {
 
 
       {/* Main Container Workspace (92% Screen Width for maximum viewability) */}
-      <main className={`pb-5 sm:pb-6 ${activeTab === 'reports' ? 'w-full max-w-none px-0 pt-0 sm:pt-0' : 'w-[92%] max-w-[1920px] mx-auto px-2 sm:px-4 lg:px-6 pt-5 sm:pt-6'} space-y-6`}>
+      <main className={`pb-5 sm:pb-6 ${activeTab === 'reports' || activeTab === 'masterdata' ? 'w-full max-w-none px-0 pt-0 sm:pt-0' : 'w-[92%] max-w-[1920px] mx-auto px-2 sm:px-4 lg:px-6 pt-5 sm:pt-6'} space-y-6`}>
 
         {/* <section className={`rounded-2xl border p-4 sm:p-5 ${isDarkMode ? 'border-sky-900/70 bg-sky-950/25' : 'border-sky-200 bg-sky-50/70'}`}>
           <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
@@ -546,7 +606,16 @@ export const EmployeeLifecyclePage: React.FC = () => {
           </div>
         )}
 
-        {/* TAB 1: VÒNG ĐỜI NHÂN SỰ & NGHIỆP VỤ VẬN HÀNH (MAIN WORKSPACE) */}
+        {/* TAB JOURNEY: HÀNH TRÌNH VÒNG ĐỜI NHÂN VIÊN (DEDICATED 8-STAGE STUDIO) */}
+        {activeTab === 'journey' && (
+          <div className="space-y-6 animate-fadeIn">
+            <Suspense fallback={<div className="h-96 flex flex-col items-center justify-center gap-3"><Loader2 className="w-8 h-8 animate-spin text-[#1f5f86]" /><span className="text-sm font-bold text-slate-500">Đang tải hành trình vòng đời...</span></div>}>
+              <EmployeeLifecycleJourneyView />
+            </Suspense>
+          </div>
+        )}
+
+        {/* TAB 1: VÒNG ĐỜI NHÂN SỰ & NGHIỆP VỤ VẬN HÀNH (LEGACY / LAYER 3 OPERATIONS) */}
         {activeTab === 'lifecycle' && (
           <div className="space-y-6 animate-fadeIn">
             <Suspense fallback={<div className="h-96 flex flex-col items-center justify-center gap-3"><Loader2 className="w-8 h-8 animate-spin text-blue-500" /><span className="text-sm font-bold text-slate-500">Đang tải biểu đồ vòng đời...</span></div>}>
@@ -577,17 +646,14 @@ export const EmployeeLifecyclePage: React.FC = () => {
           </div>
         )}
 
-        {/* TAB 2: MASTER DATA SETTINGS HUB & SƠ ĐỒ ERD */}
+        {/* TAB 2: MASTER DATA STUDIO — 3-panel layout */}
         {activeTab === 'masterdata' && (
-          <div className="space-y-6 animate-fadeIn">
-            {/* ENTERPRISE MASTER DATA HUB WITH 3 TIERS, SEARCH & MODULE FILTERS */}
+          <div className="animate-fadeIn">
             <div id="layer-1-master-data" className="scroll-mt-28">
-              <Suspense fallback={<div className="h-96 flex flex-col items-center justify-center gap-3"><Loader2 className="w-8 h-8 animate-spin text-purple-500" /><span className="text-sm font-bold text-slate-500">Đang tải Master Data...</span></div>}>
-                <MasterDataHub
-                  onOpenERD={handleOpenERD}
+              <Suspense fallback={<div className="h-96 flex flex-col items-center justify-center gap-3"><Loader2 className="w-8 h-8 animate-spin text-purple-500" /><span className="text-sm font-bold text-slate-500">Đang tải Master Data Studio...</span></div>}>
+                <MasterDataStudio
                   isDarkMode={isDarkMode}
                   sopCode={searchParams.get('sop')}
-                  moduleId={searchParams.get('module')}
                 />
               </Suspense>
             </div>

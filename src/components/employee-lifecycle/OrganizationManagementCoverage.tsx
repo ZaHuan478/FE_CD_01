@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react'
+import React, { useEffect, useRef, useState, useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
 import {
   ArrowRight,
@@ -142,12 +142,14 @@ export const OrganizationManagementCoverage: React.FC<{ mode: OrganizationCovera
   const svgSize = 620
   const center = svgSize / 2
   const orbitRadius = 210
-  const nodePositions = ORGANIZATION_MODULES.map((module, index) => {
-    const baseAngle = -90 + index * (360 / ORGANIZATION_MODULES.length)
-    const angle = prefersReducedMotion ? baseAngle : baseAngle + rotationAngle
-    const radians = angle * Math.PI / 180
-    return { module, x: center + orbitRadius * Math.cos(radians), y: center + orbitRadius * Math.sin(radians) }
-  })
+  const nodePositions = useMemo(() => {
+    return ORGANIZATION_MODULES.map((module, index) => {
+      const baseAngle = -90 + index * (360 / ORGANIZATION_MODULES.length)
+      const angle = prefersReducedMotion ? baseAngle : baseAngle + rotationAngle
+      const radians = angle * Math.PI / 180
+      return { module, x: center + orbitRadius * Math.cos(radians), y: center + orbitRadius * Math.sin(radians) }
+    })
+  }, [prefersReducedMotion, rotationAngle, center, orbitRadius])
 
   const openModule = (module: OrganizationModule) => navigate(`/employee-lifecycle/infographic/${module.workflowId}?sop=${encodeURIComponent(module.firstSopCode)}`)
 
