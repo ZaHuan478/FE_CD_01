@@ -238,11 +238,11 @@ export const WorkflowDetailPage: React.FC<WorkflowDetailPageProps> = ({
           </div>
         </div>
 
-        <div className={`border-t px-4 py-1.5 text-center text-[11px] font-medium ${isDarkMode ? 'border-slate-800 bg-amber-500/10 text-amber-200' : 'border-amber-100 bg-amber-50 text-amber-900'}`}>
+        {/* <div className={`border-t px-4 py-1.5 text-center text-[11px] font-medium ${isDarkMode ? 'border-slate-800 bg-amber-500/10 text-amber-200' : 'border-amber-100 bg-amber-50 text-amber-900'}`}>
           <strong>{language === 'vi' ? 'BẢN DEMO NGHIỆP VỤ' : 'BUSINESS DEMO'}</strong>
           <span className="mx-1.5 opacity-50">•</span>
           {language === 'vi' ? 'Mô phỏng luồng xử lý và màn hình dự kiến; không phát sinh dữ liệu thật.' : 'Simulates expected flows and screens; no real data is created.'}
-        </div>
+        </div> */}
 
         {/* WORKFLOW VIEW TABS */}
         <div className="border-t border-slate-200/80 dark:border-slate-800/80 bg-slate-100/60 dark:bg-slate-950/60">
@@ -285,10 +285,6 @@ export const WorkflowDetailPage: React.FC<WorkflowDetailPageProps> = ({
                 <span>{t('workflow.tab.specs', 'Bảng kiểm & quy định')}</span>
               </button> */}
             </div>
-
-            <span className="text-[11px] font-mono text-slate-400 dark:text-slate-500 hidden md:inline shrink-0">
-              Standardized Workflow Spec
-            </span>
           </div>
         </div>
       </header>
@@ -299,7 +295,6 @@ export const WorkflowDetailPage: React.FC<WorkflowDetailPageProps> = ({
         <section className={`rounded-2xl border p-4 sm:p-5 ${isDarkMode ? 'border-sky-900/70 bg-sky-950/25' : 'border-sky-200 bg-sky-50/70'}`}>
           <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
             <div>
-              <p className="text-[10px] font-black uppercase tracking-[0.16em] text-sky-700 dark:text-sky-300">{language === 'vi' ? 'Hiểu nhanh trong 30 giây' : 'Understand it in 30 seconds'}</p>
               <h2 className="mt-1 text-base font-black text-slate-900 dark:text-white">{item.title}</h2>
               <p className="mt-1 text-xs leading-relaxed text-slate-600 dark:text-slate-300">{item.subtitle}</p>
             </div>

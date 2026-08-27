@@ -8,8 +8,10 @@ import { useLanguage } from '../../context/LanguageContext'
 import { SOP_DATABASE } from './workflow-detail/data/sopDatabase'
 
 type ModuleId = 'recruitment' | 'employee' | 'attendance' | 'payroll' | 'insurance' | 'tax' | 'shared' | 'configuration'
-interface ModuleMenuItem { label: string; sopCode?: string; workflowId?: string; disabled?: boolean; groupHeader?: boolean }
+interface ModuleMenuItem { label: string; sopCode?: string; workflowId?: string; stepNumber?: number; disabled?: boolean; groupHeader?: boolean }
 interface ModuleMenu { id: ModuleId; label: string; code: string; count: number; items: ModuleMenuItem[] }
+
+const normalizeSopCode = (value?: string) => (value ?? '').toUpperCase().replace(/[^A-Z0-9]/g, '')
 
 const processMenuItems = (workflowId: string): ModuleMenuItem[] =>
   (SOP_DATABASE[workflowId] ?? []).map((process) => ({
@@ -18,10 +20,30 @@ const processMenuItems = (workflowId: string): ModuleMenuItem[] =>
     workflowId
   }))
 
+const recruitmentProcessMenuItems = (): ModuleMenuItem[] =>
+  processMenuItems('LIFE-01').filter((process) => normalizeSopCode(process.sopCode).startsWith('SOPREC'))
+
+const attendanceProcessMenuItems = (): ModuleMenuItem[] => processMenuItems('MODULE-ATT').flatMap((process) => {
+  const code = normalizeSopCode(process.sopCode)
+  if (code === 'SOPATT01') {
+    return [
+      { ...process, label: 'Tạo lịch làm việc qua Portal', stepNumber: 1 },
+      { ...process, label: 'Điều chỉnh lịch làm việc qua Portal', stepNumber: 3 }
+    ]
+  }
+  if (code === 'SOPATT02') {
+    return [
+      { ...process, label: 'Tạo lịch làm việc không sử dụng Portal', stepNumber: 2 },
+      { ...process, label: 'Điều chỉnh lịch làm việc không sử dụng Portal', stepNumber: 4 }
+    ]
+  }
+  return [{ ...process, label: `${process.label.charAt(0).toLocaleUpperCase('vi-VN')}${process.label.slice(1)}` }]
+})
+
 let moduleMenus: ModuleMenu[] = [
   {
-    id: 'recruitment', label: 'Tuyển dụng', code: 'REC', count: 4,
-    items: [{ label: 'Chưa có quy trình chi tiết', disabled: true }]
+    id: 'recruitment', label: 'Tuyển dụng', code: 'REC', count: 11,
+    items: recruitmentProcessMenuItems()
   },
   {
     id: 'employee', label: 'Nhân sự', code: 'EMP', count: 15,
@@ -38,7 +60,7 @@ let moduleMenus: ModuleMenu[] = [
   },
   {
     id: 'attendance', label: 'Chấm công', code: 'ATT', count: 15,
-    items: processMenuItems('MODULE-ATT')
+    items: attendanceProcessMenuItems()
   },
   {
     id: 'payroll', label: 'Lương', code: 'PAY', count: 4,
@@ -74,9 +96,57 @@ const lifecycleSummary = ['Định biên nhân sự', 'Tuyển dụng', 'Tiếp 
 
 void lifecycleSummary
 
-const normalizeSopCode = (value?: string) => (value ?? '').toUpperCase().replace(/[^A-Z0-9]/g, '')
+const formatMenuLabel = (label: string) => {
+  if (/^EMP01\s*-\s*/.test(label)) return 'Thiết lập định biên'
+  return label.replace(/^EMP\d+\s*-\s*/, '')
+}
 
-const formatMenuLabel = (label: string) => label.replace(/^EMP\d+\s*-\s*/, '')
+const getMenuItemOrder = (item: ModuleMenuItem) => {
+  const numbers = item.sopCode?.match(/\d+/g)
+  const processNumber = numbers?.length ? Number(numbers[numbers.length - 1]) : 0
+  return processNumber * 100 + (item.stepNumber ?? 0)
+}
+
+const sortModuleItemsNewestFirst = (items: ModuleMenuItem[]) => {
+  const sortGroup = (group: ModuleMenuItem[]) => [...group].sort((a, b) => getMenuItemOrder(b) - getMenuItemOrder(a))
+  const sorted: ModuleMenuItem[] = []
+  let group: ModuleMenuItem[] = []
+
+  items.forEach((item) => {
+    if (item.groupHeader) {
+      sorted.push(...sortGroup(group), item)
+      group = []
+      return
+    }
+    group.push(item)
+  })
+
+  return [...sorted, ...sortGroup(group)]
+}
+
+const employeeLifecycleOrder: Record<string, number> = {
+  'SOPEMP01': 1,
+  'SOPEMP02': 2,
+  'SOPEMP03': 3,
+  'SOPEMP04': 4,
+  'SOPEMP11': 5,
+  'SOPEMP14': 6,
+  'SOPEMP06': 7,
+  'SOPEMP05': 8,
+  'SOPEMP07': 9,
+  'SOPEMP08': 10,
+  'SOPEMP09': 11,
+  'SOPEMP10': 12,
+  'SOPEMP12': 13,
+  'SOPEMP13': 14,
+  'SOPEMP15': 15
+}
+
+const sortEmployeeItemsByLifecycle = (items: ModuleMenuItem[]) => [...items].sort((a, b) => {
+  const orderA = employeeLifecycleOrder[normalizeSopCode(a.sopCode)] ?? Number.MAX_SAFE_INTEGER
+  const orderB = employeeLifecycleOrder[normalizeSopCode(b.sopCode)] ?? Number.MAX_SAFE_INTEGER
+  return orderA - orderB
+})
 
 const workflowBySopCode: Record<string, string> = {
   'SOP EMP05': 'LIFE-04',
@@ -88,9 +158,8 @@ const workflowBySopCode: Record<string, string> = {
   'SOP EMP14': 'LIFE-03'
 }
 
-moduleMenus = moduleMenus.map((module) => ({
-  ...module,
-  items: (module.id === 'employee'
+moduleMenus = moduleMenus.map((module) => {
+  const items = (module.id === 'employee'
     ? [
         { label: 'EMP01 - Thiết lập định biên nhân sự', sopCode: 'SOP EMP01', workflowId: 'LIFE-00' },
         { label: 'EMP02 - Tăng nhân viên mới không qua quy trình tuyển dụng', sopCode: 'SOP EMP02', workflowId: 'LIFE-01' },
@@ -106,7 +175,12 @@ moduleMenus = moduleMenus.map((module) => ({
       label: formatMenuLabel(item.label),
       workflowId: item.workflowId ?? workflowBySopCode[item.sopCode ?? '']
     }))
-}))
+
+  return {
+    ...module,
+    items: module.id === 'employee' ? sortEmployeeItemsByLifecycle(items) : sortModuleItemsNewestFirst(items)
+  }
+})
 
 const getProcessForMenuItem = (item: ModuleMenuItem) => {
   const processes = item.workflowId ? SOP_DATABASE[item.workflowId] ?? [] : []
@@ -141,15 +215,13 @@ export const SystemOverviewDashboard: React.FC = () => {
     if (!item.workflowId) return
     const params = new URLSearchParams({ sop: item.sopCode ?? '' })
     if (stepNumber) params.set('step', String(stepNumber))
-    navigate(`/employee-lifecycle/infographic/${item.workflowId}?${params.toString()}`)
+    const isRecruitmentProcess = normalizeSopCode(item.sopCode).startsWith('SOPREC')
+    navigate(`/employee-lifecycle/${isRecruitmentProcess ? 'flowchart' : 'infographic'}/${item.workflowId}?${params.toString()}`)
   }
 
   return (
     <div className="space-y-5">
-      <section className="rounded-lg border border-emerald-200 bg-emerald-50/70 px-4 py-3 text-xs leading-relaxed text-slate-700 dark:border-emerald-900/60 dark:bg-emerald-950/25 dark:text-slate-200">
-        <strong>Tổng quan hệ thống:</strong> chọn một phân hệ để xem nhóm nghiệp vụ mà HRMS hỗ trợ. Mỗi quy trình có thể mở chi tiết các bước, vai trò và dữ liệu liên quan. Đây là bản mô phỏng nghiệp vụ, không phải số liệu vận hành thực tế.
-      </section>
-      <section className="relative z-20 overflow-visible rounded-lg border border-slate-300 bg-white shadow-sm dark:border-slate-700 dark:bg-slate-900">
+      <section className="sticky top-[65px] z-40 overflow-visible rounded-lg border border-slate-300 bg-white shadow-sm dark:border-slate-700 dark:bg-slate-900">
         <div className="flex flex-wrap items-start gap-1 overflow-visible bg-[#1f5f86] px-2 py-1.5 text-white">
           {moduleMenus.map((module) => {
             const active = openModule === module.id
@@ -166,16 +238,16 @@ export const SystemOverviewDashboard: React.FC = () => {
                           return <div key={`${module.id}-${item.label}`} className="sticky top-0 z-10 mt-1 border-b border-slate-200 bg-white px-2 py-1.5 text-[10px] font-bold uppercase tracking-wider text-[#1f5f86] first:mt-0 dark:border-slate-700 dark:bg-slate-900 dark:text-sky-300">{item.label}</div>
                         }
                         const process = getProcessForMenuItem(item)
-                        const processKey = `${module.id}-${item.sopCode ?? item.label}`
+                        const processKey = `${module.id}-${item.sopCode ?? item.label}-${item.stepNumber ?? item.label}`
                         const hasSteps = Boolean(process?.steps?.length)
-                        return <button key={`${module.id}-${item.label}`} type="button" disabled={item.disabled} onMouseEnter={(event) => { if (hasSteps) { const listContainer = event.currentTarget.parentElement; const rowTop = event.currentTarget.offsetTop - (listContainer?.scrollTop ?? 0); setOpenProcessKey(processKey); setOpenProcessTop(Math.max(8, rowTop + 8)) } }} onClick={() => !item.disabled && openMenuItem(item)} className={`flex w-full items-center justify-between gap-2 rounded-md px-2 py-2 text-left text-xs transition-colors ${item.disabled ? 'cursor-not-allowed text-slate-400' : openProcessKey === processKey ? 'bg-[#2e8bbd] text-white' : 'text-slate-700 hover:bg-sky-50 hover:text-[#1f5f86] dark:text-slate-200 dark:hover:bg-sky-500/15 dark:hover:text-sky-300'}`}>
+                        return <button key={`${module.id}-${item.label}`} type="button" disabled={item.disabled} onMouseEnter={(event) => { if (hasSteps) { const listContainer = event.currentTarget.parentElement; const rowTop = event.currentTarget.offsetTop - (listContainer?.scrollTop ?? 0); setOpenProcessKey(processKey); setOpenProcessTop(Math.max(8, rowTop + 8)) } }} onClick={() => !item.disabled && openMenuItem(item, item.stepNumber)} className={`flex w-full items-center justify-between gap-2 rounded-md px-2 py-2 text-left text-xs transition-colors ${item.disabled ? 'cursor-not-allowed text-slate-400' : openProcessKey === processKey ? 'bg-[#2e8bbd] text-white' : 'text-slate-700 hover:bg-sky-50 hover:text-[#1f5f86] dark:text-slate-200 dark:hover:bg-sky-500/15 dark:hover:text-sky-300'}`}>
                           <span className="min-w-0">{item.label}</span><span className={`flex h-4 w-4 shrink-0 items-center justify-center rounded text-[10px] font-bold ${item.disabled ? 'bg-slate-100 text-slate-400' : openProcessKey === processKey ? 'bg-white/20 text-white' : 'bg-sky-100 text-[#1f5f86]'}`}>{item.disabled ? '–' : hasSteps ? <ChevronRight className="h-3 w-3" /> : '›'}</span>
                         </button>
                       })}
                     </div>
                     {module.items.map((item) => {
                       const process = getProcessForMenuItem(item)
-                      const processKey = `${module.id}-${item.sopCode ?? item.label}`
+                      const processKey = `${module.id}-${item.sopCode ?? item.label}-${item.stepNumber ?? item.label}`
                       if (!process || openProcessKey !== processKey) return null
                       return <div key={`steps-${processKey}`} style={{ top: openProcessTop }} className="absolute left-[calc(100%+4px)] z-50 w-[360px] max-w-[calc(100vw-2rem)] rounded-lg border border-slate-300 bg-white p-2 text-slate-700 shadow-xl dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200">
                         <div className="max-h-64 overflow-y-auto">
@@ -192,7 +264,7 @@ export const SystemOverviewDashboard: React.FC = () => {
 
       </section>
 
-      <section id="coverage-wheel" className="rounded-lg border border-slate-300 bg-white shadow-sm scroll-mt-28 dark:border-slate-700 dark:bg-slate-900">
+      <section id="coverage-wheel" className="mx-auto w-[92%] max-w-[1920px] rounded-lg border border-slate-300 bg-white shadow-sm scroll-mt-28 dark:border-slate-700 dark:bg-slate-900">
         <div className="flex flex-col gap-3 border-b border-slate-200 px-4 py-3 lg:flex-row lg:items-center lg:justify-between dark:border-slate-700"><div><h3 className="flex items-center gap-2 text-sm font-bold text-slate-900 dark:text-white"><PieChart className="h-4 w-4 text-[#1f5f86] dark:text-sky-300" /> Tổng quan phân hệ và dữ liệu</h3></div><div className="flex flex-wrap items-center gap-1 rounded border border-slate-200 bg-slate-50 p-1 dark:border-slate-700 dark:bg-slate-800"><ViewButton active={coverageViewMode === 'wheel'} onClick={() => setCoverageViewMode('wheel')} icon={<PieChart className="h-3.5 w-3.5" />}>Quan hệ phân hệ</ViewButton><ViewButton active={coverageViewMode === 'matrix'} onClick={() => setCoverageViewMode('matrix')} icon={<Workflow className="h-3.5 w-3.5" />}>Đầu vào và kết quả</ViewButton><ViewButton active={coverageViewMode === 'flow'} onClick={() => setCoverageViewMode('flow')} icon={<GitBranch className="h-3.5 w-3.5" />}>Luồng liên phân hệ</ViewButton><button type="button" onClick={() => setIsCoverageExpanded((value) => !value)} className="px-2 py-1.5 text-xs font-semibold text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white">{isCoverageExpanded ? 'Thu gọn' : 'Mở rộng'}</button></div></div>
         {isCoverageExpanded && <div className="p-4">{coverageViewMode === 'wheel' && <RadialEcosystemChart />}{coverageViewMode === 'matrix' && <ProcessInputOutputView />}{coverageViewMode === 'flow' && <CompactDataFlowDiagram />}</div>}
       </section>

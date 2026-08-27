@@ -1099,6 +1099,116 @@ const SOP_DATABASE_BASE: Record<string, SopSubProcess[]> = {
 // Merge DOCX-derived employee processes with the existing recruitment, attendance,
 // payroll and cross-functional processes. Matching SOP codes are replaced by DOCX data.
 const normalizeSopCode = (value: string) => value.toUpperCase().replace(/[^A-Z0-9]/g, '')
+const recruitmentDetailedProcesses: SopSubProcess[] = [
+  {
+    sopCode: 'SOP-REC-01', sopTitle: 'Yêu cầu tuyển dụng', sopCategory: 'Tuyển dụng · Khởi tạo nhu cầu',
+    description: '',
+    steps: [
+      { stepCode: 'REC01.01', title: 'Xác định nhu cầu tuyển người', actor: 'Trưởng bộ phận', location: 'Manager Portal', timing: 'Khi có vị trí trống hoặc nhu cầu mới', typeCode: 'N', description: 'Xác định tuyển mới, thay thế, thời vụ hoặc theo dự án; nêu rõ lý do và số lượng cần tuyển.', fieldsChecklist: ['Loại nhu cầu tuyển', 'Số lượng', 'Lý do tuyển', 'Ngày cần người'] },
+      { stepCode: 'REC01.02', title: 'Chọn vị trí và đơn vị cần tuyển', actor: 'Trưởng bộ phận', location: 'Manager Portal', timing: 'Khi lập yêu cầu', typeCode: 'N', description: 'Chọn phòng ban, chức danh, cấp bậc, địa điểm làm việc và quản lý trực tiếp từ danh mục dùng chung.', fieldsChecklist: ['Phòng ban', 'Chức danh', 'Cấp bậc', 'Địa điểm', 'Quản lý trực tiếp'] },
+      { stepCode: 'REC01.03', title: 'Khai báo điều kiện tuyển dụng', actor: 'Trưởng bộ phận', location: 'Manager Portal', timing: 'Trước khi nộp yêu cầu', typeCode: 'N', description: 'Khai báo mô tả công việc, tiêu chí bắt buộc, dải lương đề xuất, ngân sách và thời hạn cần hoàn thành.', fieldsChecklist: ['JD', 'Tiêu chí bắt buộc', 'Dải lương đề xuất', 'Ngân sách', 'Hạn tuyển'] },
+      { stepCode: 'REC01.04', title: 'Nộp yêu cầu tuyển dụng', actor: 'Trưởng bộ phận', location: 'Manager Portal', timing: 'Sau khi kiểm tra thông tin', typeCode: 'M', description: 'Gửi yêu cầu vào luồng phê duyệt; hệ thống sinh mã Requisition và lưu lịch sử khởi tạo.', fieldsChecklist: ['Mã Requisition', 'Người yêu cầu', 'Thời điểm nộp', 'Trạng thái chờ duyệt'] }
+    ]
+  },
+  {
+    sopCode: 'SOP-REC-02', sopTitle: 'Phê duyệt tuyển dụng', sopCategory: 'Tuyển dụng · Phê duyệt nhu cầu',
+    description: 'Kiểm soát định biên, ngân sách và thẩm quyền trước khi công ty được phép tìm ứng viên.',
+    steps: [
+      { stepCode: 'REC02.01', title: 'Kiểm tra định biên và vị trí trống', actor: 'Hệ thống HRMS', location: 'HRM Core', timing: 'Ngay khi yêu cầu được nộp', typeCode: 'A', description: 'Đối chiếu số lượng đề nghị với định biên đã duyệt, headcount hiện có và thông tin nhân sự thay thế.', fieldsChecklist: ['Định biên được duyệt', 'Headcount thực tế', 'Vị trí trống', 'Kết quả đối chiếu'] },
+      { stepCode: 'REC02.02', title: 'Thẩm định nhân sự và ngân sách', actor: 'HRBP, C&B hoặc Finance', location: 'Approval Portal', timing: 'Theo SLA phê duyệt', typeCode: 'C', description: 'Rà soát JD, tính khả thi nguồn ứng viên, dải lương, cost center và mức ngân sách được phép dùng.', fieldsChecklist: ['JD chuẩn', 'Dải lương', 'Cost center', 'People cost', 'Ý kiến thẩm định'] },
+      { stepCode: 'REC02.03', title: 'Ra quyết định phê duyệt', actor: 'Người phê duyệt theo thẩm quyền', location: 'Approval Portal', timing: 'Sau khi thẩm định', typeCode: 'M', description: 'Duyệt, từ chối, trả về chỉnh sửa hoặc duyệt có điều kiện theo ma trận thẩm quyền.', fieldsChecklist: ['Quyết định', 'Điều kiện phê duyệt', 'Lý do từ chối', 'Chữ ký điện tử'] },
+      { stepCode: 'REC02.04', title: 'Kích hoạt đợt tuyển dụng', actor: 'Hệ thống HRMS', location: 'ATS', timing: 'Khi được duyệt', typeCode: 'A', description: 'Chuyển requisition sang trạng thái Open, phân công Recruiter phụ trách và tạo hạn xử lý tuyển dụng.', fieldsChecklist: ['Recruiter PIC', 'Trạng thái Open', 'Ngày mở tuyển', 'SLA tuyển dụng'] }
+    ]
+  },
+  {
+    sopCode: 'SOP-REC-03', sopTitle: 'Đăng tin tuyển dụng', sopCategory: 'Tuyển dụng · Thu hút ứng viên',
+    description: 'Chuẩn bị và xuất bản tin tuyển dụng trên các kênh phù hợp với vị trí và ngân sách đã duyệt.',
+    steps: [
+      { stepCode: 'REC03.01', title: 'Soạn tin tuyển dụng', actor: 'Recruiter', location: 'ATS', timing: 'Sau khi requisition mở', typeCode: 'N', description: 'Chuyển JD thành tin tuyển dụng dễ hiểu gồm trách nhiệm, yêu cầu, quyền lợi, địa điểm và hạn nộp.', fieldsChecklist: ['Tiêu đề tin', 'Mô tả công việc', 'Yêu cầu', 'Quyền lợi', 'Hạn nộp'] },
+      { stepCode: 'REC03.02', title: 'Chọn kênh tuyển dụng', actor: 'Recruiter hoặc TA Lead', location: 'ATS', timing: 'Trước khi xuất bản', typeCode: 'M', description: 'Chọn Career Site, job board, referral, headhunter, mạng xã hội hoặc talent pool; gắn tracking nguồn.', fieldsChecklist: ['Kênh tuyển', 'Ngân sách kênh', 'Campaign', 'Mã tracking nguồn'] },
+      { stepCode: 'REC03.03', title: 'Xuất bản tin tuyển dụng', actor: 'Recruiter hoặc Hệ thống', location: 'Career Site / Job Board', timing: 'Sau khi kiểm duyệt nội dung', typeCode: 'A', description: 'Đăng tin lên các kênh đã chọn và lưu URL, ngày bắt đầu, ngày hết hạn của từng tin.', fieldsChecklist: ['URL tin đăng', 'Ngày bắt đầu', 'Ngày hết hạn', 'Trạng thái xuất bản'] },
+      { stepCode: 'REC03.04', title: 'Theo dõi hiệu quả nguồn tuyển', actor: 'Recruiter', location: 'ATS Dashboard', timing: 'Định kỳ trong đợt tuyển', typeCode: 'C', description: 'Theo dõi lượt ứng tuyển, hồ sơ đạt, chi phí và tỷ lệ chuyển đổi để điều chỉnh kênh tuyển.', fieldsChecklist: ['Số CV', 'CV đạt', 'Chi phí', 'Tỷ lệ chuyển đổi'] }
+    ]
+  },
+  {
+    sopCode: 'SOP-REC-04', sopTitle: 'Tiếp nhận hồ sơ ứng viên', sopCategory: 'Tuyển dụng · Quản lý ứng viên',
+    description: 'Tập trung hồ sơ từ mọi nguồn, tạo hồ sơ ứng viên duy nhất và ghi nhận đồng ý xử lý dữ liệu.',
+    steps: [
+      { stepCode: 'REC04.01', title: 'Nhận hồ sơ từ các kênh tuyển dụng', actor: 'Hệ thống ATS', location: 'ATS Ingestion', timing: 'Khi ứng viên nộp hồ sơ', typeCode: 'A', description: 'Thu nhận CV và thông tin ứng tuyển từ career site, email, job board, referral hoặc recruiter nhập thủ công.', fieldsChecklist: ['CV', 'Nguồn ứng tuyển', 'Vị trí ứng tuyển', 'Thời điểm nộp'] },
+      { stepCode: 'REC04.02', title: 'Kiểm tra trùng ứng viên', actor: 'Hệ thống ATS', location: 'ATS', timing: 'Ngay khi nhận hồ sơ', typeCode: 'A', description: 'Đối chiếu email, điện thoại và lịch sử ứng tuyển để tránh tạo nhiều hồ sơ cho cùng một người.', fieldsChecklist: ['Email', 'Số điện thoại', 'Ứng viên trùng', 'Lịch sử ứng tuyển'] },
+      { stepCode: 'REC04.03', title: 'Hoàn thiện hồ sơ ứng viên', actor: 'Recruiter', location: 'ATS', timing: 'Khi dữ liệu thiếu hoặc không đọc được CV', typeCode: 'N', description: 'Bổ sung thông tin liên hệ, kinh nghiệm, kỹ năng, mức lương mong muốn và thời gian có thể đi làm.', fieldsChecklist: ['Thông tin liên hệ', 'Kinh nghiệm', 'Kỹ năng', 'Lương mong muốn', 'Ngày có thể đi làm'] },
+      { stepCode: 'REC04.04', title: 'Ghi nhận đồng ý xử lý dữ liệu', actor: 'Ứng viên và Hệ thống', location: 'Candidate Portal', timing: 'Khi nộp hồ sơ', typeCode: 'M', description: 'Lưu nhận diện mục đích xử lý và thời điểm ứng viên đồng ý theo chính sách bảo vệ dữ liệu.', fieldsChecklist: ['Điều khoản đồng ý', 'Thời điểm đồng ý', 'Mục đích xử lý', 'Kỳ hạn lưu trữ'] }
+    ]
+  },
+  {
+    sopCode: 'SOP-REC-05', sopTitle: 'Sàng lọc ứng viên', sopCategory: 'Tuyển dụng · Sàng lọc',
+    description: 'Đánh giá mức phù hợp ban đầu theo tiêu chí vị trí trước khi mời ứng viên vào vòng chuyên môn.',
+    steps: [
+      { stepCode: 'REC05.01', title: 'Đối chiếu tiêu chí bắt buộc', actor: 'Recruiter', location: 'ATS', timing: 'Sau khi hồ sơ hoàn chỉnh', typeCode: 'C', description: 'So sánh kinh nghiệm, kỹ năng, địa điểm, ca làm, lương kỳ vọng và điều kiện bắt buộc trong requisition.', fieldsChecklist: ['Tiêu chí bắt buộc', 'Kinh nghiệm', 'Kỹ năng', 'Địa điểm', 'Lương kỳ vọng'] },
+      { stepCode: 'REC05.02', title: 'Phỏng vấn sơ loại', actor: 'Recruiter', location: 'ATS / Điện thoại', timing: 'Theo SLA recruiter', typeCode: 'N', description: 'Xác nhận mức độ quan tâm, khả năng nhận việc, thông tin hồ sơ và các điều kiện quan trọng trước khi shortlist.', fieldsChecklist: ['Kết quả screening call', 'Ngày có thể đi làm', 'Lương mong muốn', 'Ghi chú recruiter'] },
+      { stepCode: 'REC05.03', title: 'Chốt danh sách ngắn', actor: 'Hiring Manager', location: 'Manager Portal', timing: 'Sau khi recruiter đề xuất', typeCode: 'M', description: 'Đồng ý mời phỏng vấn, từ chối, yêu cầu bổ sung hoặc chuyển ứng viên sang vị trí phù hợp hơn.', fieldsChecklist: ['Danh sách shortlist', 'Kết quả duyệt', 'Lý do loại', 'Vị trí thay thế'] },
+      { stepCode: 'REC05.04', title: 'Thông báo kết quả sàng lọc', actor: 'Hệ thống ATS', location: 'Email / Candidate Portal', timing: 'Sau khi có quyết định', typeCode: 'A', description: 'Mời ứng viên đạt sang vòng tiếp theo hoặc gửi thông báo phù hợp theo mẫu được duyệt.', fieldsChecklist: ['Mẫu thông báo', 'Trạng thái gửi', 'Talent pool', 'Lý do loại'] }
+    ]
+  },
+  {
+    sopCode: 'SOP-REC-06', sopTitle: 'Đánh giá năng lực', sopCategory: 'Tuyển dụng · Assessment',
+    description: 'Tổ chức bài kiểm tra hoặc case study theo yêu cầu của từng vị trí trước hoặc song song với phỏng vấn.',
+    steps: [
+      { stepCode: 'REC06.01', title: 'Chọn hình thức đánh giá', actor: 'Recruiter và Hiring Manager', location: 'ATS', timing: 'Khi shortlist được duyệt', typeCode: 'M', description: 'Chọn test chuyên môn, ngoại ngữ, logic, tay nghề, case study hoặc miễn test theo cấu hình vị trí.', fieldsChecklist: ['Loại assessment', 'Điểm đạt', 'Thời hạn hoàn thành', 'Lý do miễn test'] },
+      { stepCode: 'REC06.02', title: 'Gửi bài đánh giá', actor: 'Hệ thống ATS', location: 'Candidate Portal', timing: 'Theo lịch tuyển dụng', typeCode: 'A', description: 'Gửi link, hướng dẫn, thời hạn và quy tắc làm bài; ghi nhận ứng viên đã mở hoặc nộp bài.', fieldsChecklist: ['Link bài test', 'Thời hạn', 'Trạng thái làm bài', 'Nhắc hạn'] },
+      { stepCode: 'REC06.03', title: 'Chấm điểm đánh giá', actor: 'Người chấm hoặc Hệ thống', location: 'Assessment Portal', timing: 'Sau khi ứng viên nộp bài', typeCode: 'C', description: 'Chấm tự động hoặc thủ công theo rubric/đáp án phiên bản hóa.', fieldsChecklist: ['Điểm từng phần', 'Điểm tổng', 'Rubric', 'Người chấm'] },
+      { stepCode: 'REC06.04', title: 'Xác nhận kết quả đánh giá', actor: 'Recruiter', location: 'ATS', timing: 'Sau khi có điểm', typeCode: 'M', description: 'Chuyển ứng viên đạt sang phỏng vấn hoặc ghi nhận không đạt, dự phòng hay ngoại lệ được phê duyệt.', fieldsChecklist: ['Kết quả đạt', 'Kết quả không đạt', 'Ngoại lệ', 'Bước tiếp theo'] }
+    ]
+  },
+  {
+    sopCode: 'SOP-REC-07', sopTitle: 'Phỏng vấn ứng viên', sopCategory: 'Tuyển dụng · Phỏng vấn',
+    description: 'Điều phối lịch phỏng vấn, thu thập đánh giá độc lập và quản lý các trường hợp đổi lịch hoặc không tham dự.',
+    steps: [
+      { stepCode: 'REC07.01', title: 'Lập lịch phỏng vấn', actor: 'Recruiter', location: 'ATS / Calendar', timing: 'Khi ứng viên đủ điều kiện', typeCode: 'N', description: 'Chọn vòng phỏng vấn, interviewer, thời gian, hình thức online/trực tiếp và địa điểm.', fieldsChecklist: ['Vòng phỏng vấn', 'Interviewer', 'Thời gian', 'Hình thức', 'Địa điểm hoặc link họp'] },
+      { stepCode: 'REC07.02', title: 'Gửi thư mời và xác nhận tham dự', actor: 'Hệ thống ATS', location: 'Email / SMS', timing: 'Sau khi lập lịch', typeCode: 'A', description: 'Gửi thư mời, link xác nhận, hướng dẫn tham gia và nhắc lịch; ứng viên có thể xác nhận hoặc yêu cầu đổi lịch.', fieldsChecklist: ['Thư mời', 'RSVP', 'Nhắc lịch', 'Yêu cầu đổi lịch'] },
+      { stepCode: 'REC07.03', title: 'Thực hiện phỏng vấn', actor: 'Hội đồng phỏng vấn', location: 'Interview Room / Online', timing: 'Theo lịch xác nhận', typeCode: 'M', description: 'Phỏng vấn theo bộ câu hỏi và tiêu chí đã cấu hình cho vị trí.', fieldsChecklist: ['Câu hỏi phỏng vấn', 'Ghi chú', 'Trạng thái có mặt', 'No-show hoặc hủy lịch'] },
+      { stepCode: 'REC07.04', title: 'Gửi scorecard độc lập', actor: 'Interviewer', location: 'Interview Portal', timing: 'Ngay sau buổi phỏng vấn', typeCode: 'M', description: 'Mỗi interviewer chấm điểm và nhận xét riêng trước khi xem kết quả tổng hợp.', fieldsChecklist: ['Điểm chuyên môn', 'Điểm hành vi', 'Điểm phù hợp', 'Khuyến nghị tuyển hoặc không tuyển'] },
+      { stepCode: 'REC07.05', title: 'Tổng hợp kết quả phỏng vấn', actor: 'Recruiter', location: 'ATS', timing: 'Sau khi đủ scorecard', typeCode: 'A', description: 'Nhắc các scorecard còn thiếu, tổng hợp kết quả và chuyển ứng viên sang bước lựa chọn.', fieldsChecklist: ['Scorecard đầy đủ', 'Điểm tổng hợp', 'Nhận xét tổng hợp', 'Danh sách finalist'] }
+    ]
+  },
+  {
+    sopCode: 'SOP-REC-08', sopTitle: 'Lựa chọn ứng viên', sopCategory: 'Tuyển dụng · Quyết định tuyển',
+    description: 'So sánh ứng viên cuối, kiểm tra điều kiện trước tuyển và xác định ứng viên chính thức hoặc dự phòng.',
+    steps: [
+      { stepCode: 'REC08.01', title: 'So sánh ứng viên cuối', actor: 'Hiring Manager và Recruiter', location: 'ATS', timing: 'Sau phỏng vấn', typeCode: 'C', description: 'So sánh điểm, kinh nghiệm, mức lương mong muốn, ngày có thể nhận việc và các rủi ro của từng finalist.', fieldsChecklist: ['Danh sách finalist', 'So sánh điểm', 'Lương mong muốn', 'Ngày có thể đi làm'] },
+      { stepCode: 'REC08.02', title: 'Xác minh tham chiếu khi cần', actor: 'Recruiter', location: 'ATS', timing: 'Theo chính sách vị trí', typeCode: 'N', description: 'Thực hiện reference check hoặc kiểm tra hồ sơ theo chính sách và sự đồng ý phù hợp của ứng viên.', fieldsChecklist: ['Người tham chiếu', 'Kết quả xác minh', 'Biên bản', 'Ngoại lệ'] },
+      { stepCode: 'REC08.03', title: 'Đề xuất ứng viên được chọn', actor: 'Hiring Manager', location: 'Approval Portal', timing: 'Sau khi hoàn tất đánh giá', typeCode: 'M', description: 'Đề xuất ứng viên chính thức, ứng viên dự phòng và lý do lựa chọn để chuyển sang duyệt offer.', fieldsChecklist: ['Ứng viên được chọn', 'Ứng viên dự phòng', 'Lý do lựa chọn', 'Đề xuất offer'] }
+    ]
+  },
+  {
+    sopCode: 'SOP-REC-09', sopTitle: 'Phê duyệt thư mời nhận việc', sopCategory: 'Tuyển dụng · Phê duyệt offer',
+    description: 'Kiểm soát mức lương, cơ cấu thu nhập và thẩm quyền trước khi phát hành offer cho ứng viên.',
+    steps: [
+      { stepCode: 'REC09.01', title: 'Lập đề xuất offer', actor: 'Recruiter', location: 'ATS', timing: 'Sau khi chọn ứng viên', typeCode: 'N', description: 'Khai báo vị trí, mức lương, phụ cấp, thời gian thử việc, ngày bắt đầu và điều kiện đặc biệt.', fieldsChecklist: ['Ứng viên', 'Chức danh', 'Lương', 'Phụ cấp', 'Thử việc', 'Ngày bắt đầu'] },
+      { stepCode: 'REC09.02', title: 'Kiểm tra khung lương và ngân sách', actor: 'C&B hoặc Finance', location: 'Approval Portal', timing: 'Trước khi duyệt offer', typeCode: 'C', description: 'Đối chiếu salary range, nội bộ công bằng, ngân sách và các khoản ngoại lệ.', fieldsChecklist: ['Salary range', 'Ngân sách', 'So sánh nội bộ', 'Ngoại lệ'] },
+      { stepCode: 'REC09.03', title: 'Phê duyệt offer', actor: 'Người phê duyệt theo thẩm quyền', location: 'Approval Portal', timing: 'Theo SLA offer', typeCode: 'M', description: 'Duyệt, từ chối hoặc trả về chỉnh sửa; lưu phiên bản và chữ ký phê duyệt.', fieldsChecklist: ['Quyết định', 'Phiên bản offer', 'Lý do chỉnh sửa', 'Chữ ký phê duyệt'] }
+    ]
+  },
+  {
+    sopCode: 'SOP-REC-10', sopTitle: 'Thư mời nhận việc', sopCategory: 'Tuyển dụng · Offer',
+    description: 'Phát hành offer, quản lý thương lượng và ghi nhận ứng viên chấp nhận hoặc từ chối.',
+    steps: [
+      { stepCode: 'REC10.01', title: 'Phát hành thư mời nhận việc', actor: 'Recruiter', location: 'Candidate Portal', timing: 'Sau khi offer được duyệt', typeCode: 'N', description: 'Gửi offer bằng mẫu chuẩn có kiểm soát phiên bản, thời hạn phản hồi và thông tin liên hệ.', fieldsChecklist: ['File offer', 'Thời hạn phản hồi', 'Kênh gửi', 'Phiên bản'] },
+      { stepCode: 'REC10.02', title: 'Ứng viên phản hồi offer', actor: 'Ứng viên', location: 'Candidate Portal', timing: 'Trước hạn offer', typeCode: 'M', description: 'Ứng viên chấp nhận, từ chối hoặc đề nghị thương lượng lại điều kiện offer.', fieldsChecklist: ['Accepted', 'Declined', 'Negotiation', 'Lý do từ chối'] },
+      { stepCode: 'REC10.03', title: 'Chốt kết quả offer', actor: 'Recruiter', location: 'ATS', timing: 'Sau phản hồi ứng viên', typeCode: 'C', description: 'Cập nhật offer accepted, declined, expired hoặc withdrawn; nếu thương lượng thì tạo phiên bản offer mới.', fieldsChecklist: ['Trạng thái cuối', 'Offer version', 'Ngày nhận việc xác nhận', 'Ghi chú thương lượng'] }
+    ]
+  },
+  {
+    sopCode: 'SOP-REC-11', sopTitle: 'Chuẩn bị tiếp nhận nhân viên mới', sopCategory: 'Tuyển dụng · Pre-onboarding',
+    description: 'Chuẩn bị giấy tờ, tài khoản, thiết bị và kế hoạch ngày đầu trước khi ứng viên chính thức nhận việc.',
+    steps: [
+      { stepCode: 'REC11.01', title: 'Tạo hồ sơ chờ nhận việc', actor: 'Hệ thống HRMS', location: 'Core EMP', timing: 'Khi offer được chấp nhận', typeCode: 'A', description: 'Tạo employee profile draft và kế thừa dữ liệu ứng viên mà không tạo hồ sơ nhân viên chính thức quá sớm.', fieldsChecklist: ['Candidate ID', 'Employee draft', 'Vị trí', 'Ngày nhận việc'] },
+      { stepCode: 'REC11.02', title: 'Kích hoạt checklist liên phòng ban', actor: 'Hệ thống HRMS', location: 'Task Workflow', timing: 'Trước ngày nhận việc theo cấu hình', typeCode: 'A', description: 'Tạo task cho HR, IT, Hành chính và Hiring Manager chuẩn bị hợp đồng, tài khoản, thiết bị, chỗ ngồi và orientation.', fieldsChecklist: ['Task HR', 'Task IT', 'Task Hành chính', 'Task Manager'] },
+      { stepCode: 'REC11.03', title: 'Xác nhận ứng viên nhận việc', actor: 'Recruiter và Hiring Manager', location: 'Onboarding Portal', timing: 'Ngày đầu hoặc trước ngày bắt đầu', typeCode: 'M', description: 'Xác nhận ứng viên có mặt, no-show, đổi ngày bắt đầu hoặc hủy; chỉ ứng viên có mặt mới chuyển sang LIFE-02.', fieldsChecklist: ['Trạng thái có mặt', 'Ngày bắt đầu thực tế', 'No-show', 'Bàn giao LIFE-02'] }
+    ]
+  }
+]
+
 const mergedSopDatabase: Record<string, SopSubProcess[]> = { ...SOP_DATABASE_BASE }
 
 const docxDatabases = [DOCX_EMPLOYEE_SOP_DATABASE, DOCX_OPERATIONAL_SOP_DATABASE]
@@ -1113,5 +1223,10 @@ for (const docxDatabase of docxDatabases) {
     ]
   }
 }
+
+mergedSopDatabase['LIFE-01'] = [
+  ...recruitmentDetailedProcesses,
+  ...(mergedSopDatabase['LIFE-01'] ?? []).filter((process) => !normalizeSopCode(process.sopCode).startsWith('SOPREC'))
+]
 
 export const SOP_DATABASE: Record<string, SopSubProcess[]> = mergedSopDatabase

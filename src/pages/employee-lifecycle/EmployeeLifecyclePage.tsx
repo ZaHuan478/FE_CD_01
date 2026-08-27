@@ -1,6 +1,6 @@
 import React, { useMemo, useState, useEffect, useCallback, Suspense, useTransition } from 'react'
 import { useSearchParams, useParams, useLocation, useNavigate } from 'react-router-dom'
-import { Sparkles, Layers, Database, Sun, Moon, Loader2 } from 'lucide-react'
+import { Layers, Sun, Moon, Loader2, Search, X } from 'lucide-react'
 
 import { MasterDataRelationshipModal } from '../../components/employee-lifecycle/MasterDataRelationshipModal'
 import { SystemSupportBar } from '../../components/employee-lifecycle/SystemSupportBar'
@@ -35,15 +35,41 @@ export const EmployeeLifecyclePage: React.FC = () => {
     if (location.pathname.includes('/employee-lifecycle/lifecycle')) return 'lifecycle'
     const tabParam = searchParams.get('tab') as 'lifecycle' | 'masterdata' | 'reports'
     if (tabParam && ['lifecycle', 'masterdata', 'reports'].includes(tabParam)) return tabParam
-    return 'lifecycle'
+    return 'reports'
   }, [location.pathname, searchParams])
 
   const [activeTab, setActiveTab] = useState<'lifecycle' | 'masterdata' | 'reports'>(getTabFromLocation)
-  const [isGuideModalOpen, setIsGuideModalOpen] = useState(false)
+  const [isGuideModalOpen] = useState(false)
+  const [globalSearchTerm, setGlobalSearchTerm] = useState('')
+  const [isGlobalSearchOpen, setIsGlobalSearchOpen] = useState(false)
 
-  const [activeSection, setActiveSection] = useState('layer-2-lifecycle')
+  const [activeSection, setActiveSection] = useState('overview-dashboard')
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false)
   const [, startTransition] = useTransition()
+
+  const globalSearchResults = useMemo(() => {
+    const query = globalSearchTerm.trim().toLocaleLowerCase('vi-VN')
+    if (!query) return []
+
+    const seen = new Set<string>()
+    return Object.entries(SOP_DATABASE).flatMap(([workflowId, processes]) => processes.map((process) => ({
+      workflowId,
+      sopCode: process.sopCode,
+      title: process.sopTitle,
+      description: process.description
+    }))).filter((process) => {
+      const key = `${process.workflowId}-${process.sopCode}`
+      if (seen.has(key)) return false
+      seen.add(key)
+      return [process.sopCode, process.title, process.description].some((value) => value?.toLocaleLowerCase('vi-VN').includes(query))
+    }).slice(0, 6)
+  }, [globalSearchTerm])
+
+  const openGlobalSearchResult = (workflowId: string, sopCode: string) => {
+    setGlobalSearchTerm('')
+    setIsGlobalSearchOpen(false)
+    navigate(`/employee-lifecycle/workflow/${workflowId}?sop=${encodeURIComponent(sopCode)}`)
+  }
 
   // Sync tab with URL search parameter
   const handleTabChange = (tab: 'lifecycle' | 'masterdata' | 'reports') => {
@@ -369,12 +395,12 @@ export const EmployeeLifecyclePage: React.FC = () => {
             </div>
             <div>
               <div className="flex flex-wrap items-center gap-1.5">
-                  <span className="text-[10px] font-bold text-blue-700 uppercase tracking-widest">
+                <span className="text-[10px] font-bold text-blue-700 uppercase tracking-widest">
                   {t('header.architecture', 'TỔNG QUAN NGHIỆP VỤ NHÂN SỰ')}
                 </span>
-                <span className="px-1.5 py-0.2 text-[9px] font-semibold bg-blue-50 text-blue-700 rounded border border-blue-200">
+                {/* <span className="px-1.5 py-0.2 text-[9px] font-semibold bg-blue-50 text-blue-700 rounded border border-blue-200">
                   {t('header.productionReady', 'Tổng quan hệ thống')}
-                </span>
+                </span> */}
               </div>
               <h1 className="text-sm sm:text-base font-bold tracking-tight text-slate-900 mt-0.5 leading-snug dark:text-white">
                 {t('header.title', 'QUẢN LÝ HỒ SƠ VÀ VÒNG ĐỜI NHÂN VIÊN')}
@@ -383,6 +409,33 @@ export const EmployeeLifecyclePage: React.FC = () => {
           </div>
 
           <div className="flex items-center gap-2.5 text-xs shrink-0">
+            <div className="relative hidden lg:block">
+              <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+              <input
+                type="search"
+                value={globalSearchTerm}
+                onFocus={() => setIsGlobalSearchOpen(true)}
+                onChange={(event) => { setGlobalSearchTerm(event.target.value); setIsGlobalSearchOpen(true) }}
+                onKeyDown={(event) => {
+                  if (event.key === 'Escape') { setIsGlobalSearchOpen(false); event.currentTarget.blur() }
+                  if (event.key === 'Enter' && globalSearchResults[0]) openGlobalSearchResult(globalSearchResults[0].workflowId, globalSearchResults[0].sopCode)
+                }}
+                placeholder="Tìm quy trình, mã SOP..."
+                aria-label="Tìm quy trình hoặc mã SOP"
+                className="w-52 rounded-xl border border-slate-200 bg-slate-50 py-2 pl-9 pr-8 text-xs font-medium text-slate-800 outline-none transition-colors placeholder:text-slate-400 focus:border-blue-500 focus:bg-white dark:border-slate-700 dark:bg-slate-800 dark:text-white dark:placeholder:text-slate-500 dark:focus:border-sky-400 dark:focus:bg-slate-900 xl:w-64"
+              />
+              {globalSearchTerm && <button type="button" onClick={() => { setGlobalSearchTerm(''); setIsGlobalSearchOpen(false) }} aria-label="Xóa tìm kiếm" className="absolute right-2 top-1/2 -translate-y-1/2 rounded p-0.5 text-slate-400 hover:bg-slate-200 hover:text-slate-700 dark:hover:bg-slate-700 dark:hover:text-slate-200"><X className="h-3.5 w-3.5" /></button>}
+              {isGlobalSearchOpen && globalSearchTerm.trim() && (
+                <div className="absolute right-0 top-[calc(100%+0.5rem)] z-[60] w-[360px] overflow-hidden rounded-xl border border-slate-200 bg-white p-1.5 shadow-xl dark:border-slate-700 dark:bg-slate-900">
+                  {globalSearchResults.length > 0 ? globalSearchResults.map((result) => (
+                    <button key={`${result.workflowId}-${result.sopCode}`} type="button" onMouseDown={(event) => event.preventDefault()} onClick={() => openGlobalSearchResult(result.workflowId, result.sopCode)} className="flex w-full items-start gap-2 rounded-lg px-2.5 py-2 text-left transition-colors hover:bg-sky-50 dark:hover:bg-sky-500/10">
+                      <span className="mt-0.5 rounded bg-sky-100 px-1.5 py-0.5 font-mono text-[9px] font-bold text-sky-800 dark:bg-sky-500/20 dark:text-sky-200">{result.sopCode}</span>
+                      <span className="min-w-0"><span className="block truncate text-xs font-semibold text-slate-800 dark:text-slate-100">{result.title}</span><span className="mt-0.5 block truncate text-[11px] text-slate-500 dark:text-slate-400">{result.workflowId}</span></span>
+                    </button>
+                  )) : <p className="px-3 py-3 text-xs text-slate-500 dark:text-slate-400">Không tìm thấy quy trình hoặc mã SOP phù hợp.</p>}
+                </div>
+              )}
+            </div>
             {/* Custom Language Selection Popover */}
             <LanguageSelector isDarkTheme={isDarkMode} />
 
@@ -408,73 +461,15 @@ export const EmployeeLifecyclePage: React.FC = () => {
             </button>
           </div>
         </div>
-
-        {/* MODERNIZED SUB-HEADER: 3 MAIN TABS & ARCHITECTURE GUIDE BUTTON */}
-        <div className="bg-slate-50 border-t border-slate-200 dark:bg-slate-950/75 dark:border-slate-800">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 flex items-center justify-between overflow-x-auto no-scrollbar gap-4">
-
-            {/* Tab Navigation Buttons */}
-            <div className="flex items-center gap-1 sm:gap-2 py-2">
-              <button
-                type="button"
-                onClick={() => handleTabChange('lifecycle')}
-                className={`px-3.5 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-2 cursor-pointer shrink-0 ${activeTab === 'lifecycle'
-                  ? 'bg-blue-600 text-white shadow-sm'
-                  : 'text-slate-600 hover:text-slate-900 hover:bg-white dark:text-slate-300 dark:hover:text-white dark:hover:bg-slate-800'
-                  }`}
-              >
-                <Layers className="w-4 h-4" />
-                <span>{t('tabs.lifecycle', 'Vòng đời nhân sự')}</span>
-              </button>
-
-              <button
-                type="button"
-                onClick={() => handleTabChange('masterdata')}
-                className={`px-3.5 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-2 cursor-pointer shrink-0 ${activeTab === 'masterdata'
-                  ? 'bg-blue-600 text-white shadow-sm'
-                  : 'text-slate-600 hover:text-slate-900 hover:bg-white dark:text-slate-300 dark:hover:text-white dark:hover:bg-slate-800'
-                  }`}
-              >
-                <Database className="w-4 h-4" />
-                <span>{t('tabs.masterdata', 'Danh mục dùng chung')}</span>
-              </button>
-
-              <button
-                type="button"
-                onClick={() => handleTabChange('reports')}
-                className={`px-3.5 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-2 cursor-pointer shrink-0 ${activeTab === 'reports'
-                  ? 'bg-blue-600 text-white shadow-sm'
-                  : 'text-slate-600 hover:text-slate-900 hover:bg-white dark:text-slate-300 dark:hover:text-white dark:hover:bg-slate-800'
-                  }`}
-              >
-                <Sparkles className="w-4 h-4" />
-                <span>{t('tabs.reports', 'Báo cáo và quy trình')}</span>
-              </button>
-            </div>
-
-            {/* Guide Explainer Toggle Button */}
-            <button
-              type="button"
-              onClick={() => setIsGuideModalOpen(!isGuideModalOpen)}
-              className={`px-3 py-1.5 rounded-xl border text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer shrink-0 ${isGuideModalOpen
-                ? 'bg-blue-600 text-white border-blue-600 shadow-xs'
-                : 'bg-white hover:bg-slate-100 text-slate-700 border-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 dark:text-slate-200 dark:border-slate-700'
-                }`}
-            >
-              <Sparkles className="w-3.5 h-3.5 text-blue-600" />
-              <span>{t('tabs.guideBtn', 'Hướng dẫn Kiến trúc')}</span>
-            </button>
-          </div>
-        </div>
       </header>
 
 
       {/* Main Container Workspace (92% Screen Width for maximum viewability) */}
-      <main className="w-[92%] max-w-[1920px] mx-auto px-2 sm:px-4 lg:px-6 py-5 sm:py-6 space-y-6">
+      <main className={`pb-5 sm:pb-6 ${activeTab === 'reports' ? 'w-full max-w-none px-0 pt-0 sm:pt-0' : 'w-[92%] max-w-[1920px] mx-auto px-2 sm:px-4 lg:px-6 pt-5 sm:pt-6'} space-y-6`}>
 
-        <section className={`rounded-2xl border p-4 sm:p-5 ${isDarkMode ? 'border-sky-900/70 bg-sky-950/25' : 'border-sky-200 bg-sky-50/70'}`}>
+        {/* <section className={`rounded-2xl border p-4 sm:p-5 ${isDarkMode ? 'border-sky-900/70 bg-sky-950/25' : 'border-sky-200 bg-sky-50/70'}`}>
           <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
-            <div className="max-w-3xl"><p className="text-[10px] font-black uppercase tracking-[0.16em] text-sky-700 dark:text-sky-300">BẢN DEMO NGHIỆP VỤ · DÀNH CHO NGƯỜI MỚI</p><h2 className="mt-1 text-base font-black text-slate-900 dark:text-white">HRMS quản lý hành trình nhân viên: từ lúc cần người đến khi nghỉ việc.</h2><p className="mt-1 text-xs leading-relaxed text-slate-600 dark:text-slate-300">Mô phỏng phạm vi, luồng xử lý và màn hình dự kiến; không kết nối dữ liệu hay phát sinh giao dịch thật.</p></div>
+            <div className="max-w-3xl"><h2 className="mt-1 text-base font-black text-slate-900 dark:text-white">HRMS quản lý hành trình nhân viên: từ lúc cần người đến khi nghỉ việc.</h2><p className="mt-1 text-xs leading-relaxed text-slate-600 dark:text-slate-300">Mô phỏng phạm vi, luồng xử lý và màn hình dự kiến; không kết nối dữ liệu hay phát sinh giao dịch thật.</p></div>
             <button type="button" onClick={() => setIsGuideModalOpen(!isGuideModalOpen)} className="shrink-0 self-start rounded-xl border border-sky-200 bg-white px-3 py-2 text-xs font-bold text-sky-800 transition-colors hover:bg-sky-100 dark:border-sky-800 dark:bg-slate-900 dark:text-sky-200 dark:hover:bg-slate-800">{isGuideModalOpen ? 'Ẩn giải thích thuật ngữ' : 'Giải thích LIFE · MD · SOP · RACI'}</button>
           </div>
           <div className="mt-4 grid grid-cols-1 gap-3 md:grid-cols-3">
@@ -484,7 +479,7 @@ export const EmployeeLifecyclePage: React.FC = () => {
               ['3. Xem dữ liệu & quy tắc', 'Tra cứu danh mục dùng chung, SOP, vai trò và quan hệ dữ liệu.', () => handleTabChange('masterdata')]
             ].map(([title, description, action]) => <button key={title as string} type="button" onClick={action as () => void} className={`rounded-xl border p-3 text-left transition-colors ${isDarkMode ? 'border-slate-800 bg-slate-900/80 hover:border-sky-700' : 'border-white bg-white/90 hover:border-sky-300 hover:bg-white'}`}><p className="text-xs font-black text-slate-900 dark:text-white">{title as string}</p><p className="mt-1 text-xs leading-relaxed text-slate-600 dark:text-slate-300">{description as string}</p></button>)}
           </div>
-        </section>
+        </section> */}
 
         {/* Collapsible Architecture Guide Banner */}
         {isGuideModalOpen && (
