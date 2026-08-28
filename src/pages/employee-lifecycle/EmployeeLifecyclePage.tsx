@@ -21,6 +21,7 @@ import { LanguageSelector } from '../../components/common/LanguageSelector'
 import { masterData, lifecycleProcesses, crossFunctionalProcesses, sharedServices, findNodeById } from './data'
 import { SOP_DATABASE } from '../../components/employee-lifecycle/workflow-detail/data/sopDatabase'
 import { sopDictionary } from '../../components/employee-lifecycle/data/sopDictionary'
+import { CROSS_FUNCTIONAL_REGISTRY } from '../../components/employee-lifecycle/cross-functional'
 import type { LifecycleStep, OperationModule, DetailItem } from '../../types/employee-lifecycle'
 import { useLanguage } from '../../context/LanguageContext'
 
@@ -41,19 +42,17 @@ export const EmployeeLifecyclePage: React.FC = () => {
   const navigate = useNavigate()
   const [searchParams, setSearchParams] = useSearchParams()
 
-  const getTabFromLocation = useCallback((): 'lifecycle' | 'masterdata' | 'reports' | 'journey' => {
-    const tabParam = searchParams.get('tab') as 'lifecycle' | 'masterdata' | 'reports' | 'journey'
-    if (tabParam && ['lifecycle', 'masterdata', 'reports', 'journey'].includes(tabParam)) {
-      return tabParam === 'lifecycle' ? 'journey' : tabParam
-    }
-    if (location.pathname.includes('/employee-lifecycle/journey')) return 'journey'
-    if (location.pathname.includes('/employee-lifecycle/masterdata')) return 'masterdata'
-    if (location.pathname.includes('/employee-lifecycle/reports') || location.pathname.includes('/employee-lifecycle/workbench')) return 'reports'
-    if (location.pathname.includes('/employee-lifecycle/lifecycle')) return 'journey'
+  const getTabFromLocation = useCallback((): 'lifecycle' | 'masterdata' | 'reports' | 'journey' | 'operations' => {
+    const tabParam = searchParams.get('tab')
+    if (location.pathname.includes('/employee-lifecycle/operations') || tabParam === 'operations') return 'operations'
+    if (location.pathname.includes('/employee-lifecycle/journey') || tabParam === 'journey') return 'journey'
+    if (location.pathname.includes('/employee-lifecycle/masterdata') || tabParam === 'masterdata') return 'masterdata'
+    if (location.pathname.includes('/employee-lifecycle/lifecycle') || tabParam === 'lifecycle') return 'lifecycle'
+    if (location.pathname.includes('/employee-lifecycle/reports') || location.pathname.includes('/employee-lifecycle/workbench') || tabParam === 'reports') return 'reports'
     return 'reports'
   }, [location.pathname, searchParams])
 
-  const [activeTab, setActiveTab] = useState<'lifecycle' | 'masterdata' | 'reports' | 'journey'>(getTabFromLocation)
+  const [activeTab, setActiveTab] = useState<'lifecycle' | 'masterdata' | 'reports' | 'journey' | 'operations'>(getTabFromLocation)
   const [activeBusinessCluster, setActiveBusinessCluster] = useState<BusinessClusterId>(() => {
     const clusterParam = searchParams.get('cluster')
     return isBusinessClusterId(clusterParam) ? clusterParam : 'core'
@@ -91,18 +90,20 @@ export const EmployeeLifecyclePage: React.FC = () => {
   }
 
   // Sync tab with URL search parameter & navigation
-  const handleTabChange = (tab: 'lifecycle' | 'masterdata' | 'reports' | 'journey') => {
+  const handleTabChange = (tab: 'lifecycle' | 'masterdata' | 'reports' | 'journey' | 'operations') => {
     startTransition(() => {
       setActiveTab(tab)
     })
-    if (tab === 'journey') {
+    if (tab === 'operations') {
+      navigate('/employee-lifecycle/operations')
+    } else if (tab === 'journey') {
       navigate('/employee-lifecycle/journey?stage=LIFE-00&scenario=all')
     } else if (tab === 'masterdata') {
       navigate('/employee-lifecycle/masterdata')
     } else if (tab === 'reports') {
       navigate('/employee-lifecycle')
     } else if (tab === 'lifecycle') {
-      navigate('/employee-lifecycle?tab=lifecycle')
+      navigate('/employee-lifecycle/lifecycle')
     }
     window.scrollTo({ top: 0, behavior: 'smooth' })
   }
@@ -129,12 +130,16 @@ export const EmployeeLifecyclePage: React.FC = () => {
         setActiveTab(tabFromUrl)
       })
     }
-    if (tabFromUrl === 'journey' || location.pathname.includes('/employee-lifecycle/journey')) {
+    if (tabFromUrl === 'operations' || location.pathname.includes('/employee-lifecycle/operations')) {
+      setActiveSection('layer-3-operations')
+    } else if (tabFromUrl === 'journey' || location.pathname.includes('/employee-lifecycle/journey')) {
       setActiveSection('layer-2-lifecycle')
     } else if (tabFromUrl === 'masterdata') {
       setActiveSection('layer-1-master-data')
     } else if (tabFromUrl === 'reports') {
       setActiveSection('overview-dashboard')
+    } else if (tabFromUrl === 'lifecycle') {
+      setActiveSection('layer-2-lifecycle')
     }
   }, [getTabFromLocation, activeTab, location.pathname])
 
@@ -222,16 +227,8 @@ export const EmployeeLifecyclePage: React.FC = () => {
     }
 
     if (sectionId === 'layer-3-operations' || sectionId === 'system-support') {
-      handleTabChange('lifecycle')
-      setTimeout(() => {
-        const el = document.getElementById(sectionId)
-        if (el) {
-          const headerOffset = 130
-          const elementPosition = el.getBoundingClientRect().top
-          const offsetPosition = elementPosition + window.pageYOffset - headerOffset
-          window.scrollTo({ top: offsetPosition, behavior: 'smooth' })
-        }
-      }, 50)
+      handleTabChange('operations')
+      return
     }
   }
 
@@ -257,21 +254,22 @@ export const EmployeeLifecyclePage: React.FC = () => {
     })
   }, [])
 
-  // Transform Operations modules (8 modules)
+  // Transform Operations modules (8 modules from Canonical Registry)
   const operationModules: OperationModule[] = useMemo(() => {
     return crossFunctionalProcesses.map((item) => {
+      const cfDef = CROSS_FUNCTIONAL_REGISTRY[item.id]
       const sopInfo = sopDictionary[item.id]
       return {
         id: item.id,
         code: item.id,
-        title: item.title,
-        description: item.subtitle,
-        iconName: 'Clock',
-        category: item.overview.phase || 'Cross Functional',
-        inputs: item.inputs.map((inp) => inp.name),
-        outputs: item.outputs.map((out) => out.name),
-        sopBadge: sopInfo?.badge || 'SOP-CF-01',
-        sopIds: [sopInfo?.badge || 'SOP-CF-01']
+        title: cfDef?.title || item.title,
+        description: cfDef?.subtitle || item.subtitle,
+        iconName: cfDef?.iconName || 'Clock',
+        category: cfDef?.domainLabel || item.overview.phase || 'Cross Functional',
+        inputs: cfDef?.inputs || item.inputs.map((inp) => inp.name),
+        outputs: cfDef?.outputs || item.outputs.map((out) => out.name),
+        sopBadge: cfDef?.sopBadge || sopInfo?.badge || 'SOP-CF-01',
+        sopIds: cfDef?.sopIds || [sopInfo?.badge || 'SOP-CF-01']
       }
     })
   }, [])
@@ -407,6 +405,42 @@ export const EmployeeLifecyclePage: React.FC = () => {
     }
   }
 
+  const currentHeaderInfo = useMemo(() => {
+    if (activeTab === 'masterdata' || activeSection === 'layer-1-master-data') {
+      return {
+        subtitle: t('header.layer1Subtitle', 'TẦNG 1 · DỮ LIỆU NỀN TẢNG'),
+        title: t('header.layer1Title', 'Trung tâm Master Data'),
+        icon: Database
+      }
+    }
+    if (activeTab === 'journey' || activeSection === 'layer-2-lifecycle') {
+      return {
+        subtitle: t('header.layer2Subtitle', 'TẦNG 2 · VÒNG ĐỜI NHÂN VIÊN'),
+        title: t('header.layer2Title', 'Hành trình vòng đời nhân viên'),
+        icon: Layers
+      }
+    }
+    if (activeTab === 'operations' || activeSection === 'layer-3-operations') {
+      return {
+        subtitle: t('header.layer3Subtitle', 'TẦNG 3 · NGHIỆP VỤ PHÁT SINH'),
+        title: t('header.layer3Title', 'Nghiệp vụ phát sinh & Vận hành (CF-01 ➔ CF-08)'),
+        icon: GitBranch
+      }
+    }
+    if (activeTab === 'lifecycle') {
+      return {
+        subtitle: t('header.layer3Subtitle', 'TẦNG 2 & TẦNG 3 · VẬN HÀNH TOÀN DIỆN'),
+        title: t('header.layer3Title', 'Vòng đời nhân sự & Nghiệp vụ phát sinh'),
+        icon: GitBranch
+      }
+    }
+    return {
+      subtitle: t('header.architecture', 'ENTERPRISE HR SAAS ARCHITECTURE'),
+      title: t('header.title', 'QUẢN LÝ HỒ SƠ & VÒNG ĐỜI NHÂN VIÊN'),
+      icon: Layers
+    }
+  }, [activeTab, activeSection, t])
+
   // IF WIREFRAME ITEM IS OPENED, RENDER FULL-PAGE FORM UI WORKSPACE!
   if (isWireframeRoute && wireframeItem) {
     return (
@@ -427,42 +461,6 @@ export const EmployeeLifecyclePage: React.FC = () => {
       />
     )
   }
-
-  const currentHeaderInfo = useMemo(() => {
-    if (activeTab === 'masterdata' || activeSection === 'layer-1-master-data') {
-      return {
-        subtitle: t('header.layer1Subtitle', 'TẦNG 1 · DỮ LIỆU NỀN TẢNG'),
-        title: t('header.layer1Title', 'Trung tâm Master Data'),
-        icon: Database
-      }
-    }
-    if (activeTab === 'journey' || activeSection === 'layer-2-lifecycle') {
-      return {
-        subtitle: t('header.layer2Subtitle', 'TẦNG 2 · VÒNG ĐỜI NHÂN VIÊN'),
-        title: t('header.layer2Title', 'Hành trình vòng đời nhân viên'),
-        icon: Layers
-      }
-    }
-    if (activeTab === 'lifecycle') {
-      if (activeSection === 'layer-3-operations') {
-        return {
-          subtitle: t('header.layer3Subtitle', 'TẦNG 3 · NGHIỆP VỤ PHÁT SINH'),
-          title: t('header.layer3Title', 'Nghiệp vụ phát sinh & Vận hành'),
-          icon: GitBranch
-        }
-      }
-      return {
-        subtitle: t('header.layer2Subtitle', 'TẦNG 2 · VÒNG ĐỜI NHÂN VIÊN'),
-        title: t('header.layer2Title', 'Hành trình vòng đời nhân viên'),
-        icon: Layers
-      }
-    }
-    return {
-      subtitle: t('header.architecture', 'ENTERPRISE HR SAAS ARCHITECTURE'),
-      title: t('header.title', 'QUẢN LÝ HỒ SƠ & VÒNG ĐỜI NHÂN VIÊN'),
-      icon: Layers
-    }
-  }, [activeTab, activeSection, t])
 
   const HeaderIcon = currentHeaderInfo.icon
 
@@ -615,7 +613,27 @@ export const EmployeeLifecyclePage: React.FC = () => {
           </div>
         )}
 
-        {/* TAB 1: VÒNG ĐỜI NHÂN SỰ & NGHIỆP VỤ VẬN HÀNH (LEGACY / LAYER 3 OPERATIONS) */}
+        {/* TAB OPERATIONS: TẦNG 3 - NGHIỆP VỤ PHÁT SINH (DEDICATED 8-MODULE WORKSPACE) */}
+        {activeTab === 'operations' && (
+          <div className="space-y-6 animate-fadeIn">
+            <Suspense fallback={<div className="h-96 flex flex-col items-center justify-center gap-3"><Loader2 className="w-8 h-8 animate-spin text-blue-500" /><span className="text-sm font-bold text-slate-500">Đang tải nghiệp vụ phát sinh...</span></div>}>
+              <div id="layer-3-operations" className="scroll-mt-28">
+                <OperationsGrid
+                  modules={operationModules}
+                  onSelectModule={handleOpenItemDetails}
+                />
+              </div>
+
+              <div id="system-support" className="scroll-mt-28">
+                <SystemSupportBar
+                  onSelectUtility={handleOpenItemDetails}
+                />
+              </div>
+            </Suspense>
+          </div>
+        )}
+
+        {/* TAB LIFECYCLE: VÒNG ĐỜI NHÂN SỰ & NGHIỆP VỤ VẬN HÀNH (ALL-IN-ONE CANVAS) */}
         {activeTab === 'lifecycle' && (
           <div className="space-y-6 animate-fadeIn">
             <Suspense fallback={<div className="h-96 flex flex-col items-center justify-center gap-3"><Loader2 className="w-8 h-8 animate-spin text-blue-500" /><span className="text-sm font-bold text-slate-500">Đang tải biểu đồ vòng đời...</span></div>}>

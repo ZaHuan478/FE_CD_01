@@ -1,6 +1,6 @@
 import React from 'react'
 import { useSearchParams, useNavigate } from 'react-router-dom'
-import { ChevronRight, Home } from 'lucide-react'
+import { ChevronRight, Home, ArrowRight } from 'lucide-react'
 import { LifecycleJourneyHeader } from './LifecycleJourneyHeader'
 import { LifecycleScenarioSelector } from './LifecycleScenarioSelector'
 import { LifecycleStagePipeline } from './LifecycleStagePipeline'
@@ -111,6 +111,32 @@ export const EmployeeLifecycleJourneyView: React.FC = () => {
 
       {/* KHU VỰC 4: TÁC ĐỘNG LIÊN PHÂN HỆ (THU GỌN MẶC ĐỊNH) */}
       <LifecycleImpactMatrix stage={stageDefinition} />
+
+      {/* KHU VỰC 5: CHUYỂN TIẾP SANG TẦNG 3 (NGHIỆP VỤ PHÁT SINH) */}
+      <div className="rounded-2xl border border-blue-200/80 dark:border-blue-900/60 bg-gradient-to-r from-blue-50/80 via-indigo-50/40 to-white dark:from-blue-950/40 dark:via-slate-900 dark:to-slate-900 p-5 shadow-xs flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+        <div className="space-y-1">
+          <div className="flex items-center gap-2">
+            <span className="px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-blue-600 text-white">
+              TẦNG 3
+            </span>
+            <h3 className="text-sm font-black text-slate-900 dark:text-white">
+              Nghiệp vụ phát sinh trong quá trình làm việc (CF-01 ➔ CF-08)
+            </h3>
+          </div>
+          <p className="text-xs text-slate-600 dark:text-slate-400">
+            Khác với 8 chặng vòng đời tuần tự, Tầng 3 xử lý các sự kiện phát sinh bất kỳ lúc nào: Chấm công, Tái ký HĐ, Điều chuyển, Khen thưởng, Kỷ luật, Đào tạo, KPI và Nhân tài.
+          </p>
+        </div>
+
+        <button
+          type="button"
+          onClick={() => navigate('/employee-lifecycle/operations')}
+          className="shrink-0 px-4 py-2.5 rounded-xl bg-[#1f5f86] hover:bg-[#174968] text-white text-xs font-bold transition-all shadow-xs flex items-center gap-2 cursor-pointer group"
+        >
+          <span>Khám phá 8 Nghiệp vụ Tầng 3</span>
+          <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+        </button>
+      </div>
     </div>
   )
 }

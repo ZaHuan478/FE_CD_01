@@ -1,3 +1,5 @@
+import { CROSS_FUNCTIONAL_REGISTRY } from '../cross-functional'
+
 // SOP Mapping Dictionary (Global Constant based on SOP - HRUX.xlsx)
 export const sopDictionary: Record<string, { badge: string; title: string }> = {
   // 8 Giai đoạn Vòng đời Nhân viên (Lifecycle), bắt đầu từ LIFE-00 Định biên
@@ -10,24 +12,25 @@ export const sopDictionary: Record<string, { badge: string; title: string }> = {
   'LIFE-06': { badge: 'SOP-CC-08', title: 'Xử lý dữ liệu chấm công & Quá trình làm việc (Phân hệ Chấm công)' },
   'LIFE-07': { badge: 'SOP-NS-16', title: 'Giảm lao động & Quản lý báo giảm bảo hiểm (SOP-BH-04)' },
 
-  // 8 Module Nghiệp vụ Phát sinh (Operations Grid - Aliases CF-xx & CROSS-xx)
-  'CF-01': { badge: 'SOP-CC-01', title: 'Quản lý lịch đi ca & Quản lý nghỉ phép (SOP-CC-06)' },
-  'CF-02': { badge: 'SOP-NS-05', title: 'Tái ký hợp đồng lao động & Phụ lục hợp đồng (SOP-NS-07)' },
-  'CF-03': { badge: 'SOP-NS-09', title: 'Bổ nhiệm, Kiêm nhiệm (SOP-NS-10) & Điều động/điều chuyển (SOP-NS-12)' },
-  'CF-04': { badge: 'SOP-NS-13', title: 'Khen thưởng & Xử lý Kỷ luật (SOP-NS-14)' },
-  'CF-05': { badge: 'SOP-DT-02', title: 'Quản lý kế hoạch đào tạo của Công ty (Phân hệ Đào tạo)' },
-  'CF-06': { badge: 'SOP-ĐG-02', title: 'Quy trình đánh giá thành tích & Bộ tiêu chí KPI (SOP-ĐG-01)' },
-  'CF-07': { badge: 'SOP-PL-01', title: 'Quản lý thông tin khám sức khoẻ định kỳ & Phúc lợi (SOP-PL-05)' },
-  'CF-08': { badge: 'SOP-NS-15', title: 'Quản lý công tác (Phân hệ Nhân sự)' },
+  // 8 Module Nghiệp vụ Phát sinh (Đồng bộ trực tiếp từ Canonical Registry)
+  'CF-01': { badge: CROSS_FUNCTIONAL_REGISTRY['CF-01'].sopBadge, title: CROSS_FUNCTIONAL_REGISTRY['CF-01'].title },
+  'CF-02': { badge: CROSS_FUNCTIONAL_REGISTRY['CF-02'].sopBadge, title: CROSS_FUNCTIONAL_REGISTRY['CF-02'].title },
+  'CF-03': { badge: CROSS_FUNCTIONAL_REGISTRY['CF-03'].sopBadge, title: CROSS_FUNCTIONAL_REGISTRY['CF-03'].title },
+  'CF-04': { badge: CROSS_FUNCTIONAL_REGISTRY['CF-04'].sopBadge, title: CROSS_FUNCTIONAL_REGISTRY['CF-04'].title },
+  'CF-05': { badge: CROSS_FUNCTIONAL_REGISTRY['CF-05'].sopBadge, title: CROSS_FUNCTIONAL_REGISTRY['CF-05'].title },
+  'CF-06': { badge: CROSS_FUNCTIONAL_REGISTRY['CF-06'].sopBadge, title: CROSS_FUNCTIONAL_REGISTRY['CF-06'].title },
+  'CF-07': { badge: CROSS_FUNCTIONAL_REGISTRY['CF-07'].sopBadge, title: CROSS_FUNCTIONAL_REGISTRY['CF-07'].title },
+  'CF-08': { badge: CROSS_FUNCTIONAL_REGISTRY['CF-08'].sopBadge, title: CROSS_FUNCTIONAL_REGISTRY['CF-08'].title },
 
-  'CROSS-01': { badge: 'SOP-CC-01', title: 'Quản lý lịch đi ca & Quản lý nghỉ phép (SOP-CC-06)' },
-  'CROSS-02': { badge: 'SOP-NS-05', title: 'Tái ký hợp đồng lao động & Phụ lục hợp đồng (SOP-NS-07)' },
-  'CROSS-03': { badge: 'SOP-NS-09', title: 'Bổ nhiệm, Kiêm nhiệm (SOP-NS-10) & Điều động/điều chuyển (SOP-NS-12)' },
-  'CROSS-04': { badge: 'SOP-NS-13', title: 'Khen thưởng & Xử lý Kỷ luật (SOP-NS-14)' },
-  'CROSS-05': { badge: 'SOP-DT-02', title: 'Quản lý kế hoạch đào tạo của Công ty (Phân hệ Đào tạo)' },
-  'CROSS-06': { badge: 'SOP-ĐG-02', title: 'Quy trình đánh giá thành tích & Bộ tiêu chí KPI (SOP-ĐG-01)' },
-  'CROSS-07': { badge: 'SOP-PL-01', title: 'Quản lý thông tin khám sức khoẻ định kỳ & Phúc lợi (SOP-PL-05)' },
-  'CROSS-08': { badge: 'SOP-NS-15', title: 'Quản lý công tác (Phân hệ Nhân sự)' },
+  // Aliases CROSS-01 .. CROSS-08
+  'CROSS-01': { badge: CROSS_FUNCTIONAL_REGISTRY['CF-01'].sopBadge, title: CROSS_FUNCTIONAL_REGISTRY['CF-01'].title },
+  'CROSS-02': { badge: CROSS_FUNCTIONAL_REGISTRY['CF-02'].sopBadge, title: CROSS_FUNCTIONAL_REGISTRY['CF-02'].title },
+  'CROSS-03': { badge: CROSS_FUNCTIONAL_REGISTRY['CF-03'].sopBadge, title: CROSS_FUNCTIONAL_REGISTRY['CF-03'].title },
+  'CROSS-04': { badge: CROSS_FUNCTIONAL_REGISTRY['CF-04'].sopBadge, title: CROSS_FUNCTIONAL_REGISTRY['CF-04'].title },
+  'CROSS-05': { badge: CROSS_FUNCTIONAL_REGISTRY['CF-05'].sopBadge, title: CROSS_FUNCTIONAL_REGISTRY['CF-05'].title },
+  'CROSS-06': { badge: CROSS_FUNCTIONAL_REGISTRY['CF-06'].sopBadge, title: CROSS_FUNCTIONAL_REGISTRY['CF-06'].title },
+  'CROSS-07': { badge: CROSS_FUNCTIONAL_REGISTRY['CF-07'].sopBadge, title: CROSS_FUNCTIONAL_REGISTRY['CF-07'].title },
+  'CROSS-08': { badge: CROSS_FUNCTIONAL_REGISTRY['CF-08'].sopBadge, title: CROSS_FUNCTIONAL_REGISTRY['CF-08'].title },
 
   // Tầng 1: Master Data Categories
   'MD-01': { badge: 'SOP-NS-04', title: 'Quản lý thông tin nhân viên (Danh mục Nền tảng)' },

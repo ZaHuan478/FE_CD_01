@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState } from 'react'
 import {
   Users,
   GitPullRequest,
@@ -25,6 +25,7 @@ import {
 } from 'lucide-react'
 import { useLanguage } from '../../../../../../context/LanguageContext'
 import type { FlowStageProps } from '../types'
+import { useFlowSimulation } from '../shared/useFlowSimulation'
 
 interface StepDetail {
   code: string
@@ -323,74 +324,17 @@ export const DirectOnboardingFlow: React.FC<FlowStageProps> = ({
 }) => {
   const { language } = useLanguage()
 
-  const [selectedStep, setSelectedStep] = useState<string>('EMP02.01')
   const [activeTabMode, setActiveTabMode] = useState<'swimlane' | 'story' | 'specs'>('swimlane')
-  const [simulationScenario, setSimulationScenario] = useState<'pass' | 'fail' | null>(null)
-  const [simActiveStep, setSimActiveStep] = useState<string | null>(null)
-
-  // Sync selected step when activeStageTab prop changes
-  useEffect(() => {
-    if (activeStageTab === 1) setSelectedStep('EMP02.01')
-    else if (activeStageTab === 2) setSelectedStep('EMP02.03')
-    else if (activeStageTab === 3) setSelectedStep('EMP02.06')
-    else if (activeStageTab === 4) setSelectedStep('EMP02.11')
-    else if (activeStageTab === 5) setSelectedStep('EMP02.13')
-  }, [activeStageTab])
-
-  // Simulation runner
-  const runSimulation = (scenario: 'pass' | 'fail') => {
-    setSimulationScenario(scenario)
-    if (scenario === 'pass') {
-      const sequence = [
-        'START',
-        'EMP02.01',
-        'EMP02.02',
-        'EMP02.03',
-        'EMP02.04',
-        'EMP02.05',
-        'EMP02.08',
-        'EMP02.09',
-        'EMP02.06',
-        'EMP02.07',
-        'EMP02.10',
-        'EMP02.11',
-        'EMP02.12',
-        'EMP02.13',
-        'END'
-      ]
-      sequence.forEach((step, idx) => {
-        setTimeout(() => {
-          setSimActiveStep(step)
-          if (step.startsWith('EMP')) setSelectedStep(step)
-          if (idx === sequence.length - 1) {
-            setTimeout(() => setSimulationScenario(null), 1500)
-          }
-        }, idx * 900)
-      })
-    } else {
-      const sequence = [
-        'START',
-        'EMP02.01',
-        'EMP02.06',
-        'EMP02.07',
-        'EMP02.10',
-        'EMP02.11',
-        'EMP02.12',
-        'EMP02.14',
-        'EMP02.15',
-        'END'
-      ]
-      sequence.forEach((step, idx) => {
-        setTimeout(() => {
-          setSimActiveStep(step)
-          if (step.startsWith('EMP')) setSelectedStep(step)
-          if (idx === sequence.length - 1) {
-            setTimeout(() => setSimulationScenario(null), 1500)
-          }
-        }, idx * 1000)
-      })
-    }
-  }
+  const { selectedStep, setSelectedStep, simulationScenario, simActiveStep, runSimulation } = useFlowSimulation({
+    initialStep: 'EMP02.01',
+    activeStageTab,
+    stageSteps: { 1: 'EMP02.01', 2: 'EMP02.03', 3: 'EMP02.06', 4: 'EMP02.11', 5: 'EMP02.13' },
+    sequences: {
+      pass: ['START', 'EMP02.01', 'EMP02.02', 'EMP02.03', 'EMP02.04', 'EMP02.05', 'EMP02.08', 'EMP02.09', 'EMP02.06', 'EMP02.07', 'EMP02.10', 'EMP02.11', 'EMP02.12', 'EMP02.13', 'END'],
+      fail: ['START', 'EMP02.01', 'EMP02.06', 'EMP02.07', 'EMP02.10', 'EMP02.11', 'EMP02.12', 'EMP02.14', 'EMP02.15', 'END']
+    },
+    delays: { pass: 900, fail: 1000 }
+  })
 
   const currentStepData = EMP02_STEPS[selectedStep] || EMP02_STEPS['EMP02.01']
 

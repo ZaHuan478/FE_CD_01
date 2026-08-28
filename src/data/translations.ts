@@ -222,7 +222,7 @@ export const translations: TranslationDict = {
   },
 
   'layer3.title': {
-    vi: 'TẦNG 3: NGHIỆP VỤ PHÁT SINH VẬN HÀNH (OPERATIONAL GRID)',
+    vi: 'TẦNG 3: NGHIỆP VỤ PHÁT SINH VẬN HÀNH',
     en: 'LAYER 3: OPERATIONAL GRID & PERIODIC BUSINESS'
   },
   'layer3.subtitle': {

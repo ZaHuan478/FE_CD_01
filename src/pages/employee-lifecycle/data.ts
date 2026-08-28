@@ -1,4 +1,5 @@
 import { lifecycleMockNodes } from '../../data/lifecycle-mock-data'
+import { CROSS_FUNCTIONAL_REGISTRY } from '../../components/employee-lifecycle/cross-functional'
 
 export type SourceStatus = 'official' | 'designed' | 'draft' | 'not_available' | 'placeholder'
 export type ProcessStatus = 'official' | 'designed' | 'draft' | 'not_available'
@@ -540,7 +541,7 @@ export const crossFunctionalProcesses: BusinessNode[] = [
       { name: node.actorsMatrix.approver, role: 'Phê duyệt', action: 'Thẩm định' },
       { name: node.actorsMatrix.executor, role: 'Thực thi', action: 'Xử lý hệ thống' }
     ],
-    masterDataIds: ['MD-05', 'MD-06', 'MD-08', 'MD-10'],
+    masterDataIds: CROSS_FUNCTIONAL_REGISTRY[id]?.masterDataIds || ['MD-05', 'MD-06', 'MD-08', 'MD-10'],
     sopIds: node.sopIds,
     process: node.process,
     wireframe: {

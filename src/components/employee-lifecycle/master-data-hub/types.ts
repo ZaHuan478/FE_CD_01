@@ -1,5 +1,7 @@
 export type CatalogTier = 'tier1_global' | 'tier2_module' | 'tier3_utility' | 'tier4_governance'
 
+export type WorkspaceView = 'catalogs' | 'process' | 'relations'
+
 export type CatalogModuleId =
   | 'global'
   | 'ats'

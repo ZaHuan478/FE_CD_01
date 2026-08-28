@@ -5,6 +5,7 @@ import { PEOPLE_DEVELOPMENT_SOP_DATABASE } from './peopleDevelopmentSopDatabase'
 import { ORGANIZATION_MANAGEMENT_SOP_DATABASE } from './organizationManagementSopDatabase'
 import { PLATFORM_FOUNDATION_SOP_DATABASE } from './platformFoundationSopDatabase'
 import { CORE_EXPERIENCE_SOP_DATABASE } from './coreExperienceSopDatabase'
+import { CROSS_FUNCTIONAL_REGISTRY } from '../../cross-functional'
 
 // 100% Complete SOP Database mapped for ALL 7 Lifecycle Steps & Cross-Functional Operations from 1.EMP.HRM.SOP.docx
 const SOP_DATABASE_BASE: Record<string, SopSubProcess[]> = {
@@ -1238,5 +1239,11 @@ mergedSopDatabase['LIFE-01'] = [
   ...recruitmentDetailedProcesses,
   ...(mergedSopDatabase['LIFE-01'] ?? []).filter((process) => !normalizeSopCode(process.sopCode).startsWith('SOPREC'))
 ]
+
+// Register Canonical Cross-Functional Modules (Tầng 3: CF-01 -> CF-08)
+for (const [cfId, cfDef] of Object.entries(CROSS_FUNCTIONAL_REGISTRY)) {
+  mergedSopDatabase[cfId] = cfDef.sopProcesses
+  mergedSopDatabase[cfId.replace('CF-', 'CROSS-')] = cfDef.sopProcesses
+}
 
 export const SOP_DATABASE: Record<string, SopSubProcess[]> = mergedSopDatabase
