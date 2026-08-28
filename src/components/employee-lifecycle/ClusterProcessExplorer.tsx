@@ -27,7 +27,6 @@ import {
   Send,
   ShieldCheck,
   SlidersHorizontal,
-  Sparkles,
   Target,
   Trophy,
   UserCheck,
@@ -488,10 +487,10 @@ export const ClusterProcessExplorer: React.FC<{ cluster: ExplorerCluster }> = ({
       {/* SECTION HEADER */}
       <header className="border-b border-slate-200 pb-4 dark:border-slate-800">
         <div className="flex flex-col gap-1">
-          <span className="text-[10px] font-extrabold uppercase tracking-wider text-[#1f5f86] dark:text-sky-300 flex items-center gap-1.5">
+          {/* <span className="text-[10px] font-extrabold uppercase tracking-wider text-[#1f5f86] dark:text-sky-300 flex items-center gap-1.5">
             <Sparkles className="h-3.5 w-3.5 text-amber-500" />
             {language === 'vi' ? `Khám phá quy trình ${config.label}` : `${config.labelEn} Process Explorer`}
-          </span>
+          </span> */}
           <h3 className="text-base font-black text-slate-900 dark:text-white sm:text-lg">
             {language === 'vi'
               ? 'Chi tiết từng quy trình từ đầu vào đến kết quả'

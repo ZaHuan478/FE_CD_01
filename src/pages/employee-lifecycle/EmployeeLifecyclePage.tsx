@@ -1,6 +1,6 @@
 import React, { useMemo, useState, useEffect, useCallback, Suspense, useTransition } from 'react'
 import { useSearchParams, useParams, useLocation, useNavigate } from 'react-router-dom'
-import { Layers, Database, GitBranch, Sun, Moon, Loader2, Search, X } from 'lucide-react'
+import { Layers, Database, GitBranch, Sun, Moon, Loader2, Search, X, ShieldCheck } from 'lucide-react'
 
 import { MasterDataRelationshipModal } from '../../components/employee-lifecycle/MasterDataRelationshipModal'
 import { SystemSupportBar } from '../../components/employee-lifecycle/SystemSupportBar'
@@ -16,6 +16,7 @@ const LifecycleStepper = React.lazy(() => import('../../components/employee-life
 const OperationsGrid = React.lazy(() => import('../../components/employee-lifecycle/OperationsGrid').then(module => ({ default: module.OperationsGrid })))
 const SystemOverviewDashboard = React.lazy(() => import('../../components/employee-lifecycle/SystemOverviewDashboard').then(module => ({ default: module.SystemOverviewDashboard })))
 const EmployeeLifecycleJourneyView = React.lazy(() => import('../../components/employee-lifecycle/lifecycle-journey/EmployeeLifecycleJourneyView').then(module => ({ default: module.EmployeeLifecycleJourneyView })))
+const PolicyCenterPage = React.lazy(() => import('../../components/employee-lifecycle/policy-center/PolicyCenterPage').then(module => ({ default: module.PolicyCenterPage })))
 import { LanguageSelector } from '../../components/common/LanguageSelector'
 
 import { masterData, lifecycleProcesses, crossFunctionalProcesses, sharedServices, findNodeById } from './data'
@@ -42,8 +43,9 @@ export const EmployeeLifecyclePage: React.FC = () => {
   const navigate = useNavigate()
   const [searchParams, setSearchParams] = useSearchParams()
 
-  const getTabFromLocation = useCallback((): 'lifecycle' | 'masterdata' | 'reports' | 'journey' | 'operations' => {
+  const getTabFromLocation = useCallback((): 'lifecycle' | 'masterdata' | 'reports' | 'journey' | 'operations' | 'policies' => {
     const tabParam = searchParams.get('tab')
+    if (location.pathname.includes('/employee-lifecycle/policies') || tabParam === 'policies') return 'policies'
     if (location.pathname.includes('/employee-lifecycle/operations') || tabParam === 'operations') return 'operations'
     if (location.pathname.includes('/employee-lifecycle/journey') || tabParam === 'journey') return 'journey'
     if (location.pathname.includes('/employee-lifecycle/masterdata') || tabParam === 'masterdata') return 'masterdata'
@@ -52,7 +54,7 @@ export const EmployeeLifecyclePage: React.FC = () => {
     return 'reports'
   }, [location.pathname, searchParams])
 
-  const [activeTab, setActiveTab] = useState<'lifecycle' | 'masterdata' | 'reports' | 'journey' | 'operations'>(getTabFromLocation)
+  const [activeTab, setActiveTab] = useState<'lifecycle' | 'masterdata' | 'reports' | 'journey' | 'operations' | 'policies'>(getTabFromLocation)
   const [activeBusinessCluster, setActiveBusinessCluster] = useState<BusinessClusterId>(() => {
     const clusterParam = searchParams.get('cluster')
     return isBusinessClusterId(clusterParam) ? clusterParam : 'core'
@@ -90,11 +92,13 @@ export const EmployeeLifecyclePage: React.FC = () => {
   }
 
   // Sync tab with URL search parameter & navigation
-  const handleTabChange = (tab: 'lifecycle' | 'masterdata' | 'reports' | 'journey' | 'operations') => {
+  const handleTabChange = (tab: 'lifecycle' | 'masterdata' | 'reports' | 'journey' | 'operations' | 'policies') => {
     startTransition(() => {
       setActiveTab(tab)
     })
-    if (tab === 'operations') {
+    if (tab === 'policies') {
+      navigate('/employee-lifecycle/policies')
+    } else if (tab === 'operations') {
       navigate('/employee-lifecycle/operations')
     } else if (tab === 'journey') {
       navigate('/employee-lifecycle/journey?stage=LIFE-00&scenario=all')
@@ -130,7 +134,9 @@ export const EmployeeLifecyclePage: React.FC = () => {
         setActiveTab(tabFromUrl)
       })
     }
-    if (tabFromUrl === 'operations' || location.pathname.includes('/employee-lifecycle/operations')) {
+    if (tabFromUrl === 'policies' || location.pathname.includes('/employee-lifecycle/policies')) {
+      setActiveSection('policy-center')
+    } else if (tabFromUrl === 'operations' || location.pathname.includes('/employee-lifecycle/operations')) {
       setActiveSection('layer-3-operations')
     } else if (tabFromUrl === 'journey' || location.pathname.includes('/employee-lifecycle/journey')) {
       setActiveSection('layer-2-lifecycle')
@@ -210,6 +216,11 @@ export const EmployeeLifecyclePage: React.FC = () => {
 
   const handleNavigateSection = (sectionId: string) => {
     setActiveSection(sectionId)
+
+    if (sectionId === 'policy-center') {
+      handleTabChange('policies')
+      return
+    }
 
     if (sectionId === 'overview-dashboard' || sectionId === 'sop-specs-matrix') {
       handleTabChange('reports')
@@ -406,6 +417,13 @@ export const EmployeeLifecyclePage: React.FC = () => {
   }
 
   const currentHeaderInfo = useMemo(() => {
+    if (activeTab === 'policies' || activeSection === 'policy-center') {
+      return {
+        subtitle: t('header.policiesSubtitle', 'QUẢN TRỊ & TUÂN THỦ NỘI BỘ'),
+        title: t('header.policiesTitle', 'Trung tâm Quy định & Tuân thủ'),
+        icon: ShieldCheck
+      }
+    }
     if (activeTab === 'masterdata' || activeSection === 'layer-1-master-data') {
       return {
         subtitle: t('header.layer1Subtitle', 'TẦNG 1 · DỮ LIỆU NỀN TẢNG'),
@@ -685,6 +703,17 @@ export const EmployeeLifecyclePage: React.FC = () => {
             <div id="overview-dashboard" className="scroll-mt-28">
               <Suspense fallback={<div className="h-96 flex flex-col items-center justify-center gap-3"><Loader2 className="w-8 h-8 animate-spin text-emerald-500" /><span className="text-sm font-bold text-slate-500">Đang khởi tạo Dashboard...</span></div>}>
                 <SystemOverviewDashboard activeCluster={activeBusinessCluster} />
+              </Suspense>
+            </div>
+          </div>
+        )}
+
+        {/* TAB 4: QUY ĐỊNH & TUÂN THỦ NỘI BỘ (POLICIES & COMPLIANCE CENTER) */}
+        {activeTab === 'policies' && (
+          <div className="space-y-6 animate-fadeIn">
+            <div id="policy-center" className="scroll-mt-28">
+              <Suspense fallback={<div className="h-96 flex flex-col items-center justify-center gap-3"><Loader2 className="w-8 h-8 animate-spin text-[#1f5f86]" /><span className="text-sm font-bold text-slate-500">Đang tải Trung tâm Quy định & Tuân thủ...</span></div>}>
+                <PolicyCenterPage />
               </Suspense>
             </div>
           </div>

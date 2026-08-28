@@ -18,6 +18,7 @@ import { UniversalStepDetailCanvas } from './components/UniversalStepDetailCanva
 import { RoleFlowSection } from './components/RoleFlowSection'
 import { CrossFunctionalOperationalSpec } from './components/CrossFunctionalOperationalSpec'
 import { getCrossFunctionalModule } from '../cross-functional'
+import { RelatedPoliciesWidget } from '../policy-center/components/RelatedPoliciesWidget'
 import { useLanguage } from '../../../context/LanguageContext'
 
 export const WorkflowDetailPage: React.FC<WorkflowDetailPageProps> = ({
@@ -333,6 +334,9 @@ export const WorkflowDetailPage: React.FC<WorkflowDetailPageProps> = ({
                 </div>
               </div>
             )}
+
+            {/* Linked Policies & Compliance Widget */}
+            <RelatedPoliciesWidget processId={item.id} sopCode={selectedSop.sopCode} />
           </div>
         )}
       </main>

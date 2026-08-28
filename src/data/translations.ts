@@ -37,6 +37,14 @@ export const translations: TranslationDict = {
     vi: 'Nghiệp vụ phát sinh & Vận hành',
     en: 'Operational Processes'
   },
+  'header.policiesSubtitle': {
+    vi: 'QUẢN TRỊ & TUÂN THỦ NỘI BỘ',
+    en: 'GOVERNANCE & COMPLIANCE'
+  },
+  'header.policiesTitle': {
+    vi: 'Trung tâm Quy định & Tuân thủ',
+    en: 'Policies & Compliance Center'
+  },
   'header.productionReady': {
     vi: 'Sẵn sàng Vận hành',
     en: 'Production Ready'
@@ -108,12 +116,16 @@ export const translations: TranslationDict = {
     en: '8 Modules'
   },
   'sidebar.item.support': {
-    vi: 'Hỗ trợ Hệ thống',
+    vi: 'Tiện ích hỗ trợ',
     en: 'System Support'
   },
   'sidebar.item.supportBadge': {
-    vi: 'Hỗ trợ',
-    en: 'Support'
+    vi: '4 Tiện ích',
+    en: '4 Utilities'
+  },
+  'sidebar.item.policies': {
+    vi: 'Quy định & Tuân thủ',
+    en: 'Policies & Compliance'
   },
   'sidebar.item.erd': {
     vi: 'Sơ đồ ERD Master Data',
@@ -196,6 +208,22 @@ export const translations: TranslationDict = {
   'dashboard.quickJump': {
     vi: 'Chuyển Nhanh Tới Tầng System:',
     en: 'Quick Jump To Layer:'
+  },
+  'coverage.tab.wheel': {
+    vi: 'Quan hệ phân hệ',
+    en: 'Module Ecosystem'
+  },
+  'coverage.tab.matrix': {
+    vi: 'Đầu vào và kết quả',
+    en: 'Inputs & Deliverables'
+  },
+  'coverage.tab.flow': {
+    vi: 'Dòng dữ liệu nghiệp vụ',
+    en: 'Data Flow & Dependencies'
+  },
+  'coverage.title': {
+    vi: 'Tổng quan phân hệ và dữ liệu',
+    en: 'Module Overview & Data Architecture'
   },
 
   // Layer Titles & Badges

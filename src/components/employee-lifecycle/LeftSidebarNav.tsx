@@ -90,6 +90,13 @@ export const LeftSidebarNav: React.FC<LeftSidebarNavProps> = ({
       groupTitle: t('sidebar.group.specs', 'TRA CỨU CHI TIẾT'),
       items: [
         {
+          id: 'policy-center',
+          label: t('sidebar.item.policies', 'Quy định & Tuân thủ'),
+          icon: ShieldCheck,
+          badge: '7 Quy định',
+          color: 'text-emerald-600'
+        },
+        {
           id: 'open-erd-modal',
           label: t('sidebar.item.erd', 'Sơ đồ dữ liệu'),
           icon: Sparkles,
@@ -100,7 +107,7 @@ export const LeftSidebarNav: React.FC<LeftSidebarNavProps> = ({
         {
           id: 'sop-specs-matrix',
           label: t('sidebar.item.sopMatrix', 'Danh sách quy trình'),
-          icon: ShieldCheck,
+          icon: HelpCircle,
           badge: 'Tra cứu',
           color: 'text-blue-600'
         }

@@ -27,10 +27,11 @@ export const AppRoutes: React.FC = () => {
       <Route path="/employee-lifecycle/infographic/:id" element={<EmployeeLifecyclePage />} />
       <Route path="/employee-lifecycle/flowchart/:id" element={<EmployeeLifecyclePage />} />
       <Route path="/employee-lifecycle/raci/:id" element={<EmployeeLifecyclePage />} />
-      <Route path="/employee-lifecycle/specs/:id" element={<EmployeeLifecyclePage />} />
       <Route path="/employee-lifecycle/workflow/:id" element={<EmployeeLifecyclePage />} />
       <Route path="/employee-lifecycle/wireframe/:id" element={<EmployeeLifecyclePage />} />
       <Route path="/employee-lifecycle/erd" element={<EmployeeLifecyclePage />} />
+      <Route path="/employee-lifecycle/policies" element={<EmployeeLifecyclePage />} />
+      <Route path="/employee-lifecycle/policies/:id" element={<EmployeeLifecyclePage />} />
       <Route path="*" element={<Navigate to="/employee-lifecycle" replace />} />
     </Routes>
   )
