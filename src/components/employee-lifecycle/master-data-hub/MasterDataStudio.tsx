@@ -1,7 +1,7 @@
 /**
  * MasterDataStudio.tsx
  *
- * Master Data Studio — thay thế MasterDataHub với layout 3 panel:
+ * Master Data Studio với layout 3 panel:
  *   Left Domain Rail  |  Center Workspace  |  Right Detail Inspector
  *
  * Route: /employee-lifecycle/masterdata
@@ -84,7 +84,7 @@ export const MasterDataStudio: React.FC<MasterDataStudioProps> = ({
   // Mobile: Right Inspector opens as drawer
   const [isInspectorOpen, setIsInspectorOpen] = useState(false)
 
-  // Process Guide state (carries over from legacy MasterDataHub)
+  // Process Guide state
   const [selectedProcessCode, setSelectedProcessCode] = useState(sopCode || '')
   const [processSearch, setProcessSearch] = useState('')
 

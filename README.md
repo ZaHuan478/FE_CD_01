@@ -99,7 +99,7 @@ Trang chính hiển thị 7 bước chính như sau:
 
 ## 5. Master Data
 
-Master Data được định nghĩa trong `src/data/master-data.ts`.
+Master Data được phát hành trong SQLite tại `public/data/` và được nạp qua `src/database/`.
 
 Mỗi item Master Data gồm các thuộc tính bổ trợ như:
 - id
@@ -150,7 +150,7 @@ Ví dụ:
 
 ## 7. Relationship Model
 
-Quan hệ được định nghĩa trong `src/data/relationships.ts`.
+Quan hệ được lưu trong SQLite phát hành và lớp dữ liệu tương thích của trang Employee Lifecycle.
 
 Các loại quan hệ gồm:
 - `used-by`
@@ -254,17 +254,11 @@ Khi click một liên kết trong panel:
 
 ## 12. Cấu trúc file chính
 
-### `src/data/master-data.ts`
-Chứa Master Data thực thể nền tảng.
+### `src/database/`
+Khởi tạo SQLite trong Web Worker, tải bản dữ liệu phát hành và lưu thay đổi cục bộ trong IndexedDB.
 
-### `src/data/lifecycle.ts`
-Chứa các lifecycle step chính.
-
-### `src/data/sop.ts`
-Chứa danh mục SOP và lookup theo title.
-
-### `src/data/relationships.ts`
-Chứa mối quan hệ giữa node và node.
+### `public/data/`
+Chứa SQLite phát hành và manifest checksum của kho kiến thức HRM.
 
 ### `src/pages/employee-lifecycle/EmployeeLifecyclePage.tsx`
 File render chính cho trang `/employee-lifecycle`.
