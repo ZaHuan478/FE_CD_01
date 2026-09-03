@@ -30,7 +30,7 @@ import {
   type CatalogStatus
 } from './masterDataCatalogAdapter'
 import type { CatalogTier, WorkspaceView } from './types'
-import { DOCX_OPERATIONAL_SOP_DATABASE } from '../workflow-detail/data/docxOperationalSopDatabase'
+import { SOP_DATABASE } from '../workflow-detail/data/sopDatabase'
 
 import {
   StudioHeader,
@@ -117,7 +117,7 @@ export const MasterDataStudio: React.FC<MasterDataStudioProps> = ({
 
   // ── Process guide data ──────────────────────────────────────────────────
   const allOperationalProcesses = useMemo(
-    () => Object.values(DOCX_OPERATIONAL_SOP_DATABASE).flat(),
+    () => Object.values(SOP_DATABASE).flat(),
     []
   )
   const filteredProcesses = useMemo(() => {

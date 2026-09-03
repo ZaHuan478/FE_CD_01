@@ -14,7 +14,7 @@ import {
   X
 } from 'lucide-react'
 
-import { DOCX_OPERATIONAL_SOP_DATABASE } from '../workflow-detail/data/docxOperationalSopDatabase'
+import { SOP_DATABASE } from '../workflow-detail/data/sopDatabase'
 import type { SopSubProcess, SopSubStep } from '../workflow-detail/types'
 
 interface MasterDataHubProps {
@@ -31,9 +31,9 @@ const normalize = (value: string) => value
   .replace(/[\u0300-\u036f]/g, '')
   .toLocaleLowerCase('vi')
 
-const allOperationalProcesses = Object.values(DOCX_OPERATIONAL_SOP_DATABASE).flat()
-const commonCatalogs = DOCX_OPERATIONAL_SOP_DATABASE['MODULE-MD'] || []
-const managementFunctions = DOCX_OPERATIONAL_SOP_DATABASE['MODULE-MD-FUNCTIONS'] || []
+const allOperationalProcesses = Object.values(SOP_DATABASE).flat()
+const commonCatalogs = SOP_DATABASE['MODULE-MD'] || []
+const managementFunctions = SOP_DATABASE['MODULE-MD-FUNCTIONS'] || []
 
 const getStepRequirement = (step: SopSubStep) => {
   if (step.fieldsChecklist?.length) return step.fieldsChecklist

@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react'
 import { CheckCircle2, ShieldCheck, Sparkles } from 'lucide-react'
 import type { Policy } from '../types'
 import { useLanguage } from '../../../../context/LanguageContext'
+import { knowledgeRepository } from '../../../../database/knowledgeRepository'
 
 interface PolicyAcknowledgementDemoProps {
   policy: Policy
@@ -10,35 +11,45 @@ interface PolicyAcknowledgementDemoProps {
 export const PolicyAcknowledgementDemo: React.FC<PolicyAcknowledgementDemoProps> = ({ policy }) => {
   const { language } = useLanguage()
 
-  const storageKey = `policy_ack_${policy.id}`
-  const [isAcknowledged, setIsAcknowledged] = useState<boolean>(() => {
-    return localStorage.getItem(storageKey) === 'true'
-  })
-  const [ackTimestamp, setAckTimestamp] = useState<string | null>(() => {
-    return localStorage.getItem(`${storageKey}_time`)
-  })
+  const [isAcknowledged, setIsAcknowledged] = useState(false)
+  const [ackTimestamp, setAckTimestamp] = useState<string | null>(null)
 
   useEffect(() => {
-    setIsAcknowledged(localStorage.getItem(storageKey) === 'true')
-    setAckTimestamp(localStorage.getItem(`${storageKey}_time`))
-  }, [policy.id, storageKey])
+    let active = true
+    void knowledgeRepository.getPolicyAcknowledgement(policy.id).then((acknowledgement) => {
+      if (!active) return
+      setIsAcknowledged(acknowledgement.acknowledged)
+      setAckTimestamp(acknowledgement.acknowledgedAt)
+    })
+    return () => { active = false }
+  }, [policy.id])
 
   if (!policy.requiresAcknowledgement) {
     return null
   }
 
-  const handleToggleAck = () => {
+  const handleToggleAck = async () => {
+    const previousAcknowledged = isAcknowledged
+    const previousTimestamp = ackTimestamp
     if (!isAcknowledged) {
       const nowStr = new Date().toLocaleString('vi-VN')
-      localStorage.setItem(storageKey, 'true')
-      localStorage.setItem(`${storageKey}_time`, nowStr)
       setIsAcknowledged(true)
       setAckTimestamp(nowStr)
+      try {
+        await knowledgeRepository.setPolicyAcknowledgement(policy.id, nowStr)
+      } catch {
+        setIsAcknowledged(previousAcknowledged)
+        setAckTimestamp(previousTimestamp)
+      }
     } else {
-      localStorage.removeItem(storageKey)
-      localStorage.removeItem(`${storageKey}_time`)
       setIsAcknowledged(false)
       setAckTimestamp(null)
+      try {
+        await knowledgeRepository.setPolicyAcknowledgement(policy.id, null)
+      } catch {
+        setIsAcknowledged(previousAcknowledged)
+        setAckTimestamp(previousTimestamp)
+      }
     }
   }
 
