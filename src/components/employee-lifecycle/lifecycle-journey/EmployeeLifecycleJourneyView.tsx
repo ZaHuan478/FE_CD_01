@@ -6,7 +6,7 @@ import { LifecycleScenarioSelector } from './LifecycleScenarioSelector'
 import { LifecycleStagePipeline } from './LifecycleStagePipeline'
 import { LifecycleStageWorkbench } from './LifecycleStageWorkbench'
 import { LifecycleImpactMatrix } from './LifecycleImpactMatrix'
-import { getStageDefinition, getStageSops } from './lifecycleJourneySelectors'
+import { getDefaultStageId, getStageDefinition, getStageSops } from './lifecycleJourneySelectors'
 import { LIFECYCLE_STAGE_ORDER } from './lifecycleJourneyData'
 import type { LifecycleStageId, ScenarioId } from './types'
 
@@ -26,8 +26,18 @@ export const EmployeeLifecycleJourneyView: React.FC = () => {
   const scenarioParam = searchParams.get('scenario')
   const sopParam = searchParams.get('sop')
 
-  const activeStage: LifecycleStageId = isValidStageId(stageParam) ? stageParam : 'LIFE-00'
+  const activeStage = isValidStageId(stageParam) ? stageParam : getDefaultStageId()
   const activeScenario: ScenarioId = isValidScenarioId(scenarioParam) ? scenarioParam : 'all'
+
+  React.useEffect(() => {
+    if (!activeStage || stageParam === activeStage) return
+    setSearchParams((prev) => {
+      const next = new URLSearchParams(prev)
+      next.set('stage', activeStage)
+      next.delete('sop')
+      return next
+    }, { replace: true })
+  }, [activeStage, setSearchParams, stageParam])
 
   // Update query params when state changes
   const handleSelectStage = (stageId: LifecycleStageId) => {
@@ -60,9 +70,33 @@ export const EmployeeLifecycleJourneyView: React.FC = () => {
     })
   }
 
-  const stageDefinition = getStageDefinition(activeStage)
-  const currentSops = getStageSops(activeStage)
+  const stageDefinition = activeStage ? getStageDefinition(activeStage) : undefined
+  const currentSops = activeStage ? getStageSops(activeStage) : []
   const activeSopCode = sopParam && currentSops.some((s) => s.sopCode === sopParam) ? sopParam : currentSops[0]?.sopCode
+
+  if (!activeStage || !stageDefinition) {
+    return (
+      <section
+        role="status"
+        className="rounded-2xl border border-amber-200 bg-amber-50 p-6 text-center dark:border-amber-900/60 dark:bg-amber-950/30"
+      >
+        <h2 className="text-sm font-black text-slate-900 dark:text-white">
+          Chưa có chặng vòng đời phù hợp
+        </h2>
+        <p className="mt-2 text-xs leading-5 text-slate-600 dark:text-slate-300">
+          Tài khoản hiện tại chưa được cấp quyền xem dữ liệu của chặng vòng đời nào.
+        </p>
+        <button
+          type="button"
+          onClick={() => navigate('/employee-lifecycle')}
+          className="mt-4 inline-flex items-center gap-2 rounded-lg bg-[#1f5f86] px-4 py-2 text-xs font-bold text-white hover:bg-[#174968]"
+        >
+          <Home className="h-3.5 w-3.5" />
+          Về bản đồ HRMS
+        </button>
+      </section>
+    )
+  }
 
   return (
     <div className="space-y-5 animate-fadeIn">

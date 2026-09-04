@@ -99,7 +99,7 @@ Trang chính hiển thị 7 bước chính như sau:
 
 ## 5. Master Data
 
-Master Data được phát hành trong SQLite tại `public/data/` và được nạp qua `src/database/`.
+Master Data được frontend tải từ `GET /api/v1/bootstrap`; backend đọc dữ liệu từ SQL Server.
 
 Mỗi item Master Data gồm các thuộc tính bổ trợ như:
 - id
@@ -150,7 +150,7 @@ Ví dụ:
 
 ## 7. Relationship Model
 
-Quan hệ được lưu trong SQLite phát hành và lớp dữ liệu tương thích của trang Employee Lifecycle.
+Quan hệ được lưu trong SQL Server và được trả về qua API bootstrap của trang Employee Lifecycle.
 
 Các loại quan hệ gồm:
 - `used-by`
@@ -255,10 +255,18 @@ Khi click một liên kết trong panel:
 ## 12. Cấu trúc file chính
 
 ### `src/database/`
-Khởi tạo SQLite trong Web Worker, tải bản dữ liệu phát hành và lưu thay đổi cục bộ trong IndexedDB.
+Khởi tạo dữ liệu runtime bằng API backend. Frontend không kết nối trực tiếp tới database.
 
-### `public/data/`
-Chứa SQLite phát hành và manifest checksum của kho kiến thức HRM.
+### `src/api/`
+Chứa HTTP client dùng chung. Trong local development, Vite proxy `/api` sang backend tại port `3000`.
+
+### Đăng nhập và phân hệ theo người dùng
+
+- Đặt `VITE_AUTH_MODE=development` để dùng màn chọn ba tài khoản demo từ Backend.
+- FE gọi `/api/v1/me` trước `/api/v1/bootstrap`; menu và phân hệ không được tự suy đoán ở trình duyệt.
+- Tài khoản đang chọn được lưu bằng khóa local development và gửi qua `x-user-id`. Chế độ này không được dùng production.
+- Khi tích hợp HRM thật, đặt `VITE_AUTH_MODE=jwt`; token phải đến từ luồng đăng nhập trung tâm và Backend ánh xạ claim `sub` vào `Account.ExternalSubject`.
+- Nút đổi người dùng nằm ở thẻ tài khoản cuối sidebar. Giao diện màn nghiệp vụ giữ nguyên, chỉ lọc menu và dữ liệu theo session.
 
 ### `src/pages/employee-lifecycle/EmployeeLifecyclePage.tsx`
 File render chính cho trang `/employee-lifecycle`.

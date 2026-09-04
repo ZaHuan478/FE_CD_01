@@ -15,18 +15,19 @@ export const LifecycleStagePipeline: React.FC<LifecycleStagePipelineProps> = ({
   activeScenario,
   onSelectStage
 }) => {
-  const currentIdx = LIFECYCLE_STAGE_ORDER.indexOf(activeStage)
+  const availableStageOrder = LIFECYCLE_STAGE_ORDER.filter((stageId) => Boolean(LIFECYCLE_STAGES[stageId]))
+  const currentIdx = availableStageOrder.indexOf(activeStage)
   const pipelineRef = useRef<HTMLDivElement>(null)
 
   const handlePrev = () => {
     if (currentIdx > 0) {
-      onSelectStage(LIFECYCLE_STAGE_ORDER[currentIdx - 1])
+      onSelectStage(availableStageOrder[currentIdx - 1])
     }
   }
 
   const handleNext = () => {
-    if (currentIdx < LIFECYCLE_STAGE_ORDER.length - 1) {
-      onSelectStage(LIFECYCLE_STAGE_ORDER[currentIdx + 1])
+    if (currentIdx >= 0 && currentIdx < availableStageOrder.length - 1) {
+      onSelectStage(availableStageOrder[currentIdx + 1])
     }
   }
 
@@ -34,12 +35,12 @@ export const LifecycleStagePipeline: React.FC<LifecycleStagePipelineProps> = ({
     if (e.key === 'Enter' || e.key === ' ') {
       e.preventDefault()
       onSelectStage(stageId)
-    } else if (e.key === 'ArrowRight' && index < LIFECYCLE_STAGE_ORDER.length - 1) {
+    } else if (e.key === 'ArrowRight' && index < availableStageOrder.length - 1) {
       e.preventDefault()
-      onSelectStage(LIFECYCLE_STAGE_ORDER[index + 1])
+      onSelectStage(availableStageOrder[index + 1])
     } else if (e.key === 'ArrowLeft' && index > 0) {
       e.preventDefault()
-      onSelectStage(LIFECYCLE_STAGE_ORDER[index - 1])
+      onSelectStage(availableStageOrder[index - 1])
     }
   }
 
@@ -54,7 +55,7 @@ export const LifecycleStagePipeline: React.FC<LifecycleStagePipelineProps> = ({
             Tiến trình 8 chặng liên tục (Pipeline):
           </span>
           <span className="rounded bg-sky-100 px-2 py-0.5 text-[10px] font-bold text-[#1f5f86] dark:bg-sky-950 dark:text-sky-300">
-            Chặng {currentIdx + 1} / {LIFECYCLE_STAGE_ORDER.length}
+            Chặng {currentIdx + 1} / {availableStageOrder.length}
           </span>
         </div>
 
@@ -62,7 +63,7 @@ export const LifecycleStagePipeline: React.FC<LifecycleStagePipelineProps> = ({
         <div className="flex items-center gap-1.5">
           <button
             type="button"
-            disabled={currentIdx === 0}
+            disabled={currentIdx <= 0}
             onClick={handlePrev}
             aria-label="Chuyển đến chặng trước"
             className="flex items-center gap-1 rounded-md border border-slate-200 bg-slate-50 px-2 py-1 text-[11px] font-bold text-slate-700 transition-colors hover:bg-slate-100 disabled:cursor-not-allowed disabled:opacity-40 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700 cursor-pointer"
@@ -72,7 +73,7 @@ export const LifecycleStagePipeline: React.FC<LifecycleStagePipelineProps> = ({
           </button>
           <button
             type="button"
-            disabled={currentIdx === LIFECYCLE_STAGE_ORDER.length - 1}
+            disabled={currentIdx < 0 || currentIdx === availableStageOrder.length - 1}
             onClick={handleNext}
             aria-label="Chuyển đến chặng sau"
             className="flex items-center gap-1 rounded-md border border-slate-200 bg-slate-50 px-2 py-1 text-[11px] font-bold text-slate-700 transition-colors hover:bg-slate-100 disabled:cursor-not-allowed disabled:opacity-40 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700 cursor-pointer"
@@ -90,7 +91,7 @@ export const LifecycleStagePipeline: React.FC<LifecycleStagePipelineProps> = ({
         aria-label="Danh sách các chặng vòng đời"
         className="grid grid-cols-2 gap-2 sm:grid-cols-4 lg:grid-cols-8 overflow-x-auto no-scrollbar"
       >
-        {LIFECYCLE_STAGE_ORDER.map((stageId, index) => {
+        {availableStageOrder.map((stageId, index) => {
           const stage = LIFECYCLE_STAGES[stageId]
           const isSelected = stageId === activeStage
           const isHighlighted = isStageHighlightedInScenario(stageId, activeScenario)

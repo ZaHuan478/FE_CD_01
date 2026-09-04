@@ -25,6 +25,8 @@ import { sopDictionary } from '../../components/employee-lifecycle/data/sopDicti
 import { CROSS_FUNCTIONAL_REGISTRY } from '../../components/employee-lifecycle/cross-functional'
 import type { LifecycleStep, OperationModule, DetailItem } from '../../types/employee-lifecycle'
 import { useLanguage } from '../../context/LanguageContext'
+import { useSession } from '../../auth/session'
+import { CORE_OPERATIONS_STAGE_MAP } from '../../components/employee-lifecycle/data/coreOperationsStageMap'
 
 const headerBusinessClusters: Array<{ id: BusinessClusterId; label: string }> = [
   { id: 'core', label: 'Vận hành lõi' },
@@ -33,18 +35,22 @@ const headerBusinessClusters: Array<{ id: BusinessClusterId; label: string }> = 
   { id: 'platform', label: 'Nền tảng' }
 ]
 
+type EmployeeLifecycleTab = 'lifecycle' | 'masterdata' | 'reports' | 'journey' | 'operations' | 'policies' | 'admin'
+
 const isBusinessClusterId = (value: string | null): value is BusinessClusterId =>
   Boolean(value && headerBusinessClusters.some((cluster) => cluster.id === value))
 
 export const EmployeeLifecyclePage: React.FC = () => {
   const { t } = useLanguage()
+  const session = useSession()
   const { id: routeId } = useParams<{ id?: string }>()
   const location = useLocation()
   const navigate = useNavigate()
   const [searchParams, setSearchParams] = useSearchParams()
 
-  const getTabFromLocation = useCallback((): 'lifecycle' | 'masterdata' | 'reports' | 'journey' | 'operations' | 'policies' => {
+  const getTabFromLocation = useCallback((): EmployeeLifecycleTab => {
     const tabParam = searchParams.get('tab')
+    if (location.pathname.includes('/employee-lifecycle/admin') || tabParam === 'admin') return 'admin'
     if (location.pathname.includes('/employee-lifecycle/policies') || tabParam === 'policies') return 'policies'
     if (location.pathname.includes('/employee-lifecycle/operations') || tabParam === 'operations') return 'operations'
     if (location.pathname.includes('/employee-lifecycle/journey') || tabParam === 'journey') return 'journey'
@@ -54,7 +60,7 @@ export const EmployeeLifecyclePage: React.FC = () => {
     return 'reports'
   }, [location.pathname, searchParams])
 
-  const [activeTab, setActiveTab] = useState<'lifecycle' | 'masterdata' | 'reports' | 'journey' | 'operations' | 'policies'>(getTabFromLocation)
+  const [activeTab, setActiveTab] = useState<EmployeeLifecycleTab>(getTabFromLocation)
   const [activeBusinessCluster, setActiveBusinessCluster] = useState<BusinessClusterId>(() => {
     const clusterParam = searchParams.get('cluster')
     return isBusinessClusterId(clusterParam) ? clusterParam : 'core'
@@ -66,6 +72,14 @@ export const EmployeeLifecyclePage: React.FC = () => {
   const [activeSection, setActiveSection] = useState('overview-dashboard')
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false)
   const [, startTransition] = useTransition()
+  const allowedMenuCodes = useMemo(() => new Set(session.menuItems.map((item) => item.code)), [session.menuItems])
+  const accessibleModuleIds = useMemo(() => new Set(session.modules.map((module) => module.id)), [session.modules])
+
+  const visibleBusinessClusters = useMemo(() => headerBusinessClusters.filter((cluster) => {
+    if (cluster.id === 'core') return accessibleModuleIds.size > 0
+    if (cluster.id === 'people' || cluster.id === 'organization') return accessibleModuleIds.has('emp')
+    return accessibleModuleIds.has('ess')
+  }), [accessibleModuleIds])
 
   const globalSearchResults = useMemo(() => {
     const query = globalSearchTerm.trim().toLocaleLowerCase('vi-VN')
@@ -92,11 +106,13 @@ export const EmployeeLifecyclePage: React.FC = () => {
   }
 
   // Sync tab with URL search parameter & navigation
-  const handleTabChange = (tab: 'lifecycle' | 'masterdata' | 'reports' | 'journey' | 'operations' | 'policies') => {
+  const handleTabChange = (tab: EmployeeLifecycleTab) => {
     startTransition(() => {
       setActiveTab(tab)
     })
-    if (tab === 'policies') {
+    if (tab === 'admin') {
+      navigate('/employee-lifecycle/admin')
+    } else if (tab === 'policies') {
       navigate('/employee-lifecycle/policies')
     } else if (tab === 'operations') {
       navigate('/employee-lifecycle/operations')
@@ -134,10 +150,12 @@ export const EmployeeLifecyclePage: React.FC = () => {
         setActiveTab(tabFromUrl)
       })
     }
-    if (tabFromUrl === 'policies' || location.pathname.includes('/employee-lifecycle/policies')) {
+    if (tabFromUrl === 'admin' || location.pathname.includes('/employee-lifecycle/admin')) {
+      setActiveSection('ADMIN')
+    } else if (tabFromUrl === 'policies' || location.pathname.includes('/employee-lifecycle/policies')) {
       setActiveSection('policy-center')
     } else if (tabFromUrl === 'operations' || location.pathname.includes('/employee-lifecycle/operations')) {
-      setActiveSection('layer-3-operations')
+      setActiveSection(allowedMenuCodes.has('layer-3-operations') ? 'layer-3-operations' : 'system-support')
     } else if (tabFromUrl === 'journey' || location.pathname.includes('/employee-lifecycle/journey')) {
       setActiveSection('layer-2-lifecycle')
     } else if (tabFromUrl === 'masterdata') {
@@ -147,7 +165,37 @@ export const EmployeeLifecyclePage: React.FC = () => {
     } else if (tabFromUrl === 'lifecycle') {
       setActiveSection('layer-2-lifecycle')
     }
-  }, [getTabFromLocation, activeTab, location.pathname])
+  }, [getTabFromLocation, activeTab, location.pathname, allowedMenuCodes])
+
+  useEffect(() => {
+    const menuCodesByTab: Record<typeof activeTab, string[]> = {
+      reports: ['overview-dashboard', 'sop-specs-matrix'],
+      masterdata: ['layer-1-master-data'],
+      journey: ['layer-2-lifecycle'],
+      lifecycle: ['layer-2-lifecycle'],
+      operations: ['layer-3-operations', 'system-support'],
+      policies: ['policy-center'],
+      admin: ['ADMIN']
+    }
+    if (menuCodesByTab[activeTab].some((code) => allowedMenuCodes.has(code))) return
+
+    const fallbackDestinations: Array<{ code: string; tab: typeof activeTab; path: string }> = [
+      { code: 'overview-dashboard', tab: 'reports', path: '/employee-lifecycle' },
+      { code: 'layer-1-master-data', tab: 'masterdata', path: '/employee-lifecycle/masterdata' },
+      { code: 'layer-2-lifecycle', tab: 'journey', path: '/employee-lifecycle/journey?stage=LIFE-00&scenario=all' },
+      { code: 'layer-3-operations', tab: 'operations', path: '/employee-lifecycle/operations' },
+      { code: 'system-support', tab: 'operations', path: '/employee-lifecycle/operations' },
+      { code: 'policy-center', tab: 'policies', path: '/employee-lifecycle/policies' },
+      { code: 'sop-specs-matrix', tab: 'reports', path: '/employee-lifecycle' },
+      { code: 'ADMIN', tab: 'admin', path: '/employee-lifecycle/admin' }
+    ]
+    const fallback = fallbackDestinations.find((destination) => allowedMenuCodes.has(destination.code))
+    if (!fallback) return
+
+    setActiveSection(fallback.code)
+    setActiveTab(fallback.tab)
+    navigate(fallback.path, { replace: true })
+  }, [activeTab, allowedMenuCodes, navigate])
 
   useEffect(() => {
     const clusterFromUrl = searchParams.get('cluster')
@@ -155,6 +203,12 @@ export const EmployeeLifecyclePage: React.FC = () => {
       setActiveBusinessCluster(clusterFromUrl)
     }
   }, [searchParams, activeBusinessCluster])
+
+  useEffect(() => {
+    if (visibleBusinessClusters.some((cluster) => cluster.id === activeBusinessCluster)) return
+    const fallback = visibleBusinessClusters[0]?.id
+    if (fallback) setActiveBusinessCluster(fallback)
+  }, [activeBusinessCluster, visibleBusinessClusters])
 
   // Effect to scroll to hash target after tab or hash change
   useEffect(() => {
@@ -215,10 +269,16 @@ export const EmployeeLifecyclePage: React.FC = () => {
   }
 
   const handleNavigateSection = (sectionId: string) => {
+    if (!allowedMenuCodes.has(sectionId)) return
     setActiveSection(sectionId)
 
     if (sectionId === 'policy-center') {
       handleTabChange('policies')
+      return
+    }
+
+    if (sectionId === 'ADMIN') {
+      handleTabChange('admin')
       return
     }
 
@@ -267,7 +327,7 @@ export const EmployeeLifecyclePage: React.FC = () => {
 
   // Transform Operations modules (8 modules from Canonical Registry)
   const operationModules: OperationModule[] = useMemo(() => {
-    return crossFunctionalProcesses.map((item) => {
+    const crossFunctionalModules = crossFunctionalProcesses.map((item) => {
       const cfDef = CROSS_FUNCTIONAL_REGISTRY[item.id]
       const sopInfo = sopDictionary[item.id]
       return {
@@ -283,7 +343,25 @@ export const EmployeeLifecyclePage: React.FC = () => {
         sopIds: cfDef?.sopIds || [sopInfo?.badge || 'SOP-CF-01']
       }
     })
-  }, [])
+    if (crossFunctionalModules.length > 0) return crossFunctionalModules
+
+    return ['att', 'leave', 'pay', 'ins', 'tax']
+      .filter((moduleId) => accessibleModuleIds.has(moduleId))
+      .map((moduleId) => CORE_OPERATIONS_STAGE_MAP[moduleId])
+      .filter((module): module is NonNullable<typeof module> => Boolean(module))
+      .map((module) => ({
+        id: module.id,
+        code: module.code,
+        title: module.name,
+        description: module.shortDesc,
+        iconName: 'Clock',
+        category: 'Core Operations',
+        inputs: [module.receivesFrom],
+        outputs: [module.sendsTo],
+        sopBadge: module.stages[0]?.sopCodes[0] || module.code,
+        sopIds: module.stages.flatMap((stage) => stage.sopCodes)
+      }))
+  }, [accessibleModuleIds])
 
   // Build DetailItem from id
   const getItemById = useCallback((id: string): DetailItem | null => {
@@ -417,6 +495,13 @@ export const EmployeeLifecyclePage: React.FC = () => {
   }
 
   const currentHeaderInfo = useMemo(() => {
+    if (activeTab === 'admin' || activeSection === 'ADMIN') {
+      return {
+        subtitle: t('header.adminSubtitle', 'QUẢN TRỊ TRUY CẬP HỆ THỐNG'),
+        title: t('header.adminTitle', 'Phân quyền và phạm vi hiện tại'),
+        icon: ShieldCheck
+      }
+    }
     if (activeTab === 'policies' || activeSection === 'policy-center') {
       return {
         subtitle: t('header.policiesSubtitle', 'QUẢN TRỊ & TUÂN THỦ NỘI BỘ'),
@@ -522,7 +607,7 @@ export const EmployeeLifecyclePage: React.FC = () => {
               className="hidden md:flex flex-1 items-center justify-center gap-1.5 max-w-[720px] rounded-xl animate-fadeIn"
               aria-label="Cụm nghiệp vụ HRM"
             >
-              {headerBusinessClusters.map((cluster) => {
+              {visibleBusinessClusters.map((cluster) => {
                 const active = activeBusinessCluster === cluster.id
                 return (
                   <button
@@ -642,11 +727,11 @@ export const EmployeeLifecyclePage: React.FC = () => {
                 />
               </div>
 
-              <div id="system-support" className="scroll-mt-28">
-                <SystemSupportBar
-                  onSelectUtility={handleOpenItemDetails}
-                />
-              </div>
+              {allowedMenuCodes.has('system-support') && (
+                <div id="system-support" className="scroll-mt-28">
+                  <SystemSupportBar onSelectUtility={handleOpenItemDetails} />
+                </div>
+              )}
             </Suspense>
           </div>
         )}
@@ -674,11 +759,11 @@ export const EmployeeLifecyclePage: React.FC = () => {
             </Suspense>
 
             {/* TẦNG HỖ TRỢ XUYÊN SUỐT (System Support Sticky Bar) */}
-            <div id="system-support" className="scroll-mt-28">
-              <SystemSupportBar
-                onSelectUtility={handleOpenItemDetails}
-              />
-            </div>
+            {allowedMenuCodes.has('system-support') && (
+              <div id="system-support" className="scroll-mt-28">
+                <SystemSupportBar onSelectUtility={handleOpenItemDetails} />
+              </div>
+            )}
           </div>
         )}
 
@@ -717,6 +802,43 @@ export const EmployeeLifecyclePage: React.FC = () => {
               </Suspense>
             </div>
           </div>
+        )}
+
+        {activeTab === 'admin' && (
+          <section className="mx-auto w-full max-w-5xl rounded-2xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900 sm:p-7">
+            <div className="flex flex-col gap-4 border-b border-slate-200 pb-5 dark:border-slate-800 sm:flex-row sm:items-center sm:justify-between">
+              <div>
+                <h2 className="text-lg font-black tracking-tight text-slate-950 dark:text-white">Quyền truy cập của tài khoản</h2>
+                <p className="mt-1 text-sm text-slate-600 dark:text-slate-300">Thông tin đọc trực tiếp từ phiên đăng nhập và scoped RBAC.</p>
+              </div>
+              <span className="self-start rounded-lg bg-sky-50 px-3 py-1.5 font-mono text-xs font-black text-sky-800 ring-1 ring-inset ring-sky-100 dark:bg-sky-500/10 dark:text-sky-200 dark:ring-sky-500/20">
+                {session.username}
+              </span>
+            </div>
+
+            <div className="mt-6 grid gap-6 md:grid-cols-2">
+              <div>
+                <h3 className="text-sm font-black text-slate-900 dark:text-white">Phân hệ được truy cập</h3>
+                <div className="mt-3 flex flex-wrap gap-2">
+                  {session.modules.map((module) => (
+                    <span key={module.id} className="rounded-lg border border-slate-200 bg-slate-50 px-2.5 py-1.5 text-xs font-bold text-slate-700 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200">
+                      {module.id.toUpperCase()} <span className="font-medium text-slate-400">{module.title}</span>
+                    </span>
+                  ))}
+                </div>
+              </div>
+              <div>
+                <h3 className="text-sm font-black text-slate-900 dark:text-white">Năng lực được cấp</h3>
+                <div className="mt-3 flex flex-wrap gap-2">
+                  {session.capabilities.map((capability) => (
+                    <span key={capability} className="rounded-lg border border-slate-200 bg-slate-50 px-2.5 py-1.5 font-mono text-xs font-bold text-slate-700 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200">
+                      {capability}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </section>
         )}
 
       </main>

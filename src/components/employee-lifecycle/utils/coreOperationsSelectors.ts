@@ -269,6 +269,8 @@ export const getCoreOperationsData = (): CoreOperationModuleResolved[] => {
     const stageInfo = sopToStageMap.get(canonicalCode)
     const moduleId = stageInfo?.moduleId ?? getModuleIdByPrefix(canonicalCode)
     if (!moduleId) continue
+    const moduleMetadata = CORE_OPERATIONS_STAGE_MAP[moduleId]
+    if (!moduleMetadata) continue
     const stageId = stageInfo?.stage.stageId || `${moduleId.toUpperCase()}_STG_UNASSIGNED`
     const stageNumber = stageInfo?.stage.stageNumber || 99
     const stageTitle = stageInfo?.stage.stageTitle || 'Chặng: Chưa phân loại'
@@ -277,7 +279,7 @@ export const getCoreOperationsData = (): CoreOperationModuleResolved[] => {
       console.warn(`[CoreOperations] SOP code ${canonicalCode} is not assigned to any stage in CORE_OPERATIONS_STAGE_MAP.`)
     }
 
-    const workflowId = WORKFLOW_ID_BY_SOP_CODE[canonicalCode] || sourceWorkflowId || CORE_OPERATIONS_STAGE_MAP[moduleId].workflowIdDefault
+    const workflowId = WORKFLOW_ID_BY_SOP_CODE[canonicalCode] || sourceWorkflowId || moduleMetadata.workflowIdDefault
     const hasWireframe = KNOWN_WIREFRAME_IDS.has(workflowId)
     const stepTypes = extractStepTypes(currentProcess.steps)
     const primaryType = determinePrimaryType(stepTypes)
@@ -298,7 +300,7 @@ export const getCoreOperationsData = (): CoreOperationModuleResolved[] => {
       sopCode: canonicalCode,
       canonicalCode,
       sopTitle: cleanTitle(currentProcess.sopTitle || canonicalCode),
-      sopCategory: currentProcess.sopCategory || CORE_OPERATIONS_STAGE_MAP[moduleId].name,
+      sopCategory: currentProcess.sopCategory || moduleMetadata.name,
       description: currentProcess.description || `Quy trình thực hiện chi tiết nghiệp vụ ${cleanTitle(currentProcess.sopTitle || canonicalCode)}.`,
       moduleId,
       stageId,
@@ -325,7 +327,8 @@ export const getCoreOperationsData = (): CoreOperationModuleResolved[] => {
   }
 
   // 4. Assemble the resolved modules in end-to-end operating order
-  const moduleKeys: CoreOperationModuleId[] = ['ats', 'emp', 'onb', 'att', 'leave', 'pay', 'ins', 'tax', 'ess']
+  const moduleKeys = (['ats', 'emp', 'onb', 'att', 'leave', 'pay', 'ins', 'tax', 'ess'] as const)
+    .filter((moduleId) => Boolean(CORE_OPERATIONS_STAGE_MAP[moduleId]))
 
   const result: CoreOperationModuleResolved[] = moduleKeys.map((modId) => {
     const meta = CORE_OPERATIONS_STAGE_MAP[modId]

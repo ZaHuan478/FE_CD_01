@@ -8,9 +8,13 @@ import {
   ChevronLeft,
   ChevronRight,
   ShieldCheck,
-  Sparkles
+  Sparkles,
+  LogOut,
+  Settings
 } from 'lucide-react'
+import { useNavigate } from 'react-router-dom'
 import { useLanguage } from '../../context/LanguageContext'
+import { useAuth, useSession } from '../../auth/session'
 
 interface LeftSidebarNavProps {
   activeSection: string
@@ -27,8 +31,16 @@ export const LeftSidebarNav: React.FC<LeftSidebarNavProps> = ({
   isCollapsed: externalIsCollapsed,
   onToggleCollapse
 }) => {
+  const navigate = useNavigate()
   const { t } = useLanguage()
+  const session = useSession()
+  const { roleTitle, logout } = useAuth()
   const [internalIsCollapsed, setInternalIsCollapsed] = useState(false)
+
+  const handleSignOut = () => {
+    logout()
+    navigate('/login', { replace: true })
+  }
 
   const isCollapsed = externalIsCollapsed !== undefined ? externalIsCollapsed : internalIsCollapsed
 
@@ -40,6 +52,7 @@ export const LeftSidebarNav: React.FC<LeftSidebarNavProps> = ({
     }
   }
 
+  const allowedMenuCodes = new Set(session.menuItems.map((item) => item.code))
   const menuGroups = [
     {
       groupTitle: t('sidebar.group.overview', 'BẮT ĐẦU TỪ ĐÂY'),
@@ -112,8 +125,30 @@ export const LeftSidebarNav: React.FC<LeftSidebarNavProps> = ({
           color: 'text-blue-600'
         }
       ]
+    },
+    {
+      groupTitle: t('sidebar.group.administration', 'QUẢN TRỊ HỆ THỐNG'),
+      items: [
+        {
+          id: 'ADMIN',
+          label: t('sidebar.item.administration', 'Quản trị phân quyền'),
+          icon: Settings,
+          badge: 'RBAC',
+          color: 'text-blue-600'
+        }
+      ]
     }
-  ]
+  ].map((group) => ({
+    ...group,
+    items: group.items.filter((item) => allowedMenuCodes.has(item.id))
+  })).filter((group) => group.items.length > 0)
+
+  const initials = session.fullName
+    .split(/\s+/)
+    .filter(Boolean)
+    .slice(-2)
+    .map((part) => part[0]?.toUpperCase())
+    .join('') || 'U'
 
   return (
     <aside
@@ -220,20 +255,46 @@ export const LeftSidebarNav: React.FC<LeftSidebarNavProps> = ({
         ))}
       </div>
 
-      {/* SIDEBAR FOOTER ROLES & VERSION */}
+      {/* SIDEBAR FOOTER ROLES & LOGOUT */}
       <div className="p-3 border-t border-slate-200 shrink-0 bg-slate-50 dark:border-slate-800 dark:bg-slate-950/60">
         {!isCollapsed ? (
-          <div className="flex items-center gap-2.5 p-2 rounded-xl bg-white border border-slate-200 dark:bg-slate-900 dark:border-slate-700">
-            <div className="w-8 h-8 rounded-lg bg-blue-50 border border-blue-200 text-blue-700 flex items-center justify-center font-bold text-xs shrink-0">
-              HA
+          <div className="rounded-xl border border-slate-200 bg-white p-2 dark:border-slate-700 dark:bg-slate-900">
+            <div className="flex items-center gap-2.5">
+              <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-blue-200 bg-blue-50 text-xs font-bold text-blue-700">
+                {initials}
+              </div>
+              <div className="min-w-0 flex-1">
+                <h4 className="truncate text-xs font-extrabold leading-tight text-slate-700 dark:text-slate-100">{session.fullName}</h4>
+                <p className="mt-0.5 truncate text-[10px] font-semibold text-[#174d70] dark:text-sky-300">{roleTitle || session.username}</p>
+              </div>
             </div>
-            <div className="truncate">
-              <h4 className="text-xs font-extrabold text-slate-700 truncate leading-tight">{t('sidebar.role', 'Người xem nghiệp vụ')}</h4>
-            </div>
+            <button
+              type="button"
+              onClick={handleSignOut}
+              className="mt-2 flex w-full items-center justify-center gap-2 whitespace-nowrap rounded-lg border border-slate-200 bg-slate-50 px-2.5 py-2 text-[11px] font-bold text-slate-600 transition hover:border-red-200 hover:bg-red-50 hover:text-red-700 active:translate-y-px dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300 dark:hover:border-red-900 dark:hover:bg-red-950/40 dark:hover:text-red-300"
+              title="Đăng xuất"
+            >
+              <LogOut className="h-3.5 w-3.5" />
+              Đăng xuất
+            </button>
           </div>
         ) : (
-          <div className="w-8 h-8 mx-auto rounded-lg bg-blue-50 border border-blue-200 text-blue-700 flex items-center justify-center font-bold text-xs">
-            HA
+          <div className="space-y-2">
+            <div
+              className="mx-auto flex h-8 w-8 items-center justify-center rounded-lg border border-blue-200 bg-blue-50 text-xs font-bold text-blue-700"
+              title={`${session.fullName} - ${roleTitle || session.username}`}
+            >
+              {initials}
+            </div>
+            <button
+              type="button"
+              onClick={handleSignOut}
+              className="mx-auto flex h-8 w-8 items-center justify-center rounded-lg text-slate-500 transition hover:bg-red-50 hover:text-red-700 active:translate-y-px dark:text-slate-400 dark:hover:bg-red-950/40 dark:hover:text-red-300"
+              title="Đăng xuất"
+              aria-label="Đăng xuất"
+            >
+              <LogOut className="h-4 w-4" />
+            </button>
           </div>
         )}
       </div>

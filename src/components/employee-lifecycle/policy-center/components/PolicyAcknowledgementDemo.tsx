@@ -36,7 +36,9 @@ export const PolicyAcknowledgementDemo: React.FC<PolicyAcknowledgementDemoProps>
       setIsAcknowledged(true)
       setAckTimestamp(nowStr)
       try {
-        await knowledgeRepository.setPolicyAcknowledgement(policy.id, nowStr)
+        const saved = await knowledgeRepository.setPolicyAcknowledgement(policy.id, nowStr)
+        setIsAcknowledged(saved.acknowledged)
+        setAckTimestamp(saved.acknowledgedAt)
       } catch {
         setIsAcknowledged(previousAcknowledged)
         setAckTimestamp(previousTimestamp)
@@ -45,7 +47,9 @@ export const PolicyAcknowledgementDemo: React.FC<PolicyAcknowledgementDemoProps>
       setIsAcknowledged(false)
       setAckTimestamp(null)
       try {
-        await knowledgeRepository.setPolicyAcknowledgement(policy.id, null)
+        const saved = await knowledgeRepository.setPolicyAcknowledgement(policy.id, null)
+        setIsAcknowledged(saved.acknowledged)
+        setAckTimestamp(saved.acknowledgedAt)
       } catch {
         setIsAcknowledged(previousAcknowledged)
         setAckTimestamp(previousTimestamp)
@@ -93,8 +97,8 @@ export const PolicyAcknowledgementDemo: React.FC<PolicyAcknowledgementDemoProps>
           <Sparkles className="w-3.5 h-3.5 text-amber-500 shrink-0" />
           <span>
             {language === 'vi'
-              ? 'Lưu ý: Đây là tính năng mô phỏng xác nhận trong phiên demo (dữ liệu lưu trữ cục bộ phía frontend).'
-              : 'Notice: This acknowledgement is stored locally for demo simulation purposes.'}
+              ? 'Xác nhận được lưu theo tài khoản trong SQL Server.'
+              : 'This acknowledgement is stored per account in SQL Server.'}
           </span>
         </div>
       </div>

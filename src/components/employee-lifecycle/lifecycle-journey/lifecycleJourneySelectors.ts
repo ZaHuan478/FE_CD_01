@@ -3,8 +3,12 @@ import type { SopSubProcess } from '../workflow-detail/types'
 import { LIFECYCLE_STAGES, LIFECYCLE_STAGE_ORDER, LIFECYCLE_SCENARIOS } from './lifecycleJourneyData'
 import type { LifecycleStageId, ScenarioId, LifecycleStageDefinition, ScenarioDefinition } from './types'
 
-export function getStageDefinition(stageId: LifecycleStageId): LifecycleStageDefinition {
-  return LIFECYCLE_STAGES[stageId] ?? LIFECYCLE_STAGES['LIFE-00']
+export function getStageDefinition(stageId: LifecycleStageId): LifecycleStageDefinition | undefined {
+  return LIFECYCLE_STAGES[stageId]
+}
+
+export function getDefaultStageId(): LifecycleStageId | undefined {
+  return LIFECYCLE_STAGE_ORDER.find((stageId) => Boolean(LIFECYCLE_STAGES[stageId]))
 }
 
 export function getStageSops(stageId: LifecycleStageId): SopSubProcess[] {
@@ -17,14 +21,14 @@ export function getTotalDynamicSops(): number {
   }, 0)
 }
 
-export function getScenario(scenarioId: ScenarioId): ScenarioDefinition {
+export function getScenario(scenarioId: ScenarioId): ScenarioDefinition | undefined {
   return LIFECYCLE_SCENARIOS.find((s) => s.id === scenarioId) ?? LIFECYCLE_SCENARIOS[0]
 }
 
 export function isStageHighlightedInScenario(stageId: LifecycleStageId, scenarioId: ScenarioId): boolean {
   if (scenarioId === 'all') return true
   const scenario = getScenario(scenarioId)
-  return scenario.highlightStages.includes(stageId)
+  return scenario?.highlightStages.includes(stageId) ?? false
 }
 
 export function getDistinctSubsystemsCount(): number {

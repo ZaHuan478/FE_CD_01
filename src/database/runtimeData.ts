@@ -10,7 +10,7 @@ export function getRuntimeDataset<T>(key: string): T {
   }
 
   if (!(key in runtimeDatasets)) {
-    throw new Error(`Dataset is missing from the SQLite release: ${key}`)
+    throw new Error(`Dataset is missing from the SQL Server bootstrap response: ${key}`)
   }
 
   return runtimeDatasets[key] as T
