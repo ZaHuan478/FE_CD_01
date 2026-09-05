@@ -1,5 +1,7 @@
 # Employee Lifecycle – Business Process Map
 
+Cấu trúc mã nguồn hiện dùng **feature-based + Atomic Design cho UI dùng chung**. Xem [kiến trúc FrontEnd](docs/frontend-architecture.md) để biết nơi đặt file, hướng import và cách kiểm thử.
+
 ## 1. Mục tiêu
 
 Trang `/employee-lifecycle` không phải là dashboard CRUD hay module quản lý nhân sự thông thường. Đây là một bản đồ nghiệp vụ cho vòng đời nhân viên trong HRMS.
@@ -99,7 +101,7 @@ Trang chính hiển thị 7 bước chính như sau:
 
 ## 5. Master Data
 
-Master Data được frontend tải từ `GET /api/v1/bootstrap`; backend đọc dữ liệu từ SQL Server.
+Master Data được frontend tải từ `GET /api/v1/bootstrap`; backend đọc dữ liệu từ MySQL.
 
 Mỗi item Master Data gồm các thuộc tính bổ trợ như:
 - id
@@ -150,7 +152,7 @@ Ví dụ:
 
 ## 7. Relationship Model
 
-Quan hệ được lưu trong SQL Server và được trả về qua API bootstrap của trang Employee Lifecycle.
+Quan hệ được lưu trong MySQL và được trả về qua API bootstrap của trang Employee Lifecycle.
 
 Các loại quan hệ gồm:
 - `used-by`
@@ -254,22 +256,22 @@ Khi click một liên kết trong panel:
 
 ## 12. Cấu trúc file chính
 
-### `src/database/`
-Khởi tạo dữ liệu runtime bằng API backend. Frontend không kết nối trực tiếp tới database.
+### `src/shared/api/`
+HTTP client và các API đang dùng: auth, bootstrap, xác nhận chính sách. Không còn thư mục `src/database`; trình duyệt không kết nối trực tiếp tới database.
 
-### `src/api/`
-Chứa HTTP client dùng chung. Trong local development, Vite proxy `/api` sang backend tại port `3000`.
+### `src/features/` và `src/entities/`
+Feature chứa hành vi/hook/UI nghiệp vụ; entity chứa model, kiểu và adapter dữ liệu nghiệp vụ. Bootstrap phiên đăng nhập nằm trong `features/authentication/model`, dữ liệu runtime dùng chung ở `shared/lib/runtime-datasets`. Trong local development, Vite vẫn proxy `/api` sang Backend port `3000`.
 
 ### Đăng nhập và phân hệ theo người dùng
 
-- Đặt `VITE_AUTH_MODE=development` để dùng màn chọn ba tài khoản demo từ Backend.
-- FE gọi `/api/v1/me` trước `/api/v1/bootstrap`; menu và phân hệ không được tự suy đoán ở trình duyệt.
+- Đặt `VITE_AUTH_MODE=development` để dùng danh sách tài khoản demo do Backend trả về.
+- FE tải `/api/v1/me` và `/api/v1/bootstrap` song song, chỉ mở workspace khi cả hai hoàn tất. Backend quyết định quyền; FE chỉ lọc/hiển thị dựa trên dữ liệu được trả về.
 - Tài khoản đang chọn được lưu bằng khóa local development và gửi qua `x-user-id`. Chế độ này không được dùng production.
 - Khi tích hợp HRM thật, đặt `VITE_AUTH_MODE=jwt`; token phải đến từ luồng đăng nhập trung tâm và Backend ánh xạ claim `sub` vào `Account.ExternalSubject`.
 - Nút đổi người dùng nằm ở thẻ tài khoản cuối sidebar. Giao diện màn nghiệp vụ giữ nguyên, chỉ lọc menu và dữ liệu theo session.
 
 ### `src/pages/employee-lifecycle/EmployeeLifecyclePage.tsx`
-File render chính cho trang `/employee-lifecycle`.
+Page mỏng ghép `widgets/employee-workspace/ui/EmployeeWorkspace`. Route và provider ở `src/app`; atom/molecule dùng chung ở `src/shared/ui`. Toàn bộ URL hiện có được giữ nguyên.
 
 ---
 
