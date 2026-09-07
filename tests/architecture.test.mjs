@@ -68,11 +68,107 @@ test('public URLs and lazy workspace loading are preserved', () => {
   const router = read(path.join(root, 'src/app/router.tsx'))
   const paths = [...router.matchAll(/path="([^"]+)"/g)].map((match) => match[1])
   assert.deepEqual(paths, [
-    '/', '/login', '/employee-lifecycle', '/employee-lifecycle/journey', '/employee-lifecycle/lifecycle',
+    '/', '/login', '/employee-lifecycle/sop-imports', '/employee-lifecycle', '/employee-lifecycle/journey', '/employee-lifecycle/lifecycle',
     '/employee-lifecycle/operations', '/employee-lifecycle/masterdata', '/employee-lifecycle/reports',
     '/employee-lifecycle/workbench', '/employee-lifecycle/infographic/:id', '/employee-lifecycle/flowchart/:id',
     '/employee-lifecycle/raci/:id', '/employee-lifecycle/workflow/:id', '/employee-lifecycle/wireframe/:id',
-    '/employee-lifecycle/erd', '/employee-lifecycle/policies', '/employee-lifecycle/policies/:id', '/employee-lifecycle/admin', '*'
+    '/employee-lifecycle/erd', '/employee-lifecycle/policies', '/employee-lifecycle/policies/:id',
+    '/employee-lifecycle/admin', '/employee-lifecycle/admin/users', '/employee-lifecycle/admin/access',
+    '/employee-lifecycle/admin/catalog', '/employee-lifecycle/admin/imports', '/employee-lifecycle/admin/master-data', '/employee-lifecycle/admin/settings', '*'
   ])
   assert(router.includes("import('../pages/employee-lifecycle/EmployeeLifecyclePage')"))
+})
+
+test('SOP import opens inside the employee workspace instead of a standalone page', () => {
+  const router = read(path.join(root, 'src/app/router.tsx'))
+  const workspace = read(path.join(root, 'src/widgets/employee-workspace/ui/EmployeeWorkspace.tsx'))
+  const sidebar = read(path.join(root, 'src/widgets/app-sidebar/ui/LeftSidebarNav.tsx'))
+  assert(!router.includes("pages/admin-access/SopImportsPage"))
+  assert(router.includes('path="/employee-lifecycle/sop-imports"'))
+  assert(workspace.includes("activeTab === 'imports'"))
+  assert(workspace.includes('<SopImportWorkspace />'))
+  assert(!sidebar.includes("navigate('/employee-lifecycle/sop-imports')"))
+})
+
+test('admin lands on the workspace and receives an admin-only sidebar destination', () => {
+  const router = read(path.join(root, 'src/app/router.tsx'))
+  const login = read(path.join(root, 'src/features/authentication/hooks/useDevelopmentLogin.ts'))
+  const sidebar = read(path.join(root, 'src/widgets/app-sidebar/ui/LeftSidebarNav.tsx'))
+  assert(!router.includes('session.modules.length === 0'))
+  assert(login.includes("rawRedirect && user.systemRole !== 'ADMIN'"))
+  assert(!login.includes("target = '/employee-lifecycle/admin'"))
+  assert(sidebar.includes("session.systemRole === 'ADMIN'"))
+  assert(sidebar.includes("'Quản trị hệ thống'"))
+  assert(sidebar.includes("id: 'ADMIN'"))
+})
+
+test('removed SOP specs matrix is absent from workspace navigation', () => {
+  const workspace = read(path.join(root, 'src/widgets/employee-workspace/ui/EmployeeWorkspace.tsx'))
+  const sidebar = read(path.join(root, 'src/widgets/app-sidebar/ui/LeftSidebarNav.tsx'))
+  assert(!workspace.includes('sop-specs-matrix'))
+  assert(!sidebar.includes('sop-specs-matrix'))
+  assert(!sidebar.includes('sidebar.item.sopMatrix'))
+})
+
+test('process library is separated from the overview and remains inside the employee workspace', () => {
+  const workspace = read(path.join(root, 'src/widgets/employee-workspace/ui/EmployeeWorkspace.tsx'))
+  const sidebar = read(path.join(root, 'src/widgets/app-sidebar/ui/LeftSidebarNav.tsx'))
+  const overview = read(path.join(root, 'src/widgets/module-explorer/ui/SystemOverviewDashboard.tsx'))
+  const library = read(path.join(root, 'src/widgets/module-explorer/ui/ProcessLibraryWorkspace.tsx'))
+  assert(sidebar.includes("id: 'process-library'"))
+  assert(sidebar.includes("'Thư viện quy trình'"))
+  assert(workspace.includes("activeTab === 'process-library'"))
+  assert(workspace.includes('<ProcessLibraryWorkspace activeCluster={activeBusinessCluster} />'))
+  assert(overview.includes('<RadialEcosystemChart view="overview" />'))
+  assert(!overview.includes('<ClusterProcessExplorer'))
+  assert(library.includes('<RadialEcosystemChart view="library" />'))
+  assert(library.includes('<ClusterProcessExplorer'))
+})
+
+test('full-page process details return to the workspace context that opened them', () => {
+  const workspace = read(path.join(root, 'src/widgets/employee-workspace/ui/EmployeeWorkspace.tsx'))
+  const relationship = read(path.join(root, 'src/widgets/module-explorer/ui/HrmModuleRelationshipSection.tsx'))
+  const coreDetail = read(path.join(root, 'src/widgets/module-explorer/ui/EcosystemSopDetail.tsx'))
+  const clusterDetail = read(path.join(root, 'src/widgets/module-explorer/ui/ClusterProcessExplorer.tsx'))
+  const returnHelper = read(path.join(root, 'src/shared/lib/navigation/workspaceReturn.ts'))
+  assert(workspace.includes('navigate(resolveWorkspaceReturn(searchParams))'))
+  assert(relationship.includes('withWorkspaceReturn(mod.workflowPath'))
+  assert(coreDetail.includes('withWorkspaceReturn(target, getCurrentWorkspacePath(location))'))
+  assert(clusterDetail.includes('withWorkspaceReturn(target, getCurrentWorkspacePath(location))'))
+  assert(returnHelper.includes("returnTo.startsWith(`${employeeWorkspaceRoot}?`)"))
+  assert(returnHelper.includes("returnTo.startsWith(`${employeeWorkspaceRoot}/`)"))
+})
+
+test('admin tools render inside the employee workspace and keep legacy URLs available', () => {
+  const router = read(path.join(root, 'src/app/router.tsx'))
+  const employeeWorkspace = read(path.join(root, 'src/widgets/employee-workspace/ui/EmployeeWorkspace.tsx'))
+  const adminWorkspace = read(path.join(root, 'src/widgets/admin-workspace/ui/AdminWorkspace.tsx'))
+  const knowledgeBoundary = read(path.join(root, 'src/app/layouts/KnowledgeBoundary.tsx'))
+  const oldDashboard = path.join(root, 'src/features/user-module-access/ui/AdminDashboard.tsx')
+  for (const route of ['/admin/users', '/admin/access', '/admin/catalog', '/admin/master-data', '/admin/settings']) assert(router.includes(route))
+  assert(!router.includes('AdminLayout'))
+  assert(router.includes('<EmployeeLifecycleAdminPage />'))
+  assert(employeeWorkspace.includes('<AdminWorkspace activeSection={activeAdminSection} isDarkMode={isDarkMode} />'))
+  assert(adminWorkspace.includes("session.systemRole !== 'ADMIN'"))
+  assert(adminWorkspace.includes('aria-label="Chức năng quản trị"'))
+  assert(knowledgeBoundary.includes("!session.modules.length && session.systemRole !== 'ADMIN'"))
+  assert(knowledgeBoundary.includes("isAdminWorkspace"))
+  assert(knowledgeBoundary.includes("key={session.accountId}"))
+  assert(knowledgeBoundary.includes("resetKey={boundaryResetKey}"))
+  for (const section of ['overview', 'users', 'access', 'catalog', 'imports', 'master-data', 'settings']) {
+    assert(adminWorkspace.includes(`adminSection=${section}`))
+  }
+  assert.equal(existsSync(oldDashboard), false)
+})
+
+test('admin catalog loads independently and does not invent unavailable persistence', () => {
+  const api = read(path.join(root, 'src/shared/api/knowledge.api.ts'))
+  const catalog = read(path.join(root, 'src/features/admin-catalog/ui/CatalogManagement.tsx'))
+  const settings = read(path.join(root, 'src/widgets/admin-workspace/ui/AdminWorkspace.tsx'))
+  assert(api.includes('catalogDocuments:'))
+  assert(api.includes("apiRequest<KnowledgePage>(`/knowledge-documents?"))
+  assert(api.includes("createDocument:"))
+  assert(catalog.includes('Sửa và lưu trữ chưa có endpoint'))
+  assert(settings.includes('Chưa có API lưu cấu hình'))
+  assert(settings.includes('không hiển thị sự kiện giả'))
 })

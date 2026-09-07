@@ -6,9 +6,17 @@ import { PublicOnlyRoute } from './layouts/PublicOnlyRoute'
 import { NotFoundPage } from '../pages/not-found/NotFoundPage'
 import { useAuth } from '../features/authentication/model/session'
 import { FullPageLoading } from '../shared/ui/molecules/FullPageLoading'
+import { KnowledgeBoundary } from './layouts/KnowledgeBoundary'
 
-const EmployeeLifecyclePage = React.lazy(() =>
-  import('../pages/employee-lifecycle/EmployeeLifecyclePage').then((m) => ({ default: m.EmployeeLifecyclePage }))
+const EmployeeLifecycleContent = React.lazy(() =>
+  import('../pages/employee-lifecycle/EmployeeLifecyclePage').then((m) => ({ default: m.EmployeeLifecyclePage })
+))
+
+const EmployeeLifecyclePage = () => <KnowledgeBoundary><EmployeeLifecycleContent /></KnowledgeBoundary>
+const EmployeeLifecycleAdminPage = () => (
+  <Suspense fallback={<FullPageLoading message="Đang mở khu vực quản trị..." />}>
+    <EmployeeLifecyclePage />
+  </Suspense>
 )
 
 const RootRedirect: React.FC = () => {
@@ -38,6 +46,14 @@ export const AppRoutes: React.FC = () => {
 
       {/* Protected routes */}
       <Route element={<ProtectedRoute />}>
+        <Route
+          path="/employee-lifecycle/sop-imports"
+          element={
+            <Suspense fallback={<FullPageLoading message="Đang mở không gian số hóa..." />}>
+              <EmployeeLifecyclePage />
+            </Suspense>
+          }
+        />
         <Route
           path="/employee-lifecycle"
           element={
@@ -158,14 +174,13 @@ export const AppRoutes: React.FC = () => {
             </Suspense>
           }
         />
-        <Route
-          path="/employee-lifecycle/admin"
-          element={
-            <Suspense fallback={<FullPageLoading message="Đang tải dữ liệu phân hệ..." />}>
-              <EmployeeLifecyclePage />
-            </Suspense>
-          }
-        />
+        <Route path="/employee-lifecycle/admin" element={<EmployeeLifecycleAdminPage />} />
+        <Route path="/employee-lifecycle/admin/users" element={<EmployeeLifecycleAdminPage />} />
+        <Route path="/employee-lifecycle/admin/access" element={<EmployeeLifecycleAdminPage />} />
+        <Route path="/employee-lifecycle/admin/catalog" element={<EmployeeLifecycleAdminPage />} />
+        <Route path="/employee-lifecycle/admin/imports" element={<EmployeeLifecycleAdminPage />} />
+        <Route path="/employee-lifecycle/admin/master-data" element={<EmployeeLifecycleAdminPage />} />
+        <Route path="/employee-lifecycle/admin/settings" element={<EmployeeLifecycleAdminPage />} />
       </Route>
 
       {/* 404 Not Found */}

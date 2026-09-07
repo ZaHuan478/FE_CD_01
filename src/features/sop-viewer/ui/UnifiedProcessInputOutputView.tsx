@@ -13,10 +13,10 @@ import {
   Sparkles,
   Workflow
 } from 'lucide-react'
-import { SOP_DATABASE } from '../../../entities/sop/model/sopDatabase'
+import { getWorkflowProcesses } from '../../../entities/sop/model/sopDatabase'
 import type { SopSubProcess } from '../../../entities/sop/model/types'
 import { useLanguage } from '../../../shared/lib/i18n/LanguageContext'
-import type { BusinessClusterId } from '../../../entities/process-flow/model/types'
+import type { BusinessClusterId } from '../../../entities/module/model/types'
 
 interface ModuleDefinition {
   id: string
@@ -353,7 +353,7 @@ export const UnifiedProcessInputOutputView: React.FC<{ cluster: BusinessClusterI
   const processes: SopSubProcess[] = useMemo(() => {
     const procs: SopSubProcess[] = []
     for (const workflowId of activeModule.workflowIds) {
-      const items = SOP_DATABASE[workflowId] ?? []
+      const items = getWorkflowProcesses(workflowId)
       procs.push(...items)
     }
     if (activeModule.processCodes?.length) {

@@ -1,6 +1,6 @@
 import React from 'react'
 import { CheckCircle2, Compass, Info } from 'lucide-react'
-import { LIFECYCLE_SCENARIOS } from '../../../entities/lifecycle/model/journey/lifecycleJourneyData'
+import { getLIFECYCLE_SCENARIOS } from '../../../entities/lifecycle/model/journey/lifecycleJourneyData'
 import type { ScenarioId } from '../../../entities/lifecycle/model/journey/types'
 
 interface LifecycleScenarioSelectorProps {
@@ -12,7 +12,7 @@ export const LifecycleScenarioSelector: React.FC<LifecycleScenarioSelectorProps>
   activeScenario,
   onSelectScenario
 }) => {
-  const currentScenario = LIFECYCLE_SCENARIOS.find((s) => s.id === activeScenario) ?? LIFECYCLE_SCENARIOS[0]
+  const currentScenario = getLIFECYCLE_SCENARIOS().find((s) => s.id === activeScenario) ?? getLIFECYCLE_SCENARIOS()[0]
 
   return (
     <section aria-label="Bộ chọn kịch bản nghiệp vụ" className="rounded-xl border border-slate-200 bg-white p-3.5 sm:p-4 shadow-2xs dark:border-slate-800 dark:bg-slate-900">
@@ -26,7 +26,7 @@ export const LifecycleScenarioSelector: React.FC<LifecycleScenarioSelectorProps>
 
         {/* DANH SÁCH NÚT KỊCH BẢN */}
         <div className="flex flex-wrap items-center gap-1.5">
-          {LIFECYCLE_SCENARIOS.map((scenario) => {
+          {getLIFECYCLE_SCENARIOS().map((scenario) => {
             const isSelected = scenario.id === activeScenario
             return (
               <button

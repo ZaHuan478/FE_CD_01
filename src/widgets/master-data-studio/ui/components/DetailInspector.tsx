@@ -7,8 +7,8 @@ import {
   AlertTriangle
 } from 'lucide-react'
 import {
-  TIER_LABELS,
-  STATUS_LABELS,
+  getTIER_LABELS,
+  getSTATUS_LABELS,
   type CatalogViewModel
 } from '../../../../entities/master-data/model/masterDataCatalogAdapter'
 import type { SopSubProcess } from '../../../../entities/sop/model/types'
@@ -47,8 +47,8 @@ export const DetailInspector: React.FC<DetailInspectorProps> = ({
     )
   }
 
-  const tierInfo = TIER_LABELS[selectedCatalog.tier]
-  const statusInfo = STATUS_LABELS[selectedCatalog.status]
+  const tierInfo = getTIER_LABELS()[selectedCatalog.tier]
+  const statusInfo = getSTATUS_LABELS()[selectedCatalog.status]
 
   return (
     <div className="flex flex-col">
@@ -161,7 +161,7 @@ export const DetailInspector: React.FC<DetailInspectorProps> = ({
             <InspectorRow label="Data Owner" value={selectedCatalog.ownerRole} subdued={subdued} />
             <InspectorRow
               label="Phạm vi"
-              value={TIER_LABELS[selectedCatalog.tier].description}
+              value={getTIER_LABELS()[selectedCatalog.tier].description}
               subdued={subdued}
             />
           </div>

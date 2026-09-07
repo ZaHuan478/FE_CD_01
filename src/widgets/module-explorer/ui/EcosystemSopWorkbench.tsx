@@ -8,7 +8,7 @@ import {
   Sparkles
 } from 'lucide-react'
 import {
-  CORE_OPERATION_MODULES,
+  getCORE_OPERATION_MODULES,
   type ModuleEcosystemItem,
   type SopDetailItem
 } from '../../../entities/module/data/ecosystemModulesData'
@@ -94,7 +94,7 @@ export const EcosystemSopWorkbench: React.FC<EcosystemSopWorkbenchProps> = ({
         role="tablist"
         className="flex items-center gap-1.5 overflow-x-auto no-scrollbar rounded-lg border border-slate-200 bg-slate-50 p-1.5 dark:border-slate-800 dark:bg-slate-950/60"
       >
-        {CORE_OPERATION_MODULES.map((mod) => {
+        {getCORE_OPERATION_MODULES().map((mod) => {
           const isSelected = activeModule.id === mod.id
           return (
             <button

@@ -1,3 +1,4 @@
+import { memoRuntime } from '../../../shared/lib/runtime-datasets/runtimeData'
 import { getRuntimeDataset } from '../../../shared/lib/runtime-datasets/runtimeData'
 import type { SopSubProcess } from '../../sop/model/types'
 import type { CatalogModuleId, CatalogTier } from './types'
@@ -57,14 +58,14 @@ interface MasterDataCatalogDataset {
   statusLabels: Record<CatalogStatus, { label: string; color: string }>
 }
 
-const dataset = getRuntimeDataset<MasterDataCatalogDataset>('masterData.catalog')
+const getDataset = memoRuntime(() => (getRuntimeDataset<MasterDataCatalogDataset>('masterData.catalog')))
 
-export const DOMAIN_GROUPS = dataset.domainGroups
-export const ALL_CATALOG_ITEMS = dataset.catalogItems
-export const GOVERNANCE_ITEMS = dataset.governanceItems
-export const ALL_MASTER_DATA_ITEMS = dataset.allItems
-export const TIER_LABELS = dataset.tierLabels
-export const STATUS_LABELS = dataset.statusLabels
+export const getDOMAIN_GROUPS = memoRuntime(() => (getDataset().domainGroups))
+export const getALL_CATALOG_ITEMS = memoRuntime(() => (getDataset().catalogItems))
+export const getGOVERNANCE_ITEMS = memoRuntime(() => (getDataset().governanceItems))
+export const getALL_MASTER_DATA_ITEMS = memoRuntime(() => (getDataset().allItems))
+export const getTIER_LABELS = memoRuntime(() => (getDataset().tierLabels))
+export const getSTATUS_LABELS = memoRuntime(() => (getDataset().statusLabels))
 
 export interface MasterDataStats {
   totalCatalogs: number
@@ -74,26 +75,26 @@ export interface MasterDataStats {
 }
 
 export function computeMasterDataStats(): MasterDataStats {
-  const allModules = new Set(ALL_MASTER_DATA_ITEMS.flatMap((item) => item.consumerModules))
-  const activeGroups = new Set(ALL_MASTER_DATA_ITEMS.map((item) => item.domainGroupId))
+  const allModules = new Set(getALL_MASTER_DATA_ITEMS().flatMap((item) => item.consumerModules))
+  const activeGroups = new Set(getALL_MASTER_DATA_ITEMS().map((item) => item.domainGroupId))
   return {
-    totalCatalogs: ALL_MASTER_DATA_ITEMS.length,
+    totalCatalogs: getALL_MASTER_DATA_ITEMS().length,
     totalDomainGroups: activeGroups.size,
     totalConsumerModules: allModules.size,
-    totalFieldsDefined: ALL_MASTER_DATA_ITEMS.reduce((sum, item) => sum + item.fieldCount, 0)
+    totalFieldsDefined: getALL_MASTER_DATA_ITEMS().reduce((sum, item) => sum + item.fieldCount, 0)
   }
 }
 
 export function getItemsByGroup(groupId: DomainGroupId): CatalogViewModel[] {
-  return ALL_MASTER_DATA_ITEMS.filter((item) => item.domainGroupId === groupId)
+  return getALL_MASTER_DATA_ITEMS().filter((item) => item.domainGroupId === groupId)
 }
 
 export function getItemsByTier(tier: CatalogTier): CatalogViewModel[] {
-  return ALL_MASTER_DATA_ITEMS.filter((item) => item.tier === tier)
+  return getALL_MASTER_DATA_ITEMS().filter((item) => item.tier === tier)
 }
 
 export function getItemsByStatus(status: CatalogStatus): CatalogViewModel[] {
-  return ALL_MASTER_DATA_ITEMS.filter((item) => item.status === status)
+  return getALL_MASTER_DATA_ITEMS().filter((item) => item.status === status)
 }
 
 export function searchCatalogs(items: CatalogViewModel[], query: string): CatalogViewModel[] {
@@ -111,7 +112,7 @@ export function searchCatalogs(items: CatalogViewModel[], query: string): Catalo
 
 export function getGroupCounts(): Record<DomainGroupId, number> {
   const counts: Partial<Record<DomainGroupId, number>> = {}
-  for (const item of ALL_MASTER_DATA_ITEMS) {
+  for (const item of getALL_MASTER_DATA_ITEMS()) {
     counts[item.domainGroupId] = (counts[item.domainGroupId] ?? 0) + 1
   }
   return counts as Record<DomainGroupId, number>

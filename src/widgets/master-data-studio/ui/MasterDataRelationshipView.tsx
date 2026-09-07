@@ -22,7 +22,7 @@ import {
   ShieldCheck,
   Info
 } from 'lucide-react'
-import { erdClustersData } from '../../../entities/module/data/erdClustersData'
+import { getErdClustersData } from '../../../entities/module/data/erdClustersData'
 
 // ────────────────────────────────────────────────────────────────────────────
 // PROPS
@@ -90,7 +90,7 @@ export const MasterDataRelationshipView: React.FC<MasterDataRelationshipViewProp
 
         {/* Left: ERD clusters */}
         <div className="lg:col-span-8 space-y-4">
-          {erdClustersData.map((cluster) => (
+          {getErdClustersData().map((cluster) => (
             <div
               key={cluster.id}
               className={`rounded-xl border p-4 relative transition-shadow ${isDarkMode ? 'bg-slate-900/80 border-slate-800 hover:border-slate-700' : 'bg-white border-slate-200 hover:shadow-sm'}`}

@@ -1,6 +1,6 @@
 import React, { useState, useMemo } from 'react'
 import { useSearchParams, useNavigate, useParams } from 'react-router-dom'
-import { POLICY_REGISTRY } from '../../../entities/policy/model/policyRegistry'
+import { getPOLICY_REGISTRY } from '../../../entities/policy/model/policyRegistry'
 import type { Policy, PolicyFilterState } from '../../../entities/policy/model/types'
 import {
   filterPolicies,
@@ -27,7 +27,7 @@ export const PolicyCenterPage: React.FC<PolicyCenterPageProps> = ({ initialPolic
   // Selected policy derived from URL or prop
   const selectedPolicy = useMemo(() => {
     if (!activePolicyId) return null
-    return getPolicyByIdOrCode(POLICY_REGISTRY, activePolicyId) || null
+    return getPolicyByIdOrCode(getPOLICY_REGISTRY(), activePolicyId) || null
   }, [activePolicyId])
 
   // Filter state
@@ -42,11 +42,11 @@ export const PolicyCenterPage: React.FC<PolicyCenterPageProps> = ({ initialPolic
   const [isSimulatorOpen, setIsSimulatorOpen] = useState(false)
 
   // Metrics
-  const metrics = useMemo(() => calculatePolicyMetrics(POLICY_REGISTRY), [])
+  const metrics = useMemo(() => calculatePolicyMetrics(getPOLICY_REGISTRY()), [])
 
   // Filtered policies
   const filteredPolicies = useMemo(() => {
-    return filterPolicies(POLICY_REGISTRY, filter)
+    return filterPolicies(getPOLICY_REGISTRY(), filter)
   }, [filter])
 
   // Filter handlers
@@ -132,7 +132,7 @@ export const PolicyCenterPage: React.FC<PolicyCenterPageProps> = ({ initialPolic
         onChangeFilter={handleFilterChange}
         onResetFilter={handleResetFilter}
         resultCount={filteredPolicies.length}
-        totalCount={POLICY_REGISTRY.length}
+        totalCount={getPOLICY_REGISTRY().length}
       />
 
       {/* 3. Policy Cards Grid */}

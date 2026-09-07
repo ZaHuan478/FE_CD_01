@@ -1,7 +1,7 @@
 import React from 'react'
 import { useNavigate } from 'react-router-dom'
 import { ShieldCheck, ArrowRight } from 'lucide-react'
-import { POLICY_REGISTRY } from '../../../../entities/policy/model/policyRegistry'
+import { getPOLICY_REGISTRY } from '../../../../entities/policy/model/policyRegistry'
 import { getPoliciesForProcess } from '../../../../entities/policy/lib/policySelectors'
 import { CATEGORY_METADATA } from '../../../../entities/policy/lib/policyConstants'
 import { useLanguage } from '../../../../shared/lib/i18n/LanguageContext'
@@ -20,8 +20,8 @@ export const RelatedPoliciesWidget: React.FC<RelatedPoliciesWidgetProps> = ({
 
   // Find policies related to either processId or sopCode
   const relatedPolicies = React.useMemo(() => {
-    const fromProc = getPoliciesForProcess(POLICY_REGISTRY, processId)
-    const fromSop = sopCode ? getPoliciesForProcess(POLICY_REGISTRY, sopCode) : []
+    const fromProc = getPoliciesForProcess(getPOLICY_REGISTRY(), processId)
+    const fromSop = sopCode ? getPoliciesForProcess(getPOLICY_REGISTRY(), sopCode) : []
     const combined = [...fromProc, ...fromSop]
     // deduplicate
     const map = new Map<string, typeof combined[0]>()

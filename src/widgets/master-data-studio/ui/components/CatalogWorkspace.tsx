@@ -1,8 +1,8 @@
 import React from 'react'
 import { Search, Filter, Database } from 'lucide-react'
 import {
-  TIER_LABELS,
-  STATUS_LABELS,
+  getTIER_LABELS,
+  getSTATUS_LABELS,
   type CatalogViewModel,
   type CatalogStatus,
   type DomainGroup
@@ -50,18 +50,18 @@ export const CatalogWorkspace: React.FC<CatalogWorkspaceProps> = ({
 }) => {
   const TIERS: Array<{ value: CatalogTier | 'all'; label: string }> = [
     { value: 'all', label: 'Tất cả tầng' },
-    { value: 'tier1_global', label: TIER_LABELS.tier1_global.label },
-    { value: 'tier2_module', label: TIER_LABELS.tier2_module.label },
-    { value: 'tier3_utility', label: TIER_LABELS.tier3_utility.label },
-    { value: 'tier4_governance', label: TIER_LABELS.tier4_governance.label }
+    { value: 'tier1_global', label: getTIER_LABELS().tier1_global.label },
+    { value: 'tier2_module', label: getTIER_LABELS().tier2_module.label },
+    { value: 'tier3_utility', label: getTIER_LABELS().tier3_utility.label },
+    { value: 'tier4_governance', label: getTIER_LABELS().tier4_governance.label }
   ]
 
   const STATUSES: Array<{ value: CatalogStatus | 'all'; label: string }> = [
     { value: 'all', label: 'Tất cả trạng thái' },
-    { value: 'active', label: STATUS_LABELS.active.label },
-    { value: 'upcoming', label: STATUS_LABELS.upcoming.label },
-    { value: 'legacy', label: STATUS_LABELS.legacy.label },
-    { value: 'deprecated', label: STATUS_LABELS.deprecated.label }
+    { value: 'active', label: getSTATUS_LABELS().active.label },
+    { value: 'upcoming', label: getSTATUS_LABELS().upcoming.label },
+    { value: 'legacy', label: getSTATUS_LABELS().legacy.label },
+    { value: 'deprecated', label: getSTATUS_LABELS().deprecated.label }
   ]
 
   return (

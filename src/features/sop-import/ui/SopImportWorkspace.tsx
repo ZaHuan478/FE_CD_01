@@ -1,0 +1,197 @@
+import { useEffect, useMemo, useRef, useState, type ChangeEvent, type FormEvent } from 'react'
+import { AlertTriangle, ArrowDown, ArrowUp, CheckCircle2, FileText, LoaderCircle, Plus, ScanText, Trash2, UploadCloud } from 'lucide-react'
+import { sopImportApi, useSopImportModules, type SopImportItem, type SopImportPreview, type SopImportStep } from '../model/sopImportModel'
+import { Feedback, Panel, adminInputClass, primaryButtonClass, secondaryButtonClass } from '../../../shared/ui/molecules/AdminSurface'
+
+const maxFileSize = 10 * 1024 * 1024
+
+function formatBytes(value: number) {
+  return value < 1024 * 1024 ? `${Math.max(1, Math.round(value / 1024))} KB` : `${(value / 1024 / 1024).toFixed(1)} MB`
+}
+
+function rebuildFlow(preview: SopImportPreview): SopImportPreview {
+  const steps = preview.steps.map((step, index) => ({ ...step, sortOrder: index + 1 }))
+  return { ...preview, steps, transitions: steps.slice(0, -1).map((step, index) => ({
+    id: `import-transition-${index + 1}`, fromStepId: step.id, toStepId: steps[index + 1]!.id,
+    kind: 'normal', sortOrder: index + 1
+  })) }
+}
+
+function reorder(preview: SopImportPreview, index: number, direction: -1 | 1) {
+  const target = index + direction
+  if (target < 0 || target >= preview.steps.length) return preview
+  const steps = [...preview.steps]
+  const current = steps[index]!
+  steps[index] = steps[target]!
+  steps[target] = current
+  return rebuildFlow({ ...preview, steps })
+}
+
+export function SopImportWorkspace({ adminMode = false }: { adminMode?: boolean }) {
+  const moduleState = useSopImportModules()
+  const inputRef = useRef<HTMLInputElement>(null)
+  const [file, setFile] = useState<File | null>(null)
+  const [fileError, setFileError] = useState('')
+  const [imports, setImports] = useState<SopImportItem[]>([])
+  const [active, setActive] = useState<SopImportItem | null>(null)
+  const [preview, setPreview] = useState<SopImportPreview | null>(null)
+  const [busy, setBusy] = useState<'load' | 'upload' | 'save' | 'accept' | 'publish' | null>('load')
+  const [error, setError] = useState('')
+  const [notice, setNotice] = useState('')
+  const modules = useMemo(() => moduleState.modules, [moduleState.modules])
+
+  useEffect(() => {
+    const controller = new AbortController()
+    void sopImportApi.list(controller.signal).then(result => setImports(result.data)).catch(reason => {
+      if (!controller.signal.aborted) setError(reason instanceof Error ? reason.message : 'Không tải được hồ sơ số hóa')
+    }).finally(() => { if (!controller.signal.aborted) setBusy(null) })
+    return () => controller.abort()
+  }, [])
+
+  const chooseFile = (next: File | null) => {
+    setFileError('')
+    if (!next) return setFile(null)
+    const extension = next.name.split('.').pop()?.toLocaleLowerCase()
+    if (!['docx', 'pdf'].includes(extension ?? '')) { setFileError('Chỉ chấp nhận tệp DOCX hoặc PDF.'); return setFile(null) }
+    if (next.size > maxFileSize) { setFileError('Dung lượng tối đa là 10 MB.'); return setFile(null) }
+    setFile(next)
+  }
+
+  const upload = async (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault(); setError(''); setNotice('')
+    if (!file) return setFileError('Vui lòng chọn một tệp DOCX hoặc PDF.')
+    const data = new FormData(event.currentTarget)
+    data.set('file', file)
+    setBusy('upload')
+    try {
+      const result = await sopImportApi.upload(data)
+      setImports(current => [result.data, ...current]); setActive(result.data); setPreview(result.data.preview)
+      setNotice('Đã trích xuất nội dung. Hãy kiểm tra và hiệu chỉnh trước khi tạo SOP draft.')
+    } catch (reason) { setError(reason instanceof Error ? reason.message : 'Không thể số hóa tài liệu') }
+    finally { setBusy(null) }
+  }
+
+  const selectImport = (item: SopImportItem) => { setActive(item); setPreview(item.preview); setError(''); setNotice('') }
+  const updateStep = (index: number, patch: Partial<SopImportStep>) => setPreview(current => current ? {
+    ...current, steps: current.steps.map((step, stepIndex) => stepIndex === index ? { ...step, ...patch } : step)
+  } : current)
+  const removeStep = (index: number) => setPreview(current => current ? rebuildFlow({ ...current, steps: current.steps.filter((_, i) => i !== index) }) : current)
+  const addStep = () => setPreview(current => {
+    if (!current) return current
+    const key = `import-step-${Date.now()}`
+    return rebuildFlow({ ...current, steps: [...current.steps, {
+      id: key, stableKey: key, code: `STEP-${String(current.steps.length + 1).padStart(2, '0')}`,
+      title: 'Bước mới', description: '', actor: '', location: '', timing: '', nodeKind: 'task',
+      sortOrder: current.steps.length + 1, checklist: [], inputs: [], outputs: []
+    }] })
+  })
+
+  const save = async () => {
+    if (!active || !preview) return
+    setBusy('save'); setError(''); setNotice('')
+    try {
+      const result = await sopImportApi.update(active.id, rebuildFlow(preview))
+      setActive(result.data); setPreview(result.data.preview)
+      setImports(current => current.map(item => item.id === result.data.id ? result.data : item))
+      setNotice('Đã lưu bản hiệu chỉnh.')
+    } catch (reason) { setError(reason instanceof Error ? reason.message : 'Không lưu được bản hiệu chỉnh') }
+    finally { setBusy(null) }
+  }
+
+  const accept = async () => {
+    if (!active || !preview || !preview.steps.length) return
+    setBusy('accept'); setError(''); setNotice('')
+    try {
+      await sopImportApi.update(active.id, rebuildFlow(preview))
+      const result = await sopImportApi.accept(active.id)
+      setActive(result.data.import); setPreview(result.data.import.preview)
+      setImports(current => current.map(item => item.id === active.id ? result.data.import : item))
+      setNotice(`Đã tạo SOP ${result.data.import.preview.code} ở trạng thái Draft. Tài liệu chưa được công bố.`)
+    } catch (reason) { setError(reason instanceof Error ? reason.message : 'Không tạo được SOP draft') }
+    finally { setBusy(null) }
+  }
+
+  const publish = async () => {
+    if (!active || active.status !== 'accepted') return
+    setBusy('publish'); setError(''); setNotice('')
+    try {
+      const result = await sopImportApi.publish(active.id)
+      setActive(result.data); setPreview(result.data.preview)
+      setImports(current => current.map(item => item.id === result.data.id ? result.data : item))
+      setNotice(`Đã phê duyệt và công bố SOP ${result.data.preview.code}.`)
+    } catch (reason) { setError(reason instanceof Error ? reason.message : 'Không công bố được SOP') }
+    finally { setBusy(null) }
+  }
+
+  return <div className="space-y-4">
+    {error && <Feedback type="error">{error}</Feedback>}
+    {moduleState.error && <Feedback type="error">{moduleState.error}</Feedback>}
+    {notice && <Feedback type="success">{notice}</Feedback>}
+    <ol className="grid gap-2 sm:grid-cols-2 xl:grid-cols-4" aria-label="Tiến trình số hóa">
+      {[['1', 'Tải tài liệu', Boolean(file || active)], ['2', 'Rà soát nội dung', Boolean(active)], ['3', 'Gửi bản nháp', active?.status === 'accepted' || active?.status === 'published'], ['4', 'Admin công bố', active?.status === 'published']].map(([number, label, done]) => <li key={String(number)} className={`flex min-h-12 items-center gap-3 rounded-xl border px-4 text-sm font-bold ${done ? 'border-cyan-300 bg-cyan-50 text-cyan-950 dark:border-cyan-800 dark:bg-cyan-950/30 dark:text-cyan-100' : 'border-slate-200 bg-white text-slate-500 dark:border-slate-800 dark:bg-slate-900'}`}><span className="grid size-7 place-items-center rounded-full bg-[#155e75] text-xs text-white">{number}</span>{label}</li>)}
+    </ol>
+
+    <div className="grid gap-4 xl:grid-cols-[340px_minmax(0,1fr)]">
+      <div className="space-y-4">
+        <Panel title="Tài liệu nguồn" description="DOCX hoặc PDF có văn bản, tối đa 10 MB.">
+          <form onSubmit={upload} className="space-y-4 p-4">
+            <input ref={inputRef} type="file" name="file" accept=".docx,.pdf,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document" className="sr-only" onChange={(event: ChangeEvent<HTMLInputElement>) => chooseFile(event.target.files?.[0] ?? null)} />
+            <button type="button" onClick={() => inputRef.current?.click()} className="flex min-h-36 w-full cursor-pointer flex-col items-center justify-center rounded-xl border-2 border-dashed border-slate-300 bg-slate-50 px-5 text-center transition-colors hover:border-[#155e75] hover:bg-cyan-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#155e75] dark:border-slate-700 dark:bg-slate-950 dark:hover:border-cyan-500">
+              <UploadCloud aria-hidden="true" className="size-8 text-[#155e75] dark:text-cyan-400" />
+              <span className="mt-3 text-sm font-black">{file ? file.name : 'Chọn tài liệu cần số hóa'}</span>
+              <span className="mt-1 text-xs text-slate-500">{file ? formatBytes(file.size) : 'Hệ thống giữ file gốc để đối chiếu và audit'}</span>
+            </button>
+            {fileError && <p role="alert" className="text-xs font-semibold text-red-700 dark:text-red-300">{fileError}</p>}
+            <Field label="Mã SOP"><input required name="code" placeholder="SOP-EMP-01" className={adminInputClass} /></Field>
+            <Field label="Tên SOP"><input required name="title" placeholder="Quy trình tiếp nhận nhân viên" className={adminInputClass} /></Field>
+            <Field label="Phân hệ"><select required name="primaryModuleId" className={adminInputClass}><option value="">Chọn phân hệ</option>{modules.map(module => <option key={module.id} value={module.id}>{module.code} · {module.title}</option>)}</select></Field>
+            <Field label="Nhóm tài liệu"><input name="category" placeholder="Quy trình nhân sự" className={adminInputClass} /></Field>
+            <button disabled={busy !== null} className={`${primaryButtonClass} w-full`}>{busy === 'upload' ? <><LoaderCircle className="size-4 animate-spin" />Đang trích xuất...</> : <><ScanText className="size-4" />Upload và số hóa</>}</button>
+          </form>
+        </Panel>
+
+        <Panel title="Hồ sơ gần đây" description="Các tài liệu do tài khoản hiện tại tải lên.">
+          <div className="max-h-80 divide-y divide-slate-100 overflow-y-auto dark:divide-slate-800">
+            {busy === 'load' && <p className="p-4 text-sm text-slate-500">Đang tải...</p>}
+            {!busy && !imports.length && <p className="p-4 text-sm text-slate-500">Chưa có tài liệu nào.</p>}
+            {imports.map(item => <button key={item.id} type="button" onClick={() => selectImport(item)} className={`flex min-h-16 w-full cursor-pointer items-start gap-3 px-4 py-3 text-left hover:bg-slate-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-[#155e75] dark:hover:bg-slate-800 ${active?.id === item.id ? 'bg-cyan-50 dark:bg-cyan-950/20' : ''}`}><FileText className="mt-0.5 size-4 shrink-0 text-[#155e75] dark:text-cyan-400" /><span className="min-w-0 flex-1"><span className="block truncate text-sm font-bold">{item.file.name}</span><span className="mt-1 block text-xs text-slate-500">{item.preview.code} · {item.preview.steps.length} bước</span></span><span className={`rounded-md px-2 py-1 text-[10px] font-black ${item.status === 'published' ? 'bg-emerald-100 text-emerald-800' : 'bg-amber-100 text-amber-800'}`}>{item.status === 'published' ? 'Đã công bố' : item.status === 'accepted' ? 'Chờ duyệt' : 'Cần rà soát'}</span></button>)}
+          </div>
+        </Panel>
+      </div>
+
+      {!preview || !active ? <EmptyPreview /> : <div className="space-y-4">
+        <Panel title="Bản xem trước SOP" description={`${active.file.name} · ${formatBytes(active.file.size)} · SHA-256 ${active.file.checksum.slice(0, 12)}…`} action={<span className={`rounded-md px-2 py-1 text-xs font-black ${active.status === 'published' ? 'bg-emerald-100 text-emerald-800' : 'bg-amber-100 text-amber-800'}`}>{active.status === 'published' ? 'Đã công bố' : active.status === 'accepted' ? 'Chờ Admin duyệt' : 'Chưa công bố'}</span>}>
+          <div className="grid gap-4 p-4 md:grid-cols-2">
+            <Field label="Mã SOP"><input disabled={active.status !== 'needs_review'} value={preview.code} onChange={event => setPreview({ ...preview, code: event.target.value })} className={adminInputClass} /></Field>
+            <Field label="Tên SOP"><input disabled={active.status !== 'needs_review'} value={preview.title} onChange={event => setPreview({ ...preview, title: event.target.value })} className={adminInputClass} /></Field>
+            <Field label="Mục đích" wide><textarea disabled={active.status !== 'needs_review'} rows={3} value={preview.purpose ?? ''} onChange={event => setPreview({ ...preview, purpose: event.target.value })} className={`${adminInputClass} h-auto py-2`} /></Field>
+            <Field label="Phạm vi" wide><textarea disabled={active.status !== 'needs_review'} rows={3} value={preview.scope ?? ''} onChange={event => setPreview({ ...preview, scope: event.target.value })} className={`${adminInputClass} h-auto py-2`} /></Field>
+          </div>
+        </Panel>
+
+        {!!active.warnings.length && <div className="rounded-xl border border-amber-200 bg-amber-50 p-4 dark:border-amber-900 dark:bg-amber-950/30"><div className="flex gap-3"><AlertTriangle className="mt-0.5 size-5 shrink-0 text-amber-700" /><div><p className="text-sm font-black text-amber-950 dark:text-amber-100">Cần người dùng kiểm tra</p><ul className="mt-2 list-disc space-y-1 pl-5 text-sm leading-6 text-amber-900 dark:text-amber-200">{active.warnings.map((warning, index) => <li key={index}>{warning}</li>)}</ul></div></div></div>}
+
+        <Panel title={`Các bước nghiệp vụ (${preview.steps.length})`} description="Sắp xếp và hiệu chỉnh nội dung trước khi tạo SOP draft." action={active.status === 'needs_review' ? <button type="button" onClick={addStep} className={secondaryButtonClass}><Plus className="size-4" />Thêm bước</button> : undefined}>
+          <div className="space-y-3 p-4">{preview.steps.map((step, index) => <StepEditor key={step.id} step={step} index={index} count={preview.steps.length} disabled={active.status !== 'needs_review'} onChange={patch => updateStep(index, patch)} onUp={() => setPreview(reorder(preview, index, -1))} onDown={() => setPreview(reorder(preview, index, 1))} onRemove={() => removeStep(index)} />)}</div>
+          <div className="flex flex-col gap-2 border-t border-slate-200 p-4 sm:flex-row sm:justify-end dark:border-slate-800">{active.status === 'published' ? <span className="inline-flex min-h-10 items-center gap-2 rounded-lg bg-emerald-100 px-4 text-sm font-bold text-emerald-900"><CheckCircle2 className="size-4" />SOP đã được công bố</span> : active.status === 'accepted' ? adminMode ? <button type="button" disabled={busy !== null} onClick={() => void publish()} className={primaryButtonClass}>{busy === 'publish' ? <><LoaderCircle className="size-4 animate-spin" />Đang công bố...</> : 'Phê duyệt và công bố'}</button> : <span className="inline-flex min-h-10 items-center gap-2 rounded-lg bg-amber-100 px-4 text-sm font-bold text-amber-900"><CheckCircle2 className="size-4" />Đang chờ quản trị viên phê duyệt</span> : <><button type="button" disabled={busy !== null} onClick={() => void save()} className={secondaryButtonClass}>{busy === 'save' ? 'Đang lưu...' : 'Lưu hiệu chỉnh'}</button><button type="button" disabled={busy !== null || !preview.steps.length} onClick={() => void accept()} className={primaryButtonClass}>{busy === 'accept' ? <><LoaderCircle className="size-4 animate-spin" />Đang gửi...</> : 'Gửi bản nháp chờ duyệt'}</button></>}</div>
+        </Panel>
+      </div>}
+    </div>
+  </div>
+}
+
+function Field({ label, wide, children }: { label: string; wide?: boolean; children: React.ReactNode }) {
+  return <label className={`grid gap-1.5 text-sm font-bold ${wide ? 'md:col-span-2' : ''}`}><span>{label}</span>{children}</label>
+}
+
+function EmptyPreview() {
+  return <Panel className="min-h-[520px]" title="Bản xem trước SOP"><div className="grid min-h-[460px] place-items-center px-6 text-center"><div><ScanText className="mx-auto size-9 text-slate-300" /><p className="mt-3 font-black">Chưa có bản số hóa</p><p className="mt-1 max-w-md text-sm leading-6 text-slate-500">Tải một tài liệu hoặc chọn hồ sơ gần đây để kiểm tra nội dung đã trích xuất.</p></div></div></Panel>
+}
+
+function StepEditor({ step, index, count, disabled, onChange, onUp, onDown, onRemove }: { step: SopImportStep; index: number; count: number; disabled: boolean; onChange: (patch: Partial<SopImportStep>) => void; onUp: () => void; onDown: () => void; onRemove: () => void }) {
+  return <article className="rounded-xl border border-slate-200 p-4 dark:border-slate-700"><div className="flex flex-wrap items-center gap-2"><span className="grid size-7 place-items-center rounded-full bg-[#155e75] text-xs font-black text-white">{index + 1}</span><input aria-label={`Mã bước ${index + 1}`} disabled={disabled} value={step.code} onChange={event => onChange({ code: event.target.value })} className="h-9 w-32 rounded-lg border border-slate-300 bg-white px-2 font-mono text-xs font-bold dark:border-slate-700 dark:bg-slate-950" />{!disabled && <div className="ml-auto flex gap-1"><IconButton label="Chuyển bước lên" disabled={index === 0} onClick={onUp}><ArrowUp className="size-4" /></IconButton><IconButton label="Chuyển bước xuống" disabled={index === count - 1} onClick={onDown}><ArrowDown className="size-4" /></IconButton><IconButton label="Xóa bước" danger onClick={onRemove}><Trash2 className="size-4" /></IconButton></div>}</div><div className="mt-3 grid gap-3 md:grid-cols-2"><Field label="Tên bước"><input disabled={disabled} value={step.title} onChange={event => onChange({ title: event.target.value })} className={adminInputClass} /></Field><Field label="Người thực hiện"><input disabled={disabled} value={step.actor ?? ''} onChange={event => onChange({ actor: event.target.value })} className={adminInputClass} /></Field><Field label="Mô tả" wide><textarea disabled={disabled} rows={3} value={step.description ?? ''} onChange={event => onChange({ description: event.target.value })} className={`${adminInputClass} h-auto py-2`} /></Field></div></article>
+}
+
+function IconButton({ label, disabled, danger, onClick, children }: { label: string; disabled?: boolean; danger?: boolean; onClick: () => void; children: React.ReactNode }) {
+  return <button type="button" disabled={disabled} onClick={onClick} aria-label={label} className={`grid size-9 place-items-center rounded-lg disabled:opacity-30 ${danger ? 'text-red-700 hover:bg-red-50 dark:text-red-300 dark:hover:bg-red-950/30' : 'hover:bg-slate-100 dark:hover:bg-slate-800'}`}>{children}</button>
+}

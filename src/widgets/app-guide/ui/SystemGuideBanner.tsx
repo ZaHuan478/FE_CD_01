@@ -1,5 +1,5 @@
 import React, { useState } from 'react'
-import { BookOpen, ChevronDown, ChevronUp, Database, FileText, Workflow, RefreshCw, ArrowRight, HelpCircle, Lightbulb } from 'lucide-react'
+import { BookOpen, ChevronDown, ChevronUp, Database, FileText, Workflow, RefreshCw, HelpCircle } from 'lucide-react'
 import { useLanguage } from '../../../shared/lib/i18n/LanguageContext'
 
 export const SystemGuideBanner: React.FC = () => {
@@ -124,67 +124,6 @@ export const SystemGuideBanner: React.FC = () => {
               </div>
 
             </div>
-          </div>
-
-          {/* Section 2: Flow Diagrams / Architecture Relationship */}
-          <div className="bg-white dark:bg-slate-900 p-5 rounded-xl border border-slate-200 dark:border-slate-800 space-y-3">
-            <h3 className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider flex items-center gap-2">
-              <Lightbulb className="w-4 h-4 text-amber-500" />
-              {language === 'vi' ? '2. Sơ đồ Mối quan hệ Luồng Dữ liệu' : '2. System Data Flow Relationship Diagram'}
-            </h3>
-
-            <div className="p-4 bg-slate-900 dark:bg-slate-950 rounded-xl text-white flex flex-col lg:flex-row items-center justify-between gap-4 border border-slate-800">
-
-              {/* Step 1: Inputs */}
-              <div className="flex items-center gap-3 bg-slate-800 p-3 rounded-lg border border-slate-700 w-full lg:w-auto">
-                <Database className="w-5 h-5 text-blue-400 shrink-0" />
-                <div>
-                  <div className="text-xs font-bold text-blue-300">MASTER DATA (MD-01..10)</div>
-                  <div className="text-[11px] text-slate-400">{language === 'vi' ? 'Danh mục & Cấu trúc tổ chức' : 'Catalogs & Org Structure'}</div>
-                </div>
-              </div>
-
-              <div className="text-slate-500 font-bold hidden lg:block">+</div>
-
-              <div className="flex items-center gap-3 bg-slate-800 p-3 rounded-lg border border-slate-700 w-full lg:w-auto">
-                <FileText className="w-5 h-5 text-emerald-400 shrink-0" />
-                <div>
-                  <div className="text-xs font-bold text-emerald-300">SOP ({language === 'vi' ? 'Quy định & Luật' : 'Policies & Rules'})</div>
-                  <div className="text-[11px] text-slate-400">{language === 'vi' ? 'Quy chuẩn thao tác nhân sự' : 'Standard HR procedures'}</div>
-                </div>
-              </div>
-
-              <div className="text-blue-400 font-bold flex items-center gap-1">
-                <ArrowRight className="w-5 h-5 rotate-90 lg:rotate-0 transition-transform" />
-              </div>
-
-              {/* Step 2: Process */}
-              <div className="flex items-center gap-3 bg-slate-800 p-3 rounded-lg border border-slate-700 w-full lg:w-auto">
-                <Workflow className="w-5 h-5 text-sky-400 shrink-0" />
-                <div>
-                  <div className="text-xs font-bold text-sky-300">PROCESS ({language === 'vi' ? 'Quy trình' : 'Workflow'})</div>
-                  <div className="text-[11px] text-slate-400">{language === 'vi' ? 'Nhập dữ liệu, Kiểm tra & Phê duyệt' : 'Data Entry, Validation & Approval'}</div>
-                </div>
-              </div>
-
-              <div className="text-sky-400 font-bold flex items-center gap-1">
-                <ArrowRight className="w-5 h-5 rotate-90 lg:rotate-0 transition-transform" />
-              </div>
-
-              {/* Step 3: Life Output */}
-              <div className="flex items-center gap-3 bg-gradient-to-r from-[#1f5f86] to-[#2e8bbd] p-3 rounded-lg border border-sky-400/50 w-full lg:w-auto text-white">
-                <RefreshCw className="w-5 h-5 text-sky-200 shrink-0" />
-                <div>
-                  <div className="text-xs font-bold text-white">{language === 'vi' ? 'VÒNG ĐỜI NHÂN VIÊN' : 'EMPLOYEE LIFECYCLE'} (LIFE-00..07)</div>
-                  <div className="text-[11px] text-sky-100">{language === 'vi' ? 'Cập nhật vào Hồ sơ Nhân viên Trung tâm' : 'Updates Central Employee Master Profile'}</div>
-                </div>
-              </div>
-
-            </div>
-
-            <p className="text-xs text-slate-500 dark:text-slate-400 italic mt-2">
-              💡 <strong>{language === 'vi' ? 'Tóm tắt dễ hiểu:' : 'Summary:'}</strong> {language === 'vi' ? 'Khi thực hiện 1 bước trong Vòng đời nhân viên (ví dụ: LIFE-03 Bố trí công tác), phần mềm sẽ lấy Master Data (như MD-05 Phòng ban, MD-06 Chức danh) dựa theo quy tắc của SOP để xử lý thành Process chuẩn chỉnh.' : 'When carrying out a lifecycle step (e.g. LIFE-03 Job Placement), the software references Master Data (e.g. MD-05 Dept, MD-06 Job Title) guided by SOP policy rules to execute a standardized Process.'}
-            </p>
           </div>
 
         </div>

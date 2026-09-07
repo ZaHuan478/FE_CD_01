@@ -1,3 +1,4 @@
+import { memoRuntime } from '../../../shared/lib/runtime-datasets/runtimeData'
 import React from 'react'
 import {
   Users,
@@ -292,8 +293,8 @@ const buildCoreOperationModules = (): ModuleEcosystemItem[] => {
 }
 
 // Single source of truth dynamically resolved from SOP_DATABASE
-export const CORE_OPERATION_MODULES: ModuleEcosystemItem[] = buildCoreOperationModules()
+export const getCORE_OPERATION_MODULES: () => ModuleEcosystemItem[] = memoRuntime(() => (buildCoreOperationModules()))
 
 // Backwards compatibility aliases
-export const SIX_CORE_MODULES: ModuleEcosystemItem[] = CORE_OPERATION_MODULES
-export const FIVE_CORE_MODULES: ModuleEcosystemItem[] = CORE_OPERATION_MODULES
+export const getSIX_CORE_MODULES: () => ModuleEcosystemItem[] = memoRuntime(() => (getCORE_OPERATION_MODULES()))
+export const getFIVE_CORE_MODULES: () => ModuleEcosystemItem[] = memoRuntime(() => (getCORE_OPERATION_MODULES()))

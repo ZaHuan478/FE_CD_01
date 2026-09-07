@@ -10,7 +10,9 @@ import {
   ShieldCheck,
   Sparkles,
   LogOut,
-  Settings
+  Settings,
+  FileUp,
+  BookOpen
 } from 'lucide-react'
 import { useLanguage } from '../../../shared/lib/i18n/LanguageContext'
 import { signOut, useAuth, useSession } from '../../../features/authentication/model/session'
@@ -102,6 +104,13 @@ export const LeftSidebarNav: React.FC<LeftSidebarNavProps> = ({
       groupTitle: t('sidebar.group.specs', 'TRA CỨU CHI TIẾT'),
       items: [
         {
+          id: 'process-library',
+          label: t('sidebar.item.processLibrary', 'Thư viện quy trình'),
+          icon: BookOpen,
+          badge: t('sidebar.item.processLibraryBadge', 'Tra cứu'),
+          color: 'text-sky-700'
+        },
+        {
           id: 'policy-center',
           label: t('sidebar.item.policies', 'Quy định & Tuân thủ'),
           icon: ShieldCheck,
@@ -116,30 +125,30 @@ export const LeftSidebarNav: React.FC<LeftSidebarNavProps> = ({
           color: 'text-blue-600',
           onClick: onOpenERD
         },
-        {
-          id: 'sop-specs-matrix',
-          label: t('sidebar.item.sopMatrix', 'Danh sách quy trình'),
-          icon: HelpCircle,
-          badge: 'Tra cứu',
-          color: 'text-blue-600'
-        }
+        ...(Array.isArray(session.capabilities) && session.capabilities.includes('sop.create') ? [{
+          id: 'SOP_IMPORT',
+          label: 'Upload & số hóa SOP',
+          icon: FileUp,
+          badge: 'Tạo mới',
+          color: 'text-cyan-700'
+        }] : [])
       ]
     },
-    {
-      groupTitle: t('sidebar.group.administration', 'QUẢN TRỊ HỆ THỐNG'),
+    ...(session.systemRole === 'ADMIN' ? [{
+      groupTitle: t('sidebar.group.administration', 'KHU VỰC QUẢN TRỊ'),
       items: [
         {
           id: 'ADMIN',
-          label: t('sidebar.item.administration', 'Quản trị phân quyền'),
+          label: t('sidebar.item.administration', 'Quản trị hệ thống'),
           icon: Settings,
-          badge: 'RBAC',
+          badge: 'ADMIN',
           color: 'text-blue-600'
         }
       ]
-    }
+    }] : [])
   ].map((group) => ({
     ...group,
-    items: group.items.filter((item) => allowedMenuCodes.has(item.id))
+    items: group.items.filter((item) => item.id === 'SOP_IMPORT' || allowedMenuCodes.has(item.id))
   })).filter((group) => group.items.length > 0)
 
   const initials = session.fullName

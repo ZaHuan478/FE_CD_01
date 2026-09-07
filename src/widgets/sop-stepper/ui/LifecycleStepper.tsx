@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react'
 import type { LifecycleStepperProps } from '../../../entities/lifecycle/model/stepper/types'
-import { STEP_MODULE_MAP, MODULE_FILTER_OPTIONS } from '../../../entities/lifecycle/model/stepper/data/stepModuleData'
+import { getSTEP_MODULE_MAP, getMODULE_FILTER_OPTIONS } from '../../../entities/lifecycle/model/stepper/data/stepModuleData'
 import { LifecycleStepperHeader } from './components/LifecycleStepperHeader'
 import { LifecycleModuleFilter } from './components/LifecycleModuleFilter'
 import { LifecycleClusterGrid } from './components/LifecycleClusterGrid'
@@ -26,7 +26,7 @@ export const LifecycleStepper: React.FC<LifecycleStepperProps> = ({
   }, [activeStepId])
 
   const activeStep = steps.find((s) => s.id === previewStepId) || steps.find((s) => s.id === 'LIFE-03') || steps[0]
-  const activeModInfo = STEP_MODULE_MAP[activeStep?.id || 'LIFE-03']
+  const activeModInfo = getSTEP_MODULE_MAP()[activeStep?.id || 'LIFE-03']
   const currentStepIdx = steps.findIndex((s) => s.id === activeStep?.id)
 
   const handlePrevStep = () => {
@@ -42,7 +42,7 @@ export const LifecycleStepper: React.FC<LifecycleStepperProps> = ({
   }
 
   // Filter steps based on selected module filter option
-  const activeFilterOpt = MODULE_FILTER_OPTIONS.find(
+  const activeFilterOpt = getMODULE_FILTER_OPTIONS().find(
     (m) => m.id === selectedModuleFilter
   )
   const isStepHighlighted = useCallback(

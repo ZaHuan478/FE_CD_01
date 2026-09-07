@@ -18,9 +18,9 @@ import { useSearchParams } from 'react-router-dom'
 import { Loader2 } from 'lucide-react'
 
 import {
-  DOMAIN_GROUPS,
-  ALL_MASTER_DATA_ITEMS,
-  GOVERNANCE_ITEMS,
+  getDOMAIN_GROUPS,
+  getALL_MASTER_DATA_ITEMS,
+  getGOVERNANCE_ITEMS,
   computeMasterDataStats,
   getItemsByGroup,
   getGroupCounts,
@@ -30,7 +30,7 @@ import {
   type CatalogStatus
 } from '../../../entities/master-data/model/masterDataCatalogAdapter'
 import type { CatalogTier, WorkspaceView } from '../../../entities/master-data/model/types'
-import { SOP_DATABASE } from '../../../entities/sop/model/sopDatabase'
+import { getSOP_DATABASE, getWorkflowProcesses } from '../../../entities/sop/model/sopDatabase'
 
 import {
   StudioHeader,
@@ -43,8 +43,8 @@ import {
 
 // ── Lazy-load relationship view ─────────────────────────────────────────────
 const MasterDataRelationshipView = React.lazy(() =>
-  import('./MasterDataRelationshipView').then((m) => ({ default: m.MasterDataRelationshipView }))
-)
+  import('./MasterDataRelationshipView').then((m) => ({ default: m.MasterDataRelationshipView })
+))
 
 // ────────────────────────────────────────────────────────────────────────────
 // PROPS
@@ -74,7 +74,7 @@ export const MasterDataStudio: React.FC<MasterDataStudioProps> = ({
   const [workspaceView, setWorkspaceView] = useState<WorkspaceView>(initView)
   const [activeGroupId, setActiveGroupId] = useState<DomainGroupId>(initGroup)
   const [selectedCatalog, setSelectedCatalog] = useState<CatalogViewModel | null>(
-    () => (initCatalog ? ALL_MASTER_DATA_ITEMS.find((item) => item.id === initCatalog) ?? null : null)
+    () => (initCatalog ? getALL_MASTER_DATA_ITEMS().find((item) => item.id === initCatalog) ?? null : null)
   )
   const [catalogSearch, setCatalogSearch] = useState('')
   const [tierFilter, setTierFilter] = useState<CatalogTier | 'all'>('all')
@@ -117,7 +117,7 @@ export const MasterDataStudio: React.FC<MasterDataStudioProps> = ({
 
   // ── Process guide data ──────────────────────────────────────────────────
   const allOperationalProcesses = useMemo(
-    () => Object.values(SOP_DATABASE).flat(),
+    () => Object.values(getSOP_DATABASE()).flat(),
     []
   )
   const filteredProcesses = useMemo(() => {
@@ -139,10 +139,13 @@ export const MasterDataStudio: React.FC<MasterDataStudioProps> = ({
 
   const contextProcess = useMemo(() => {
     if (!selectedProcessCode) return undefined
-    return allOperationalProcesses.find(
-      (p) => p.sopCode.toLowerCase() === selectedProcessCode.toLowerCase()
-    )
-  }, [selectedProcessCode, allOperationalProcesses])
+    const workflowId = Object.entries(getSOP_DATABASE()).find(([, processes]) => processes.some(
+      process => process.sopCode.toLowerCase() === selectedProcessCode.toLowerCase()
+    ))?.[0]
+    return workflowId ? getWorkflowProcesses(workflowId).find(
+      process => process.sopCode.toLowerCase() === selectedProcessCode.toLowerCase()
+    ) : undefined
+  }, [selectedProcessCode])
 
   const [selectedStepCode, setSelectedStepCode] = useState(
     contextProcess?.steps[0]?.stepCode || ''
@@ -173,7 +176,7 @@ export const MasterDataStudio: React.FC<MasterDataStudioProps> = ({
   }, [])
 
   const filterActive = tierFilter !== 'all' || statusFilter !== 'all'
-  const activeGroup = DOMAIN_GROUPS.find((g) => g.id === activeGroupId)!
+  const activeGroup = getDOMAIN_GROUPS().find((g) => g.id === activeGroupId)!
   const subdued = isDarkMode ? 'text-slate-400' : 'text-slate-500'
 
   // ────────────────────────────────────────────────────────────────────────
@@ -236,7 +239,7 @@ export const MasterDataStudio: React.FC<MasterDataStudioProps> = ({
               selectedStep={selectedStep}
               selectedStepCode={selectedStepCode}
               onSelectStep={setSelectedStepCode}
-              governanceItems={GOVERNANCE_ITEMS}
+              governanceItems={getGOVERNANCE_ITEMS()}
               subdued={subdued}
             />
           )}
@@ -257,7 +260,7 @@ export const MasterDataStudio: React.FC<MasterDataStudioProps> = ({
                 mode="embedded"
                 selectedCatalogId={selectedCatalog?.id}
                 onSelectCatalog={(id) => {
-                  const found = ALL_MASTER_DATA_ITEMS.find((item) => item.id === id)
+                  const found = getALL_MASTER_DATA_ITEMS().find((item) => item.id === id)
                   if (found) {
                     setSelectedCatalog(found)
                     setWorkspaceView('catalogs')
@@ -284,7 +287,7 @@ export const MasterDataStudio: React.FC<MasterDataStudioProps> = ({
             selectedCatalog={selectedCatalog}
             contextProcess={contextProcess}
             onNavigateToCatalog={(id) => {
-              const found = ALL_MASTER_DATA_ITEMS.find((item) => item.id === id)
+              const found = getALL_MASTER_DATA_ITEMS().find((item) => item.id === id)
               if (found) {
                 setSelectedCatalog(found)
                 setWorkspaceView('catalogs')

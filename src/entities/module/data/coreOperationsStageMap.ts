@@ -1,3 +1,4 @@
+import { memoRuntime } from '../../../shared/lib/runtime-datasets/runtimeData'
 import { getRuntimeDataset } from '../../../shared/lib/runtime-datasets/runtimeData'
 
 export interface StageDefinition {
@@ -36,8 +37,8 @@ interface CoreOperationsDataset {
   knownWireframeIds: string[]
 }
 
-const dataset = getRuntimeDataset<CoreOperationsDataset>('coreOperations.config')
+const getDataset = memoRuntime(() => (getRuntimeDataset<CoreOperationsDataset>('coreOperations.config')))
 
-export const CORE_OPERATIONS_STAGE_MAP = dataset.stageMap
-export const WORKFLOW_ID_BY_SOP_CODE = dataset.workflowBySopCode
-export const KNOWN_WIREFRAME_IDS = new Set(dataset.knownWireframeIds)
+export const getCORE_OPERATIONS_STAGE_MAP = memoRuntime(() => (getDataset().stageMap))
+export const getWORKFLOW_ID_BY_SOP_CODE = memoRuntime(() => (getDataset().workflowBySopCode))
+export const getKNOWN_WIREFRAME_IDS = memoRuntime(() => (new Set(getDataset().knownWireframeIds)))

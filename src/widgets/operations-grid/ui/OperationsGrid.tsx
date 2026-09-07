@@ -18,7 +18,7 @@ import {
 } from 'lucide-react'
 import type { OperationModule } from '../../../entities/module/model/lifecycle.types'
 import { useLanguage } from '../../../shared/lib/i18n/LanguageContext'
-import { CROSS_FUNCTIONAL_MODULES_LIST } from '../../../entities/sop/cross-functional/index'
+import { getCROSS_FUNCTIONAL_MODULES_LIST } from '../../../entities/sop/cross-functional/index'
 
 interface OperationsGridProps {
   modules?: OperationModule[]
@@ -108,7 +108,7 @@ export const OperationsGrid: React.FC<OperationsGridProps> = ({
   ]
 
   const filteredModules = useMemo(() => {
-    return CROSS_FUNCTIONAL_MODULES_LIST.filter((mod) => {
+    return getCROSS_FUNCTIONAL_MODULES_LIST().filter((mod) => {
       const matchDomain = selectedDomain === 'all' || mod.domain === selectedDomain
       const q = searchQuery.trim().toLowerCase()
       if (!q) return matchDomain

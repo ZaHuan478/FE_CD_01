@@ -1,8 +1,8 @@
 import React from 'react'
 import { ChevronRight, AlertTriangle } from 'lucide-react'
 import {
-  TIER_LABELS,
-  STATUS_LABELS,
+  getTIER_LABELS,
+  getSTATUS_LABELS,
   type CatalogViewModel
 } from '../../../../entities/master-data/model/masterDataCatalogAdapter'
 import { colorBadge, statusIcon } from './DomainIcon'
@@ -22,8 +22,8 @@ export const CatalogCard: React.FC<CatalogCardProps> = ({
   onSelect,
   subdued
 }) => {
-  const tierInfo = TIER_LABELS[item.tier]
-  const statusInfo = STATUS_LABELS[item.status]
+  const tierInfo = getTIER_LABELS()[item.tier]
+  const statusInfo = getSTATUS_LABELS()[item.status]
 
   return (
     <button

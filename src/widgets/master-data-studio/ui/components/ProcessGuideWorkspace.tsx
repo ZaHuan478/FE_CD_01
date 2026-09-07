@@ -7,13 +7,14 @@ import {
   ShieldCheck
 } from 'lucide-react'
 import type { SopSubProcess } from '../../../../entities/sop/model/types'
+import type { SopProcessSummary } from '../../../../entities/sop/model/sopDatabase'
 import type { CatalogViewModel } from '../../../../entities/master-data/model/masterDataCatalogAdapter'
 
 export interface ProcessGuideWorkspaceProps {
   isDarkMode: boolean
   processSearch: string
   onProcessSearchChange: (v: string) => void
-  filteredProcesses: SopSubProcess[]
+  filteredProcesses: SopProcessSummary[]
   selectedProcessCode: string
   onSelectProcess: (code: string) => void
   contextProcess: SopSubProcess | undefined

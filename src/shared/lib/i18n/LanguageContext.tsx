@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useState } from 'react'
 import type { Language } from './translations'
-import { translations } from './translations'
+import { getTranslations } from './translations'
 
 interface LanguageContextType {
   language: Language
@@ -22,7 +22,7 @@ export const LanguageProvider: React.FC<{ children: React.ReactNode }> = ({ chil
   }
 
   const t = (key: string, fallback?: string): string => {
-    const entry = translations[key]
+    const entry = getTranslations()[key]
     if (entry && entry[language]) {
       return entry[language]
     }

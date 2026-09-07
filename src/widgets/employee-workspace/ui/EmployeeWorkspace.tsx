@@ -1,7 +1,7 @@
 import { GlobalSopSearch } from '../../../features/sop-search/ui/GlobalSopSearch'
 import React, { useMemo, useState, useEffect, useCallback, Suspense, useTransition } from 'react'
 import { useSearchParams, useParams, useLocation, useNavigate } from 'react-router-dom'
-import { Layers, Database, GitBranch, Sun, Moon, Loader2, ShieldCheck } from 'lucide-react'
+import { Layers, Database, GitBranch, Sun, Moon, Loader2, ShieldCheck, FileUp, BookOpen } from 'lucide-react'
 
 import { MasterDataRelationshipModal } from '../../master-data-studio/ui/MasterDataRelationshipModal'
 import { SystemSupportBar } from '../../app-support/ui/SystemSupportBar'
@@ -9,26 +9,32 @@ import { SystemGuideBanner } from '../../app-guide/ui/SystemGuideBanner'
 import { LeftSidebarNav } from '../../app-sidebar/ui/LeftSidebarNav'
 import { WireframeFormDetailPage } from '../../../features/wireframe-viewer/ui/WireframeFormDetailPage'
 import { WorkflowDetailPage } from '../../../features/sop-viewer/index'
-import type { BusinessClusterId } from '../../module-explorer/ui/SystemOverviewDashboard'
+import type { BusinessClusterId } from '../../../entities/module/model/types'
 
 // ⚡ LAZY LOAD HEAVY COMPONENTS
 const MasterDataStudio = React.lazy(() => import('../../master-data-studio/ui/MasterDataStudio').then(module => ({ default: module.MasterDataStudio })))
 const LifecycleStepper = React.lazy(() => import('../../sop-stepper/ui/LifecycleStepper').then(module => ({ default: module.LifecycleStepper })))
 const OperationsGrid = React.lazy(() => import('../../operations-grid/ui/OperationsGrid').then(module => ({ default: module.OperationsGrid })))
 const SystemOverviewDashboard = React.lazy(() => import('../../module-explorer/ui/SystemOverviewDashboard').then(module => ({ default: module.SystemOverviewDashboard })))
+const ProcessLibraryWorkspace = React.lazy(() => import('../../module-explorer/ui/ProcessLibraryWorkspace').then(module => ({ default: module.ProcessLibraryWorkspace })))
 const EmployeeLifecycleJourneyView = React.lazy(() => import('../../lifecycle-journey/ui/EmployeeLifecycleJourneyView').then(module => ({ default: module.EmployeeLifecycleJourneyView })))
 const PolicyCenterPage = React.lazy(() => import('../../../features/policy-browser/ui/PolicyCenterPage').then(module => ({ default: module.PolicyCenterPage })))
+const SopImportWorkspace = React.lazy(() => import('../../../features/sop-import/ui/SopImportWorkspace').then(module => ({ default: module.SopImportWorkspace })))
+const AdminWorkspace = React.lazy(() => import('../../admin-workspace/ui/AdminWorkspace').then(module => ({ default: module.AdminWorkspace })))
 import { LanguageSelector } from '../../../shared/ui/molecules/LanguageSelector'
+import { PageIntro } from '../../../shared/ui/molecules/AdminSurface'
 
-import { masterData, lifecycleProcesses, crossFunctionalProcesses, sharedServices, findNodeById } from '../../../entities/business-node/model/businessNodes'
-import { SOP_DATABASE } from '../../../entities/sop/model/sopDatabase'
-import { sopDictionary } from '../../../entities/sop/model/sopDictionary'
-import { CROSS_FUNCTIONAL_REGISTRY } from '../../../entities/sop/cross-functional/index'
+import { getMasterData, getLifecycleProcesses, getCrossFunctionalProcesses, getSharedServices, findNodeById } from '../../../entities/business-node/model/businessNodes'
+import { getWorkflowProcesses } from '../../../entities/sop/model/sopDatabase'
+import { getSopDictionary } from '../../../entities/sop/model/sopDictionary'
+import { getCROSS_FUNCTIONAL_REGISTRY } from '../../../entities/sop/cross-functional/index'
 import type { LifecycleStep, OperationModule, DetailItem } from '../../../entities/module/model/lifecycle.types'
 import { useLanguage } from '../../../shared/lib/i18n/LanguageContext'
 import { useSession } from '../../../features/authentication/model/session'
-import { CORE_OPERATIONS_STAGE_MAP } from '../../../entities/module/data/coreOperationsStageMap'
+import { getCORE_OPERATIONS_STAGE_MAP } from '../../../entities/module/data/coreOperationsStageMap'
 import { canAccessAnyModule, requiredModuleIdsForRoute } from '../../../entities/module/lib/moduleAccess'
+import type { AdminWorkspaceSection } from '../../admin-workspace/ui/AdminWorkspace'
+import { getCurrentWorkspacePath, resolveWorkspaceReturn, withWorkspaceReturn } from '../../../shared/lib/navigation/workspaceReturn'
 
 const headerBusinessClusters: Array<{ id: BusinessClusterId; label: string }> = [
   { id: 'core', label: 'Vận hành lõi' },
@@ -37,7 +43,20 @@ const headerBusinessClusters: Array<{ id: BusinessClusterId; label: string }> = 
   { id: 'platform', label: 'Nền tảng' }
 ]
 
-type EmployeeLifecycleTab = 'lifecycle' | 'masterdata' | 'reports' | 'journey' | 'operations' | 'policies' | 'admin'
+type EmployeeLifecycleTab = 'lifecycle' | 'masterdata' | 'reports' | 'process-library' | 'journey' | 'operations' | 'policies' | 'imports' | 'admin'
+
+const adminWorkspaceSections = new Set<AdminWorkspaceSection>(['overview', 'users', 'access', 'catalog', 'imports', 'master-data', 'settings'])
+
+const getAdminSectionFromLocation = (pathname: string, sectionParam: string | null): AdminWorkspaceSection => {
+  if (adminWorkspaceSections.has(sectionParam as AdminWorkspaceSection)) return sectionParam as AdminWorkspaceSection
+  if (pathname.endsWith('/users')) return 'users'
+  if (pathname.endsWith('/access')) return 'access'
+  if (pathname.endsWith('/catalog')) return 'catalog'
+  if (pathname.endsWith('/imports')) return 'imports'
+  if (pathname.endsWith('/master-data')) return 'master-data'
+  if (pathname.endsWith('/settings')) return 'settings'
+  return 'overview'
+}
 
 const isBusinessClusterId = (value: string | null): value is BusinessClusterId =>
   Boolean(value && headerBusinessClusters.some((cluster) => cluster.id === value))
@@ -52,6 +71,8 @@ export const EmployeeWorkspace: React.FC = () => {
 
   const getTabFromLocation = useCallback((): EmployeeLifecycleTab => {
     const tabParam = searchParams.get('tab')
+    if (location.pathname.includes('/employee-lifecycle/sop-imports') || tabParam === 'imports') return 'imports'
+    if (tabParam === 'process-library') return 'process-library'
     if (location.pathname.includes('/employee-lifecycle/admin') || tabParam === 'admin') return 'admin'
     if (location.pathname.includes('/employee-lifecycle/policies') || tabParam === 'policies') return 'policies'
     if (location.pathname.includes('/employee-lifecycle/operations') || tabParam === 'operations') return 'operations'
@@ -63,6 +84,10 @@ export const EmployeeWorkspace: React.FC = () => {
   }, [location.pathname, searchParams])
 
   const [activeTab, setActiveTab] = useState<EmployeeLifecycleTab>(getTabFromLocation)
+  const activeAdminSection = useMemo(
+    () => getAdminSectionFromLocation(location.pathname, searchParams.get('adminSection')),
+    [location.pathname, searchParams]
+  )
   const [activeBusinessCluster, setActiveBusinessCluster] = useState<BusinessClusterId>(() => {
     const clusterParam = searchParams.get('cluster')
     return isBusinessClusterId(clusterParam) ? clusterParam : 'core'
@@ -73,6 +98,7 @@ export const EmployeeWorkspace: React.FC = () => {
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false)
   const [, startTransition] = useTransition()
   const allowedMenuCodes = useMemo(() => new Set(session.menuItems.map((item) => item.code)), [session.menuItems])
+  const canCreateSop = Array.isArray(session.capabilities) && session.capabilities.includes('sop.create')
   const accessibleModuleIds = useMemo(() => new Set(session.modules.map((module) => module.id)), [session.modules])
 
   const visibleBusinessClusters = useMemo(() => headerBusinessClusters.filter((cluster) => {
@@ -87,7 +113,25 @@ export const EmployeeWorkspace: React.FC = () => {
       setActiveTab(tab)
     })
     if (tab === 'admin') {
-      navigate('/employee-lifecycle/admin')
+      setSearchParams((previous) => {
+        const next = new URLSearchParams(previous)
+        next.set('tab', 'admin')
+        next.set('adminSection', 'overview')
+        return next
+      })
+    } else if (tab === 'imports') {
+      setSearchParams((previous) => {
+        const next = new URLSearchParams(previous)
+        next.set('tab', 'imports')
+        return next
+      })
+    } else if (tab === 'process-library') {
+      setSearchParams((previous) => {
+        const next = new URLSearchParams(previous)
+        next.set('tab', 'process-library')
+        next.set('cluster', activeBusinessCluster)
+        return next
+      })
     } else if (tab === 'policies') {
       navigate('/employee-lifecycle/policies')
     } else if (tab === 'operations') {
@@ -106,13 +150,18 @@ export const EmployeeWorkspace: React.FC = () => {
 
   const handleBusinessClusterChange = (cluster: BusinessClusterId) => {
     setActiveBusinessCluster(cluster)
-    if (activeTab !== 'reports') {
+    const destinationTab = activeTab === 'process-library' ? 'process-library' : 'reports'
+    if (activeTab !== 'reports' && activeTab !== 'process-library') {
       startTransition(() => setActiveTab('reports'))
     }
     setSearchParams((prev) => {
       const next = new URLSearchParams(prev)
-      next.set('tab', 'reports')
+      next.set('tab', destinationTab)
       next.set('cluster', cluster)
+      next.delete('module')
+      next.delete('sop')
+      next.delete('stage')
+      next.delete('type')
       return next
     })
     window.scrollTo({ top: 0, behavior: 'smooth' })
@@ -126,7 +175,11 @@ export const EmployeeWorkspace: React.FC = () => {
         setActiveTab(tabFromUrl)
       })
     }
-    if (tabFromUrl === 'admin' || location.pathname.includes('/employee-lifecycle/admin')) {
+    if (tabFromUrl === 'imports') {
+      setActiveSection('SOP_IMPORT')
+    } else if (tabFromUrl === 'process-library') {
+      setActiveSection('process-library')
+    } else if (tabFromUrl === 'admin' || location.pathname.includes('/employee-lifecycle/admin')) {
       setActiveSection('ADMIN')
     } else if (tabFromUrl === 'policies' || location.pathname.includes('/employee-lifecycle/policies')) {
       setActiveSection('policy-center')
@@ -145,24 +198,27 @@ export const EmployeeWorkspace: React.FC = () => {
 
   useEffect(() => {
     const menuCodesByTab: Record<typeof activeTab, string[]> = {
-      reports: ['overview-dashboard', 'sop-specs-matrix'],
+      reports: ['overview-dashboard'],
+      'process-library': ['process-library'],
       masterdata: ['layer-1-master-data'],
       journey: ['layer-2-lifecycle'],
       lifecycle: ['layer-2-lifecycle'],
       operations: ['layer-3-operations', 'system-support'],
       policies: ['policy-center'],
+      imports: ['SOP_IMPORT'],
       admin: ['ADMIN']
     }
+    if (activeTab === 'imports' && canCreateSop) return
     if (menuCodesByTab[activeTab].some((code) => allowedMenuCodes.has(code))) return
 
     const fallbackDestinations: Array<{ code: string; tab: typeof activeTab; path: string }> = [
       { code: 'overview-dashboard', tab: 'reports', path: '/employee-lifecycle' },
+      { code: 'process-library', tab: 'process-library', path: '/employee-lifecycle?tab=process-library&cluster=core' },
       { code: 'layer-1-master-data', tab: 'masterdata', path: '/employee-lifecycle/masterdata' },
       { code: 'layer-2-lifecycle', tab: 'journey', path: '/employee-lifecycle/journey?stage=LIFE-00&scenario=all' },
       { code: 'layer-3-operations', tab: 'operations', path: '/employee-lifecycle/operations' },
       { code: 'system-support', tab: 'operations', path: '/employee-lifecycle/operations' },
       { code: 'policy-center', tab: 'policies', path: '/employee-lifecycle/policies' },
-      { code: 'sop-specs-matrix', tab: 'reports', path: '/employee-lifecycle' },
       { code: 'ADMIN', tab: 'admin', path: '/employee-lifecycle/admin' }
     ]
     const fallback = fallbackDestinations.find((destination) => allowedMenuCodes.has(destination.code))
@@ -171,7 +227,13 @@ export const EmployeeWorkspace: React.FC = () => {
     setActiveSection(fallback.code)
     setActiveTab(fallback.tab)
     navigate(fallback.path, { replace: true })
-  }, [activeTab, allowedMenuCodes, navigate])
+  }, [activeTab, allowedMenuCodes, canCreateSop, navigate])
+
+  useEffect(() => {
+    if (activeTab === 'admin' && session.systemRole !== 'ADMIN') {
+      navigate('/employee-lifecycle', { replace: true })
+    }
+  }, [activeTab, navigate, session.systemRole])
 
   useEffect(() => {
     const clusterFromUrl = searchParams.get('cluster')
@@ -245,11 +307,22 @@ export const EmployeeWorkspace: React.FC = () => {
   }
 
   const handleNavigateSection = (sectionId: string) => {
-    if (!allowedMenuCodes.has(sectionId)) return
+    if (sectionId === 'SOP_IMPORT' && !canCreateSop) return
+    if (sectionId !== 'SOP_IMPORT' && !allowedMenuCodes.has(sectionId)) return
     setActiveSection(sectionId)
+
+    if (sectionId === 'SOP_IMPORT') {
+      handleTabChange('imports')
+      return
+    }
 
     if (sectionId === 'policy-center') {
       handleTabChange('policies')
+      return
+    }
+
+    if (sectionId === 'process-library') {
+      handleTabChange('process-library')
       return
     }
 
@@ -258,7 +331,7 @@ export const EmployeeWorkspace: React.FC = () => {
       return
     }
 
-    if (sectionId === 'overview-dashboard' || sectionId === 'sop-specs-matrix') {
+    if (sectionId === 'overview-dashboard') {
       handleTabChange('reports')
       return
     }
@@ -283,8 +356,8 @@ export const EmployeeWorkspace: React.FC = () => {
 
   // Transform Lifecycle steps (7 steps)
   const lifecycleSteps: LifecycleStep[] = useMemo(() => {
-    return lifecycleProcesses.map((item, idx) => {
-      const sopInfo = sopDictionary[item.id]
+    return getLifecycleProcesses().map((item, idx) => {
+      const sopInfo = getSopDictionary()[item.id]
       return {
         id: item.id,
         stepNumber: idx + 1,
@@ -303,9 +376,9 @@ export const EmployeeWorkspace: React.FC = () => {
 
   // Transform Operations modules (8 modules from Canonical Registry)
   const operationModules: OperationModule[] = useMemo(() => {
-    const crossFunctionalModules = crossFunctionalProcesses.map((item) => {
-      const cfDef = CROSS_FUNCTIONAL_REGISTRY[item.id]
-      const sopInfo = sopDictionary[item.id]
+    const crossFunctionalModules = getCrossFunctionalProcesses().map((item) => {
+      const cfDef = getCROSS_FUNCTIONAL_REGISTRY()[item.id]
+      const sopInfo = getSopDictionary()[item.id]
       return {
         id: item.id,
         code: item.id,
@@ -323,7 +396,7 @@ export const EmployeeWorkspace: React.FC = () => {
 
     return ['att', 'leave', 'pay', 'ins', 'tax']
       .filter((moduleId) => accessibleModuleIds.has(moduleId))
-      .map((moduleId) => CORE_OPERATIONS_STAGE_MAP[moduleId])
+      .map((moduleId) => getCORE_OPERATIONS_STAGE_MAP()[moduleId])
       .filter((module): module is NonNullable<typeof module> => Boolean(module))
       .map((module) => ({
         id: module.id,
@@ -343,13 +416,13 @@ export const EmployeeWorkspace: React.FC = () => {
   const getItemById = useCallback((id: string): DetailItem | null => {
     const rawNode =
       findNodeById(id) ||
-      masterData.find((m) => m.id === id) ||
-      lifecycleProcesses.find((l) => l.id === id) ||
-      crossFunctionalProcesses.find((c) => c.id === id) ||
-      sharedServices.find((s) => s.id === id)
+      getMasterData().find((m) => m.id === id) ||
+      getLifecycleProcesses().find((l) => l.id === id) ||
+      getCrossFunctionalProcesses().find((c) => c.id === id) ||
+      getSharedServices().find((s) => s.id === id)
 
     if (rawNode) {
-      const sopInfo = sopDictionary[rawNode.id] || sopDictionary[id]
+      const sopInfo = getSopDictionary()[rawNode.id] || getSopDictionary()[id]
       return {
         id: rawNode.id,
         title: rawNode.title,
@@ -368,9 +441,9 @@ export const EmployeeWorkspace: React.FC = () => {
     }
 
     // Fallback for items configured in SOP_DATABASE (e.g. LIFE-00, SOP-EMP-01, etc.)
-    const sopDbItem = SOP_DATABASE[id]?.[0]
+    const sopDbItem = getWorkflowProcesses(id)[0]
     if (sopDbItem) {
-      const sopInfo = sopDictionary[id]
+      const sopInfo = getSopDictionary()[id]
       const firstStep = sopDbItem.steps[0]
       const lastStep = sopDbItem.steps[sopDbItem.steps.length - 1]
       const actors = Array.from(new Set(sopDbItem.steps.map((step) => step.actor).filter(Boolean)))
@@ -401,7 +474,7 @@ export const EmployeeWorkspace: React.FC = () => {
 
     // Fallback for Operation Modules (e.g. CF-01, CF-02...)
     const opMod = operationModules.find((m) => m.id === id)
-    const sopInfo = sopDictionary[id]
+    const sopInfo = getSopDictionary()[id]
     if (opMod || sopInfo) {
       return {
         id: id,
@@ -463,19 +536,22 @@ export const EmployeeWorkspace: React.FC = () => {
 
   // Navigation handlers
   const handleOpenItemDetails = (id: string) => {
-    navigate(`/employee-lifecycle/workflow/${id}`)
+    navigate(withWorkspaceReturn(`/employee-lifecycle/workflow/${id}`, getCurrentWorkspacePath(location)))
   }
 
   const handleOpenWireframe = (itemToOpen: DetailItem) => {
-    navigate(`/employee-lifecycle/wireframe/${itemToOpen.id}`)
+    navigate(withWorkspaceReturn(`/employee-lifecycle/wireframe/${itemToOpen.id}`, getCurrentWorkspacePath(location)))
   }
 
   const handleCloseWorkflow = () => {
-    navigate('/employee-lifecycle')
+    navigate(resolveWorkspaceReturn(searchParams))
   }
 
   const handleCloseWireframe = () => {
-    if (routeId) {
+    const returnTo = searchParams.get('returnTo')
+    if (returnTo) {
+      navigate(resolveWorkspaceReturn(searchParams))
+    } else if (routeId) {
       navigate(`/employee-lifecycle/workflow/${routeId}`)
     } else {
       navigate('/employee-lifecycle')
@@ -483,11 +559,25 @@ export const EmployeeWorkspace: React.FC = () => {
   }
 
   const currentHeaderInfo = useMemo(() => {
+    if (activeTab === 'imports' || activeSection === 'SOP_IMPORT') {
+      return {
+        subtitle: 'QUẢN LÝ TÀI LIỆU SOP',
+        title: 'Upload và số hóa tài liệu',
+        icon: FileUp
+      }
+    }
     if (activeTab === 'admin' || activeSection === 'ADMIN') {
       return {
-        subtitle: t('header.adminSubtitle', 'QUẢN TRỊ TRUY CẬP HỆ THỐNG'),
-        title: t('header.adminTitle', 'Phân quyền và phạm vi hiện tại'),
+        subtitle: t('header.adminSubtitle', 'KHU VỰC QUẢN TRỊ'),
+        title: t('header.adminTitle', 'Quản trị hệ thống'),
         icon: ShieldCheck
+      }
+    }
+    if (activeTab === 'process-library' || activeSection === 'process-library') {
+      return {
+        subtitle: t('header.processLibrarySubtitle', 'THƯ VIỆN SOP'),
+        title: t('header.processLibraryTitle', 'Tra cứu quy trình nghiệp vụ'),
+        icon: BookOpen
       }
     }
     if (activeTab === 'policies' || activeSection === 'policy-center') {
@@ -631,7 +721,7 @@ export const EmployeeWorkspace: React.FC = () => {
           </div>
 
           {/* CỘT GIỮA: CỤM NGHIỆP VỤ HRM (CHỈ HIỂN THỊ KHI Ở MÀN HÌNH DASHBOARD CHỈ SỐ) */}
-          {activeTab === 'reports' && (
+          {(activeTab === 'reports' || activeTab === 'process-library') && (
             <nav
               className="hidden md:flex flex-1 items-center justify-center gap-1.5 max-w-[720px] rounded-xl animate-fadeIn"
               aria-label="Cụm nghiệp vụ HRM"
@@ -796,6 +886,18 @@ export const EmployeeWorkspace: React.FC = () => {
           </div>
         )}
 
+        {activeTab === 'process-library' && (
+          <section id="process-library" className="space-y-5 animate-fadeIn scroll-mt-28">
+            <PageIntro
+              title="Thư viện quy trình"
+              description="Chọn cụm nghiệp vụ, phân hệ và SOP để tra cứu mục tiêu, người thực hiện, đầu vào, bước xử lý và kết quả bàn giao."
+            />
+            <Suspense fallback={<div className="flex h-96 flex-col items-center justify-center gap-3"><Loader2 className="h-8 w-8 animate-spin text-[#1f5f86]" /><span className="text-sm font-bold text-slate-500">Đang mở thư viện quy trình...</span></div>}>
+              <ProcessLibraryWorkspace activeCluster={activeBusinessCluster} />
+            </Suspense>
+          </section>
+        )}
+
         {/* TAB 4: QUY ĐỊNH & TUÂN THỦ NỘI BỘ (POLICIES & COMPLIANCE CENTER) */}
         {activeTab === 'policies' && (
           <div className="space-y-6 animate-fadeIn">
@@ -807,41 +909,22 @@ export const EmployeeWorkspace: React.FC = () => {
           </div>
         )}
 
-        {activeTab === 'admin' && (
-          <section className="mx-auto w-full max-w-5xl rounded-2xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900 sm:p-7">
-            <div className="flex flex-col gap-4 border-b border-slate-200 pb-5 dark:border-slate-800 sm:flex-row sm:items-center sm:justify-between">
-              <div>
-                <h2 className="text-lg font-black tracking-tight text-slate-950 dark:text-white">Quyền truy cập của tài khoản</h2>
-                <p className="mt-1 text-sm text-slate-600 dark:text-slate-300">Thông tin đọc trực tiếp từ phiên đăng nhập và scoped RBAC.</p>
-              </div>
-              <span className="self-start rounded-lg bg-sky-50 px-3 py-1.5 font-mono text-xs font-black text-sky-800 ring-1 ring-inset ring-sky-100 dark:bg-sky-500/10 dark:text-sky-200 dark:ring-sky-500/20">
-                {session.username}
-              </span>
-            </div>
-
-            <div className="mt-6 grid gap-6 md:grid-cols-2">
-              <div>
-                <h3 className="text-sm font-black text-slate-900 dark:text-white">Phân hệ được truy cập</h3>
-                <div className="mt-3 flex flex-wrap gap-2">
-                  {session.modules.map((module) => (
-                    <span key={module.id} className="rounded-lg border border-slate-200 bg-slate-50 px-2.5 py-1.5 text-xs font-bold text-slate-700 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200">
-                      {module.id.toUpperCase()} <span className="font-medium text-slate-400">{module.title}</span>
-                    </span>
-                  ))}
-                </div>
-              </div>
-              <div>
-                <h3 className="text-sm font-black text-slate-900 dark:text-white">Năng lực được cấp</h3>
-                <div className="mt-3 flex flex-wrap gap-2">
-                  {session.capabilities.map((capability) => (
-                    <span key={capability} className="rounded-lg border border-slate-200 bg-slate-50 px-2.5 py-1.5 font-mono text-xs font-bold text-slate-700 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200">
-                      {capability}
-                    </span>
-                  ))}
-                </div>
-              </div>
-            </div>
+        {activeTab === 'imports' && canCreateSop && (
+          <section id="SOP_IMPORT" className="space-y-5 animate-fadeIn scroll-mt-28">
+            <PageIntro
+              title="Upload và số hóa tài liệu"
+              description="Chuyển DOCX hoặc PDF thành SOP có cấu trúc, hiệu chỉnh kết quả và gửi bản nháp để quản trị viên phê duyệt."
+            />
+            <Suspense fallback={<div className="flex h-96 flex-col items-center justify-center gap-3"><Loader2 className="h-8 w-8 animate-spin text-[#1f5f86]" /><span className="text-sm font-bold text-slate-500">Đang mở không gian số hóa...</span></div>}>
+              <SopImportWorkspace />
+            </Suspense>
           </section>
+        )}
+
+        {activeTab === 'admin' && session.systemRole === 'ADMIN' && (
+          <Suspense fallback={<div className="flex h-96 flex-col items-center justify-center gap-3"><Loader2 className="h-8 w-8 animate-spin text-[#1f5f86]" /><span className="text-sm font-bold text-slate-500">Đang mở khu vực quản trị...</span></div>}>
+            <AdminWorkspace activeSection={activeAdminSection} isDarkMode={isDarkMode} />
+          </Suspense>
         )}
 
       </main>
@@ -856,4 +939,3 @@ export const EmployeeWorkspace: React.FC = () => {
     </div>
   )
 }
-

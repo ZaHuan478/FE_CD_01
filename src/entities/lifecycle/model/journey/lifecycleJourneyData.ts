@@ -1,3 +1,4 @@
+import { memoRuntime } from '../../../../shared/lib/runtime-datasets/runtimeData'
 import { getRuntimeDataset } from '../../../../shared/lib/runtime-datasets/runtimeData'
 import type { LifecycleStageDefinition, LifecycleStageId, ScenarioDefinition } from './types'
 
@@ -7,8 +8,8 @@ interface LifecycleJourneyDataset {
   stageOrder: LifecycleStageId[]
 }
 
-const dataset = getRuntimeDataset<LifecycleJourneyDataset>('lifecycle.journey')
+const getDataset = memoRuntime(() => (getRuntimeDataset<LifecycleJourneyDataset>('lifecycle.journey')))
 
-export const LIFECYCLE_SCENARIOS = dataset.scenarios
-export const LIFECYCLE_STAGES = dataset.stages
-export const LIFECYCLE_STAGE_ORDER = dataset.stageOrder
+export const getLIFECYCLE_SCENARIOS = memoRuntime(() => (getDataset().scenarios))
+export const getLIFECYCLE_STAGES = memoRuntime(() => (getDataset().stages))
+export const getLIFECYCLE_STAGE_ORDER = memoRuntime(() => (getDataset().stageOrder))

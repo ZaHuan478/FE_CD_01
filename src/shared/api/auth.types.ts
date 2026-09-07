@@ -29,6 +29,7 @@ export interface UserSession {
   menuItems: SessionMenuItem[]
   modules: SessionModule[]
   capabilities: string[]
+  systemRole: 'USER' | 'CONTENT_EDITOR' | 'ADMIN'
   roleTitle?: string
 }
 

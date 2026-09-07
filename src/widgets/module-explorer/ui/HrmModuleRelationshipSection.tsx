@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef, useId, useMemo } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useLocation, useNavigate } from 'react-router-dom'
 import {
   UserPlus,
   FileText,
@@ -18,6 +18,7 @@ import {
   LockKeyhole
 } from 'lucide-react'
 import { useSession } from '../../../features/authentication/model/session'
+import { getCurrentWorkspacePath, withWorkspaceReturn } from '../../../shared/lib/navigation/workspaceReturn'
 
 export interface HrmModuleRelationshipSectionProps {
   onSelectModule?: (moduleId: string) => void
@@ -170,6 +171,7 @@ export const HrmModuleRelationshipSection: React.FC<HrmModuleRelationshipSection
   className = ''
 }) => {
   const navigate = useNavigate()
+  const location = useLocation()
   const session = useSession()
   const accessibleModuleIds = useMemo(() => new Set(session.modules.map((module) => module.id)), [session.modules])
   const firstAccessibleModule = CORE_MODULES.find((module) => accessibleModuleIds.has(module.id)) ?? CORE_MODULES[0]
@@ -259,7 +261,7 @@ export const HrmModuleRelationshipSection: React.FC<HrmModuleRelationshipSection
 
   const handleOpenWorkflow = (mod: ModuleNode) => {
     if (accessibleModuleIds.has(mod.id) && mod.workflowPath) {
-      navigate(mod.workflowPath)
+      navigate(withWorkspaceReturn(mod.workflowPath, getCurrentWorkspacePath(location)))
     }
   }
 

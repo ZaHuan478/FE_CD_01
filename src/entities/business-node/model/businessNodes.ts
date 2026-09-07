@@ -1,3 +1,4 @@
+import { memoRuntime } from '../../../shared/lib/runtime-datasets/runtimeData'
 import { getRuntimeDataset } from '../../../shared/lib/runtime-datasets/runtimeData'
 
 export type SourceStatus = 'official' | 'designed' | 'draft' | 'not_available' | 'placeholder'
@@ -50,18 +51,18 @@ interface PageBusinessDataset {
   relationships: Relationship[]
 }
 
-const dataset = getRuntimeDataset<PageBusinessDataset>('page.businessNodes')
+const getDataset = memoRuntime(() => (getRuntimeDataset<PageBusinessDataset>('page.businessNodes')))
 
-export const masterData = dataset.masterData
-export const lifecycleProcesses = dataset.lifecycleProcesses
-export const crossFunctionalProcesses = dataset.crossFunctionalProcesses
-export const sharedServices = dataset.sharedServices
-export const allBusinessNodes = [...masterData, ...lifecycleProcesses, ...crossFunctionalProcesses, ...sharedServices]
-export const sops = dataset.sops
-export const relationships = dataset.relationships
+export const getMasterData = memoRuntime(() => (getDataset().masterData))
+export const getLifecycleProcesses = memoRuntime(() => (getDataset().lifecycleProcesses))
+export const getCrossFunctionalProcesses = memoRuntime(() => (getDataset().crossFunctionalProcesses))
+export const getSharedServices = memoRuntime(() => (getDataset().sharedServices))
+export const getAllBusinessNodes = memoRuntime(() => ([...getMasterData(), ...getLifecycleProcesses(), ...getCrossFunctionalProcesses(), ...getSharedServices()]))
+export const getSops = memoRuntime(() => (getDataset().sops))
+export const getRelationships = memoRuntime(() => (getDataset().relationships))
 
 export function findNodeById(nodeId: string): BusinessNode | undefined {
-  return allBusinessNodes.find((node) => node.id === nodeId)
+  return getAllBusinessNodes().find((node) => node.id === nodeId)
 }
 
 export function getNodeLabel(node: BusinessNode): string {
@@ -71,4 +72,4 @@ export function getNodeLabel(node: BusinessNode): string {
   return 'SHARED SERVICE'
 }
 
-export const defaultBusinessDetail = lifecycleProcesses[0]
+export const getDefaultBusinessDetail = memoRuntime(() => (getLifecycleProcesses()[0]))

@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import {
-  CORE_OPERATION_MODULES,
+  getCORE_OPERATION_MODULES,
   type SopDetailItem,
   type ModuleEcosystemItem
 } from '../../../entities/module/data/ecosystemModulesData'
@@ -10,7 +10,11 @@ import { EcosystemSopWorkbench } from './EcosystemSopWorkbench'
 import { EcosystemSopDetail } from './EcosystemSopDetail'
 import { canonicalizeSopCode } from '../../../entities/sop/lib/coreOperationsSelectors'
 
-export const RadialEcosystemChart: React.FC = () => {
+interface RadialEcosystemChartProps {
+  view?: 'overview' | 'library' | 'complete'
+}
+
+export const RadialEcosystemChart: React.FC<RadialEcosystemChartProps> = ({ view = 'complete' }) => {
   const [searchParams, setSearchParams] = useSearchParams()
 
   const urlModule = searchParams.get('module')
@@ -18,12 +22,12 @@ export const RadialEcosystemChart: React.FC = () => {
   const urlStage = searchParams.get('stage')
   const urlFilter = searchParams.get('type') as 'ALL' | 'N' | 'M' | 'C' | 'A'
 
-  const initialModule = urlModule && CORE_OPERATION_MODULES.some(m => m.id === urlModule)
+  const initialModule = urlModule && getCORE_OPERATION_MODULES().some(m => m.id === urlModule)
     ? urlModule
     : 'emp'
 
   const targetInitialMod: ModuleEcosystemItem =
-    CORE_OPERATION_MODULES.find(m => m.id === initialModule) || CORE_OPERATION_MODULES[0]
+    getCORE_OPERATION_MODULES().find(m => m.id === initialModule) || getCORE_OPERATION_MODULES()[0]
 
   const canonicalUrlSop = urlSop ? canonicalizeSopCode(urlSop) : ''
 
@@ -51,7 +55,7 @@ export const RadialEcosystemChart: React.FC = () => {
     const currentStage = searchParams.get('stage')
     const currentFilter = searchParams.get('type') as 'ALL' | 'N' | 'M' | 'C' | 'A'
 
-    if (currentModule && currentModule !== selectedModuleId && CORE_OPERATION_MODULES.some(m => m.id === currentModule)) {
+    if (currentModule && currentModule !== selectedModuleId && getCORE_OPERATION_MODULES().some(m => m.id === currentModule)) {
       setSelectedModuleId(currentModule)
     }
 
@@ -90,7 +94,7 @@ export const RadialEcosystemChart: React.FC = () => {
     }))
   }
 
-  const activeModule = CORE_OPERATION_MODULES.find((m) => m.id === selectedModuleId) || CORE_OPERATION_MODULES[0]
+  const activeModule = getCORE_OPERATION_MODULES().find((m) => m.id === selectedModuleId) || getCORE_OPERATION_MODULES()[0]
 
   // Automatically expand the stage containing selectedSopCode on module or SOP change
   useEffect(() => {
@@ -118,7 +122,7 @@ export const RadialEcosystemChart: React.FC = () => {
   const handleSelectModule = (modId: string) => {
     setSelectedModuleId(modId)
     setSelectedStageId('ALL')
-    const targetMod = CORE_OPERATION_MODULES.find((m) => m.id === modId) || CORE_OPERATION_MODULES[0]
+    const targetMod = getCORE_OPERATION_MODULES().find((m) => m.id === modId) || getCORE_OPERATION_MODULES()[0]
     const newSop = targetMod.sopList[0]?.code || 'SOP-REC-01'
 
     setSelectedSopCode(newSop)
@@ -176,33 +180,37 @@ export const RadialEcosystemChart: React.FC = () => {
 
   return (
     <div className="relative w-full overflow-hidden py-2 flex flex-col items-center justify-center space-y-6">
-      <EcosystemRadialWheel
-        hoveredModuleId={hoveredModuleId}
-        setHoveredModuleId={setHoveredModuleId}
-        selectedModuleId={selectedModuleId}
-        handleSelectModule={handleSelectModule}
-      />
+      {view !== 'library' && (
+        <EcosystemRadialWheel
+          hoveredModuleId={hoveredModuleId}
+          setHoveredModuleId={setHoveredModuleId}
+          selectedModuleId={selectedModuleId}
+          handleSelectModule={handleSelectModule}
+        />
+      )}
 
-      <EcosystemSopWorkbench
-        activeModule={activeModule}
-        handleSelectModule={handleSelectModule}
-        isSopListExpanded={isSopListExpanded}
-        setIsSopListExpanded={setIsSopListExpanded}
-        activeTypeFilter={activeTypeFilter}
-        setActiveTypeFilter={handleTypeFilterChange}
-        filteredSopList={filteredSopList}
-        setSelectedSopCode={handleSelectSop}
-        selectedStageId={selectedStageId}
-        setSelectedStageId={handleSelectStageId}
-        isStageDropdownOpen={isStageDropdownOpen}
-        setIsStageDropdownOpen={setIsStageDropdownOpen}
-        stageDropdownRef={stageDropdownRef}
-        collapsedStages={collapsedStages}
-        toggleStageCollapse={toggleStageCollapse}
-        activeSopItem={activeSopItem}
-      >
-        <EcosystemSopDetail activeSopItem={activeSopItem} moduleId={activeModule.id} />
-      </EcosystemSopWorkbench>
+      {view !== 'overview' && (
+        <EcosystemSopWorkbench
+          activeModule={activeModule}
+          handleSelectModule={handleSelectModule}
+          isSopListExpanded={isSopListExpanded}
+          setIsSopListExpanded={setIsSopListExpanded}
+          activeTypeFilter={activeTypeFilter}
+          setActiveTypeFilter={handleTypeFilterChange}
+          filteredSopList={filteredSopList}
+          setSelectedSopCode={handleSelectSop}
+          selectedStageId={selectedStageId}
+          setSelectedStageId={handleSelectStageId}
+          isStageDropdownOpen={isStageDropdownOpen}
+          setIsStageDropdownOpen={setIsStageDropdownOpen}
+          stageDropdownRef={stageDropdownRef}
+          collapsedStages={collapsedStages}
+          toggleStageCollapse={toggleStageCollapse}
+          activeSopItem={activeSopItem}
+        >
+          <EcosystemSopDetail activeSopItem={activeSopItem} moduleId={activeModule.id} />
+        </EcosystemSopWorkbench>
+      )}
     </div>
   )
 }

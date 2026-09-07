@@ -1,6 +1,6 @@
 import type { DetailItem } from '../../module/model/lifecycle.types'
 import type { SopSubProcess, SopSubStep } from '../model/types'
-import { SOP_DATABASE } from '../model/sopDatabase'
+import { getWorkflowProcesses } from '../model/sopDatabase'
 import { getCrossFunctionalModule } from '../cross-functional/index'
 
 /**
@@ -25,9 +25,8 @@ export const resolveWorkflowSops = (
   item?: DetailItem | null
 ): SopSubProcess[] => {
   // 1. Direct match in SOP_DATABASE
-  if (SOP_DATABASE[workflowId] && SOP_DATABASE[workflowId].length > 0) {
-    return SOP_DATABASE[workflowId]
-  }
+  const processes = getWorkflowProcesses(workflowId)
+  if (processes.length > 0) return processes
 
   // 2. Canonical Cross-Functional Module match
   const cfMod = getCrossFunctionalModule(workflowId)

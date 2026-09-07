@@ -1,6 +1,6 @@
 import React, { useRef } from 'react'
 import { ChevronLeft, ChevronRight } from 'lucide-react'
-import { LIFECYCLE_STAGE_ORDER, LIFECYCLE_STAGES } from '../../../entities/lifecycle/model/journey/lifecycleJourneyData'
+import { getLIFECYCLE_STAGE_ORDER, getLIFECYCLE_STAGES } from '../../../entities/lifecycle/model/journey/lifecycleJourneyData'
 import { getStageSops, isStageHighlightedInScenario } from '../../../entities/lifecycle/lib/lifecycleJourneySelectors'
 import type { LifecycleStageId, ScenarioId } from '../../../entities/lifecycle/model/journey/types'
 
@@ -15,7 +15,7 @@ export const LifecycleStagePipeline: React.FC<LifecycleStagePipelineProps> = ({
   activeScenario,
   onSelectStage
 }) => {
-  const availableStageOrder = LIFECYCLE_STAGE_ORDER.filter((stageId) => Boolean(LIFECYCLE_STAGES[stageId]))
+  const availableStageOrder = getLIFECYCLE_STAGE_ORDER().filter((stageId) => Boolean(getLIFECYCLE_STAGES()[stageId]))
   const currentIdx = availableStageOrder.indexOf(activeStage)
   const pipelineRef = useRef<HTMLDivElement>(null)
 
@@ -92,7 +92,7 @@ export const LifecycleStagePipeline: React.FC<LifecycleStagePipelineProps> = ({
         className="grid grid-cols-2 gap-2 sm:grid-cols-4 lg:grid-cols-8 overflow-x-auto no-scrollbar"
       >
         {availableStageOrder.map((stageId, index) => {
-          const stage = LIFECYCLE_STAGES[stageId]
+          const stage = getLIFECYCLE_STAGES()[stageId]
           const isSelected = stageId === activeStage
           const isHighlighted = isStageHighlightedInScenario(stageId, activeScenario)
           const sopsCount = getStageSops(stageId).length

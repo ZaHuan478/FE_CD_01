@@ -1,9 +1,9 @@
-import { SOP_DATABASE } from '../model/sopDatabase'
-import type { SopSubProcess, SopSubStep } from '../model/types'
+import { getSOP_DATABASE, type SopProcessSummary as SopSubProcess, type SopStepSummary as SopSubStep } from '../model/sopDatabase'
+import { runtimeGeneration } from '../../../shared/lib/runtime-datasets/runtimeData'
 import {
-  CORE_OPERATIONS_STAGE_MAP,
-  WORKFLOW_ID_BY_SOP_CODE,
-  KNOWN_WIREFRAME_IDS,
+  getCORE_OPERATIONS_STAGE_MAP,
+  getWORKFLOW_ID_BY_SOP_CODE,
+  getKNOWN_WIREFRAME_IDS,
   type ModuleMetadata,
   type StageDefinition,
   type CoreOperationModuleId
@@ -217,16 +217,17 @@ const getFallbackOutputsForSop = (process: SopSubProcess, _canonicalCode?: strin
 }
 
 let cachedCoreOperationsData: CoreOperationModuleResolved[] | null = null
+let cachedGeneration = -1
 
 export const getCoreOperationsData = (): CoreOperationModuleResolved[] => {
-  if (cachedCoreOperationsData) {
+  if (cachedGeneration === runtimeGeneration() && cachedCoreOperationsData) {
     return cachedCoreOperationsData
   }
 
   // 1. Flatten all SOPs from SOP_DATABASE
   const rawSopMap = new Map<string, { process: SopSubProcess; sourceWorkflowId: string }>()
 
-  for (const [workflowId, processes] of Object.entries(SOP_DATABASE)) {
+  for (const [workflowId, processes] of Object.entries(getSOP_DATABASE())) {
     for (const process of processes) {
       const canonical = canonicalizeSopCode(process.sopCode)
       if (!canonical) continue
@@ -242,7 +243,7 @@ export const getCoreOperationsData = (): CoreOperationModuleResolved[] => {
   // 2. Build map of stage definitions by canonical SOP code
   const sopToStageMap = new Map<string, { stage: StageDefinition; moduleId: CoreOperationModuleId }>()
 
-  for (const [modKey, modMeta] of Object.entries(CORE_OPERATIONS_STAGE_MAP)) {
+  for (const [modKey, modMeta] of Object.entries(getCORE_OPERATIONS_STAGE_MAP())) {
     const moduleId = modKey as CoreOperationModuleId
     for (const stage of modMeta.stages) {
       for (const rawCode of stage.sopCodes) {
@@ -269,7 +270,7 @@ export const getCoreOperationsData = (): CoreOperationModuleResolved[] => {
     const stageInfo = sopToStageMap.get(canonicalCode)
     const moduleId = stageInfo?.moduleId ?? getModuleIdByPrefix(canonicalCode)
     if (!moduleId) continue
-    const moduleMetadata = CORE_OPERATIONS_STAGE_MAP[moduleId]
+    const moduleMetadata = getCORE_OPERATIONS_STAGE_MAP()[moduleId]
     if (!moduleMetadata) continue
     const stageId = stageInfo?.stage.stageId || `${moduleId.toUpperCase()}_STG_UNASSIGNED`
     const stageNumber = stageInfo?.stage.stageNumber || 99
@@ -279,8 +280,8 @@ export const getCoreOperationsData = (): CoreOperationModuleResolved[] => {
       console.warn(`[CoreOperations] SOP code ${canonicalCode} is not assigned to any stage in CORE_OPERATIONS_STAGE_MAP.`)
     }
 
-    const workflowId = WORKFLOW_ID_BY_SOP_CODE[canonicalCode] || sourceWorkflowId || moduleMetadata.workflowIdDefault
-    const hasWireframe = KNOWN_WIREFRAME_IDS.has(workflowId)
+    const workflowId = getWORKFLOW_ID_BY_SOP_CODE()[canonicalCode] || sourceWorkflowId || moduleMetadata.workflowIdDefault
+    const hasWireframe = getKNOWN_WIREFRAME_IDS().has(workflowId)
     const stepTypes = extractStepTypes(currentProcess.steps)
     const primaryType = determinePrimaryType(stepTypes)
 
@@ -328,10 +329,10 @@ export const getCoreOperationsData = (): CoreOperationModuleResolved[] => {
 
   // 4. Assemble the resolved modules in end-to-end operating order
   const moduleKeys = (['ats', 'emp', 'onb', 'att', 'leave', 'pay', 'ins', 'tax', 'ess'] as const)
-    .filter((moduleId) => Boolean(CORE_OPERATIONS_STAGE_MAP[moduleId]))
+    .filter((moduleId) => Boolean(getCORE_OPERATIONS_STAGE_MAP()[moduleId]))
 
   const result: CoreOperationModuleResolved[] = moduleKeys.map((modId) => {
-    const meta = CORE_OPERATIONS_STAGE_MAP[modId]
+    const meta = getCORE_OPERATIONS_STAGE_MAP()[modId]
     const allSopsForMod = resolvedSopsByModule[modId] || []
 
     // Sort SOPs by numerical code (e.g. SOP-REC-01 -> SOP-REC-11)
@@ -383,6 +384,7 @@ export const getCoreOperationsData = (): CoreOperationModuleResolved[] => {
   })
 
   cachedCoreOperationsData = result
+  cachedGeneration = runtimeGeneration()
   return result
 }
 

@@ -1,6 +1,6 @@
 import React, { useRef } from 'react'
 import { ChevronRight } from 'lucide-react'
-import { DOMAIN_GROUPS, type DomainGroupId } from '../../../../entities/master-data/model/masterDataCatalogAdapter'
+import { getDOMAIN_GROUPS, type DomainGroupId } from '../../../../entities/master-data/model/masterDataCatalogAdapter'
 import type { WorkspaceView } from '../../../../entities/master-data/model/types'
 import { DomainIcon } from './DomainIcon'
 
@@ -42,7 +42,7 @@ export const DomainRail: React.FC<DomainRailProps> = ({
       </div>
 
       <div className="flex flex-col gap-0.5 p-2">
-        {DOMAIN_GROUPS.map((group) => {
+        {getDOMAIN_GROUPS().map((group) => {
           const active = activeGroupId === group.id
           const count = groupCounts[group.id] ?? 0
           // In process tab, we show all groups but visual differentiation is less important

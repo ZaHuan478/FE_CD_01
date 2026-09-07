@@ -7,11 +7,11 @@ import { LifecycleStagePipeline } from './LifecycleStagePipeline'
 import { LifecycleStageWorkbench } from './LifecycleStageWorkbench'
 import { LifecycleImpactMatrix } from './LifecycleImpactMatrix'
 import { getDefaultStageId, getStageDefinition, getStageSops } from '../../../entities/lifecycle/lib/lifecycleJourneySelectors'
-import { LIFECYCLE_STAGE_ORDER } from '../../../entities/lifecycle/model/journey/lifecycleJourneyData'
+import { getLIFECYCLE_STAGE_ORDER } from '../../../entities/lifecycle/model/journey/lifecycleJourneyData'
 import type { LifecycleStageId, ScenarioId } from '../../../entities/lifecycle/model/journey/types'
 
 const isValidStageId = (value: string | null): value is LifecycleStageId => {
-  return Boolean(value && LIFECYCLE_STAGE_ORDER.includes(value as LifecycleStageId))
+  return Boolean(value && getLIFECYCLE_STAGE_ORDER().includes(value as LifecycleStageId))
 }
 
 const isValidScenarioId = (value: string | null): value is ScenarioId => {

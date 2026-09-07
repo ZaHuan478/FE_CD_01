@@ -1,8 +1,9 @@
 /* oxlint-disable react/only-export-components -- session bootstrap and context share one lifecycle */
-import React, { createContext, useContext, useEffect, useState, useCallback, useMemo } from 'react'
+import React, { createContext, useContext, useEffect, useState, useCallback, useMemo, useRef } from 'react'
 import { authApi } from '../../../shared/api/auth.api'
 import { clearAuthentication, isAuthenticated, selectDevelopmentAccount } from '../../../shared/lib/auth/authCredentials'
-import { bootstrapKnowledge, resetKnowledgeBootstrap } from './bootstrap'
+import { beginKnowledgeSession, warmKnowledgeNavigation } from './knowledgeSession'
+import { resetRuntimeDatasets } from '../../../shared/lib/runtime-datasets/runtimeData'
 
 import type { UserSession } from '../../../entities/user/model/types'
 export type AuthStatus = 'loading' | 'authenticated' | 'unauthenticated'
@@ -20,19 +21,23 @@ export interface AuthContextType {
 const AuthContext = createContext<AuthContextType | null>(null)
 
 export const SessionProvider: React.FC<React.PropsWithChildren> = ({ children }) => {
+  const requestVersion = useRef(0)
   const [session, setSession] = useState<UserSession | null>(null)
   const [status, setStatus] = useState<AuthStatus>(() => {
     return isAuthenticated() ? 'loading' : 'unauthenticated'
   })
 
   const logout = useCallback(() => {
+    requestVersion.current++
     clearAuthentication()
-    resetKnowledgeBootstrap()
+    resetRuntimeDatasets()
     setSession(null)
     setStatus('unauthenticated')
   }, [])
 
   const refreshSession = useCallback(async (): Promise<UserSession | null> => {
+    const version = ++requestVersion.current
+    setStatus('loading')
     if (!isAuthenticated()) {
       setSession(null)
       setStatus('unauthenticated')
@@ -40,34 +45,36 @@ export const SessionProvider: React.FC<React.PropsWithChildren> = ({ children })
     }
 
     try {
-      const [user] = await Promise.all([
-        authApi.getSession(),
-        bootstrapKnowledge()
-      ])
+      const user = await authApi.getSession()
+      if (version !== requestVersion.current) return null
+      beginKnowledgeSession()
+      warmKnowledgeNavigation()
       setSession(user)
       setStatus('authenticated')
       return user
     } catch {
       // Session is invalid, expired, or backend returned 401
-      logout()
+      if (version === requestVersion.current) logout()
       return null
     }
   }, [logout])
 
   const login = useCallback(async (accountId: string): Promise<UserSession> => {
-    resetKnowledgeBootstrap()
+    const version = ++requestVersion.current
+    resetRuntimeDatasets()
+    setSession(null)
     selectDevelopmentAccount(accountId)
     setStatus('loading')
     try {
-      const [user] = await Promise.all([
-        authApi.getSession(),
-        bootstrapKnowledge()
-      ])
+      const user = await authApi.getSession()
+      if (version !== requestVersion.current) throw new Error('Phiên đăng nhập đã thay đổi')
+      beginKnowledgeSession()
+      warmKnowledgeNavigation()
       setSession(user)
       setStatus('authenticated')
       return user
     } catch (error) {
-      logout()
+      if (version === requestVersion.current) logout()
       throw error
     }
   }, [logout])
@@ -119,6 +126,6 @@ export function useSession(): UserSession {
 
 export function signOut(): void {
   clearAuthentication()
-  resetKnowledgeBootstrap()
+  resetRuntimeDatasets()
   window.location.assign('/login')
 }

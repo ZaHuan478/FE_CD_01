@@ -1,3 +1,4 @@
+import { memoRuntime } from '../../../shared/lib/runtime-datasets/runtimeData'
 import { getRuntimeDataset } from '../../../shared/lib/runtime-datasets/runtimeData'
 
 export interface LegalReference {
@@ -14,6 +15,6 @@ export interface LegalReference {
   status: 'active' | 'superseded' | 'upcoming'
 }
 
-export const CORE_OPERATIONS_LEGAL_REFS = getRuntimeDataset<{
+export const getCORE_OPERATIONS_LEGAL_REFS = memoRuntime(() => (getRuntimeDataset<{
   legalReferences: LegalReference[]
-}>('coreOperations.config').legalReferences
+}>('coreOperations.config').legalReferences))

@@ -9,19 +9,16 @@ import {
   LoaderCircle,
   LockKeyhole,
   Mail,
-  RefreshCw,
-  ShieldCheck,
-  UsersRound
+  ShieldCheck
 } from 'lucide-react'
 
 
 import { useDevelopmentLogin } from '../hooks/useDevelopmentLogin'
-import { DEMO_GROUPS, getRoleCode, getAccountIdentifier } from '../model/developmentAccounts'
 import { Button } from '../../../shared/ui/atoms/Button'
 import { Input } from '../../../shared/ui/atoms/Input'
 
 export const DevelopmentLoginForm: React.FC = () => {
-  const { accounts, accountsLoading, accountsError, identifier, password, showPassword, setShowPassword, submitting, loginError, sortedAccounts, selectedAccount, loadAccounts, handleIdentifierChange, handlePasswordChange, handleSelectDemoAccount, handleSubmit } = useDevelopmentLogin()
+  const { identifier, password, showPassword, setShowPassword, submitting, loginError, handleIdentifierChange, handlePasswordChange, handleSubmit } = useDevelopmentLogin()
 
   return (
     <main className="flex min-h-[100dvh] w-full items-center justify-center bg-slate-100 px-4 py-8 text-slate-900 sm:px-6 sm:py-12 lg:px-8">
@@ -101,74 +98,6 @@ export const DevelopmentLoginForm: React.FC = () => {
             </p>
 
             {/* Quick Demo Accounts Selection */}
-            <div className="mt-5 space-y-2">
-              <div className="flex items-center justify-between gap-3">
-                <label htmlFor="demo-account" className="text-xs font-bold text-slate-700">
-                  Chọn nhanh tài khoản demo
-                </label>
-                <span className="text-[11px] font-semibold text-slate-500">Mật khẩu: 123456</span>
-              </div>
-
-              <div className="relative">
-                <UsersRound className="pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" strokeWidth={2} />
-                <select
-                  id="demo-account"
-                  value={selectedAccount ? getAccountIdentifier(selectedAccount) : ''}
-                  onChange={(event) => handleSelectDemoAccount(event.target.value)}
-                  disabled={accountsLoading || Boolean(accountsError) || submitting}
-                  className="h-11 w-full appearance-none rounded-xl border border-slate-300 bg-slate-50 pl-10 pr-9 text-xs font-semibold text-slate-800 outline-none transition hover:border-slate-400 focus:border-[#174d70] focus:ring-3 focus:ring-[#174d70]/15 disabled:cursor-not-allowed disabled:text-slate-400"
-                >
-                  <option value="">
-                    {accountsLoading ? 'Đang tải tài khoản...' : 'Chọn vai trò để điền email'}
-                  </option>
-                  {DEMO_GROUPS.map((group) => (
-                    <optgroup key={group.title} label={group.title}>
-                      {sortedAccounts
-                        .filter((account) => group.roles.includes(getRoleCode(account)))
-                        .map((account) => (
-                          <option key={account.id} value={getAccountIdentifier(account)}>
-                            {account.roleTitle} - {getAccountIdentifier(account)}
-                          </option>
-                        ))}
-                    </optgroup>
-                  ))}
-                </select>
-              </div>
-
-              {selectedAccount && (
-                <div className="rounded-xl border border-sky-100 bg-sky-50 px-3 py-2.5">
-                  <p className="truncate text-xs font-bold text-slate-900">{selectedAccount.fullName}</p>
-                  <p className="mt-0.5 truncate text-[11px] text-slate-600">{selectedAccount.roleTitle}</p>
-                  <div className="mt-2 flex flex-wrap gap-1">
-                    {selectedAccount.modules.map((module) => (
-                      <span key={module.id} className="rounded-md bg-white px-1.5 py-1 font-mono text-[9px] font-black uppercase text-[#174d70] ring-1 ring-inset ring-sky-200">
-                        {module.id}
-                      </span>
-                    ))}
-                  </div>
-                </div>
-              )}
-
-              {accountsError && (
-                <div className="flex items-center justify-between gap-3 rounded-xl border border-amber-200 bg-amber-50 px-3 py-2.5 text-[11px] text-amber-900" role="alert">
-                  <span>{accountsError}</span>
-                  <Button
-                    type="button"
-                    onClick={() => void loadAccounts()}
-                    className="flex shrink-0 items-center gap-1 font-bold hover:underline"
-                  >
-                    <RefreshCw className="h-3.5 w-3.5" strokeWidth={2} />
-                    Tải lại
-                  </Button>
-                </div>
-              )}
-
-              {!accountsLoading && !accountsError && accounts.length === 0 && (
-                <p className="rounded-xl border border-slate-200 bg-slate-50 px-3 py-2.5 text-[11px] text-slate-600">
-                  Chưa có tài khoản demo. Bạn vẫn có thể nhập tài khoản được cấp bên dưới.
-                </p>
-              )}
-            </div>
 
             {/* Actual Login Form */}
             <form onSubmit={handleSubmit} noValidate className="mt-5 space-y-4">

@@ -1,10 +1,10 @@
 import React from 'react'
 import { Layers } from 'lucide-react'
 import { getTotalDynamicSops, getDistinctSubsystemsCount } from '../../../entities/lifecycle/lib/lifecycleJourneySelectors'
-import { LIFECYCLE_STAGE_ORDER } from '../../../entities/lifecycle/model/journey/lifecycleJourneyData'
+import { getLIFECYCLE_STAGE_ORDER } from '../../../entities/lifecycle/model/journey/lifecycleJourneyData'
 
 export const LifecycleJourneyHeader: React.FC = () => {
-  const totalStages = LIFECYCLE_STAGE_ORDER.length
+  const totalStages = getLIFECYCLE_STAGE_ORDER().length
   const totalSops = getTotalDynamicSops()
   const totalSubsystems = getDistinctSubsystemsCount()
 

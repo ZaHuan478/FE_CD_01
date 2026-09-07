@@ -1,10 +1,11 @@
+import { memoRuntime } from '../../../../../shared/lib/runtime-datasets/runtimeData'
 import { getRuntimeDataset } from '../../../../../shared/lib/runtime-datasets/runtimeData'
 import type { ModuleFilterOption, ModuleInfo } from '../types'
 
-const dataset = getRuntimeDataset<{
+const getDataset = memoRuntime(() => (getRuntimeDataset<{
   stepModuleMap: Record<string, ModuleInfo>
   moduleFilterOptions: ModuleFilterOption[]
-}>('lifecycleStepper.modules')
+}>('lifecycleStepper.modules')))
 
-export const STEP_MODULE_MAP = dataset.stepModuleMap
-export const MODULE_FILTER_OPTIONS = dataset.moduleFilterOptions
+export const getSTEP_MODULE_MAP = memoRuntime(() => (getDataset().stepModuleMap))
+export const getMODULE_FILTER_OPTIONS = memoRuntime(() => (getDataset().moduleFilterOptions))

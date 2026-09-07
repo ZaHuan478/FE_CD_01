@@ -1,17 +1,17 @@
+import { memoRuntime } from '../../../shared/lib/runtime-datasets/runtimeData'
 import React, { useMemo, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { ChevronDown, ChevronRight, GitBranch, PieChart, Workflow } from 'lucide-react'
+import { ChevronDown, ChevronRight, PieChart, Workflow } from 'lucide-react'
 import { RadialEcosystemChart } from './RadialEcosystemChart'
 import { UnifiedProcessInputOutputView } from '../../../features/sop-viewer/ui/UnifiedProcessInputOutputView'
-import { CrossModuleFlowShell } from '../../cross-module-flow/index'
 import { PeopleDevelopmentCoverage } from './PeopleDevelopmentCoverage'
 import { OrganizationManagementCoverage } from './OrganizationManagementCoverage'
 import { PlatformFoundationCoverage } from './PlatformFoundationCoverage'
-import { ClusterProcessExplorer } from './ClusterProcessExplorer'
 import { useLanguage } from '../../../shared/lib/i18n/LanguageContext'
-import { SOP_DATABASE } from '../../../entities/sop/model/sopDatabase'
+import { getSOP_DATABASE } from '../../../entities/sop/model/sopDatabase'
 import { useSession } from '../../../features/authentication/model/session'
 import { canAccessAnyModule, dashboardModuleAccess, requiredModuleIdsForRoute } from '../../../entities/module/lib/moduleAccess'
+import type { BusinessClusterId } from '../../../entities/module/model/types'
 
 type ModuleId =
   | 'recruitment'
@@ -44,14 +44,13 @@ type ModuleId =
   | 'security'
   | 'audit'
 
-export type BusinessClusterId = 'core' | 'people' | 'organization' | 'platform'
 interface ModuleMenuItem { label: string; sopCode?: string; workflowId?: string; stepNumber?: number; disabled?: boolean; groupHeader?: boolean }
 interface ModuleMenu { id: ModuleId; label: string; code: string; count: number; items: ModuleMenuItem[] }
 
 const normalizeSopCode = (value?: string) => (value ?? '').toUpperCase().replace(/[^A-Z0-9]/g, '')
 
 const processMenuItems = (workflowId: string): ModuleMenuItem[] =>
-  (SOP_DATABASE[workflowId] ?? []).map((process) => ({
+  (getSOP_DATABASE()[workflowId] ?? []).map((process) => ({
     label: process.sopTitle.replace(/^Quy trình\s+/i, ''),
     sopCode: process.sopCode,
     workflowId
@@ -87,11 +86,11 @@ const leaveProcessMenuItems = (): ModuleMenuItem[] => formatAttendanceMenuItems(
   processMenuItems('MODULE-ATT').filter((process) => leaveSopCodes.has(normalizeSopCode(process.sopCode)))
 )
 
-const performanceProcessMenuItems = processMenuItems('MODULE-PFM')
-const kpiProcessMenuItems = performanceProcessMenuItems.filter((process) => ['PFM02', 'PFM03'].includes(normalizeSopCode(process.sopCode)))
-const reviewProcessMenuItems = performanceProcessMenuItems.filter((process) => !['PFM02', 'PFM03'].includes(normalizeSopCode(process.sopCode)))
+const getPerformanceProcessMenuItems = memoRuntime(() => (processMenuItems('MODULE-PFM')))
+const getKpiProcessMenuItems = memoRuntime(() => (getPerformanceProcessMenuItems().filter((process) => ['PFM02', 'PFM03'].includes(normalizeSopCode(process.sopCode)))))
+const getReviewProcessMenuItems = memoRuntime(() => (getPerformanceProcessMenuItems().filter((process) => !['PFM02', 'PFM03'].includes(normalizeSopCode(process.sopCode)))))
 
-let moduleMenus: ModuleMenu[] = [
+const getModuleMenus: () => ModuleMenu[] = memoRuntime(() => ([
   {
     id: 'recruitment', label: 'Tuyển dụng', code: 'REC', count: 11,
     items: recruitmentProcessMenuItems()
@@ -139,11 +138,11 @@ let moduleMenus: ModuleMenu[] = [
   },
   {
     id: 'kpi', label: 'KPI', code: 'KPI', count: 2,
-    items: kpiProcessMenuItems
+    items: getKpiProcessMenuItems()
   },
   {
     id: 'review', label: 'Đánh giá', code: 'DG', count: 4,
-    items: reviewProcessMenuItems
+    items: getReviewProcessMenuItems()
   },
   {
     id: 'competency', label: 'Năng lực', code: 'CMP', count: 4,
@@ -217,7 +216,7 @@ let moduleMenus: ModuleMenu[] = [
     id: 'audit', label: 'Audit log', code: 'AUD', count: 8,
     items: processMenuItems('MODULE-PLT-AUD')
   }
-]
+]))
 
 const moduleClusterById: Record<ModuleId, BusinessClusterId> = {
   recruitment: 'core',
@@ -326,7 +325,7 @@ const workflowBySopCode: Record<string, string> = {
   'SOP EMP14': 'LIFE-03'
 }
 
-moduleMenus = moduleMenus.map((module) => {
+const getSortedModuleMenus = () => getModuleMenus().map((module) => {
   const items = (module.id === 'employee'
     ? [
       { label: 'EMP01 - Thiết lập định biên nhân sự', sopCode: 'SOP EMP01', workflowId: 'LIFE-00' },
@@ -355,7 +354,7 @@ moduleMenus = moduleMenus.map((module) => {
 })
 
 const getProcessForMenuItem = (item: ModuleMenuItem) => {
-  const processes = item.workflowId ? SOP_DATABASE[item.workflowId] ?? [] : []
+  const processes = item.workflowId ? getSOP_DATABASE()[item.workflowId] ?? [] : []
   const wantedCode = normalizeSopCode(item.sopCode)
   return processes.find((process) => normalizeSopCode(process.sopCode) === wantedCode) ?? (processes.length === 1 ? processes[0] : undefined)
 }
@@ -367,7 +366,7 @@ export const SystemOverviewDashboard: React.FC<{ activeCluster: BusinessClusterI
   const [openModule, setOpenModule] = useState<ModuleId | null>(null)
   const [openProcessKey, setOpenProcessKey] = useState<string | null>(null)
   const [openProcessTop, setOpenProcessTop] = useState(8)
-  const [coverageViewMode, setCoverageViewMode] = useState<'wheel' | 'matrix' | 'flow'>('wheel')
+  const [coverageViewMode, setCoverageViewMode] = useState<'wheel' | 'matrix'>('wheel')
   const [isCoverageExpanded, setIsCoverageExpanded] = useState(true)
   const closeMenuTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
   const keepMenuOpen = () => {
@@ -393,7 +392,7 @@ export const SystemOverviewDashboard: React.FC<{ activeCluster: BusinessClusterI
   }
 
   const accessibleModuleIds = useMemo(() => new Set(session.modules.map((module) => module.id)), [session.modules])
-  const visibleModuleMenus = moduleMenus
+  const visibleModuleMenus = getSortedModuleMenus()
     .filter((module) => moduleClusterById[module.id] === activeCluster)
     .filter((module) => accessibleModuleIds.has(dashboardModuleAccess[module.id]))
     .map((module) => ({
@@ -463,9 +462,6 @@ export const SystemOverviewDashboard: React.FC<{ activeCluster: BusinessClusterI
             <ViewButton active={coverageViewMode === 'matrix'} onClick={() => setCoverageViewMode('matrix')} icon={<Workflow className="h-3.5 w-3.5" />}>
               {t('coverage.tab.matrix')}
             </ViewButton>
-            <ViewButton active={coverageViewMode === 'flow'} onClick={() => setCoverageViewMode('flow')} icon={<GitBranch className="h-3.5 w-3.5" />}>
-              {t('coverage.tab.flow')}
-            </ViewButton>
             <button type="button" onClick={() => setIsCoverageExpanded((value) => !value)} className="px-2 py-1.5 text-xs font-semibold text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white">
               {isCoverageExpanded ? 'Thu gọn' : 'Mở rộng'}
             </button>
@@ -473,9 +469,7 @@ export const SystemOverviewDashboard: React.FC<{ activeCluster: BusinessClusterI
         </div>
         {isCoverageExpanded && (
           <div className="p-4">
-            {coverageViewMode === 'flow' ? (
-              <CrossModuleFlowShell cluster={activeCluster} />
-            ) : coverageViewMode === 'matrix' ? (
+            {coverageViewMode === 'matrix' ? (
               <UnifiedProcessInputOutputView cluster={activeCluster} />
             ) : activeCluster === 'people' ? (
               <PeopleDevelopmentCoverage mode={coverageViewMode} />
@@ -484,13 +478,11 @@ export const SystemOverviewDashboard: React.FC<{ activeCluster: BusinessClusterI
             ) : activeCluster === 'platform' ? (
               <PlatformFoundationCoverage mode={coverageViewMode} />
             ) : (
-              <RadialEcosystemChart />
+              <RadialEcosystemChart view="overview" />
             )}
           </div>
         )}
       </section>
-
-      {activeCluster !== 'core' && <ClusterProcessExplorer cluster={activeCluster} />}
     </div>
   )
 }

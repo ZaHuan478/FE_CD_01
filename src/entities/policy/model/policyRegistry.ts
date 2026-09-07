@@ -1,4 +1,5 @@
+import { memoRuntime } from '../../../shared/lib/runtime-datasets/runtimeData'
 import { getRuntimeDataset } from '../../../shared/lib/runtime-datasets/runtimeData'
 import type { Policy } from './types'
 
-export const POLICY_REGISTRY = getRuntimeDataset<Policy[]>('policy.registry')
+export const getPOLICY_REGISTRY = memoRuntime(() => (getRuntimeDataset<Policy[]>('policy.registry')))

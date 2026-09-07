@@ -27,13 +27,14 @@ export async function apiRequest<T>(path: string, init: ApiRequestInit = {}): Pr
   }, timeoutMs)
 
   try {
+    const hasFormData = typeof FormData !== 'undefined' && requestInit.body instanceof FormData
     const response = await fetch(`${apiBaseUrl}${path}`, {
       ...requestInit,
       signal: controller.signal,
       headers: {
         Accept: 'application/json',
         ...getAuthenticationHeaders(),
-        ...(requestInit.body ? { 'Content-Type': 'application/json' } : {}),
+        ...(requestInit.body && !hasFormData ? { 'Content-Type': 'application/json' } : {}),
         ...requestInit.headers
       }
     })

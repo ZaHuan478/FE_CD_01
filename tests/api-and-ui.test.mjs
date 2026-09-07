@@ -6,13 +6,14 @@ import { renderToStaticMarkup } from 'react-dom/server'
 import { MemoryRouter } from 'react-router-dom'
 
 let server
-const originals = { fetch: globalThis.fetch, window: globalThis.window, localStorage: globalThis.localStorage, sessionStorage: globalThis.sessionStorage, authMode: process.env.VITE_AUTH_MODE }
+const originals = { fetch: globalThis.fetch, window: globalThis.window, document: globalThis.document, localStorage: globalThis.localStorage, sessionStorage: globalThis.sessionStorage, authMode: process.env.VITE_AUTH_MODE }
 const storage = new Map()
 const calls = []
 let nextStatus = 200
 before(async () => {
   process.env.VITE_AUTH_MODE = 'development'
   globalThis.window = { setTimeout, clearTimeout }
+  globalThis.document = { cookie: '' }
   globalThis.localStorage = { getItem: (key) => storage.get(key) ?? null, setItem: (key, value) => storage.set(key, value), removeItem: (key) => storage.delete(key) }
   globalThis.sessionStorage = globalThis.localStorage
   globalThis.fetch = async (url, init) => {
@@ -26,7 +27,7 @@ before(async () => {
 })
 after(async () => {
   await server?.close()
-  for (const key of ['fetch', 'window', 'localStorage', 'sessionStorage']) {
+  for (const key of ['fetch', 'window', 'document', 'localStorage', 'sessionStorage']) {
     if (originals[key] === undefined) delete globalThis[key]
     else globalThis[key] = originals[key]
   }
@@ -59,6 +60,15 @@ test('HTTP client reads current identity for each request and propagates errors'
   nextStatus = 200
 })
 
+test('development identity is synchronized to a same-origin API cookie', async () => {
+  const auth = await server.ssrLoadModule('/src/shared/lib/auth/authCredentials.ts')
+  auth.selectDevelopmentAccount('demo/admin')
+  assert.match(globalThis.document.cookie, /hrm_demo_account_id=demo%2Fadmin/)
+  assert.match(globalThis.document.cookie, /SameSite=Lax/)
+  auth.clearAuthentication()
+  assert.match(globalThis.document.cookie, /Max-Age=0/)
+})
+
 test('policy acknowledgement encodes IDs and preserves PUT contract', async () => {
   const { policyAcknowledgementApi } = await server.ssrLoadModule('/src/shared/api/policy-acknowledgement.api.ts')
   await policyAcknowledgementApi.getPolicyAcknowledgement('POL/a?b')
@@ -89,20 +99,45 @@ test('atomic wrappers preserve native markup, form types and accessibility props
   ]) assert.equal(renderToStaticMarkup(React.createElement(Component, props)), renderToStaticMarkup(React.createElement(tag, props)))
 })
 
-test('feature bootstrap deduplicates requests and resets cached datasets on logout', async () => {
-  const bootstrap = await server.ssrLoadModule('/src/features/authentication/model/bootstrap.ts')
-  const store = await server.ssrLoadModule('/src/shared/lib/runtime-datasets/runtimeData.ts')
-  bootstrap.resetKnowledgeBootstrap()
-  const beforeCount = calls.filter((call) => call.url.endsWith('/bootstrap')).length
-  const [first, second] = await Promise.all([bootstrap.bootstrapKnowledge(), bootstrap.bootstrapKnowledge()])
-  assert.equal(first, second)
-  assert.equal(calls.filter((call) => call.url.endsWith('/bootstrap')).length, beforeCount + 1)
-  assert.equal(store.getRuntimeDataset('test.bootstrap').title, 'Dữ liệu được phép xem')
-  bootstrap.resetKnowledgeBootstrap()
-  assert.equal(store.hasRuntimeDataset('test.bootstrap'), false)
-  await bootstrap.bootstrapKnowledge()
-  assert.equal(calls.filter((call) => call.url.endsWith('/bootstrap')).length, beforeCount + 2)
-  bootstrap.resetKnowledgeBootstrap()
+test('select atom keeps native semantics with rounded and keyboard focus styling', async () => {
+  const { Select } = await server.ssrLoadModule('/src/shared/ui/atoms/Select.tsx')
+  const html = renderToStaticMarkup(React.createElement(Select, { 'aria-label': 'Mọi trạng thái', defaultValue: 'all' },
+    React.createElement('option', { value: 'all' }, 'Mọi trạng thái')))
+  assert(html.includes('<select'))
+  assert(html.includes('rounded-xl'))
+  assert(html.includes('focus-visible:ring-2'))
+  assert(html.includes('aria-label="Mọi trạng thái"'))
+})
+
+test('knowledge API has separate encoded list, search and detail requests', async () => {
+  const { knowledgeApi } = await server.ssrLoadModule('/src/shared/api/knowledge.api.ts')
+  await knowledgeApi.documents('pay', 2)
+  assert(calls.at(-1).url.includes('/knowledge-documents?moduleId=pay&page=2&pageSize=20'))
+  await knowledgeApi.search('quy trình & thuế')
+  const url = new URL(calls.at(-1).url, 'http://localhost')
+  assert.equal(url.searchParams.get('q'), 'quy trình & thuế')
+  await knowledgeApi.workflow('MODULE/PAY')
+  assert(calls.at(-1).url.endsWith('/ui/workflows/MODULE%2FPAY'))
+  assert(!calls.some(call => call.url.endsWith('/bootstrap')))
+})
+
+test('admin access API separates account, module and assignment operations', async () => {
+  const { adminAccessApi } = await server.ssrLoadModule('/src/shared/api/admin-access.api.ts')
+  await adminAccessApi.users()
+  assert(calls.at(-1).url.endsWith('/admin/users'))
+  await adminAccessApi.userModules('account/a?b')
+  assert(calls.at(-1).url.endsWith('/admin/users/account%2Fa%3Fb/module-access'))
+  await adminAccessApi.replaceUserModules('employee-1', ['emp', 'pay'])
+  assert.equal(calls.at(-1).init.method, 'PUT')
+  assert.deepEqual(JSON.parse(calls.at(-1).init.body), { moduleIds: ['emp', 'pay'] })
+  await adminAccessApi.updateUser('employee-1', { active: false })
+  assert.equal(calls.at(-1).init.method, 'PATCH')
+  assert.deepEqual(JSON.parse(calls.at(-1).init.body), { active: false })
+  await adminAccessApi.createUser({ username: 'new-user', fullName: 'Người dùng mới' })
+  assert(calls.at(-1).url.endsWith('/accounts'))
+  assert.equal(calls.at(-1).init.method, 'POST')
+  await adminAccessApi.modules()
+  assert(calls.at(-1).url.endsWith('/modules'))
 })
 
 test('protected workspace renders a loading gate before runtime datasets are installed', async () => {

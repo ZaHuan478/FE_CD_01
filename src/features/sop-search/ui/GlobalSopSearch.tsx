@@ -2,7 +2,7 @@ import { useGlobalSopSearch } from '../hooks/useGlobalSopSearch'
 import { SearchField } from '../../../shared/ui/molecules/SearchField'
 
 export function GlobalSopSearch() {
-  const { globalSearchTerm, setGlobalSearchTerm, isGlobalSearchOpen, setIsGlobalSearchOpen, globalSearchResults, openGlobalSearchResult } = useGlobalSopSearch()
+  const { globalSearchTerm, setGlobalSearchTerm, isGlobalSearchOpen, setIsGlobalSearchOpen, globalSearchResults, openGlobalSearchResult, searchLoading, searchError } = useGlobalSopSearch()
   return (
             <div className="relative hidden lg:block">
               <SearchField value={globalSearchTerm}
@@ -21,7 +21,7 @@ export function GlobalSopSearch() {
                       <span className="mt-0.5 rounded bg-sky-100 px-1.5 py-0.5 font-mono text-[9px] font-bold text-sky-800 dark:bg-sky-500/20 dark:text-sky-200">{result.sopCode}</span>
                       <span className="min-w-0"><span className="block truncate text-xs font-semibold text-slate-800 dark:text-slate-100">{result.title}</span><span className="mt-0.5 block truncate text-[11px] text-slate-500 dark:text-slate-400">{result.workflowId}</span></span>
                     </button>
-                  )) : <p className="px-3 py-3 text-xs text-slate-500 dark:text-slate-400">Không tìm thấy quy trình hoặc mã SOP phù hợp.</p>}
+                  )) : <p role="status" className="px-3 py-3 text-xs text-slate-500 dark:text-slate-400">{searchLoading ? 'Đang tìm kiếm...' : searchError ? 'Không tải được kết quả. Vui lòng thử lại.' : 'Không tìm thấy quy trình hoặc mã SOP phù hợp.'}</p>}
                 </div>
               )}
             </div>

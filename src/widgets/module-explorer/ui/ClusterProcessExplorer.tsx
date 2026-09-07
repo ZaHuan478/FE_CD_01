@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useLocation, useNavigate, useSearchParams } from 'react-router-dom'
 import {
   ArrowDown,
   ArrowRight,
@@ -35,11 +35,12 @@ import {
   Workflow,
   type LucideIcon
 } from 'lucide-react'
-import { SOP_DATABASE } from '../../../entities/sop/model/sopDatabase'
+import { getWorkflowProcesses } from '../../../entities/sop/model/sopDatabase'
 import type { SopSubProcess, SopSubStep } from '../../../entities/sop/model/types'
 import { useLanguage } from '../../../shared/lib/i18n/LanguageContext'
+import { getCurrentWorkspacePath, withWorkspaceReturn } from '../../../shared/lib/navigation/workspaceReturn'
 
-type ExplorerCluster = 'people' | 'organization' | 'platform'
+export type ExplorerCluster = 'people' | 'organization' | 'platform'
 
 interface ExplorerModule {
   id: string
@@ -368,7 +369,7 @@ const extractStepTypes = (steps: SopSubStep[] = []): StepTypeCode[] => {
 }
 
 const getModuleProcesses = (module: ExplorerModule): SopSubProcess[] => {
-  const processes = SOP_DATABASE[module.workflowId] ?? []
+  const processes = getWorkflowProcesses(module.workflowId)
   if (!module.processCodes?.length) return processes
   const allowedCodes = new Set(module.processCodes.map(normalizeCode))
   return processes.filter((process) => allowedCodes.has(normalizeCode(process.sopCode)))
@@ -412,20 +413,34 @@ const KNOWN_WIREFRAME_IDS = new Set<string>([
 
 export const ClusterProcessExplorer: React.FC<{ cluster: ExplorerCluster }> = ({ cluster }) => {
   const navigate = useNavigate()
+  const location = useLocation()
+  const [searchParams, setSearchParams] = useSearchParams()
   const { language } = useLanguage()
   const config = CLUSTER_CONFIGS[cluster]
 
-  const [selectedModuleId, setSelectedModuleId] = useState(config.modules[0].id)
-  const [selectedProcessCode, setSelectedProcessCode] = useState('')
+  const initialModule = config.modules.find((module) => module.id === searchParams.get('module')) ?? config.modules[0]
+  const initialProcesses = getModuleProcesses(initialModule)
+  const initialProcessCode = initialProcesses.some((process) => process.sopCode === searchParams.get('sop'))
+    ? searchParams.get('sop') ?? ''
+    : initialProcesses[0]?.sopCode ?? ''
+
+  const [selectedModuleId, setSelectedModuleId] = useState(initialModule.id)
+  const [selectedProcessCode, setSelectedProcessCode] = useState(initialProcessCode)
   const [activeTypeFilter, setActiveTypeFilter] = useState<'ALL' | StepTypeCode>('ALL')
   const [searchValue, setSearchValue] = useState('')
 
   useEffect(() => {
-    setSelectedModuleId(config.modules[0].id)
-    setSelectedProcessCode('')
+    const moduleFromUrl = config.modules.find((module) => module.id === searchParams.get('module')) ?? config.modules[0]
+    const processes = getModuleProcesses(moduleFromUrl)
+    const processFromUrl = searchParams.get('sop')
+    const nextProcessCode = processes.some((process) => process.sopCode === processFromUrl)
+      ? processFromUrl ?? ''
+      : processes[0]?.sopCode ?? ''
+    setSelectedModuleId(moduleFromUrl.id)
+    setSelectedProcessCode(nextProcessCode)
     setActiveTypeFilter('ALL')
     setSearchValue('')
-  }, [cluster, config.modules])
+  }, [cluster, config.modules, searchParams])
 
   const activeModule = config.modules.find((module) => module.id === selectedModuleId) ?? config.modules[0]
   const activeProcesses = useMemo(() => getModuleProcesses(activeModule), [activeModule])
@@ -456,15 +471,40 @@ export const ClusterProcessExplorer: React.FC<{ cluster: ExplorerCluster }> = ({
   }, [activeProcesses, selectedProcessCode])
 
   const selectModule = (module: ExplorerModule) => {
+    const firstProcessCode = getModuleProcesses(module)[0]?.sopCode ?? ''
     setSelectedModuleId(module.id)
-    setSelectedProcessCode(getModuleProcesses(module)[0]?.sopCode ?? '')
+    setSelectedProcessCode(firstProcessCode)
     setActiveTypeFilter('ALL')
     setSearchValue('')
+    setSearchParams((previous) => {
+      const next = new URLSearchParams(previous)
+      next.set('tab', 'process-library')
+      next.set('cluster', cluster)
+      next.set('module', module.id)
+      if (firstProcessCode) next.set('sop', firstProcessCode)
+      else next.delete('sop')
+      next.delete('stage')
+      next.delete('type')
+      return next
+    }, { replace: true })
+  }
+
+  const selectProcess = (processCode: string) => {
+    setSelectedProcessCode(processCode)
+    setSearchParams((previous) => {
+      const next = new URLSearchParams(previous)
+      next.set('tab', 'process-library')
+      next.set('cluster', cluster)
+      next.set('module', activeModule.id)
+      next.set('sop', processCode)
+      return next
+    }, { replace: true })
   }
 
   const openDetail = (view: 'infographic' | 'flowchart' | 'raci' | 'specs') => {
     if (!activeProcess) return
-    navigate(`/employee-lifecycle/${view}/${activeModule.workflowId}?sop=${encodeURIComponent(activeProcess.sopCode)}`)
+    const target = `/employee-lifecycle/${view}/${activeModule.workflowId}?sop=${encodeURIComponent(activeProcess.sopCode)}`
+    navigate(withWorkspaceReturn(target, getCurrentWorkspacePath(location)))
   }
 
   const actors = activeProcess ? uniqueValues(activeProcess.steps.map((step) => step.actor)) : []
@@ -475,14 +515,14 @@ export const ClusterProcessExplorer: React.FC<{ cluster: ExplorerCluster }> = ({
 
   const handleOpenWireframe = () => {
     if (hasWireframe && activeModule.workflowId) {
-      navigate(`/employee-lifecycle/wireframe/${activeModule.workflowId}`)
+      navigate(withWorkspaceReturn(`/employee-lifecycle/wireframe/${activeModule.workflowId}`, getCurrentWorkspacePath(location)))
     }
   }
 
   return (
     <section
       id={`${cluster}-process-explorer`}
-      className="mx-auto w-[92%] max-w-[1920px] space-y-5 rounded-xl border border-slate-300 bg-white p-4 shadow-sm scroll-mt-28 dark:border-slate-700 dark:bg-slate-900 sm:p-6"
+      className="w-full space-y-5 rounded-xl border border-slate-300 bg-white p-4 shadow-sm scroll-mt-28 dark:border-slate-700 dark:bg-slate-900 sm:p-6"
     >
       {/* SECTION HEADER */}
       <header className="border-b border-slate-200 pb-4 dark:border-slate-800">
@@ -663,7 +703,7 @@ export const ClusterProcessExplorer: React.FC<{ cluster: ExplorerCluster }> = ({
                   key={process.sopCode}
                   type="button"
                   aria-pressed={isSelected}
-                  onClick={() => setSelectedProcessCode(process.sopCode)}
+                  onClick={() => selectProcess(process.sopCode)}
                   className={`flex w-full cursor-pointer items-start justify-between gap-2 rounded-md p-2.5 text-left transition-colors ${
                     isSelected
                       ? 'border-l-3 border-[#1f5f86] bg-sky-50/80 text-[#1f5f86] dark:bg-sky-950/40 dark:text-sky-200'

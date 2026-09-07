@@ -1,5 +1,7 @@
 # FrontEnd: feature-based + Atomic Design
 
+> Cập nhật: FE đã bỏ bootstrap client và chuyển sang đọc theo nhu cầu. Xem [on-demand-data.md](./on-demand-data.md) cho luồng hiện tại; các mô tả bootstrap bên dưới là bối cảnh của lần tách thư mục trước.
+
 ## Cấu trúc đang dùng
 
 ```text

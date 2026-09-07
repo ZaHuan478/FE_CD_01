@@ -95,12 +95,12 @@ export function useDevelopmentLogin() {
       const result = await authApi.loginDevelopment(trimmedIdentifier, password)
 
       // Update session state inside Context
-      await login(result.accountId)
+      const user = await login(result.accountId)
 
       // Resolve safe redirect target
       const rawRedirect = searchParams.get('redirect')
       let target = '/employee-lifecycle'
-      if (rawRedirect) {
+      if (rawRedirect && user.systemRole !== 'ADMIN') {
         try {
           const decoded = decodeURIComponent(rawRedirect)
           if (decoded.startsWith('/') && !decoded.startsWith('//')) {

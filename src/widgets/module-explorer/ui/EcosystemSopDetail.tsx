@@ -1,5 +1,5 @@
 import React from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useLocation, useNavigate } from 'react-router-dom'
 import {
   ArrowDown,
   ArrowRight,
@@ -17,7 +17,8 @@ import {
 } from 'lucide-react'
 import { type SopDetailItem } from '../../../entities/module/data/ecosystemModulesData'
 import { useLanguage } from '../../../shared/lib/i18n/LanguageContext'
-import { CORE_OPERATIONS_LEGAL_REFS } from '../../../entities/module/data/coreOperationsLegalRefs'
+import { getCORE_OPERATIONS_LEGAL_REFS } from '../../../entities/module/data/coreOperationsLegalRefs'
+import { getCurrentWorkspacePath, withWorkspaceReturn } from '../../../shared/lib/navigation/workspaceReturn'
 
 interface EcosystemSopDetailProps {
   activeSopItem: SopDetailItem
@@ -92,6 +93,7 @@ const getTypeBadgeInfo = (type: 'N' | 'M' | 'A' | 'C', lang: 'vi' | 'en') => {
 export const EcosystemSopDetail: React.FC<EcosystemSopDetailProps> = ({ activeSopItem, moduleId }) => {
   const { language } = useLanguage()
   const navigate = useNavigate()
+  const location = useLocation()
 
   const workflowId = activeSopItem.workflowId || 'LIFE-01'
   const hasWireframe = Boolean(activeSopItem.hasWireframe && activeSopItem.wireframeId)
@@ -107,19 +109,20 @@ export const EcosystemSopDetail: React.FC<EcosystemSopDetailProps> = ({ activeSo
     ? activeSopItem.stepTypes
     : [activeSopItem.type]
 
-  const relevantLegalRefs = CORE_OPERATIONS_LEGAL_REFS.filter(ref => {
+  const relevantLegalRefs = getCORE_OPERATIONS_LEGAL_REFS().filter(ref => {
     if (!moduleId) return false
     const normalizedMod = moduleId.toLowerCase() as any
     return ref.affectedModules.includes(normalizedMod)
   })
 
   const openDetailPage = (path: 'infographic' | 'flowchart' | 'raci' | 'specs') => {
-    navigate(`/employee-lifecycle/${path}/${workflowId}?sop=${encodeURIComponent(activeSopItem.code)}`)
+    const target = `/employee-lifecycle/${path}/${workflowId}?sop=${encodeURIComponent(activeSopItem.code)}`
+    navigate(withWorkspaceReturn(target, getCurrentWorkspacePath(location)))
   }
 
   const handleOpenWireframe = () => {
     if (hasWireframe && wireframeId) {
-      navigate(`/employee-lifecycle/wireframe/${wireframeId}`)
+      navigate(withWorkspaceReturn(`/employee-lifecycle/wireframe/${wireframeId}`, getCurrentWorkspacePath(location)))
     }
   }
 
