@@ -11,12 +11,22 @@ import { KnowledgeBoundary } from './layouts/KnowledgeBoundary'
 const EmployeeLifecycleContent = React.lazy(() =>
   import('../pages/employee-lifecycle/EmployeeLifecyclePage').then((m) => ({ default: m.EmployeeLifecyclePage })
 ))
+const PublishedKnowledgeDocumentContent = React.lazy(() =>
+  import('../features/sop-viewer/ui/PublishedKnowledgeDocumentPage').then((m) => ({ default: m.PublishedKnowledgeDocumentPage }))
+)
 
 const EmployeeLifecyclePage = () => <KnowledgeBoundary><EmployeeLifecycleContent /></KnowledgeBoundary>
 const EmployeeLifecycleAdminPage = () => (
   <Suspense fallback={<FullPageLoading message="Đang mở khu vực quản trị..." />}>
     <EmployeeLifecyclePage />
   </Suspense>
+)
+const PublishedKnowledgeDocumentPage = () => (
+  <KnowledgeBoundary>
+    <Suspense fallback={<FullPageLoading message="Đang mở SOP đã công bố..." />}>
+      <PublishedKnowledgeDocumentContent />
+    </Suspense>
+  </KnowledgeBoundary>
 )
 
 const RootRedirect: React.FC = () => {
@@ -46,10 +56,19 @@ export const AppRoutes: React.FC = () => {
 
       {/* Protected routes */}
       <Route element={<ProtectedRoute />}>
+        <Route path="/employee-lifecycle/knowledge-documents/:documentId" element={<PublishedKnowledgeDocumentPage />} />
         <Route
           path="/employee-lifecycle/sop-imports"
           element={
             <Suspense fallback={<FullPageLoading message="Đang mở không gian số hóa..." />}>
+              <EmployeeLifecyclePage />
+            </Suspense>
+          }
+        />
+        <Route
+          path="/employee-lifecycle/document-conversions"
+          element={
+            <Suspense fallback={<FullPageLoading message="Đang mở không gian chuyển hóa tài liệu..." />}>
               <EmployeeLifecyclePage />
             </Suspense>
           }
@@ -143,14 +162,6 @@ export const AppRoutes: React.FC = () => {
           }
         />
         <Route
-          path="/employee-lifecycle/wireframe/:id"
-          element={
-            <Suspense fallback={<FullPageLoading message="Đang tải dữ liệu phân hệ..." />}>
-              <EmployeeLifecyclePage />
-            </Suspense>
-          }
-        />
-        <Route
           path="/employee-lifecycle/erd"
           element={
             <Suspense fallback={<FullPageLoading message="Đang tải dữ liệu phân hệ..." />}>
@@ -179,6 +190,7 @@ export const AppRoutes: React.FC = () => {
         <Route path="/employee-lifecycle/admin/access" element={<EmployeeLifecycleAdminPage />} />
         <Route path="/employee-lifecycle/admin/catalog" element={<EmployeeLifecycleAdminPage />} />
         <Route path="/employee-lifecycle/admin/imports" element={<EmployeeLifecycleAdminPage />} />
+        <Route path="/employee-lifecycle/admin/sop-approvals" element={<EmployeeLifecycleAdminPage />} />
         <Route path="/employee-lifecycle/admin/master-data" element={<EmployeeLifecycleAdminPage />} />
         <Route path="/employee-lifecycle/admin/settings" element={<EmployeeLifecycleAdminPage />} />
       </Route>

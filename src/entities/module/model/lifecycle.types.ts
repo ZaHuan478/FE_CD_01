@@ -84,6 +84,5 @@ export type DetailItem = {
   sopIds: string[]
   sopTitles?: string[]
   usedBy?: string[]
-  uiFields?: string[]
+  fieldsChecklist?: string[]
 }
-

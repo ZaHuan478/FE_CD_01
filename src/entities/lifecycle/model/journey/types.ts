@@ -81,5 +81,4 @@ export interface LifecycleStageDefinition {
   statusTransitions: MultiDimensionStatusChange[]
   legalReferences: LegalReferenceItem[]
   impactRows: ImpactMatrixRow[]
-  wireframeId?: string
 }

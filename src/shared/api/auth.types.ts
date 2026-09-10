@@ -24,12 +24,21 @@ export interface UserSession {
   username: string
   fullName: string
   email: string | null
+  organization: {
+    employeeCode: string | null
+    company: string | null
+    division: string | null
+    department: string | null
+    team: string | null
+    jobTitle: string | null
+    managerAccountId: string | null
+  }
   groupIds: string[]
   grants: SessionGrant[]
   menuItems: SessionMenuItem[]
   modules: SessionModule[]
   capabilities: string[]
-  systemRole: 'USER' | 'CONTENT_EDITOR' | 'ADMIN'
+  systemRole: 'USER' | 'CONTENT_EDITOR' | 'ADMIN' | 'SUPER_ADMIN'
   roleTitle?: string
 }
 
@@ -50,3 +59,4 @@ export interface DevelopmentLoginResult {
   fullName: string
   email: string | null
 }
+

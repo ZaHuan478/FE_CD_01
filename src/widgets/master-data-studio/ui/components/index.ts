@@ -1,5 +1,6 @@
 export * from './DomainIcon'
 export * from './StudioHeader'
+export * from './MasterDataViewTabs'
 export * from './DomainRail'
 export * from './CatalogCard'
 export * from './CatalogWorkspace'

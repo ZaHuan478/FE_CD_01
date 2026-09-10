@@ -38,10 +38,10 @@ export function KnowledgeBoundary({ children }: PropsWithChildren) {
   const isAdminWorkspace = location.pathname.startsWith('/employee-lifecycle/admin')
     || new URLSearchParams(location.search).get('tab') === 'admin'
   const boundaryResetKey = `${location.pathname}:${location.search}`
-  if (!session.modules.length && session.systemRole === 'ADMIN' && !isAdminWorkspace) {
+  if (!session.modules.length && ['ADMIN', 'SUPER_ADMIN'].includes(session.systemRole) && !isAdminWorkspace) {
     return <Navigate to="/employee-lifecycle/admin" replace />
   }
-  if (!session.modules.length && session.systemRole !== 'ADMIN') return <main className="p-8 text-center"><h1>Chưa được cấp quyền phân hệ</h1><p>Vui lòng liên hệ quản trị viên để được cấp quyền xem tài liệu phù hợp.</p></main>
+  if (!session.modules.length && !['ADMIN', 'SUPER_ADMIN'].includes(session.systemRole)) return <main className="p-8 text-center"><h1>Chưa được cấp quyền phân hệ</h1><p>Vui lòng liên hệ quản trị viên để được cấp quyền xem tài liệu phù hợp.</p></main>
   return <ReadErrorBoundary key={session.accountId} resetKey={boundaryResetKey}><TranslatedContent>{children}</TranslatedContent></ReadErrorBoundary>
 }
 
@@ -49,3 +49,4 @@ function TranslatedContent({ children }: PropsWithChildren) {
   getRuntimeDataset('translations')
   return children
 }
+

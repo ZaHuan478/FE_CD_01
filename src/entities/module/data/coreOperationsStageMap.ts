@@ -34,11 +34,9 @@ export interface ModuleMetadata {
 interface CoreOperationsDataset {
   stageMap: Record<string, ModuleMetadata>
   workflowBySopCode: Record<string, string>
-  knownWireframeIds: string[]
 }
 
 const getDataset = memoRuntime(() => (getRuntimeDataset<CoreOperationsDataset>('coreOperations.config')))
 
 export const getCORE_OPERATIONS_STAGE_MAP = memoRuntime(() => (getDataset().stageMap))
 export const getWORKFLOW_ID_BY_SOP_CODE = memoRuntime(() => (getDataset().workflowBySopCode))
-export const getKNOWN_WIREFRAME_IDS = memoRuntime(() => (new Set(getDataset().knownWireframeIds)))

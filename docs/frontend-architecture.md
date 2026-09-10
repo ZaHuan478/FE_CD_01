@@ -33,7 +33,6 @@ src/
     sop-viewer/           xem SOP, bước và luồng
     policy-browser/       tra cứu quy định, chi tiết và mô phỏng
     policy-acknowledgement/ hook ghi/đọc xác nhận và UI
-    wireframe-viewer/
   entities/
     user/                 kiểu phiên và nhãn vai trò
     module/               kiểu phân hệ, dữ liệu và helper lọc hiển thị

@@ -3,7 +3,9 @@ import { useLocation, useSearchParams } from 'react-router-dom'
 import {
   Sparkles,
   UserCheck,
-  ListCheck
+  ListCheck,
+  GitBranch,
+  Rows3
 } from 'lucide-react'
 import type { WorkflowDetailPageProps } from '../../../entities/sop/model/types'
 import {
@@ -16,15 +18,18 @@ import { UniversalBusinessBrief } from './components/UniversalBusinessBrief'
 import { UniversalWorkflowStepper } from './components/UniversalWorkflowStepper'
 import { UniversalStepDetailCanvas } from './components/UniversalStepDetailCanvas'
 import { RoleFlowSection } from './components/RoleFlowSection'
+import { SopGovernancePanel } from './components/SopGovernancePanel'
 import { CrossFunctionalOperationalSpec } from './components/CrossFunctionalOperationalSpec'
 import { getCrossFunctionalModule } from '../../../entities/sop/cross-functional/index'
 import { RelatedPoliciesWidget } from '../../policy-browser/ui/components/RelatedPoliciesWidget'
 import { useLanguage } from '../../../shared/lib/i18n/LanguageContext'
+import { PublishedSopFlow } from '../../document-conversion/ui/PublishedSopFlow'
+import { workflowCanvasPreview } from '../../document-conversion/model/workflowCanvasPreview'
+import { buildPublishedWorkflowMermaid } from '../../../entities/sop/lib/workflowMermaid'
 
 export const WorkflowDetailPage: React.FC<WorkflowDetailPageProps> = ({
   item,
-  onBack,
-  onOpenWireframe
+  onBack
 }) => {
   const { language, t } = useLanguage()
   const location = useLocation()
@@ -106,16 +111,19 @@ export const WorkflowDetailPage: React.FC<WorkflowDetailPageProps> = ({
   }, [targetStepParam, selectedSop.steps])
 
   const [selectedStepIdx, setSelectedStepIdx] = useState<number>(initialStepIdx)
+  const [diagramMode, setDiagramMode] = useState<'steps' | 'mermaid'>('mermaid')
 
   // Sync state when SOP changes
   useEffect(() => {
     setSelectedStepIdx(initialStepIdx)
+    setDiagramMode('mermaid')
   }, [initialStepIdx, selectedSop.sopCode])
 
   // Unified non-redundant business brief
   const businessBrief = useMemo(() => {
     return selectWorkflowBusinessBrief(item, selectedSop, language)
   }, [item, selectedSop, language])
+  const publishedMermaid = useMemo(() => buildPublishedWorkflowMermaid(selectedSop), [selectedSop])
 
   // Handlers for switching SOP & Steps with URL query syncing
   const handleSelectSop = (sopCode: string) => {
@@ -162,7 +170,6 @@ export const WorkflowDetailPage: React.FC<WorkflowDetailPageProps> = ({
         item={item}
         currentProcess={selectedSop}
         onBack={onBack}
-        onOpenWireframe={onOpenWireframe}
         isDarkMode={isDarkMode}
         onToggleTheme={toggleTheme}
       />
@@ -259,13 +266,21 @@ export const WorkflowDetailPage: React.FC<WorkflowDetailPageProps> = ({
             {/* Unified 4-Grid Business Brief Card (Replaces redundant multiple cards) */}
             <UniversalBusinessBrief brief={businessBrief} isDarkMode={isDarkMode} />
 
-            {/* Dynamic Horizontal Workflow Stepper with Actor Pills */}
-            <UniversalWorkflowStepper
-              steps={selectedSop.steps}
-              selectedStepIdx={selectedStepIdx}
-              onSelectStep={handleSelectStep}
-              isDarkMode={isDarkMode}
-            />
+            <div className="flex flex-wrap gap-2" role="group" aria-label="Kiểu hiển thị lưu đồ">
+              <button type="button" aria-pressed={diagramMode === 'mermaid'} onClick={() => setDiagramMode('mermaid')} className={`inline-flex min-h-10 items-center gap-2 rounded-xl border px-4 text-xs font-bold ${diagramMode === 'mermaid' ? 'border-[#1f5f86] bg-[#1f5f86] text-white' : 'border-slate-200 bg-white text-slate-700 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200'}`}><GitBranch className="size-4" />Flowchart Mermaid</button>
+              <button type="button" aria-pressed={diagramMode === 'steps'} onClick={() => setDiagramMode('steps')} className={`inline-flex min-h-10 items-center gap-2 rounded-xl border px-4 text-xs font-bold ${diagramMode === 'steps' ? 'border-[#1f5f86] bg-[#1f5f86] text-white' : 'border-slate-200 bg-white text-slate-700 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200'}`}><Rows3 className="size-4" />Các bước</button>
+            </div>
+
+            {diagramMode === 'steps' ? (
+              <UniversalWorkflowStepper
+                steps={selectedSop.steps}
+                selectedStepIdx={selectedStepIdx}
+                onSelectStep={handleSelectStep}
+                isDarkMode={isDarkMode}
+              />
+            ) : (
+              <PublishedSopFlow key={selectedSop.sopCode} code={selectedSop.sopCode} fallback={publishedMermaid} fallbackPreview={workflowCanvasPreview(selectedSop)} />
+            )}
 
             {/* Selected Step Detail Canvas (Positioned immediately below stepper in plain view) */}
             <UniversalStepDetailCanvas
@@ -282,6 +297,7 @@ export const WorkflowDetailPage: React.FC<WorkflowDetailPageProps> = ({
         {/* 5. TAB 2: VAI TRÒ & PHÂN ĐỊNH RACI */}
         {activeWorkflowTab === 'roles' && (
           <div className="space-y-5 animate-fadeIn">
+            <SopGovernancePanel currentProcess={selectedSop} isDarkMode={isDarkMode} />
             <RoleFlowSection currentProcess={selectedSop} isDarkMode={isDarkMode} />
           </div>
         )}
@@ -292,7 +308,6 @@ export const WorkflowDetailPage: React.FC<WorkflowDetailPageProps> = ({
             {cfModule ? (
               <CrossFunctionalOperationalSpec
                 module={cfModule}
-                onOpenWireframe={onOpenWireframe ? () => onOpenWireframe(item) : undefined}
               />
             ) : (
               <div
@@ -315,8 +330,8 @@ export const WorkflowDetailPage: React.FC<WorkflowDetailPageProps> = ({
                 </div>
 
                 <div className="flex flex-wrap gap-2 pt-2">
-                  {item.uiFields && item.uiFields.length > 0 ? (
-                    item.uiFields.map((field, idx) => (
+                  {item.fieldsChecklist && item.fieldsChecklist.length > 0 ? (
+                    item.fieldsChecklist.map((field, idx) => (
                       <span
                         key={idx}
                         className="px-3 py-1.5 rounded-xl text-xs font-semibold bg-slate-100 dark:bg-slate-800 text-slate-800 dark:text-slate-200 border border-slate-200 dark:border-slate-700"

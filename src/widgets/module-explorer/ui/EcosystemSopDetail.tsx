@@ -96,9 +96,6 @@ export const EcosystemSopDetail: React.FC<EcosystemSopDetailProps> = ({ activeSo
   const location = useLocation()
 
   const workflowId = activeSopItem.workflowId || 'LIFE-01'
-  const hasWireframe = Boolean(activeSopItem.hasWireframe && activeSopItem.wireframeId)
-  const wireframeId = activeSopItem.wireframeId
-
   const title = language === 'vi' ? activeSopItem.title : activeSopItem.titleEn || activeSopItem.title
   const actor = language === 'vi' ? activeSopItem.actor : activeSopItem.actorEn || activeSopItem.actor
   const inputs = language === 'vi' ? activeSopItem.inputs : activeSopItem.inputsEn || activeSopItem.inputs
@@ -118,12 +115,6 @@ export const EcosystemSopDetail: React.FC<EcosystemSopDetailProps> = ({ activeSo
   const openDetailPage = (path: 'infographic' | 'flowchart' | 'raci' | 'specs') => {
     const target = `/employee-lifecycle/${path}/${workflowId}?sop=${encodeURIComponent(activeSopItem.code)}`
     navigate(withWorkspaceReturn(target, getCurrentWorkspacePath(location)))
-  }
-
-  const handleOpenWireframe = () => {
-    if (hasWireframe && wireframeId) {
-      navigate(withWorkspaceReturn(`/employee-lifecycle/wireframe/${wireframeId}`, getCurrentWorkspacePath(location)))
-    }
   }
 
   return (
@@ -169,27 +160,6 @@ export const EcosystemSopDetail: React.FC<EcosystemSopDetailProps> = ({ activeSo
           )}
         </div>
 
-        {/* Sample Screen Wireframe Button */}
-        <div>
-          {hasWireframe ? (
-            <button
-              type="button"
-              onClick={handleOpenWireframe}
-              className="inline-flex shrink-0 items-center justify-center gap-1.5 rounded-md border border-slate-300 bg-white px-3 py-2 text-xs font-bold text-slate-700 transition-colors hover:border-[#1f5f86] hover:bg-sky-50 hover:text-[#1f5f86] dark:border-slate-700 dark:bg-slate-900 dark:text-white dark:hover:bg-slate-800 cursor-pointer shadow-2xs"
-            >
-              <FileText className="h-3.5 w-3.5 text-[#1f5f86] dark:text-sky-300" />
-              <span>{language === 'vi' ? 'Mở màn hình mẫu' : 'Open sample screen'}</span>
-            </button>
-          ) : (
-            <div
-              title={language === 'vi' ? 'SOP này chưa có màn hình mẫu' : 'Sample screen not available for this SOP'}
-              className="inline-flex shrink-0 items-center justify-center gap-1.5 rounded-md border border-slate-200 bg-slate-100 px-3 py-2 text-xs font-semibold text-slate-400 dark:border-slate-800 dark:bg-slate-900/50 dark:text-slate-600 cursor-not-allowed opacity-75"
-            >
-              <FileText className="h-3.5 w-3.5" />
-              <span>{language === 'vi' ? 'Mở màn hình mẫu' : 'Open sample screen'}</span>
-            </div>
-          )}
-        </div>
       </header>
 
       {/* PURPOSE & SCOPE */}

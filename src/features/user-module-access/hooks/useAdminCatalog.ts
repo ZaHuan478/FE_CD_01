@@ -1,15 +1,19 @@
 import { useCallback, useEffect, useState } from 'react'
 import { knowledgeApi, type CreateKnowledgeDocumentBody, type KnowledgeListParams, type KnowledgePage } from '../../../shared/api/knowledge.api'
+import type { AdminModule, ModuleInput } from '../../../shared/api/admin-access.api'
+import { useToast } from '../../../shared/ui/toast'
+import { getErrorMessage } from '../../../shared/lib/errors/apiError'
 
+export type { AdminModule, ModuleInput }
 export type AdminDocumentType = CreateKnowledgeDocumentBody['type']
 export type AdminDocumentCreateInput = CreateKnowledgeDocumentBody
 
 export function useAdminCatalog(params: KnowledgeListParams = {}) {
+  const toast = useToast()
   const [result, setResult] = useState<KnowledgePage>({ data: [], pagination: { page: 1, pageSize: 20, total: 0 } })
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState('')
-  const [notice, setNotice] = useState('')
   const { q = '', moduleId = '', type = 'all', page = 1, pageSize = 20 } = params
 
   const load = useCallback(async (signal?: AbortSignal) => {
@@ -33,19 +37,18 @@ export function useAdminCatalog(params: KnowledgeListParams = {}) {
   const createDocument = async (body: CreateKnowledgeDocumentBody) => {
     setSaving(true)
     setError('')
-    setNotice('')
     try {
       await knowledgeApi.createDocument(body)
       await load()
-      setNotice('Đã tạo và công bố tài liệu')
+      toast.success('Đã tạo và công bố tài liệu')
       return true
     } catch (reason) {
-      setError(reason instanceof Error ? reason.message : 'Không tạo được tài liệu')
+      toast.error(getErrorMessage(reason, 'Không tạo được tài liệu'))
       return false
     } finally {
       setSaving(false)
     }
   }
 
-  return { ...result, loading, saving, error, notice, load, createDocument }
+  return { ...result, loading, saving, error, notice: null, load, createDocument }
 }

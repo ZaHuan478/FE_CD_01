@@ -57,7 +57,7 @@ export const PolicyRelatedProcesses: React.FC<PolicyRelatedProcessesProps> = ({ 
           <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">
             {language === 'vi'
               ? 'Nhấp vào mã quy trình để điều hướng trực tiếp tới sơ đồ phân bước và biểu mẫu tương ứng.'
-              : 'Click on workflow code to navigate directly to step diagram and wireframe forms.'}
+              : 'Click on a workflow code to navigate directly to its process diagram and details.'}
           </p>
         </div>
       </div>

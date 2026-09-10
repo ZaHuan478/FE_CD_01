@@ -1,7 +1,8 @@
 import type { UserSession } from './types'
 
 export const ROLE_NAMES: Record<string, string> = {
-  'ADMIN': 'Quản trị hệ thống',
+  'SUPER_ADMIN': 'Siêu quản trị hệ thống',
+  'ADMIN': 'Quản trị nội dung SOP',
   'BOM': 'Ban Giám Đốc',
   'HR_ADMIN': 'Quản trị nhân sự',
   'RECRUITER': 'Chuyên viên tuyển dụng',
@@ -10,6 +11,18 @@ export const ROLE_NAMES: Record<string, string> = {
   'INSURANCE_OFFICER': 'Chuyên viên bảo hiểm',
   'LINE_MANAGER': 'Trưởng bộ phận',
   'EMPLOYEE': 'Nhân viên',
+  'SYSTEM_ADMINISTRATOR': 'Siêu quản trị hệ thống',
+  'SOP_ADMINISTRATOR': 'Quản trị nội dung SOP',
+  'EXECUTIVE': 'Ban điều hành',
+  'HR_OPERATIONS': 'Vận hành nhân sự',
+  'TIME_ATTENDANCE': 'Chấm công và nghỉ phép',
+  'PAYROLL_CB': 'Tiền lương và C&B',
+  'INSURANCE_TAX': 'Bảo hiểm và thuế',
+  'EMPLOYEE_SELF_SERVICE': 'Nhân viên tự phục vụ',
+  'CLERICAL_ADMIN': 'Hành chính và văn thư',
+  'HRIS_SUPPORT': 'HRIS và IT hỗ trợ',
+  'LEGAL': 'Pháp chế',
+  'AUDITOR': 'Kiểm toán nội bộ',
   'group-admin': 'Quản trị hệ thống',
   'group-bom': 'Ban Giám Đốc',
   'group-hr-admin': 'Quản trị nhân sự',
@@ -33,6 +46,7 @@ export const ROLE_NAMES: Record<string, string> = {
 export function resolveUserRoleTitle(session: UserSession | null): string {
   if (!session) return ''
   if (session.roleTitle) return session.roleTitle
+  if (session.organization?.jobTitle) return session.organization.jobTitle
   for (const groupId of session.groupIds || []) {
     if (ROLE_NAMES[groupId]) return ROLE_NAMES[groupId]
   }
@@ -40,3 +54,4 @@ export function resolveUserRoleTitle(session: UserSession | null): string {
   if (ROLE_NAMES[session.accountId]) return ROLE_NAMES[session.accountId]
   return 'Thành viên hệ thống'
 }
+

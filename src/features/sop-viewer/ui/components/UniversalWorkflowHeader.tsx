@@ -1,5 +1,5 @@
 import React from 'react'
-import { ArrowLeft, FileText, Sun, Moon } from 'lucide-react'
+import { ArrowLeft, Sun, Moon } from 'lucide-react'
 import type { DetailItem } from '../../../../entities/module/model/lifecycle.types'
 import type { SopSubProcess } from '../../../../entities/sop/model/types'
 import { useLanguage } from '../../../../shared/lib/i18n/LanguageContext'
@@ -9,7 +9,6 @@ interface UniversalWorkflowHeaderProps {
   item: DetailItem
   currentProcess: SopSubProcess
   onBack: () => void
-  onOpenWireframe?: (item: DetailItem) => void
   isDarkMode: boolean
   onToggleTheme: () => void
 }
@@ -18,7 +17,6 @@ export const UniversalWorkflowHeader: React.FC<UniversalWorkflowHeaderProps> = (
   item,
   currentProcess,
   onBack,
-  onOpenWireframe,
   isDarkMode,
   onToggleTheme
 }) => {
@@ -76,7 +74,7 @@ export const UniversalWorkflowHeader: React.FC<UniversalWorkflowHeaderProps> = (
           </div>
         </div>
 
-        {/* Right: Language, Dark mode & Exactly ONE Wireframe CTA */}
+        {/* Right: Language and theme controls */}
         <div className="flex items-center gap-2 shrink-0">
           <LanguageSelector isDarkTheme={isDarkMode} />
 
@@ -97,17 +95,6 @@ export const UniversalWorkflowHeader: React.FC<UniversalWorkflowHeaderProps> = (
             {isDarkMode ? <Sun className="w-4 h-4 text-amber-400" /> : <Moon className="w-4 h-4 text-slate-700" />}
           </button>
 
-          {onOpenWireframe && (
-            <button
-              type="button"
-              onClick={() => onOpenWireframe(item)}
-              className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold text-white bg-[#1f5f86] hover:bg-[#174968] rounded-xl shadow-xs transition-all cursor-pointer shrink-0"
-              title={t('common.viewWireframe', 'Mở màn hình mẫu')}
-            >
-              <FileText className="w-4 h-4" />
-              <span className="hidden sm:inline">{t('common.viewWireframe', 'Mở màn hình mẫu')}</span>
-            </button>
-          )}
         </div>
       </div>
     </header>

@@ -5,7 +5,7 @@
  *   Left Domain Rail  |  Center Workspace  |  Right Detail Inspector
  *
  * Route: /employee-lifecycle/masterdata
- * Hỗ trợ query string: ?view=catalogs|process|relations&group=<DomainGroupId>&catalog=<code>
+ * Hỗ trợ query string: ?view=catalogs|process|relations&group=<DomainGroupId>&catalog=<code>&page=<number>
  */
 import React, {
   useState,
@@ -21,7 +21,6 @@ import {
   getDOMAIN_GROUPS,
   getALL_MASTER_DATA_ITEMS,
   getGOVERNANCE_ITEMS,
-  computeMasterDataStats,
   getItemsByGroup,
   getGroupCounts,
   searchCatalogs,
@@ -46,6 +45,10 @@ const MasterDataRelationshipView = React.lazy(() =>
   import('./MasterDataRelationshipView').then((m) => ({ default: m.MasterDataRelationshipView })
 ))
 
+const CATALOG_PAGE_SIZE = 6
+const isWorkspaceView = (value: string | null): value is WorkspaceView =>
+  value === 'catalogs' || value === 'process' || value === 'relations'
+
 // ────────────────────────────────────────────────────────────────────────────
 // PROPS
 // ────────────────────────────────────────────────────────────────────────────
@@ -67,12 +70,16 @@ export const MasterDataStudio: React.FC<MasterDataStudioProps> = ({
   const [searchParams, setSearchParams] = useSearchParams()
 
   // ── Derived initial state from query string ─────────────────────────────
-  const initView = (searchParams.get('view') as WorkspaceView) || 'catalogs'
-  const initGroup = (searchParams.get('group') as DomainGroupId) || 'identity'
   const initCatalog = searchParams.get('catalog') || null
 
-  const [workspaceView, setWorkspaceView] = useState<WorkspaceView>(initView)
-  const [activeGroupId, setActiveGroupId] = useState<DomainGroupId>(initGroup)
+  const viewParam = searchParams.get('view')
+  const catalogParam = searchParams.get('catalog')
+  const workspaceView: WorkspaceView = isWorkspaceView(viewParam) ? viewParam : 'catalogs'
+  const domainGroups = getDOMAIN_GROUPS()
+  const activeGroup = domainGroups.find(group => group.id === searchParams.get('group'))
+    ?? domainGroups.find(group => group.id === 'identity')
+    ?? domainGroups[0]
+  const activeGroupId = activeGroup?.id
   const [selectedCatalog, setSelectedCatalog] = useState<CatalogViewModel | null>(
     () => (initCatalog ? getALL_MASTER_DATA_ITEMS().find((item) => item.id === initCatalog) ?? null : null)
   )
@@ -88,25 +95,10 @@ export const MasterDataStudio: React.FC<MasterDataStudioProps> = ({
   const [selectedProcessCode, setSelectedProcessCode] = useState(sopCode || '')
   const [processSearch, setProcessSearch] = useState('')
 
-  // Stats computed once
-  const stats = useMemo(() => computeMasterDataStats(), [])
   const groupCounts = useMemo(() => getGroupCounts(), [])
 
-  // ── Sync query string (non-blocking) ────────────────────────────────────
-  useEffect(() => {
-    const next = new URLSearchParams(searchParams)
-    next.set('view', workspaceView)
-    next.set('group', activeGroupId)
-    if (selectedCatalog) next.set('catalog', selectedCatalog.id)
-    else next.delete('catalog')
-    // Only update if changed to avoid back-button thrash
-    if (next.toString() !== searchParams.toString()) {
-      setSearchParams(next, { replace: true })
-    }
-  }, [workspaceView, activeGroupId, selectedCatalog]) // eslint-disable-line react-hooks/exhaustive-deps
-
   // ── Items for center workspace ──────────────────────────────────────────
-  const groupItems = useMemo(() => getItemsByGroup(activeGroupId), [activeGroupId])
+  const groupItems = useMemo(() => activeGroupId ? getItemsByGroup(activeGroupId) : [], [activeGroupId])
 
   const filteredItems = useMemo(() => {
     let items = catalogSearch.trim() ? searchCatalogs(groupItems, catalogSearch) : groupItems
@@ -115,9 +107,58 @@ export const MasterDataStudio: React.FC<MasterDataStudioProps> = ({
     return items
   }, [groupItems, catalogSearch, tierFilter, statusFilter])
 
+  const requestedPage = Number.parseInt(searchParams.get('page') || '1', 10)
+  const totalPages = Math.max(1, Math.ceil(filteredItems.length / CATALOG_PAGE_SIZE))
+  const currentPage = Math.min(
+    Number.isFinite(requestedPage) && requestedPage > 0 ? requestedPage : 1,
+    totalPages
+  )
+  const paginatedItems = useMemo(
+    () => filteredItems.slice(
+      (currentPage - 1) * CATALOG_PAGE_SIZE,
+      currentPage * CATALOG_PAGE_SIZE
+    ),
+    [filteredItems, currentPage]
+  )
+
+  useEffect(() => {
+    const catalogFromUrl = catalogParam
+      ? getALL_MASTER_DATA_ITEMS().find((item) => item.id === catalogParam) ?? null
+      : null
+    setSelectedCatalog((current) =>
+      current?.id === catalogFromUrl?.id ? current : catalogFromUrl
+    )
+  }, [catalogParam])
+
+  // ── Sync query string (non-blocking) ────────────────────────────────────
+  useEffect(() => {
+    const next = new URLSearchParams(searchParams)
+    next.set('view', workspaceView)
+    if (activeGroupId) next.set('group', activeGroupId)
+    else next.delete('group')
+    if (workspaceView === 'catalogs' && currentPage > 1) next.set('page', String(currentPage))
+    else next.delete('page')
+    // Only update if changed to avoid back-button thrash
+    if (next.toString() !== searchParams.toString()) {
+      setSearchParams(next, { replace: true })
+    }
+  }, [workspaceView, activeGroupId, currentPage]) // eslint-disable-line react-hooks/exhaustive-deps
+
   // ── Process guide data ──────────────────────────────────────────────────
   const allOperationalProcesses = useMemo(
-    () => Object.values(getSOP_DATABASE()).flat(),
+    () => Array.from(
+      new Map(
+        Object.values(getSOP_DATABASE())
+          .flat()
+          .map((process) => [process.sopCode, process])
+      ).values()
+    ),
+    []
+  )
+  const governanceItems = useMemo(
+    () => Array.from(
+      new Map(getGOVERNANCE_ITEMS().map((item) => [item.id, item])).values()
+    ),
     []
   )
   const filteredProcesses = useMemo(() => {
@@ -162,21 +203,74 @@ export const MasterDataStudio: React.FC<MasterDataStudioProps> = ({
   const handleSelectCatalog = useCallback((item: CatalogViewModel) => {
     setSelectedCatalog(item)
     setIsInspectorOpen(true)
-  }, [])
+    setSearchParams((previous) => {
+      const next = new URLSearchParams(previous)
+      next.set('catalog', item.id)
+      return next
+    }, { replace: true })
+  }, [setSearchParams])
 
   const handleGroupChange = useCallback((groupId: DomainGroupId) => {
-    setActiveGroupId(groupId)
     setSelectedCatalog(null)
     setCatalogSearch('')
-  }, [])
+    setSearchParams((previous) => {
+      const next = new URLSearchParams(previous)
+      next.set('group', groupId)
+      next.delete('catalog')
+      next.delete('page')
+      return next
+    }, { replace: true })
+  }, [setSearchParams])
 
   const handleViewChange = useCallback((view: WorkspaceView) => {
-    setWorkspaceView(view)
     setSelectedCatalog(null)
-  }, [])
+    setSearchParams((previous) => {
+      const next = new URLSearchParams(previous)
+      next.set('view', view)
+      next.delete('catalog')
+      next.delete('page')
+      return next
+    })
+  }, [setSearchParams])
+
+  const handleCatalogSearchChange = useCallback((value: string) => {
+    setCatalogSearch(value)
+    setSearchParams((previous) => {
+      const next = new URLSearchParams(previous)
+      next.delete('page')
+      return next
+    }, { replace: true })
+  }, [setSearchParams])
+
+  const handleTierFilter = useCallback((value: CatalogTier | 'all') => {
+    setTierFilter(value)
+    setSearchParams((previous) => {
+      const next = new URLSearchParams(previous)
+      next.delete('page')
+      return next
+    }, { replace: true })
+  }, [setSearchParams])
+
+  const handleStatusFilter = useCallback((value: CatalogStatus | 'all') => {
+    setStatusFilter(value)
+    setSearchParams((previous) => {
+      const next = new URLSearchParams(previous)
+      next.delete('page')
+      return next
+    }, { replace: true })
+  }, [setSearchParams])
+
+  const handlePageChange = useCallback((page: number) => {
+    const safePage = Math.min(Math.max(page, 1), totalPages)
+    setSearchParams((previous) => {
+      const next = new URLSearchParams(previous)
+      if (safePage === 1) next.delete('page')
+      else next.set('page', String(safePage))
+      return next
+    })
+  }, [setSearchParams, totalPages])
 
   const filterActive = tierFilter !== 'all' || statusFilter !== 'all'
-  const activeGroup = getDOMAIN_GROUPS().find((g) => g.id === activeGroupId)!
   const subdued = isDarkMode ? 'text-slate-400' : 'text-slate-500'
 
   // ────────────────────────────────────────────────────────────────────────
@@ -187,8 +281,6 @@ export const MasterDataStudio: React.FC<MasterDataStudioProps> = ({
     <div className="w-full flex flex-col gap-0 animate-fadeIn">
       {/* ── COMPACT HEADER ─────────────────────────────────────────────── */}
       <StudioHeader
-        isDarkMode={isDarkMode}
-        stats={stats}
         workspaceView={workspaceView}
         onViewChange={handleViewChange}
       />
@@ -206,23 +298,34 @@ export const MasterDataStudio: React.FC<MasterDataStudioProps> = ({
 
         {/* ── CENTER WORKSPACE ───────────────────────────────────────── */}
         <div className="flex-1 min-w-0 overflow-y-auto border-r border-slate-200 dark:border-slate-800">
-          {workspaceView === 'catalogs' && (
+          {workspaceView === 'catalogs' && !activeGroup && (
+            <div role="status" className="p-6 text-sm text-slate-500 dark:text-slate-400">
+              Chưa có danh mục Master Data trong phạm vi truy cập của bạn.
+              Nếu cần xem thêm danh mục, vui lòng liên hệ quản trị viên.
+            </div>
+          )}
+          {workspaceView === 'catalogs' && activeGroup && (
             <CatalogWorkspace
               isDarkMode={isDarkMode}
               activeGroup={activeGroup}
-              filteredItems={filteredItems}
+              filteredItems={paginatedItems}
+              filteredItemCount={filteredItems.length}
               allGroupItems={groupItems}
               selectedCatalog={selectedCatalog}
               catalogSearch={catalogSearch}
-              onSearchChange={setCatalogSearch}
+              onSearchChange={handleCatalogSearchChange}
               tierFilter={tierFilter}
               statusFilter={statusFilter}
-              onTierFilter={setTierFilter}
-              onStatusFilter={setStatusFilter}
+              onTierFilter={handleTierFilter}
+              onStatusFilter={handleStatusFilter}
               isFilterOpen={isFilterOpen}
               onToggleFilter={() => setIsFilterOpen((v) => !v)}
               filterActive={filterActive}
               onSelectCatalog={handleSelectCatalog}
+              currentPage={currentPage}
+              totalPages={totalPages}
+              pageSize={CATALOG_PAGE_SIZE}
+              onPageChange={handlePageChange}
               subdued={subdued}
             />
           )}
@@ -239,7 +342,7 @@ export const MasterDataStudio: React.FC<MasterDataStudioProps> = ({
               selectedStep={selectedStep}
               selectedStepCode={selectedStepCode}
               onSelectStep={setSelectedStepCode}
-              governanceItems={getGOVERNANCE_ITEMS()}
+              governanceItems={governanceItems}
               subdued={subdued}
             />
           )}
@@ -263,8 +366,14 @@ export const MasterDataStudio: React.FC<MasterDataStudioProps> = ({
                   const found = getALL_MASTER_DATA_ITEMS().find((item) => item.id === id)
                   if (found) {
                     setSelectedCatalog(found)
-                    setWorkspaceView('catalogs')
-                    setActiveGroupId(found.domainGroupId)
+                    setSearchParams((previous) => {
+                      const next = new URLSearchParams(previous)
+                      next.set('view', 'catalogs')
+                      next.set('group', found.domainGroupId)
+                      next.set('catalog', found.id)
+                      next.delete('page')
+                      return next
+                    })
                   }
                 }}
               />
@@ -290,8 +399,14 @@ export const MasterDataStudio: React.FC<MasterDataStudioProps> = ({
               const found = getALL_MASTER_DATA_ITEMS().find((item) => item.id === id)
               if (found) {
                 setSelectedCatalog(found)
-                setWorkspaceView('catalogs')
-                setActiveGroupId(found.domainGroupId)
+                setSearchParams((previous) => {
+                  const next = new URLSearchParams(previous)
+                  next.set('view', 'catalogs')
+                  next.set('group', found.domainGroupId)
+                  next.set('catalog', found.id)
+                  next.delete('page')
+                  return next
+                })
               }
             }}
             subdued={subdued}

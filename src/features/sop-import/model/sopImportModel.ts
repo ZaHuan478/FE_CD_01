@@ -4,6 +4,9 @@ import { sopImportApi } from '../../../shared/api/sop-import.api'
 
 export type { SopImportItem, SopImportPreview, SopImportStep } from '../../../shared/api/sop-import.api'
 export { sopImportApi }
+export { fetchSopSource } from '../../../shared/api/sop-import.api'
+export { getErrorMessage, isAbortError } from '../../../shared/lib/errors/apiError'
+
 
 export interface SopImportModule {
   id: string

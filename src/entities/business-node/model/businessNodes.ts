@@ -25,7 +25,6 @@ export type BusinessNode = {
   masterDataIds: string[]
   sopIds: string[]
   process: { status: ProcessStatus; steps: string[]; source: string }
-  wireframe: { title: string; fields: string[]; actions: string[] }
   source: { note: string; status: SourceStatus }
 }
 

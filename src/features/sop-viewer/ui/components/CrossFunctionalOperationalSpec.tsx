@@ -10,19 +10,16 @@ import {
   RotateCcw,
   GitMerge,
   Sparkles,
-  ExternalLink,
   ShieldCheck
 } from 'lucide-react'
 import type { CrossFunctionalModuleDefinition } from '../../../../entities/sop/cross-functional/index'
 
 interface CrossFunctionalOperationalSpecProps {
   module: CrossFunctionalModuleDefinition
-  onOpenWireframe?: () => void
 }
 
 export const CrossFunctionalOperationalSpec: React.FC<CrossFunctionalOperationalSpecProps> = ({
-  module,
-  onOpenWireframe
+  module
 }) => {
   return (
     <div className="space-y-6 animate-fadeIn">
@@ -80,18 +77,6 @@ export const CrossFunctionalOperationalSpec: React.FC<CrossFunctionalOperational
               ))}
             </div>
           </div>
-
-          {onOpenWireframe && (
-            <button
-              type="button"
-              onClick={onOpenWireframe}
-              className="mt-4 w-full py-2 px-3 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold transition-colors flex items-center justify-center gap-1.5 shadow-xs cursor-pointer"
-            >
-              <FileText className="w-4 h-4" />
-              <span>Xem biểu mẫu / Wireframe</span>
-              <ExternalLink className="w-3 h-3" />
-            </button>
-          )}
         </div>
       </div>
 

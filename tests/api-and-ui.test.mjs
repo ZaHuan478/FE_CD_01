@@ -69,6 +69,22 @@ test('development identity is synchronized to a same-origin API cookie', async (
   assert.match(globalThis.document.cookie, /Max-Age=0/)
 })
 
+test('source viewer fetches a blob with current identity and fails closed on denied access', async () => {
+  const { fetchSopSource } = await server.ssrLoadModule('/src/shared/api/sop-import.api.ts')
+  storage.set('hrm_demo_account_id', 'document-owner')
+  const controller = new AbortController()
+  const file = await fetchSopSource('import/a b', controller.signal)
+  assert(file instanceof Blob)
+  assert(calls.at(-1).url.endsWith('/sop-imports/import%2Fa%20b/source'))
+  assert.equal(calls.at(-1).init.headers['x-user-id'], 'document-owner')
+  assert.equal(calls.at(-1).init.signal, controller.signal)
+  assert.equal(calls.at(-1).init.cache, 'no-store')
+  storage.set('hrm_demo_account_id', 'unrelated-user')
+  nextStatus = 403
+  try { await assert.rejects(() => fetchSopSource('private'), /Forbidden/) }
+  finally { nextStatus = 200 }
+})
+
 test('policy acknowledgement encodes IDs and preserves PUT contract', async () => {
   const { policyAcknowledgementApi } = await server.ssrLoadModule('/src/shared/api/policy-acknowledgement.api.ts')
   await policyAcknowledgementApi.getPolicyAcknowledgement('POL/a?b')
@@ -146,3 +162,30 @@ test('protected workspace renders a loading gate before runtime datasets are ins
   const html = renderToStaticMarkup(React.createElement(MemoryRouter, { initialEntries: ['/employee-lifecycle'] }, React.createElement(App)))
   assert(html.includes('Đang xác thực quyền truy cập...'))
 })
+
+test('my documents API encodes filters, pagination and mutation payloads', async () => {
+  const { myDocumentsApi, fetchDocumentBlob } = await server.ssrLoadModule('/src/shared/api/my-documents.api.ts')
+  storage.set('hrm_demo_account_id', 'doc-owner')
+
+  await myDocumentsApi.list({ search: 'hướng dẫn', format: 'pdf', tab: 'active', page: 2, pageSize: 10 })
+  assert(calls.at(-1).url.includes('/my-documents?search=h%C6%B0%E1%BB%9Bng+d%E1%BA%ABn&format=pdf&tab=active&page=2&pageSize=10'))
+
+  await myDocumentsApi.rename('doc-123', 'Tên mới')
+  assert.equal(calls.at(-1).init.method, 'PATCH')
+  assert(calls.at(-1).url.endsWith('/my-documents/doc-123'))
+  assert.deepEqual(JSON.parse(calls.at(-1).init.body), { displayName: 'Tên mới' })
+
+  await myDocumentsApi.delete('doc-123')
+  assert.equal(calls.at(-1).init.method, 'DELETE')
+  assert(calls.at(-1).url.endsWith('/my-documents/doc-123'))
+
+  await myDocumentsApi.restore('doc-123')
+  assert.equal(calls.at(-1).init.method, 'POST')
+  assert(calls.at(-1).url.endsWith('/my-documents/doc-123/restore'))
+
+  const blob = await fetchDocumentBlob('doc-123')
+  assert(blob instanceof Blob)
+  assert(calls.at(-1).url.endsWith('/my-documents/doc-123/file'))
+  assert.equal(calls.at(-1).init.headers['x-user-id'], 'doc-owner')
+})
+

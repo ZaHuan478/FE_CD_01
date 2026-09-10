@@ -46,8 +46,6 @@ export interface SopDetailItem {
   outputs?: string[]
   outputsEn?: string[]
   workflowId?: string
-  wireframeId?: string
-  hasWireframe?: boolean
   isInheritedFromATS?: boolean
   description?: string
   rules?: string[]
@@ -234,8 +232,6 @@ const mapCoreSopToDetailItem = (sop: CoreOperationSop): SopDetailItem => ({
   outputs: sop.outputs,
   outputsEn: sop.outputs,
   workflowId: sop.workflowId,
-  wireframeId: sop.wireframeId,
-  hasWireframe: sop.hasWireframe,
   isInheritedFromATS: sop.canonicalCode === 'SOP-EMP-02' || sop.canonicalCode === 'SOP-EMP-03',
   description: sop.description,
   rules: sop.rules,

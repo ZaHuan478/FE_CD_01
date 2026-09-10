@@ -71,6 +71,6 @@ export interface CrossFunctionalModuleDefinition {
   sopTitles: string[]
   exceptionHandling: CrossFunctionalExceptionRule[]
   auditAndNotification: CrossFunctionalAuditRule[]
-  uiFields: string[]
+  fieldsChecklist: string[]
   sopProcesses: SopSubProcess[]
 }

@@ -12,7 +12,11 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@xyflow/react": "^12.11.6",
+    "docx-preview": "^0.4.0",
     "lucide-react": "^1.31.0",
+    "mermaid": "^11.17.2",
+    "pdfjs-dist": "^6.3.289",
     "react": "^19.2.8",
     "react-dom": "^19.2.8",
     "react-router-dom": "^7.18.2"

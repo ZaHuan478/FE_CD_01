@@ -1,18 +1,16 @@
 import React, { useRef } from 'react'
 import { ChevronLeft, ChevronRight } from 'lucide-react'
 import { getLIFECYCLE_STAGE_ORDER, getLIFECYCLE_STAGES } from '../../../entities/lifecycle/model/journey/lifecycleJourneyData'
-import { getStageSops, isStageHighlightedInScenario } from '../../../entities/lifecycle/lib/lifecycleJourneySelectors'
-import type { LifecycleStageId, ScenarioId } from '../../../entities/lifecycle/model/journey/types'
+import { getStageSops } from '../../../entities/lifecycle/lib/lifecycleJourneySelectors'
+import type { LifecycleStageId } from '../../../entities/lifecycle/model/journey/types'
 
 interface LifecycleStagePipelineProps {
   activeStage: LifecycleStageId
-  activeScenario: ScenarioId
   onSelectStage: (stageId: LifecycleStageId) => void
 }
 
 export const LifecycleStagePipeline: React.FC<LifecycleStagePipelineProps> = ({
   activeStage,
-  activeScenario,
   onSelectStage
 }) => {
   const availableStageOrder = getLIFECYCLE_STAGE_ORDER().filter((stageId) => Boolean(getLIFECYCLE_STAGES()[stageId]))
@@ -94,7 +92,6 @@ export const LifecycleStagePipeline: React.FC<LifecycleStagePipelineProps> = ({
         {availableStageOrder.map((stageId, index) => {
           const stage = getLIFECYCLE_STAGES()[stageId]
           const isSelected = stageId === activeStage
-          const isHighlighted = isStageHighlightedInScenario(stageId, activeScenario)
           const sopsCount = getStageSops(stageId).length
 
           return (
@@ -110,9 +107,7 @@ export const LifecycleStagePipeline: React.FC<LifecycleStagePipelineProps> = ({
               className={`group relative flex flex-col justify-between rounded-xl p-3 text-left transition-all cursor-pointer focus-visible:outline-2 focus-visible:outline-[#1f5f86] focus-visible:outline-offset-2 ${
                 isSelected
                   ? 'bg-[#1f5f86] text-white shadow-md ring-2 ring-[#2e8bbd]'
-                  : isHighlighted
-                  ? 'border border-slate-200 bg-white text-slate-800 hover:border-sky-300 hover:bg-sky-50/50 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-200 dark:hover:bg-slate-800/80 shadow-2xs'
-                  : 'border border-slate-200/60 bg-slate-50/60 text-slate-500 opacity-60 hover:opacity-100 dark:border-slate-800/60 dark:bg-slate-950/40 dark:text-slate-400'
+                  : 'border border-slate-200 bg-white text-slate-800 hover:border-sky-300 hover:bg-sky-50/50 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-200 dark:hover:bg-slate-800/80 shadow-2xs'
               }`}
             >
               {/* TOP: STAGE CODE & DYNAMIC SOP COUNT */}

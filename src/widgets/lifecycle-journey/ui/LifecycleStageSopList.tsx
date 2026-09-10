@@ -4,7 +4,6 @@ import {
   FileCode,
   GitGraph,
   Layers,
-  Layout,
   ListTree,
   UserCheck
 } from 'lucide-react'
@@ -27,7 +26,7 @@ export const LifecycleStageSopList: React.FC<LifecycleStageSopListProps> = ({
   const navigate = useNavigate()
   const activeSop = sops.find((s) => s.sopCode === selectedSopCode) ?? sops[0]
 
-  const handleNavigate = (viewType: 'infographic' | 'flowchart' | 'raci' | 'specs' | 'wireframe') => {
+  const handleNavigate = (viewType: 'infographic' | 'flowchart' | 'raci' | 'specs') => {
     const sopQuery = activeSop ? `?sop=${encodeURIComponent(activeSop.sopCode)}` : ''
     navigate(`/employee-lifecycle/${viewType}/${stageId}${sopQuery}`)
   }
@@ -86,7 +85,7 @@ export const LifecycleStageSopList: React.FC<LifecycleStageSopListProps> = ({
         })}
       </div>
 
-      {/* THÔNG TIN SOP ĐANG CHỌN & 5 NÚT ĐIỀU HƯỚNG */}
+      {/* THÔNG TIN SOP ĐANG CHỌN & 4 NÚT ĐIỀU HƯỚNG */}
       {activeSop && (
         <div className="mt-4 rounded-xl border border-sky-200/80 bg-sky-50/40 p-3.5 dark:border-sky-900/60 dark:bg-sky-950/30">
           <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between border-b border-sky-200/60 pb-3 dark:border-sky-900/60">
@@ -136,14 +135,6 @@ export const LifecycleStageSopList: React.FC<LifecycleStageSopListProps> = ({
                 <span>Quy chuẩn Specs</span>
               </button>
 
-              <button
-                type="button"
-                onClick={() => handleNavigate('wireframe')}
-                className="inline-flex items-center gap-1 rounded-lg border border-sky-300 bg-sky-50 px-2.5 py-1.5 text-xs font-bold text-[#1f5f86] hover:bg-sky-100 dark:border-sky-800 dark:bg-sky-950 dark:text-sky-300 transition-colors cursor-pointer"
-              >
-                <Layout className="h-3.5 w-3.5" />
-                <span>Màn hình mẫu</span>
-              </button>
             </div>
           </div>
 

@@ -7,6 +7,7 @@ import { UnifiedProcessInputOutputView } from '../../../features/sop-viewer/ui/U
 import { PeopleDevelopmentCoverage } from './PeopleDevelopmentCoverage'
 import { OrganizationManagementCoverage } from './OrganizationManagementCoverage'
 import { PlatformFoundationCoverage } from './PlatformFoundationCoverage'
+import { ClusterProcessExplorer } from './ClusterProcessExplorer'
 import { useLanguage } from '../../../shared/lib/i18n/LanguageContext'
 import { getSOP_DATABASE } from '../../../entities/sop/model/sopDatabase'
 import { useSession } from '../../../features/authentication/model/session'
@@ -250,10 +251,6 @@ const moduleClusterById: Record<ModuleId, BusinessClusterId> = {
   audit: 'platform'
 }
 
-const lifecycleSummary = ['Định biên nhân sự', 'Tuyển dụng', 'Tiếp nhận và hội nhập', 'Hồ sơ và hợp đồng', 'Đào tạo và đánh giá', 'Lương, thưởng và phúc lợi', 'Chấm công và quản lý làm việc', 'Thuyên chuyển và thôi việc']
-
-void lifecycleSummary
-
 const formatMenuLabel = (label: string) => {
   if (/^EMP01\s*-\s*/.test(label)) return 'Thiết lập định biên'
   return label.replace(/^EMP\d+\s*-\s*/, '')
@@ -325,7 +322,7 @@ const workflowBySopCode: Record<string, string> = {
   'SOP EMP14': 'LIFE-03'
 }
 
-const getSortedModuleMenus = () => getModuleMenus().map((module) => {
+const getPreparedModuleMenus = memoRuntime(() => (getModuleMenus().map((module) => {
   const items = (module.id === 'employee'
     ? [
       { label: 'EMP01 - Thiết lập định biên nhân sự', sopCode: 'SOP EMP01', workflowId: 'LIFE-00' },
@@ -351,7 +348,7 @@ const getSortedModuleMenus = () => getModuleMenus().map((module) => {
         ? sortModuleItemsByProcess(items)
         : sortModuleItemsNewestFirst(items)
   }
-})
+})))
 
 const getProcessForMenuItem = (item: ModuleMenuItem) => {
   const processes = item.workflowId ? getSOP_DATABASE()[item.workflowId] ?? [] : []
@@ -392,7 +389,7 @@ export const SystemOverviewDashboard: React.FC<{ activeCluster: BusinessClusterI
   }
 
   const accessibleModuleIds = useMemo(() => new Set(session.modules.map((module) => module.id)), [session.modules])
-  const visibleModuleMenus = getSortedModuleMenus()
+  const visibleModuleMenus = getPreparedModuleMenus()
     .filter((module) => moduleClusterById[module.id] === activeCluster)
     .filter((module) => accessibleModuleIds.has(dashboardModuleAccess[module.id]))
     .map((module) => ({
@@ -478,16 +475,15 @@ export const SystemOverviewDashboard: React.FC<{ activeCluster: BusinessClusterI
             ) : activeCluster === 'platform' ? (
               <PlatformFoundationCoverage mode={coverageViewMode} />
             ) : (
-              <RadialEcosystemChart view="overview" />
+              <RadialEcosystemChart view="complete" />
             )}
           </div>
         )}
       </section>
+
+      {activeCluster !== 'core' && <ClusterProcessExplorer cluster={activeCluster} />}
     </div>
   )
 }
-
-const SummaryTile: React.FC<{ icon: React.ReactNode; label: string; value: string; detail: string }> = ({ icon, label, value, detail }) => <div className="rounded-lg border border-slate-300 bg-white p-4 shadow-sm"><div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wide text-slate-500"><span className="text-[#1f5f86]">{icon}</span>{label}</div><p className="mt-2 text-xl font-bold text-slate-900">{value}</p><p className="mt-1 text-xs leading-relaxed text-slate-500">{detail}</p></div>
-void SummaryTile
 
 const ViewButton: React.FC<{ active: boolean; onClick: () => void; icon: React.ReactNode; children: React.ReactNode }> = ({ active, onClick, icon, children }) => <button type="button" onClick={onClick} className={`flex items-center gap-1.5 px-2.5 py-1.5 text-xs font-semibold ${active ? 'bg-[#1f5f86] text-white' : 'text-slate-600 hover:bg-white dark:text-slate-300 dark:hover:bg-slate-700 dark:hover:text-white'}`}>{icon}{children}</button>

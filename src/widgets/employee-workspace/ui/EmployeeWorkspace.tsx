@@ -1,15 +1,16 @@
 import { GlobalSopSearch } from '../../../features/sop-search/ui/GlobalSopSearch'
 import React, { useMemo, useState, useEffect, useCallback, Suspense, useTransition } from 'react'
 import { useSearchParams, useParams, useLocation, useNavigate } from 'react-router-dom'
-import { Layers, Database, GitBranch, Sun, Moon, Loader2, ShieldCheck, FileUp, BookOpen } from 'lucide-react'
+import { Layers, Database, GitBranch, Sun, Moon, Loader2, ShieldCheck, FileUp, BookOpen, ScanText } from 'lucide-react'
 
 import { MasterDataRelationshipModal } from '../../master-data-studio/ui/MasterDataRelationshipModal'
 import { SystemSupportBar } from '../../app-support/ui/SystemSupportBar'
 import { SystemGuideBanner } from '../../app-guide/ui/SystemGuideBanner'
 import { LeftSidebarNav } from '../../app-sidebar/ui/LeftSidebarNav'
-import { WireframeFormDetailPage } from '../../../features/wireframe-viewer/ui/WireframeFormDetailPage'
 import { WorkflowDetailPage } from '../../../features/sop-viewer/index'
 import type { BusinessClusterId } from '../../../entities/module/model/types'
+import type { WorkspaceView } from '../../../entities/master-data/model/types'
+import { MasterDataViewTabs } from '../../master-data-studio/ui/components/MasterDataViewTabs'
 
 // ⚡ LAZY LOAD HEAVY COMPONENTS
 const MasterDataStudio = React.lazy(() => import('../../master-data-studio/ui/MasterDataStudio').then(module => ({ default: module.MasterDataStudio })))
@@ -19,7 +20,8 @@ const SystemOverviewDashboard = React.lazy(() => import('../../module-explorer/u
 const ProcessLibraryWorkspace = React.lazy(() => import('../../module-explorer/ui/ProcessLibraryWorkspace').then(module => ({ default: module.ProcessLibraryWorkspace })))
 const EmployeeLifecycleJourneyView = React.lazy(() => import('../../lifecycle-journey/ui/EmployeeLifecycleJourneyView').then(module => ({ default: module.EmployeeLifecycleJourneyView })))
 const PolicyCenterPage = React.lazy(() => import('../../../features/policy-browser/ui/PolicyCenterPage').then(module => ({ default: module.PolicyCenterPage })))
-const SopImportWorkspace = React.lazy(() => import('../../../features/sop-import/ui/SopImportWorkspace').then(module => ({ default: module.SopImportWorkspace })))
+const MyDocumentsWorkspace = React.lazy(() => import('../../../features/my-documents/ui/MyDocumentsWorkspace').then(module => ({ default: module.MyDocumentsWorkspace })))
+const DocumentConversionWorkspace = React.lazy(() => import('../../../features/document-conversion/ui/DocumentConversionWorkspace').then(module => ({ default: module.DocumentConversionWorkspace })))
 const AdminWorkspace = React.lazy(() => import('../../admin-workspace/ui/AdminWorkspace').then(module => ({ default: module.AdminWorkspace })))
 import { LanguageSelector } from '../../../shared/ui/molecules/LanguageSelector'
 import { PageIntro } from '../../../shared/ui/molecules/AdminSurface'
@@ -43,9 +45,9 @@ const headerBusinessClusters: Array<{ id: BusinessClusterId; label: string }> = 
   { id: 'platform', label: 'Nền tảng' }
 ]
 
-type EmployeeLifecycleTab = 'lifecycle' | 'masterdata' | 'reports' | 'process-library' | 'journey' | 'operations' | 'policies' | 'imports' | 'admin'
+type EmployeeLifecycleTab = 'lifecycle' | 'masterdata' | 'reports' | 'process-library' | 'journey' | 'operations' | 'policies' | 'imports' | 'conversions' | 'admin'
 
-const adminWorkspaceSections = new Set<AdminWorkspaceSection>(['overview', 'users', 'access', 'catalog', 'imports', 'master-data', 'settings'])
+const adminWorkspaceSections = new Set<AdminWorkspaceSection>(['overview', 'users', 'access', 'catalog', 'imports', 'sop-approvals', 'master-data', 'audit', 'settings'])
 
 const getAdminSectionFromLocation = (pathname: string, sectionParam: string | null): AdminWorkspaceSection => {
   if (adminWorkspaceSections.has(sectionParam as AdminWorkspaceSection)) return sectionParam as AdminWorkspaceSection
@@ -53,6 +55,8 @@ const getAdminSectionFromLocation = (pathname: string, sectionParam: string | nu
   if (pathname.endsWith('/access')) return 'access'
   if (pathname.endsWith('/catalog')) return 'catalog'
   if (pathname.endsWith('/imports')) return 'imports'
+  if (pathname.endsWith('/sop-approvals')) return 'sop-approvals'
+  if (pathname.endsWith('/audit')) return 'audit'
   if (pathname.endsWith('/master-data')) return 'master-data'
   if (pathname.endsWith('/settings')) return 'settings'
   return 'overview'
@@ -61,6 +65,21 @@ const getAdminSectionFromLocation = (pathname: string, sectionParam: string | nu
 const isBusinessClusterId = (value: string | null): value is BusinessClusterId =>
   Boolean(value && headerBusinessClusters.some((cluster) => cluster.id === value))
 
+const isMasterDataWorkspaceView = (value: string | null): value is WorkspaceView =>
+  value === 'catalogs' || value === 'process' || value === 'relations'
+
+const getSectionFromTab = (tab: EmployeeLifecycleTab, allowedMenuCodes?: Set<string>): string => {
+  if (tab === 'imports') return 'SOP_IMPORT'
+  if (tab === 'conversions') return 'DOCUMENT_CONVERSION'
+  if (tab === 'process-library') return 'process-library'
+  if (tab === 'admin') return 'ADMIN'
+  if (tab === 'policies') return 'policy-center'
+  if (tab === 'operations') return allowedMenuCodes && !allowedMenuCodes.has('layer-3-operations') && allowedMenuCodes.has('system-support') ? 'system-support' : 'layer-3-operations'
+  if (tab === 'journey' || tab === 'lifecycle') return 'layer-2-lifecycle'
+  if (tab === 'masterdata') return 'layer-1-master-data'
+  return 'overview-dashboard'
+}
+
 export const EmployeeWorkspace: React.FC = () => {
   const { t } = useLanguage()
   const session = useSession()
@@ -68,18 +87,33 @@ export const EmployeeWorkspace: React.FC = () => {
   const location = useLocation()
   const navigate = useNavigate()
   const [searchParams, setSearchParams] = useSearchParams()
+  const masterDataViewParam = searchParams.get('view')
+  const activeMasterDataView: WorkspaceView = isMasterDataWorkspaceView(masterDataViewParam)
+    ? masterDataViewParam
+    : 'catalogs'
 
   const getTabFromLocation = useCallback((): EmployeeLifecycleTab => {
     const tabParam = searchParams.get('tab')
-    if (location.pathname.includes('/employee-lifecycle/sop-imports') || tabParam === 'imports') return 'imports'
+    if (tabParam === 'conversions') return 'conversions'
+    if (tabParam === 'imports') return 'imports'
     if (tabParam === 'process-library') return 'process-library'
-    if (location.pathname.includes('/employee-lifecycle/admin') || tabParam === 'admin') return 'admin'
-    if (location.pathname.includes('/employee-lifecycle/policies') || tabParam === 'policies') return 'policies'
-    if (location.pathname.includes('/employee-lifecycle/operations') || tabParam === 'operations') return 'operations'
-    if (location.pathname.includes('/employee-lifecycle/journey') || tabParam === 'journey') return 'journey'
-    if (location.pathname.includes('/employee-lifecycle/masterdata') || tabParam === 'masterdata') return 'masterdata'
-    if (location.pathname.includes('/employee-lifecycle/lifecycle') || tabParam === 'lifecycle') return 'lifecycle'
-    if (location.pathname.includes('/employee-lifecycle/reports') || location.pathname.includes('/employee-lifecycle/workbench') || tabParam === 'reports') return 'reports'
+    if (tabParam === 'admin') return 'admin'
+    if (tabParam === 'policies') return 'policies'
+    if (tabParam === 'operations') return 'operations'
+    if (tabParam === 'journey') return 'journey'
+    if (tabParam === 'masterdata') return 'masterdata'
+    if (tabParam === 'lifecycle') return 'lifecycle'
+    if (tabParam === 'reports') return 'reports'
+
+    if (location.pathname.includes('/employee-lifecycle/document-conversions')) return 'conversions'
+    if (location.pathname.includes('/employee-lifecycle/sop-imports')) return 'imports'
+    if (location.pathname.includes('/employee-lifecycle/admin')) return 'admin'
+    if (location.pathname.includes('/employee-lifecycle/policies')) return 'policies'
+    if (location.pathname.includes('/employee-lifecycle/operations')) return 'operations'
+    if (location.pathname.includes('/employee-lifecycle/journey')) return 'journey'
+    if (location.pathname.includes('/employee-lifecycle/masterdata')) return 'masterdata'
+    if (location.pathname.includes('/employee-lifecycle/lifecycle')) return 'lifecycle'
+    if (location.pathname.includes('/employee-lifecycle/reports') || location.pathname.includes('/employee-lifecycle/workbench')) return 'reports'
     return 'reports'
   }, [location.pathname, searchParams])
 
@@ -94,11 +128,21 @@ export const EmployeeWorkspace: React.FC = () => {
   })
   const [isGuideModalOpen] = useState(false)
 
-  const [activeSection, setActiveSection] = useState('overview-dashboard')
+  const allowedMenuCodes = useMemo(() => new Set([
+    ...session.menuItems.map((item) => item.code),
+    // Admin navigation is role-gated in the workspace. Keep the local alias
+    // so older sessions/databases that omit the menu row do not bounce an
+    // authorized Admin back to the employee dashboard.
+    ...(['ADMIN', 'SUPER_ADMIN'].includes(session.systemRole) ? ['ADMIN'] : []),
+    // Company policies are available to every authenticated employee.
+    'policy-center'
+  ]), [session.menuItems, session.systemRole])
+  const [activeSection, setActiveSection] = useState(() => getSectionFromTab(getTabFromLocation(), allowedMenuCodes))
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false)
   const [, startTransition] = useTransition()
-  const allowedMenuCodes = useMemo(() => new Set(session.menuItems.map((item) => item.code)), [session.menuItems])
-  const canCreateSop = Array.isArray(session.capabilities) && session.capabilities.includes('sop.create')
+  const canManageOwnDocuments = Array.isArray(session.capabilities)
+    && session.capabilities.includes('sop.read')
+    && session.modules.length > 0
   const accessibleModuleIds = useMemo(() => new Set(session.modules.map((module) => module.id)), [session.modules])
 
   const visibleBusinessClusters = useMemo(() => headerBusinessClusters.filter((cluster) => {
@@ -113,25 +157,13 @@ export const EmployeeWorkspace: React.FC = () => {
       setActiveTab(tab)
     })
     if (tab === 'admin') {
-      setSearchParams((previous) => {
-        const next = new URLSearchParams(previous)
-        next.set('tab', 'admin')
-        next.set('adminSection', 'overview')
-        return next
-      })
+      navigate('/employee-lifecycle/admin')
     } else if (tab === 'imports') {
-      setSearchParams((previous) => {
-        const next = new URLSearchParams(previous)
-        next.set('tab', 'imports')
-        return next
-      })
+      navigate('/employee-lifecycle/sop-imports')
+    } else if (tab === 'conversions') {
+      navigate('/employee-lifecycle/document-conversions')
     } else if (tab === 'process-library') {
-      setSearchParams((previous) => {
-        const next = new URLSearchParams(previous)
-        next.set('tab', 'process-library')
-        next.set('cluster', activeBusinessCluster)
-        return next
-      })
+      navigate(`/employee-lifecycle?tab=process-library&cluster=${activeBusinessCluster}`)
     } else if (tab === 'policies') {
       navigate('/employee-lifecycle/policies')
     } else if (tab === 'operations') {
@@ -145,7 +177,7 @@ export const EmployeeWorkspace: React.FC = () => {
     } else if (tab === 'lifecycle') {
       navigate('/employee-lifecycle/lifecycle')
     }
-    window.scrollTo({ top: 0, behavior: 'smooth' })
+    window.scrollTo({ top: 0, behavior: 'instant' })
   }
 
   const handleBusinessClusterChange = (cluster: BusinessClusterId) => {
@@ -164,8 +196,18 @@ export const EmployeeWorkspace: React.FC = () => {
       next.delete('type')
       return next
     })
-    window.scrollTo({ top: 0, behavior: 'smooth' })
+    window.scrollTo({ top: 0, behavior: 'instant' })
   }
+
+  const handleMasterDataViewChange = useCallback((view: WorkspaceView) => {
+    setSearchParams((previous) => {
+      const next = new URLSearchParams(previous)
+      next.set('view', view)
+      next.delete('catalog')
+      next.delete('page')
+      return next
+    })
+  }, [setSearchParams])
 
   // Effect to sync URL back to state if navigate() or back button is called
   useEffect(() => {
@@ -177,6 +219,8 @@ export const EmployeeWorkspace: React.FC = () => {
     }
     if (tabFromUrl === 'imports') {
       setActiveSection('SOP_IMPORT')
+    } else if (tabFromUrl === 'conversions') {
+      setActiveSection('DOCUMENT_CONVERSION')
     } else if (tabFromUrl === 'process-library') {
       setActiveSection('process-library')
     } else if (tabFromUrl === 'admin' || location.pathname.includes('/employee-lifecycle/admin')) {
@@ -206,14 +250,16 @@ export const EmployeeWorkspace: React.FC = () => {
       operations: ['layer-3-operations', 'system-support'],
       policies: ['policy-center'],
       imports: ['SOP_IMPORT'],
+      conversions: ['DOCUMENT_CONVERSION'],
       admin: ['ADMIN']
     }
-    if (activeTab === 'imports' && canCreateSop) return
+    if ((activeTab === 'imports' || activeTab === 'conversions') && canManageOwnDocuments) return
     if (menuCodesByTab[activeTab].some((code) => allowedMenuCodes.has(code))) return
 
     const fallbackDestinations: Array<{ code: string; tab: typeof activeTab; path: string }> = [
       { code: 'overview-dashboard', tab: 'reports', path: '/employee-lifecycle' },
       { code: 'process-library', tab: 'process-library', path: '/employee-lifecycle?tab=process-library&cluster=core' },
+      { code: 'DOCUMENT_CONVERSION', tab: 'conversions', path: '/employee-lifecycle/document-conversions' },
       { code: 'layer-1-master-data', tab: 'masterdata', path: '/employee-lifecycle/masterdata' },
       { code: 'layer-2-lifecycle', tab: 'journey', path: '/employee-lifecycle/journey?stage=LIFE-00&scenario=all' },
       { code: 'layer-3-operations', tab: 'operations', path: '/employee-lifecycle/operations' },
@@ -227,10 +273,10 @@ export const EmployeeWorkspace: React.FC = () => {
     setActiveSection(fallback.code)
     setActiveTab(fallback.tab)
     navigate(fallback.path, { replace: true })
-  }, [activeTab, allowedMenuCodes, canCreateSop, navigate])
+  }, [activeTab, allowedMenuCodes, canManageOwnDocuments, navigate])
 
   useEffect(() => {
-    if (activeTab === 'admin' && session.systemRole !== 'ADMIN') {
+    if (activeTab === 'admin' && !['ADMIN', 'SUPER_ADMIN'].includes(session.systemRole)) {
       navigate('/employee-lifecycle', { replace: true })
     }
   }, [activeTab, navigate, session.systemRole])
@@ -277,7 +323,7 @@ export const EmployeeWorkspace: React.FC = () => {
     }
   }, [isDarkMode])
 
-  // Sync state if class on html changes externally (e.g. from WorkflowDetailPage or WireframeFormDetailPage)
+  // Sync state if class on html changes externally (e.g. from WorkflowDetailPage)
   useEffect(() => {
     const handleClassChange = () => {
       const isDark = document.documentElement.classList.contains('dark')
@@ -295,7 +341,6 @@ export const EmployeeWorkspace: React.FC = () => {
     location.pathname.startsWith('/employee-lifecycle/flowchart/') ||
     location.pathname.startsWith('/employee-lifecycle/raci/') ||
     location.pathname.startsWith('/employee-lifecycle/specs/')
-  const isWireframeRoute = location.pathname.startsWith('/employee-lifecycle/wireframe/')
   const isERDOpen = location.pathname === '/employee-lifecycle/erd'
 
   const handleOpenERD = () => {
@@ -307,12 +352,17 @@ export const EmployeeWorkspace: React.FC = () => {
   }
 
   const handleNavigateSection = (sectionId: string) => {
-    if (sectionId === 'SOP_IMPORT' && !canCreateSop) return
-    if (sectionId !== 'SOP_IMPORT' && !allowedMenuCodes.has(sectionId)) return
+    if (['SOP_IMPORT', 'DOCUMENT_CONVERSION'].includes(sectionId) && !canManageOwnDocuments) return
+    if (!['SOP_IMPORT', 'DOCUMENT_CONVERSION'].includes(sectionId) && !allowedMenuCodes.has(sectionId)) return
     setActiveSection(sectionId)
 
     if (sectionId === 'SOP_IMPORT') {
       handleTabChange('imports')
+      return
+    }
+
+    if (sectionId === 'DOCUMENT_CONVERSION') {
+      handleTabChange('conversions')
       return
     }
 
@@ -436,7 +486,6 @@ export const EmployeeWorkspace: React.FC = () => {
         process: { steps: rawNode.process.steps, source: rawNode.process.source, status: rawNode.process.status },
         sopIds: sopInfo ? [sopInfo.badge] : rawNode.sopIds,
         sopTitles: sopInfo ? [sopInfo.title] : [],
-        uiFields: rawNode.wireframe.fields
       }
     }
 
@@ -468,7 +517,7 @@ export const EmployeeWorkspace: React.FC = () => {
         },
         sopIds: sopInfo ? [sopInfo.badge] : [sopDbItem.sopCode],
         sopTitles: sopInfo ? [sopInfo.title] : [sopDbItem.sopTitle],
-        uiFields: firstStep?.fieldsChecklist || []
+        fieldsChecklist: firstStep?.fieldsChecklist || []
       }
     }
 
@@ -500,7 +549,6 @@ export const EmployeeWorkspace: React.FC = () => {
         },
         sopIds: sopInfo ? [sopInfo.badge] : opMod?.sopIds || ['SOP-CF-01'],
         sopTitles: sopInfo ? [sopInfo.title] : [],
-        uiFields: ['Mã phát sinh', 'Thời gian áp dụng', 'Người thực hiện', 'Trạng thái phê duyệt']
       }
     }
 
@@ -515,18 +563,11 @@ export const EmployeeWorkspace: React.FC = () => {
     return null
   }, [isWorkflowRoute, routeId, getItemById])
 
-  const wireframeItem = useMemo(() => {
-    if (isWireframeRoute && routeId) {
-      return getItemById(routeId)
-    }
-    return null
-  }, [isWireframeRoute, routeId, getItemById])
-
   const requiredRouteModuleIds = useMemo(
     () => requiredModuleIdsForRoute(routeId, searchParams.get('sop')),
     [routeId, searchParams]
   )
-  const isDetailRoute = isWorkflowRoute || isWireframeRoute
+  const isDetailRoute = isWorkflowRoute
   const isRouteAccessRestricted = Boolean(
     isDetailRoute
     && routeId
@@ -539,30 +580,22 @@ export const EmployeeWorkspace: React.FC = () => {
     navigate(withWorkspaceReturn(`/employee-lifecycle/workflow/${id}`, getCurrentWorkspacePath(location)))
   }
 
-  const handleOpenWireframe = (itemToOpen: DetailItem) => {
-    navigate(withWorkspaceReturn(`/employee-lifecycle/wireframe/${itemToOpen.id}`, getCurrentWorkspacePath(location)))
-  }
-
   const handleCloseWorkflow = () => {
     navigate(resolveWorkspaceReturn(searchParams))
   }
 
-  const handleCloseWireframe = () => {
-    const returnTo = searchParams.get('returnTo')
-    if (returnTo) {
-      navigate(resolveWorkspaceReturn(searchParams))
-    } else if (routeId) {
-      navigate(`/employee-lifecycle/workflow/${routeId}`)
-    } else {
-      navigate('/employee-lifecycle')
-    }
-  }
-
   const currentHeaderInfo = useMemo(() => {
+    if (activeTab === 'conversions' || activeSection === 'DOCUMENT_CONVERSION') {
+      return {
+        subtitle: 'XƯỞNG CHUYỂN HÓA SOP',
+        title: 'Chuyển hóa tài liệu',
+        icon: ScanText
+      }
+    }
     if (activeTab === 'imports' || activeSection === 'SOP_IMPORT') {
       return {
-        subtitle: 'QUẢN LÝ TÀI LIỆU SOP',
-        title: 'Upload và số hóa tài liệu',
+        subtitle: 'KHO TÀI LIỆU CÁ NHÂN',
+        title: 'Tài liệu của tôi',
         icon: FileUp
       }
     }
@@ -647,7 +680,7 @@ export const EmployeeWorkspace: React.FC = () => {
     )
   }
 
-  if (isDetailRoute && routeId && !selectedItem && !wireframeItem) {
+  if (isDetailRoute && routeId && !selectedItem) {
     return (
       <main className="flex min-h-screen items-center justify-center bg-slate-50 px-4 dark:bg-slate-950">
         <section className="w-full max-w-lg rounded-2xl border border-slate-200 bg-white p-7 text-center shadow-lg dark:border-slate-800 dark:bg-slate-900">
@@ -663,23 +696,12 @@ export const EmployeeWorkspace: React.FC = () => {
     )
   }
 
-  // IF WIREFRAME ITEM IS OPENED, RENDER FULL-PAGE FORM UI WORKSPACE!
-  if (isWireframeRoute && wireframeItem) {
-    return (
-      <WireframeFormDetailPage
-        item={wireframeItem}
-        onBack={handleCloseWireframe}
-      />
-    )
-  }
-
   // IF AN ITEM IS SELECTED, RENDER FULL WORKFLOW DETAIL PAGE WITH BACK BUTTON!
   if (isWorkflowRoute && selectedItem) {
     return (
       <WorkflowDetailPage
         item={selectedItem}
         onBack={handleCloseWorkflow}
-        onOpenWireframe={handleOpenWireframe}
       />
     )
   }
@@ -687,7 +709,7 @@ export const EmployeeWorkspace: React.FC = () => {
   const HeaderIcon = currentHeaderInfo.icon
 
   return (
-    <div className={`min-h-screen transition-all duration-300 pb-20 ${isDarkMode ? 'bg-slate-950 text-slate-100' : 'bg-slate-50/50 text-slate-800'
+    <div className={`min-h-screen transition-[padding-left] duration-300 pb-20 ${isDarkMode ? 'bg-slate-950 text-slate-100' : 'bg-slate-50/50 text-slate-800'
       } ${isSidebarCollapsed ? 'pl-12 sm:pl-16' : 'pl-12 sm:pl-16 md:pl-64'
       }`}>
 
@@ -702,7 +724,7 @@ export const EmployeeWorkspace: React.FC = () => {
 
       {/* Streamlined Compact Top Navigation Header */}
       <header className="bg-white text-slate-900 border-b border-slate-200 sticky top-0 z-50 shadow-sm dark:bg-slate-900 dark:text-slate-100 dark:border-slate-800">
-        <div className="w-[96%] max-w-[1920px] mx-auto px-2 sm:px-4 py-2 sm:py-2.5 flex items-center justify-between gap-4">
+        <div className="w-[96%] max-w-[1920px] mx-auto px-2 sm:px-4 py-2 sm:py-2.5 flex flex-wrap items-center justify-between gap-x-4 gap-y-2">
           {/* CỘT TRÁI: LOGO VÀ TIÊU ĐỀ HỆ THỐNG */}
           <div className="flex min-w-0 items-center gap-2.5 sm:gap-3 shrink-0">
             <div className="p-1.5 sm:p-2 bg-[#1f5f86] rounded-lg text-white shadow-xs shrink-0">
@@ -721,7 +743,7 @@ export const EmployeeWorkspace: React.FC = () => {
           </div>
 
           {/* CỘT GIỮA: CỤM NGHIỆP VỤ HRM (CHỈ HIỂN THỊ KHI Ở MÀN HÌNH DASHBOARD CHỈ SỐ) */}
-          {(activeTab === 'reports' || activeTab === 'process-library') && (
+          {activeTab === 'reports' && (
             <nav
               className="hidden md:flex flex-1 items-center justify-center gap-1.5 max-w-[720px] rounded-xl animate-fadeIn"
               aria-label="Cụm nghiệp vụ HRM"
@@ -734,8 +756,8 @@ export const EmployeeWorkspace: React.FC = () => {
                     type="button"
                     onClick={() => handleBusinessClusterChange(cluster.id)}
                     className={`whitespace-nowrap rounded-lg px-3.5 py-1.5 text-xs sm:text-[13px] font-bold transition-all cursor-pointer ${active
-                        ? 'bg-[#1f5f86] text-white shadow-2xs'
-                        : 'text-slate-700 hover:bg-white hover:text-[#1f5f86] dark:text-slate-300 dark:hover:bg-slate-800 dark:hover:text-white'
+                      ? 'bg-[#1f5f86] text-white shadow-2xs'
+                      : 'text-slate-700 hover:bg-white hover:text-[#1f5f86] dark:text-slate-300 dark:hover:bg-slate-800 dark:hover:text-white'
                       }`}
                   >
                     {cluster.label}
@@ -743,6 +765,14 @@ export const EmployeeWorkspace: React.FC = () => {
                 )
               })}
             </nav>
+          )}
+
+          {activeTab === 'masterdata' && (
+            <MasterDataViewTabs
+              value={activeMasterDataView}
+              onChange={handleMasterDataViewChange}
+              className="order-3 hidden w-full justify-center lg:flex 2xl:order-none 2xl:w-auto 2xl:max-w-[520px] 2xl:flex-1"
+            />
           )}
 
           {/* CỘT PHẢI: TÌM KIẾM, NGÔN NGỮ & GIAO DIỆN TỐI */}
@@ -888,12 +918,8 @@ export const EmployeeWorkspace: React.FC = () => {
 
         {activeTab === 'process-library' && (
           <section id="process-library" className="space-y-5 animate-fadeIn scroll-mt-28">
-            <PageIntro
-              title="Thư viện quy trình"
-              description="Chọn cụm nghiệp vụ, phân hệ và SOP để tra cứu mục tiêu, người thực hiện, đầu vào, bước xử lý và kết quả bàn giao."
-            />
             <Suspense fallback={<div className="flex h-96 flex-col items-center justify-center gap-3"><Loader2 className="h-8 w-8 animate-spin text-[#1f5f86]" /><span className="text-sm font-bold text-slate-500">Đang mở thư viện quy trình...</span></div>}>
-              <ProcessLibraryWorkspace activeCluster={activeBusinessCluster} />
+              <ProcessLibraryWorkspace />
             </Suspense>
           </section>
         )}
@@ -909,19 +935,31 @@ export const EmployeeWorkspace: React.FC = () => {
           </div>
         )}
 
-        {activeTab === 'imports' && canCreateSop && (
+        {activeTab === 'imports' && canManageOwnDocuments && (
           <section id="SOP_IMPORT" className="space-y-5 animate-fadeIn scroll-mt-28">
             <PageIntro
-              title="Upload và số hóa tài liệu"
-              description="Chuyển DOCX hoặc PDF thành SOP có cấu trúc, hiệu chỉnh kết quả và gửi bản nháp để quản trị viên phê duyệt."
+              title="Tài liệu của tôi"
+              description="Upload, lưu trữ và tra cứu tài liệu cá nhân."
             />
-            <Suspense fallback={<div className="flex h-96 flex-col items-center justify-center gap-3"><Loader2 className="h-8 w-8 animate-spin text-[#1f5f86]" /><span className="text-sm font-bold text-slate-500">Đang mở không gian số hóa...</span></div>}>
-              <SopImportWorkspace />
+            <Suspense fallback={<div className="flex h-96 flex-col items-center justify-center gap-3"><Loader2 className="h-8 w-8 animate-spin text-[#1f5f86]" /><span className="text-sm font-bold text-slate-500">Đang mở kho tài liệu cá nhân...</span></div>}>
+              <MyDocumentsWorkspace />
             </Suspense>
           </section>
         )}
 
-        {activeTab === 'admin' && session.systemRole === 'ADMIN' && (
+        {activeTab === 'conversions' && canManageOwnDocuments && (
+          <section id="DOCUMENT_CONVERSION" className="space-y-5 animate-fadeIn scroll-mt-28">
+            <PageIntro
+              title="Chuyển hóa tài liệu"
+              description="Chọn tài liệu đang lưu để chuẩn bị trích xuất nội dung và cấu trúc thành các bước nghiệp vụ."
+            />
+            <Suspense fallback={<div className="flex h-96 flex-col items-center justify-center gap-3"><Loader2 className="h-8 w-8 animate-spin text-[#1f5f86]" /><span className="text-sm font-bold text-slate-500">Đang tải tài liệu nguồn...</span></div>}>
+              <DocumentConversionWorkspace />
+            </Suspense>
+          </section>
+        )}
+
+        {activeTab === 'admin' && ['ADMIN', 'SUPER_ADMIN'].includes(session.systemRole) && (
           <Suspense fallback={<div className="flex h-96 flex-col items-center justify-center gap-3"><Loader2 className="h-8 w-8 animate-spin text-[#1f5f86]" /><span className="text-sm font-bold text-slate-500">Đang mở khu vực quản trị...</span></div>}>
             <AdminWorkspace activeSection={activeAdminSection} isDarkMode={isDarkMode} />
           </Suspense>
@@ -939,3 +977,5 @@ export const EmployeeWorkspace: React.FC = () => {
     </div>
   )
 }
+
+

@@ -8,6 +8,7 @@ import {
 } from 'lucide-react'
 import type { SopSubProcess } from '../../../../entities/sop/model/types'
 import type { SopProcessSummary } from '../../../../entities/sop/model/sopDatabase'
+import { Select } from '../../../../shared/ui/atoms/Select'
 import type { CatalogViewModel } from '../../../../entities/master-data/model/masterDataCatalogAdapter'
 
 export interface ProcessGuideWorkspaceProps {
@@ -79,13 +80,14 @@ export const ProcessGuideWorkspace: React.FC<ProcessGuideWorkspaceProps> = ({
           <label htmlFor="process-guide-select" className="sr-only">
             Chọn quy trình
           </label>
-          <select
+          <Select
             id="process-guide-select"
+            visualSize="compact"
             value={selectedProcessCode}
             onChange={(e) => onSelectProcess(e.target.value)}
+            containerClassName="flex-[1.4] min-w-[240px]"
             className={`
-              flex-[1.4] rounded-lg border px-3 py-2 text-xs font-semibold outline-none
-              focus:border-blue-500 cursor-pointer
+              rounded-xl border px-3 py-2 text-xs font-semibold
               ${isDarkMode ? 'bg-slate-800 border-slate-700 text-white' : 'bg-white border-slate-200 text-slate-900'}
             `}
           >
@@ -98,7 +100,7 @@ export const ProcessGuideWorkspace: React.FC<ProcessGuideWorkspaceProps> = ({
             {filteredProcesses.length === 0 && (
               <option disabled>Không tìm thấy quy trình</option>
             )}
-          </select>
+          </Select>
         </div>
       </div>
 

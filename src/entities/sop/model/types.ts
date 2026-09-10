@@ -3,7 +3,6 @@ import type { DetailItem } from '../../module/model/lifecycle.types'
 export interface WorkflowDetailPageProps {
   item: DetailItem
   onBack: () => void
-  onOpenWireframe?: (item: DetailItem) => void
 }
 
 export interface SopSubStep {
@@ -31,6 +30,25 @@ export interface SopSubProcess {
   steps: SopSubStep[]
   sourceNote?: string
   notes?: string[]
+  access?: {
+    classification: 'internal' | 'restricted' | 'confidential' | 'highly-restricted'
+    sopViewers: string[]
+    recordViewers: string[]
+    excluded: string[]
+  }
+  documentControl?: {
+    owner: string
+    reviewers: string[]
+    approver: string
+    reviewCycle: string
+  }
+  approvalFlow?: Array<{
+    order: number
+    actor: string
+    decision: string
+    condition?: string
+    outcome: string
+  }>
 }
 
 export interface RoleDataFlow {

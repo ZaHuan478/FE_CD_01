@@ -12,6 +12,7 @@ import {
   LogOut,
   Settings,
   FileUp,
+  ScanText,
   BookOpen
 } from 'lucide-react'
 import { useLanguage } from '../../../shared/lib/i18n/LanguageContext'
@@ -53,7 +54,10 @@ export const LeftSidebarNav: React.FC<LeftSidebarNavProps> = ({
     }
   }
 
-  const allowedMenuCodes = new Set(session.menuItems.map((item) => item.code))
+  const allowedMenuCodes = new Set([
+    ...session.menuItems.map((item) => item.code),
+    ...(['ADMIN', 'SUPER_ADMIN'].includes(session.systemRole) ? ['ADMIN'] : [])
+  ])
   const menuGroups = [
     {
       groupTitle: t('sidebar.group.overview', 'BẮT ĐẦU TỪ ĐÂY'),
@@ -125,16 +129,22 @@ export const LeftSidebarNav: React.FC<LeftSidebarNavProps> = ({
           color: 'text-blue-600',
           onClick: onOpenERD
         },
-        ...(Array.isArray(session.capabilities) && session.capabilities.includes('sop.create') ? [{
+        ...(Array.isArray(session.capabilities) && session.capabilities.includes('sop.read') && session.modules.length > 0 ? [{
           id: 'SOP_IMPORT',
-          label: 'Upload & số hóa SOP',
+          label: 'Tài liệu của tôi',
           icon: FileUp,
-          badge: 'Tạo mới',
+          badge: 'Tài liệu',
           color: 'text-cyan-700'
+        }, {
+          id: 'DOCUMENT_CONVERSION',
+          label: 'Chuyển hóa tài liệu',
+          icon: ScanText,
+          badge: 'Xử lý',
+          color: 'text-amber-700'
         }] : [])
       ]
     },
-    ...(session.systemRole === 'ADMIN' ? [{
+    ...(['ADMIN', 'SUPER_ADMIN'].includes(session.systemRole) ? [{
       groupTitle: t('sidebar.group.administration', 'KHU VỰC QUẢN TRỊ'),
       items: [
         {
@@ -148,7 +158,7 @@ export const LeftSidebarNav: React.FC<LeftSidebarNavProps> = ({
     }] : [])
   ].map((group) => ({
     ...group,
-    items: group.items.filter((item) => item.id === 'SOP_IMPORT' || allowedMenuCodes.has(item.id))
+    items: group.items.filter((item) => ['SOP_IMPORT', 'DOCUMENT_CONVERSION', 'policy-center'].includes(item.id) || allowedMenuCodes.has(item.id))
   })).filter((group) => group.items.length > 0)
 
   const initials = session.fullName
@@ -310,3 +320,4 @@ export const LeftSidebarNav: React.FC<LeftSidebarNavProps> = ({
     </aside>
   )
 }
+

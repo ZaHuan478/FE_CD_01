@@ -428,25 +428,7 @@ Mọi bản ghi quan trọng phải có tối thiểu:
 
 Tham khảo hệ thống chỉ số cân bằng cho L&D và báo cáo vốn nhân lực tại ISO/TS 30437:2023 và ISO 30414:2025.
 
-## 13. Wireframe tối thiểu cần có trong demo
-
-1. Dashboard Phát triển con người.
-2. Màn hình thiết lập chu kỳ đánh giá.
-3. Phiếu mục tiêu/KPI cá nhân.
-4. Màn hình check-in.
-5. Phiếu tự đánh giá và đánh giá quản lý.
-6. Bảng hiệu chỉnh kết quả.
-7. Từ điển và ma trận năng lực.
-8. Kết quả competency gap.
-9. Kế hoạch phát triển cá nhân IDP.
-10. Catalog khóa học và đăng ký học.
-11. Quản lý lớp học/điểm danh/chứng chỉ.
-12. Dashboard hiệu quả đào tạo.
-13. Ma trận 9-Box.
-14. Successor slate theo vị trí trọng yếu.
-15. Trang ghi nhận và phúc lợi của nhân viên.
-
-## 14. Cách trình bày từng SOP trong demo
+## 13. Cách trình bày từng SOP trong demo
 
 Mỗi trang SOP dùng cùng một bố cục:
 
@@ -455,11 +437,10 @@ Mỗi trang SOP dùng cùng một bố cục:
 3. **RACI:** Vai trò theo từng bước.
 4. **Data Specs:** Trường dữ liệu, nguồn, bắt buộc, kiểm soát và mã thao tác.
 5. **Business Rules:** Điều kiện, công thức, effective date và ngoại lệ.
-6. **Wireframe:** Màn hình minh họa cho bước được chọn.
-7. **Liên kết:** Quy trình trước, quy trình sau và phân hệ nhận dữ liệu.
-8. **Kiểm soát:** Audit, phân quyền, bảo mật và bằng chứng.
+6. **Liên kết:** Quy trình trước, quy trình sau và phân hệ nhận dữ liệu.
+7. **Kiểm soát:** Audit, phân quyền, bảo mật và bằng chứng.
 
-## 15. Lộ trình triển khai demo
+## 14. Lộ trình triển khai demo
 
 ### Giai đoạn 1: Hiểu được câu chuyện
 
@@ -474,7 +455,6 @@ Mỗi trang SOP dùng cùng một bố cục:
 
 ### Giai đoạn 3: Nhìn thấy sản phẩm tương lai
 
-- Bổ sung 15 wireframe tối thiểu.
 - Bổ sung dashboard chỉ số và dữ liệu mẫu.
 - Bổ sung mô phỏng thay đổi trạng thái, phê duyệt và audit.
 

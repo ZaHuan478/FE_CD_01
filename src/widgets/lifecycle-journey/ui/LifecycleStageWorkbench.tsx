@@ -1,9 +1,4 @@
 import React from 'react'
-import { useNavigate } from 'react-router-dom'
-import {
-  ExternalLink,
-  Layout
-} from 'lucide-react'
 import { LifecycleStageContextPanel } from './LifecycleStageContextPanel'
 import { LifecycleStageDataFlow } from './LifecycleStageDataFlow'
 import { LifecycleStageSopList } from './LifecycleStageSopList'
@@ -21,12 +16,7 @@ export const LifecycleStageWorkbench: React.FC<LifecycleStageWorkbenchProps> = (
   selectedSopCode,
   onSelectSop
 }) => {
-  const navigate = useNavigate()
   const sops = getStageSops(stage.id)
-
-  const handleOpenWireframe = () => {
-    navigate(`/employee-lifecycle/wireframe/${stage.id}`)
-  }
 
   return (
     <article
@@ -56,18 +46,6 @@ export const LifecycleStageWorkbench: React.FC<LifecycleStageWorkbenchProps> = (
             <p className="mt-0.5 text-xs text-slate-600 dark:text-slate-300">
               {stage.oneLineSummary}
             </p>
-          </div>
-
-          <div className="flex items-center gap-2 shrink-0">
-            <button
-              type="button"
-              onClick={handleOpenWireframe}
-              className="inline-flex items-center gap-1.5 rounded-lg border border-sky-300 bg-sky-50 px-3 py-2 text-xs font-bold text-[#1f5f86] hover:bg-sky-100 dark:border-sky-800 dark:bg-sky-950 dark:text-sky-300 transition-colors shadow-2xs cursor-pointer"
-            >
-              <Layout className="h-4 w-4" />
-              <span>Mở màn hình mẫu (Wireframe)</span>
-              <ExternalLink className="h-3 w-3" />
-            </button>
           </div>
         </div>
       </header>

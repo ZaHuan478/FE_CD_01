@@ -3,7 +3,6 @@ import { runtimeGeneration } from '../../../shared/lib/runtime-datasets/runtimeD
 import {
   getCORE_OPERATIONS_STAGE_MAP,
   getWORKFLOW_ID_BY_SOP_CODE,
-  getKNOWN_WIREFRAME_IDS,
   type ModuleMetadata,
   type StageDefinition,
   type CoreOperationModuleId
@@ -22,8 +21,6 @@ export interface CoreOperationSop {
   stageNumber: number
   stageTitle: string
   workflowId: string
-  hasWireframe: boolean
-  wireframeId?: string
   stepTypes: StepTypeCode[]
   primaryType: StepTypeCode
   primaryActor: string
@@ -281,7 +278,6 @@ export const getCoreOperationsData = (): CoreOperationModuleResolved[] => {
     }
 
     const workflowId = getWORKFLOW_ID_BY_SOP_CODE()[canonicalCode] || sourceWorkflowId || moduleMetadata.workflowIdDefault
-    const hasWireframe = getKNOWN_WIREFRAME_IDS().has(workflowId)
     const stepTypes = extractStepTypes(currentProcess.steps)
     const primaryType = determinePrimaryType(stepTypes)
 
@@ -308,8 +304,6 @@ export const getCoreOperationsData = (): CoreOperationModuleResolved[] => {
       stageNumber,
       stageTitle,
       workflowId,
-      hasWireframe,
-      wireframeId: hasWireframe ? workflowId : undefined,
       stepTypes,
       primaryType,
       primaryActor,

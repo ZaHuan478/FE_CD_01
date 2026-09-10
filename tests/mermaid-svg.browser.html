@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="vi">
+<meta charset="utf-8">
+<title>Mermaid SVG regression</title>
+<body>
+<h1>Kiểm tra SVG và nhãn HTML</h1>
+<p id="result" role="status">Đang kiểm tra…</p>
+<main id="diagrams"></main>
+<script type="module">
+import mermaid from 'mermaid'
+import { prepareMermaidSvg } from '../src/shared/lib/mermaidSvg.ts'
+const assert = (condition, message) => { if (!condition) throw new Error(message) }
+const parser = new DOMParser()
+try {
+  const original = '<svg xmlns="http://www.w3.org/2000/svg"><g class="node task"><rect/><foreignObject><div xmlns="http://www.w3.org/1999/xhtml"><p>Hướng dẫn<br>Nhân viên &amp; HR&nbsp;</p></div></foreignObject></g><g class="node decision"><rect/></g></svg>'
+  assert(parser.parseFromString(original, 'image/svg+xml').querySelector('parsererror'), 'Fixture must reproduce the XML parsing error')
+  const normalized = prepareMermaidSvg(original)
+  const normalizedDoc = parser.parseFromString(normalized, 'image/svg+xml')
+  assert(!normalizedDoc.querySelector('parsererror'), 'HTML void tags/entities must serialize as valid XML')
+  assert(normalizedDoc.querySelector('g.task > rect').getAttribute('rx') === '10', 'Task corners must remain rounded')
+  assert(!normalizedDoc.querySelector('g.decision > rect').hasAttribute('rx'), 'Other shapes must not change')
+  assert(normalizedDoc.querySelector('br').namespaceURI === 'http://www.w3.org/1999/xhtml', 'HTML labels must keep their namespace')
+  let rejected = false
+  try { prepareMermaidSvg('<parsererror>Invalid SVG</parsererror>') } catch { rejected = true }
+  assert(rejected, 'Parser error pages must never be displayed as diagrams')
+  for (const direction of ['TD', 'LR']) {
+    for (const theme of ['base', 'dark']) {
+      mermaid.initialize({ startOnLoad: false, securityLevel: 'strict', theme, flowchart: { htmlLabels: true } })
+      const definition = `flowchart ${direction}
+        begin(["Bắt đầu"]) --> task("ATT18.01 · Khởi tạo đăng ký công tác ngoài<br/><small>Nhân viên &amp; HR</small>")
+        task --> decision{"Đủ thông tin?"}
+        decision -->|Có| finish(["Kết thúc"])
+        decision -->|Bổ sung| task
+        classDef task fill:#eff6ff,stroke:#0284c7,color:#0c4a6e
+        class task task`
+      const { svg } = await mermaid.render(`regression-${direction}-${theme}`, definition)
+      const fixed = prepareMermaidSvg(svg)
+      const xml = parser.parseFromString(fixed, 'image/svg+xml')
+      assert(!xml.querySelector('parsererror'), `${direction}/${theme}: invalid SVG export`)
+      assert(xml.querySelectorAll('g.node').length === 4, 'All nodes must remain present')
+      assert(xml.querySelectorAll('.edgePath, .flowchart-link').length >= 4, 'Branches must remain present')
+      const section = document.createElement('section')
+      section.innerHTML = fixed
+      document.querySelector('#diagrams').append(section)
+    }
+  }
+  document.querySelector('#result').textContent = 'PASS: HTML/XML, góc bo, nhánh, TD/LR, light/dark và SVG xuất hợp lệ.'
+} catch (error) {
+  document.querySelector('#result').textContent = `FAIL: ${error.message}`
+  console.error(error)
+}
+</script>
+</body>
+</html>

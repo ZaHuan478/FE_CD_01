@@ -2,6 +2,7 @@ import React, { useState } from 'react'
 import { Search, X, RotateCcw, SlidersHorizontal } from 'lucide-react'
 import type { PolicyFilterState, PolicyCategory, PolicyType, PolicyStatus, PolicySeverity } from '../../../../entities/policy/model/types'
 import { CATEGORY_METADATA, POLICY_TYPE_METADATA, STATUS_METADATA, SEVERITY_METADATA } from '../../../../entities/policy/lib/policyConstants'
+import { Select } from '../../../../shared/ui/atoms/Select'
 import { useLanguage } from '../../../../shared/lib/i18n/LanguageContext'
 
 interface PolicyFilterBarProps {
@@ -128,11 +129,12 @@ export const PolicyFilterBar: React.FC<PolicyFilterBarProps> = ({
             {language === 'vi' ? 'Nhóm nghiệp vụ' : 'Category'}
           </label>
           <div className="relative">
-            <select
+            <Select
               id="filter-category"
+              visualSize="compact"
               value={filter.category}
               onChange={handleCategoryChange}
-              className="w-full rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/80 px-2.5 py-1.5 text-xs font-semibold text-slate-800 dark:text-slate-200 outline-none focus:border-[#1f5f86] transition-colors cursor-pointer"
+              className="rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/80 px-2.5 py-1.5 text-xs font-semibold text-slate-800 dark:text-slate-200"
             >
               <option value="all">{language === 'vi' ? 'Tất cả nhóm nghiệp vụ' : 'All Categories'}</option>
               {Object.entries(CATEGORY_METADATA).map(([key, meta]) => (
@@ -140,7 +142,7 @@ export const PolicyFilterBar: React.FC<PolicyFilterBarProps> = ({
                   {language === 'vi' ? meta.label : meta.labelEn}
                 </option>
               ))}
-            </select>
+            </Select>
           </div>
         </div>
 
@@ -149,11 +151,12 @@ export const PolicyFilterBar: React.FC<PolicyFilterBarProps> = ({
           <label htmlFor="filter-type" className="text-[10px] font-extrabold uppercase tracking-wider text-slate-400">
             {language === 'vi' ? 'Loại quy định' : 'Policy Type'}
           </label>
-          <select
+          <Select
             id="filter-type"
+            visualSize="compact"
             value={filter.type}
             onChange={handleTypeChange}
-            className="w-full rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/80 px-2.5 py-1.5 text-xs font-semibold text-slate-800 dark:text-slate-200 outline-none focus:border-[#1f5f86] transition-colors cursor-pointer"
+            className="rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/80 px-2.5 py-1.5 text-xs font-semibold text-slate-800 dark:text-slate-200"
           >
             <option value="all">{language === 'vi' ? 'Tất cả loại quy định' : 'All Types'}</option>
             {Object.entries(POLICY_TYPE_METADATA).map(([key, meta]) => (
@@ -161,7 +164,7 @@ export const PolicyFilterBar: React.FC<PolicyFilterBarProps> = ({
                 {language === 'vi' ? meta.label : meta.labelEn}
               </option>
             ))}
-          </select>
+          </Select>
         </div>
 
         {/* Status Filter */}
@@ -169,11 +172,12 @@ export const PolicyFilterBar: React.FC<PolicyFilterBarProps> = ({
           <label htmlFor="filter-status" className="text-[10px] font-extrabold uppercase tracking-wider text-slate-400">
             {language === 'vi' ? 'Trạng thái hiệu lực' : 'Status'}
           </label>
-          <select
+          <Select
             id="filter-status"
+            visualSize="compact"
             value={filter.status}
             onChange={handleStatusChange}
-            className="w-full rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/80 px-2.5 py-1.5 text-xs font-semibold text-slate-800 dark:text-slate-200 outline-none focus:border-[#1f5f86] transition-colors cursor-pointer"
+            className="rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/80 px-2.5 py-1.5 text-xs font-semibold text-slate-800 dark:text-slate-200"
           >
             <option value="all">{language === 'vi' ? 'Tất cả trạng thái' : 'All Statuses'}</option>
             {Object.entries(STATUS_METADATA).map(([key, meta]) => (
@@ -181,7 +185,7 @@ export const PolicyFilterBar: React.FC<PolicyFilterBarProps> = ({
                 {language === 'vi' ? meta.label : meta.labelEn}
               </option>
             ))}
-          </select>
+          </Select>
         </div>
 
         {/* Severity Filter */}
@@ -189,11 +193,12 @@ export const PolicyFilterBar: React.FC<PolicyFilterBarProps> = ({
           <label htmlFor="filter-severity" className="text-[10px] font-extrabold uppercase tracking-wider text-slate-400">
             {language === 'vi' ? 'Mức độ tuân thủ' : 'Severity'}
           </label>
-          <select
+          <Select
             id="filter-severity"
+            visualSize="compact"
             value={filter.severity}
             onChange={handleSeverityChange}
-            className="w-full rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/80 px-2.5 py-1.5 text-xs font-semibold text-slate-800 dark:text-slate-200 outline-none focus:border-[#1f5f86] transition-colors cursor-pointer"
+            className="rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/80 px-2.5 py-1.5 text-xs font-semibold text-slate-800 dark:text-slate-200"
           >
             <option value="all">{language === 'vi' ? 'Tất cả mức độ' : 'All Severities'}</option>
             {Object.entries(SEVERITY_METADATA).map(([key, meta]) => (
@@ -201,7 +206,7 @@ export const PolicyFilterBar: React.FC<PolicyFilterBarProps> = ({
                 {language === 'vi' ? meta.label : meta.labelEn}
               </option>
             ))}
-          </select>
+          </Select>
         </div>
       </div>
     </div>

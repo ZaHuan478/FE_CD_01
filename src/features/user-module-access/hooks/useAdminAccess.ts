@@ -1,7 +1,10 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
-import { adminAccessApi, type AdminModule, type AdminUser, type UserModuleAccess } from '../../../shared/api/admin-access.api'
+import { adminAccessApi, type AdminModule, type AdminUser, type ModuleInput, type SystemRole, type UserModuleAccess } from '../../../shared/api/admin-access.api'
+import { useToast } from '../../../shared/ui/toast'
+import { getErrorMessage } from '../../../shared/lib/errors/apiError'
 
 export function useAdminAccess() {
+  const toast = useToast()
   const [users, setUsers] = useState<AdminUser[]>([])
   const [modules, setModules] = useState<AdminModule[]>([])
   const [selectedId, setSelectedId] = useState<string | null>(null)
@@ -11,7 +14,6 @@ export function useAdminAccess() {
   const [accessLoading, setAccessLoading] = useState(false)
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState('')
-  const [notice, setNotice] = useState('')
 
   const load = useCallback(async () => {
     setLoading(true); setError('')
@@ -37,27 +39,36 @@ export function useAdminAccess() {
 
   const selectedUser = useMemo(() => users.find(user => user.id === selectedId) ?? null, [users, selectedId])
   const toggleModule = (id: string) => setDraftModules(current => current.includes(id) ? current.filter(item => item !== id) : [...current, id])
+
   const saveModules = async () => {
     if (!selectedId) return
-    setSaving(true); setError(''); setNotice('')
+    setSaving(true); setError('')
     try {
       const result = await adminAccessApi.replaceUserModules(selectedId, draftModules)
-      setAccess(result.data); setDraftModules(result.data.assignedModuleIds); setNotice('Đã cập nhật quyền phân hệ')
+      setAccess(result.data); setDraftModules(result.data.assignedModuleIds)
+      toast.success('Đã cập nhật quyền phân hệ')
       await load()
-    } catch (reason) { setError(reason instanceof Error ? reason.message : 'Không lưu được quyền') }
-    finally { setSaving(false) }
+    } catch (reason) {
+      toast.error(getErrorMessage(reason, 'Không lưu được quyền'))
+    } finally { setSaving(false) }
   }
-  const createUser = async (body: { username: string; fullName: string; email?: string; systemRole: 'USER' | 'CONTENT_EDITOR' | 'ADMIN' }) => {
-    setSaving(true); setError(''); setNotice('')
+
+  const createUser = async (body: { username: string; fullName: string; email?: string; systemRole: Exclude<SystemRole, 'SUPER_ADMIN'> }) => {
+    setSaving(true); setError('')
     try {
       const user = await adminAccessApi.createUser({ username: body.username, fullName: body.fullName, email: body.email || null })
       if (body.systemRole !== 'USER') await adminAccessApi.updateUser(user.id, { systemRole: body.systemRole })
-      await load(); setSelectedId(user.id); setNotice('Đã tạo tài khoản mới'); return true
-    } catch (reason) { setError(reason instanceof Error ? reason.message : 'Không tạo được tài khoản'); return false }
-    finally { setSaving(false) }
+      await load(); setSelectedId(user.id)
+      toast.success('Đã tạo tài khoản mới')
+      return true
+    } catch (reason) {
+      toast.error(getErrorMessage(reason, 'Không tạo được tài khoản'))
+      return false
+    } finally { setSaving(false) }
   }
-  const updateUser = async (id: string, body: { active?: boolean; systemRole?: 'USER' | 'CONTENT_EDITOR' | 'ADMIN' }) => {
-    setSaving(true); setError(''); setNotice('')
+
+  const updateUser = async (id: string, body: { active?: boolean; systemRole?: SystemRole; department?: string | null; jobTitle?: string | null }) => {
+    setSaving(true); setError('')
     try {
       await adminAccessApi.updateUser(id, body)
       await load()
@@ -65,24 +76,46 @@ export function useAdminAccess() {
         const result = await adminAccessApi.userModules(id)
         setAccess(result.data); setDraftModules(result.data.assignedModuleIds)
       }
-      setNotice('Đã cập nhật tài khoản')
-    }
-    catch (reason) { setError(reason instanceof Error ? reason.message : 'Không cập nhật được tài khoản') }
-    finally { setSaving(false) }
-  }
-  const createModule = async (body: { code: string; title: string; description?: string; moduleType: string }) => {
-    setSaving(true); setError(''); setNotice('')
-    try { await adminAccessApi.createModule({ ...body, status: 'published', sortOrder: modules.length + 1 }); await load(); setNotice('Đã tạo phân hệ mới'); return true }
-    catch (reason) { setError(reason instanceof Error ? reason.message : 'Không tạo được phân hệ'); return false }
-    finally { setSaving(false) }
-  }
-  const updateModule = async (id: string, status: AdminModule['status']) => {
-    setSaving(true); setError(''); setNotice('')
-    try { await adminAccessApi.updateModule(id, { status }); await load(); setNotice('Đã cập nhật phân hệ') }
-    catch (reason) { setError(reason instanceof Error ? reason.message : 'Không cập nhật được phân hệ') }
-    finally { setSaving(false) }
+      toast.success('Đã cập nhật tài khoản')
+      return true
+    } catch (reason) {
+      toast.error(getErrorMessage(reason, 'Không cập nhật được tài khoản'))
+      return false
+    } finally { setSaving(false) }
   }
 
-  return { users, modules, selectedId, setSelectedId, selectedUser, access, draftModules, toggleModule,
-    loading, accessLoading, saving, error, notice, load, saveModules, createUser, updateUser, createModule, updateModule }
+  const createModule = async (body: ModuleInput) => {
+    setSaving(true); setError('')
+    try {
+      await adminAccessApi.createModule({ status: 'published', sortOrder: Math.max(0, ...modules.map(module => module.sortOrder)) + 10, ...body })
+      window.dispatchEvent(new Event('sop-catalog-changed'))
+      await load()
+      toast.success('Đã tạo phân hệ mới')
+      return true
+    } catch (reason) {
+      toast.error(getErrorMessage(reason, 'Không tạo được phân hệ'))
+      return false
+    } finally { setSaving(false) }
+  }
+
+  const updateModule = async (id: string, change: AdminModule['status'] | Partial<ModuleInput>) => {
+    setSaving(true); setError('')
+    try {
+      await adminAccessApi.updateModule(id, typeof change === 'string' ? { status: change } : change)
+      window.dispatchEvent(new Event('sop-catalog-changed'))
+      await load()
+      toast.success('Đã cập nhật phân hệ')
+      return true
+    } catch (reason) {
+      toast.error(getErrorMessage(reason, 'Không cập nhật được phân hệ'))
+      return false
+    } finally { setSaving(false) }
+  }
+
+  return {
+    users, modules, selectedId, setSelectedId, selectedUser, access, draftModules, toggleModule,
+    loading, accessLoading, saving, error, notice: null, load, saveModules, createUser, updateUser, createModule, updateModule
+  }
 }
+
+

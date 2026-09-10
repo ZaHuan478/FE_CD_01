@@ -100,6 +100,33 @@ async function render(element) {
   })
 }
 
+test('Master Data renders with a missing default group, invalid URL group, or no permitted groups', async () => {
+  const { MasterDataStudio } = await server.ssrLoadModule('/src/widgets/master-data-studio/ui/MasterDataStudio.tsx')
+  const compensation = { id: 'compensation', label: 'Lương và chế độ', iconName: 'Database', description: 'Danh mục lương', color: 'blue' }
+  const geography = { ...compensation, id: 'geography', label: 'Địa lý' }
+  const labels = keys => Object.fromEntries(keys.map(key => [key, { label: key, color: 'blue', description: '' }]))
+  for (const [groups, query, expected] of [
+    [[compensation], '', compensation.label],
+    [[compensation], '?group=invalid', compensation.label],
+    [[compensation, geography], '?group=geography', geography.label],
+    [[], '?group=identity', 'Chưa có danh mục Master Data trong phạm vi truy cập của bạn.']
+  ]) {
+    store.resetRuntimeDatasets()
+    store.installRuntimeDatasets({
+      'workflow.index': {},
+      'masterData.catalog': {
+        domainGroups: groups, allItems: [], catalogItems: [], governanceItems: [],
+        tierLabels: labels(['tier1_global', 'tier2_module', 'tier3_utility', 'tier4_governance']),
+        statusLabels: labels(['active', 'upcoming', 'legacy', 'deprecated'])
+      }
+    })
+    const html = await render(React.createElement(MemoryRouter, { initialEntries: ['/employee-lifecycle' + query] },
+      React.createElement(MasterDataStudio, { isDarkMode: false })))
+    assert(html.includes(expected))
+    if (groups.length) assert.match(html, new RegExp('<h3[^>]*>' + expected + '</h3>'))
+  }
+})
+
 test('home loads metadata only and a direct SOP URL loads its own workflow', async t => {
   let snapshot
   try { snapshot = JSON.parse(readFileSync(new URL('../../BackEnd/data/import/legacy-snapshot.json', import.meta.url), 'utf8')) }
@@ -119,10 +146,11 @@ test('home loads metadata only and a direct SOP URL loads its own workflow', asy
   })
   const { EmployeeWorkspace } = await server.ssrLoadModule('/src/widgets/employee-workspace/ui/EmployeeWorkspace.tsx')
   const { LanguageProvider } = await server.ssrLoadModule('/src/shared/lib/i18n/LanguageContext.tsx')
-  const tree = route => React.createElement(MemoryRouter, { initialEntries: [route] }, React.createElement(LanguageProvider, null,
+  const { ToastProvider } = await server.ssrLoadModule('/src/shared/ui/toast/ToastProvider.tsx')
+  const tree = route => React.createElement(MemoryRouter, { initialEntries: [route] }, React.createElement(LanguageProvider, null, React.createElement(ToastProvider, null,
     React.createElement(React.Suspense, { fallback: 'loading' }, React.createElement(Routes, null,
       React.createElement(Route, { path: '/employee-lifecycle', element: React.createElement(EmployeeWorkspace) }),
-      React.createElement(Route, { path: '/employee-lifecycle/workflow/:id', element: React.createElement(EmployeeWorkspace) })))))
+      React.createElement(Route, { path: '/employee-lifecycle/workflow/:id', element: React.createElement(EmployeeWorkspace) }))))))
   store.resetRuntimeDatasets()
   const home = await render(tree('/employee-lifecycle'))
   assert(home.length > 500)

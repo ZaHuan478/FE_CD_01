@@ -6,7 +6,7 @@ import { DomainIcon } from './DomainIcon'
 
 export interface DomainRailProps {
   isDarkMode: boolean
-  activeGroupId: DomainGroupId
+  activeGroupId: DomainGroupId | undefined
   groupCounts: Record<DomainGroupId, number>
   onGroupChange: (id: DomainGroupId) => void
   workspaceView: WorkspaceView

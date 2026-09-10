@@ -1,9 +1,17 @@
 import { getAuthenticationHeaders } from '../lib/auth/authCredentials'
-
 import { apiBaseUrl } from '../config/api'
+import {
+  ApiClientError,
+  isAbortError,
+  getErrorMessage,
+  parseApiErrorResponse
+} from '../lib/errors/apiError'
 
-interface ApiErrorBody {
-  error?: { code?: string; message?: string }
+export {
+  ApiClientError,
+  isAbortError,
+  getErrorMessage,
+  parseApiErrorResponse
 }
 
 export interface ApiRequestInit extends RequestInit {
@@ -40,16 +48,27 @@ export async function apiRequest<T>(path: string, init: ApiRequestInit = {}): Pr
     })
 
     if (!response.ok) {
-      let body: ApiErrorBody | null = null
-      try { body = await response.json() as ApiErrorBody } catch { /* response is not JSON */ }
-      const detail = body?.error?.message || `HTTP ${response.status}`
-      throw new Error(`Backend request failed: ${detail}`)
+      throw await parseApiErrorResponse(response)
     }
 
     return await response.json() as T
   } catch (error) {
     if (timedOut) {
-      throw new Error(`Máy chủ phản hồi quá thời gian (${Math.round(timeoutMs / 1000)} giây). Vui lòng thử lại.`)
+      throw new ApiClientError({
+        message: 'Máy chủ phản hồi quá thời gian. Vui lòng thử lại.',
+        code: 'REQUEST_TIMEOUT',
+        isTimeout: true
+      })
+    }
+    if (isAbortError(error) || error instanceof ApiClientError) {
+      throw error
+    }
+    if (error instanceof TypeError && /failed to fetch|networkerror|load failed/i.test(error.message)) {
+      throw new ApiClientError({
+        message: 'Không thể kết nối đến máy chủ. Vui lòng kiểm tra kết nối và thử lại.',
+        code: 'NETWORK_ERROR',
+        isNetworkError: true
+      })
     }
     throw error
   } finally {
@@ -57,3 +76,4 @@ export async function apiRequest<T>(path: string, init: ApiRequestInit = {}): Pr
     signal?.removeEventListener('abort', abortFromCaller)
   }
 }
+

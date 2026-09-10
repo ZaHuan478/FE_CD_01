@@ -1,7 +1,10 @@
 import { useState, useEffect } from 'react'
 import { policyAcknowledgementApi } from '../../../shared/api/policy-acknowledgement.api'
+import { useToast } from '../../../shared/ui/toast'
+import { getErrorMessage } from '../../../shared/lib/errors/apiError'
 
 export function usePolicyAcknowledgement(policyId: string) {
+  const toast = useToast()
   const [isAcknowledged, setIsAcknowledged] = useState(false)
   const [ackTimestamp, setAckTimestamp] = useState<string | null>(null)
 
@@ -28,9 +31,12 @@ export function usePolicyAcknowledgement(policyId: string) {
         const saved = await policyAcknowledgementApi.setPolicyAcknowledgement(policyId, nowStr)
         setIsAcknowledged(saved.acknowledged)
         setAckTimestamp(saved.acknowledgedAt)
-      } catch {
+        toast.success('Đã ghi nhận đã đọc và hiểu chính sách')
+      } catch (reason) {
         setIsAcknowledged(previousAcknowledged)
         setAckTimestamp(previousTimestamp)
+        const msg = getErrorMessage(reason, 'Không thể cập nhật trạng thái đọc chính sách')
+        if (msg) toast.error(msg)
       }
     } else {
       setIsAcknowledged(false)
@@ -39,9 +45,12 @@ export function usePolicyAcknowledgement(policyId: string) {
         const saved = await policyAcknowledgementApi.setPolicyAcknowledgement(policyId, null)
         setIsAcknowledged(saved.acknowledged)
         setAckTimestamp(saved.acknowledgedAt)
-      } catch {
+        toast.info('Đã hủy ghi nhận đọc chính sách')
+      } catch (reason) {
         setIsAcknowledged(previousAcknowledged)
         setAckTimestamp(previousTimestamp)
+        const msg = getErrorMessage(reason, 'Không thể cập nhật trạng thái đọc chính sách')
+        if (msg) toast.error(msg)
       }
     }
   }

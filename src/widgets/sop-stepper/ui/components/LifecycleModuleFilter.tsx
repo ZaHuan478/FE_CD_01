@@ -1,6 +1,7 @@
 import React from 'react'
 import { Filter } from 'lucide-react'
 import { getMODULE_FILTER_OPTIONS } from '../../../../entities/lifecycle/model/stepper/data/stepModuleData'
+import { Select } from '../../../../shared/ui/atoms/Select'
 
 interface LifecycleModuleFilterProps {
   selectedModuleFilter: string
@@ -17,18 +18,20 @@ export const LifecycleModuleFilter: React.FC<LifecycleModuleFilterProps> = ({
         <Filter className="w-3.5 h-3.5 text-blue-600 dark:text-blue-400" />
         <span>Xem hành trình theo phân hệ</span>
       </label>
-      <select
+      <Select
         id="lifecycle-module-filter"
+        visualSize="compact"
         value={selectedModuleFilter}
         onChange={(event) => onSelectFilter(event.target.value)}
-        className="min-w-[200px] rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 px-3 py-1.5 text-xs font-medium text-slate-800 dark:text-slate-200 outline-none transition focus:border-blue-600 focus:ring-1 focus:ring-blue-600 cursor-pointer shadow-2xs"
+        containerClassName="w-auto min-w-[200px]"
+        className="rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 px-3 py-1.5 text-xs font-semibold text-slate-800 dark:text-slate-200"
       >
         {getMODULE_FILTER_OPTIONS().map((modOpt) => (
           <option key={modOpt.id} value={modOpt.id}>
             {modOpt.name}
           </option>
         ))}
-      </select>
+      </Select>
     </div>
   )
 }
