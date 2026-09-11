@@ -73,6 +73,8 @@ export const AppRoutes: React.FC = () => {
             </Suspense>
           }
         />
+        <Route path="/employee-lifecycle/sop-management" element={<EmployeeLifecycleAdminPage />} />
+        <Route path="/employee-lifecycle/operation-guide" element={<EmployeeLifecycleAdminPage />} />
         <Route
           path="/employee-lifecycle"
           element={
@@ -192,6 +194,8 @@ export const AppRoutes: React.FC = () => {
         <Route path="/employee-lifecycle/admin/imports" element={<EmployeeLifecycleAdminPage />} />
         <Route path="/employee-lifecycle/admin/sop-approvals" element={<EmployeeLifecycleAdminPage />} />
         <Route path="/employee-lifecycle/admin/master-data" element={<EmployeeLifecycleAdminPage />} />
+        <Route path="/employee-lifecycle/admin/indexing" element={<EmployeeLifecycleAdminPage />} />
+        <Route path="/employee-lifecycle/admin/audit" element={<EmployeeLifecycleAdminPage />} />
         <Route path="/employee-lifecycle/admin/settings" element={<EmployeeLifecycleAdminPage />} />
       </Route>
 

@@ -22,6 +22,8 @@ const EmployeeLifecycleJourneyView = React.lazy(() => import('../../lifecycle-jo
 const PolicyCenterPage = React.lazy(() => import('../../../features/policy-browser/ui/PolicyCenterPage').then(module => ({ default: module.PolicyCenterPage })))
 const MyDocumentsWorkspace = React.lazy(() => import('../../../features/my-documents/ui/MyDocumentsWorkspace').then(module => ({ default: module.MyDocumentsWorkspace })))
 const DocumentConversionWorkspace = React.lazy(() => import('../../../features/document-conversion/ui/DocumentConversionWorkspace').then(module => ({ default: module.DocumentConversionWorkspace })))
+const SopManagementWorkspace = React.lazy(() => import('../../../features/sop-management/ui/SopManagementWorkspace').then(module => ({ default: module.SopManagementWorkspace })))
+const SopOperationGuide = React.lazy(() => import('../../../features/sop-management/ui/SopOperationGuide').then(module => ({ default: module.SopOperationGuide })))
 const AdminWorkspace = React.lazy(() => import('../../admin-workspace/ui/AdminWorkspace').then(module => ({ default: module.AdminWorkspace })))
 import { LanguageSelector } from '../../../shared/ui/molecules/LanguageSelector'
 import { PageIntro } from '../../../shared/ui/molecules/AdminSurface'
@@ -45,9 +47,9 @@ const headerBusinessClusters: Array<{ id: BusinessClusterId; label: string }> = 
   { id: 'platform', label: 'Nền tảng' }
 ]
 
-type EmployeeLifecycleTab = 'lifecycle' | 'masterdata' | 'reports' | 'process-library' | 'journey' | 'operations' | 'policies' | 'imports' | 'conversions' | 'admin'
+type EmployeeLifecycleTab = 'lifecycle' | 'masterdata' | 'reports' | 'process-library' | 'journey' | 'operations' | 'policies' | 'imports' | 'conversions' | 'management' | 'admin'
 
-const adminWorkspaceSections = new Set<AdminWorkspaceSection>(['overview', 'users', 'access', 'catalog', 'imports', 'sop-approvals', 'master-data', 'audit', 'settings'])
+const adminWorkspaceSections = new Set<AdminWorkspaceSection>(['overview', 'users', 'access', 'catalog', 'imports', 'sop-approvals', 'master-data', 'indexing', 'audit', 'settings'])
 
 const getAdminSectionFromLocation = (pathname: string, sectionParam: string | null): AdminWorkspaceSection => {
   if (adminWorkspaceSections.has(sectionParam as AdminWorkspaceSection)) return sectionParam as AdminWorkspaceSection
@@ -56,6 +58,7 @@ const getAdminSectionFromLocation = (pathname: string, sectionParam: string | nu
   if (pathname.endsWith('/catalog')) return 'catalog'
   if (pathname.endsWith('/imports')) return 'imports'
   if (pathname.endsWith('/sop-approvals')) return 'sop-approvals'
+  if (pathname.endsWith('/indexing')) return 'indexing'
   if (pathname.endsWith('/audit')) return 'audit'
   if (pathname.endsWith('/master-data')) return 'master-data'
   if (pathname.endsWith('/settings')) return 'settings'
@@ -71,6 +74,7 @@ const isMasterDataWorkspaceView = (value: string | null): value is WorkspaceView
 const getSectionFromTab = (tab: EmployeeLifecycleTab, allowedMenuCodes?: Set<string>): string => {
   if (tab === 'imports') return 'SOP_IMPORT'
   if (tab === 'conversions') return 'DOCUMENT_CONVERSION'
+  if (tab === 'management') return 'SOP_MANAGEMENT'
   if (tab === 'process-library') return 'process-library'
   if (tab === 'admin') return 'ADMIN'
   if (tab === 'policies') return 'policy-center'
@@ -95,6 +99,7 @@ export const EmployeeWorkspace: React.FC = () => {
   const getTabFromLocation = useCallback((): EmployeeLifecycleTab => {
     const tabParam = searchParams.get('tab')
     if (tabParam === 'conversions') return 'conversions'
+    if (tabParam === 'management') return 'management'
     if (tabParam === 'imports') return 'imports'
     if (tabParam === 'process-library') return 'process-library'
     if (tabParam === 'admin') return 'admin'
@@ -106,6 +111,7 @@ export const EmployeeWorkspace: React.FC = () => {
     if (tabParam === 'reports') return 'reports'
 
     if (location.pathname.includes('/employee-lifecycle/document-conversions')) return 'conversions'
+    if (location.pathname.includes('/employee-lifecycle/sop-management') || location.pathname.includes('/employee-lifecycle/operation-guide')) return 'management'
     if (location.pathname.includes('/employee-lifecycle/sop-imports')) return 'imports'
     if (location.pathname.includes('/employee-lifecycle/admin')) return 'admin'
     if (location.pathname.includes('/employee-lifecycle/policies')) return 'policies'
@@ -133,16 +139,20 @@ export const EmployeeWorkspace: React.FC = () => {
     // Admin navigation is role-gated in the workspace. Keep the local alias
     // so older sessions/databases that omit the menu row do not bounce an
     // authorized Admin back to the employee dashboard.
-    ...(['ADMIN', 'SUPER_ADMIN'].includes(session.systemRole) ? ['ADMIN'] : []),
+    ...(['ADMIN', 'SUPER_ADMIN'].includes(session.systemRole) || session.capabilities.includes('rag.manage') ? ['ADMIN'] : []),
     // Company policies are available to every authenticated employee.
     'policy-center'
-  ]), [session.menuItems, session.systemRole])
+  ]), [session.capabilities, session.menuItems, session.systemRole])
   const [activeSection, setActiveSection] = useState(() => getSectionFromTab(getTabFromLocation(), allowedMenuCodes))
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false)
   const [, startTransition] = useTransition()
   const canManageOwnDocuments = Array.isArray(session.capabilities)
     && session.capabilities.includes('sop.read')
     && session.modules.length > 0
+  const canManageSops = ['ADMIN', 'SUPER_ADMIN'].includes(session.systemRole)
+    || session.capabilities.some((code) => ['sop.create', 'sop.edit', 'sop.review', 'sop.publish'].includes(code))
+  const canOpenAdministration = ['ADMIN', 'SUPER_ADMIN'].includes(session.systemRole)
+    || session.capabilities.includes('rag.manage')
   const accessibleModuleIds = useMemo(() => new Set(session.modules.map((module) => module.id)), [session.modules])
 
   const visibleBusinessClusters = useMemo(() => headerBusinessClusters.filter((cluster) => {
@@ -157,11 +167,15 @@ export const EmployeeWorkspace: React.FC = () => {
       setActiveTab(tab)
     })
     if (tab === 'admin') {
-      navigate('/employee-lifecycle/admin')
+      navigate(['ADMIN', 'SUPER_ADMIN'].includes(session.systemRole)
+        ? '/employee-lifecycle/admin'
+        : '/employee-lifecycle/admin/indexing')
     } else if (tab === 'imports') {
       navigate('/employee-lifecycle/sop-imports')
     } else if (tab === 'conversions') {
       navigate('/employee-lifecycle/document-conversions')
+    } else if (tab === 'management') {
+      navigate('/employee-lifecycle/sop-management')
     } else if (tab === 'process-library') {
       navigate(`/employee-lifecycle?tab=process-library&cluster=${activeBusinessCluster}`)
     } else if (tab === 'policies') {
@@ -221,6 +235,8 @@ export const EmployeeWorkspace: React.FC = () => {
       setActiveSection('SOP_IMPORT')
     } else if (tabFromUrl === 'conversions') {
       setActiveSection('DOCUMENT_CONVERSION')
+    } else if (tabFromUrl === 'management') {
+      setActiveSection('SOP_MANAGEMENT')
     } else if (tabFromUrl === 'process-library') {
       setActiveSection('process-library')
     } else if (tabFromUrl === 'admin' || location.pathname.includes('/employee-lifecycle/admin')) {
@@ -251,15 +267,18 @@ export const EmployeeWorkspace: React.FC = () => {
       policies: ['policy-center'],
       imports: ['SOP_IMPORT'],
       conversions: ['DOCUMENT_CONVERSION'],
+      management: ['SOP_MANAGEMENT'],
       admin: ['ADMIN']
     }
     if ((activeTab === 'imports' || activeTab === 'conversions') && canManageOwnDocuments) return
+    if (activeTab === 'management' && canManageSops) return
     if (menuCodesByTab[activeTab].some((code) => allowedMenuCodes.has(code))) return
 
     const fallbackDestinations: Array<{ code: string; tab: typeof activeTab; path: string }> = [
       { code: 'overview-dashboard', tab: 'reports', path: '/employee-lifecycle' },
       { code: 'process-library', tab: 'process-library', path: '/employee-lifecycle?tab=process-library&cluster=core' },
       { code: 'DOCUMENT_CONVERSION', tab: 'conversions', path: '/employee-lifecycle/document-conversions' },
+      { code: 'SOP_MANAGEMENT', tab: 'management', path: '/employee-lifecycle/sop-management' },
       { code: 'layer-1-master-data', tab: 'masterdata', path: '/employee-lifecycle/masterdata' },
       { code: 'layer-2-lifecycle', tab: 'journey', path: '/employee-lifecycle/journey?stage=LIFE-00&scenario=all' },
       { code: 'layer-3-operations', tab: 'operations', path: '/employee-lifecycle/operations' },
@@ -273,13 +292,13 @@ export const EmployeeWorkspace: React.FC = () => {
     setActiveSection(fallback.code)
     setActiveTab(fallback.tab)
     navigate(fallback.path, { replace: true })
-  }, [activeTab, allowedMenuCodes, canManageOwnDocuments, navigate])
+  }, [activeTab, allowedMenuCodes, canManageOwnDocuments, canManageSops, navigate])
 
   useEffect(() => {
-    if (activeTab === 'admin' && !['ADMIN', 'SUPER_ADMIN'].includes(session.systemRole)) {
+    if (activeTab === 'admin' && !canOpenAdministration) {
       navigate('/employee-lifecycle', { replace: true })
     }
-  }, [activeTab, navigate, session.systemRole])
+  }, [activeTab, canOpenAdministration, navigate])
 
   useEffect(() => {
     const clusterFromUrl = searchParams.get('cluster')
@@ -353,7 +372,8 @@ export const EmployeeWorkspace: React.FC = () => {
 
   const handleNavigateSection = (sectionId: string) => {
     if (['SOP_IMPORT', 'DOCUMENT_CONVERSION'].includes(sectionId) && !canManageOwnDocuments) return
-    if (!['SOP_IMPORT', 'DOCUMENT_CONVERSION'].includes(sectionId) && !allowedMenuCodes.has(sectionId)) return
+    if (sectionId === 'SOP_MANAGEMENT' && !canManageSops) return
+    if (!['SOP_IMPORT', 'DOCUMENT_CONVERSION', 'SOP_MANAGEMENT'].includes(sectionId) && !allowedMenuCodes.has(sectionId)) return
     setActiveSection(sectionId)
 
     if (sectionId === 'SOP_IMPORT') {
@@ -363,6 +383,11 @@ export const EmployeeWorkspace: React.FC = () => {
 
     if (sectionId === 'DOCUMENT_CONVERSION') {
       handleTabChange('conversions')
+      return
+    }
+
+    if (sectionId === 'SOP_MANAGEMENT') {
+      handleTabChange('management')
       return
     }
 
@@ -959,7 +984,15 @@ export const EmployeeWorkspace: React.FC = () => {
           </section>
         )}
 
-        {activeTab === 'admin' && ['ADMIN', 'SUPER_ADMIN'].includes(session.systemRole) && (
+        {activeTab === 'management' && canManageSops && (
+          <section id="SOP_MANAGEMENT" className="space-y-5 animate-fadeIn scroll-mt-28">
+            <Suspense fallback={<div className="flex h-96 flex-col items-center justify-center gap-3"><Loader2 className="h-8 w-8 animate-spin text-[#1f5f86]" /><span className="text-sm font-bold text-slate-500">Đang mở khu vực quản lý SOP...</span></div>}>
+              {location.pathname.includes('/operation-guide') ? <SopOperationGuide /> : <SopManagementWorkspace />}
+            </Suspense>
+          </section>
+        )}
+
+        {activeTab === 'admin' && canOpenAdministration && (
           <Suspense fallback={<div className="flex h-96 flex-col items-center justify-center gap-3"><Loader2 className="h-8 w-8 animate-spin text-[#1f5f86]" /><span className="text-sm font-bold text-slate-500">Đang mở khu vực quản trị...</span></div>}>
             <AdminWorkspace activeSection={activeAdminSection} isDarkMode={isDarkMode} />
           </Suspense>

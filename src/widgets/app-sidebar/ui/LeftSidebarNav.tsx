@@ -13,7 +13,8 @@ import {
   Settings,
   FileUp,
   ScanText,
-  BookOpen
+  BookOpen,
+  FilePenLine
 } from 'lucide-react'
 import { useLanguage } from '../../../shared/lib/i18n/LanguageContext'
 import { signOut, useAuth, useSession } from '../../../features/authentication/model/session'
@@ -58,6 +59,10 @@ export const LeftSidebarNav: React.FC<LeftSidebarNavProps> = ({
     ...session.menuItems.map((item) => item.code),
     ...(['ADMIN', 'SUPER_ADMIN'].includes(session.systemRole) ? ['ADMIN'] : [])
   ])
+  const canManageSops = ['ADMIN', 'SUPER_ADMIN'].includes(session.systemRole)
+    || session.capabilities.some((code) => ['sop.create', 'sop.edit', 'sop.review', 'sop.publish'].includes(code))
+  const canOpenAdministration = ['ADMIN', 'SUPER_ADMIN'].includes(session.systemRole)
+    || session.capabilities.includes('rag.manage')
   const menuGroups = [
     {
       groupTitle: t('sidebar.group.overview', 'BẮT ĐẦU TỪ ĐÂY'),
@@ -141,24 +146,33 @@ export const LeftSidebarNav: React.FC<LeftSidebarNavProps> = ({
           icon: ScanText,
           badge: 'Xử lý',
           color: 'text-amber-700'
+        }] : []),
+        ...(canManageSops ? [{
+          id: 'SOP_MANAGEMENT',
+          label: 'Quản lý SOP',
+          icon: FilePenLine,
+          badge: 'Soạn & duyệt',
+          color: 'text-violet-700'
         }] : [])
       ]
     },
-    ...(['ADMIN', 'SUPER_ADMIN'].includes(session.systemRole) ? [{
+    ...(canOpenAdministration ? [{
       groupTitle: t('sidebar.group.administration', 'KHU VỰC QUẢN TRỊ'),
       items: [
         {
           id: 'ADMIN',
-          label: t('sidebar.item.administration', 'Quản trị hệ thống'),
+          label: ['ADMIN', 'SUPER_ADMIN'].includes(session.systemRole)
+            ? t('sidebar.item.administration', 'Quản trị hệ thống')
+            : 'Quản trị chỉ mục AI',
           icon: Settings,
-          badge: 'ADMIN',
+          badge: ['ADMIN', 'SUPER_ADMIN'].includes(session.systemRole) ? 'ADMIN' : 'RAG',
           color: 'text-blue-600'
         }
       ]
     }] : [])
   ].map((group) => ({
     ...group,
-    items: group.items.filter((item) => ['SOP_IMPORT', 'DOCUMENT_CONVERSION', 'policy-center'].includes(item.id) || allowedMenuCodes.has(item.id))
+    items: group.items.filter((item) => ['SOP_IMPORT', 'DOCUMENT_CONVERSION', 'SOP_MANAGEMENT', 'policy-center'].includes(item.id) || allowedMenuCodes.has(item.id))
   })).filter((group) => group.items.length > 0)
 
   const initials = session.fullName

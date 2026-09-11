@@ -10,7 +10,7 @@ import { getErrorMessage } from '../../../shared/lib/errors/apiError'
 const capabilities = [
   ['sop.read', 'Xem SOP'], ['sop.create', 'Tạo SOP'], ['sop.edit', 'Biên tập SOP'], ['sop.review', 'Rà soát SOP'],
   ['sop.publish', 'Phê duyệt và công bố'], ['sop.archive', 'Lưu trữ SOP'], ['module.manage', 'Quản lý phân hệ'],
-  ['knowledge.manage', 'Quản lý tài liệu'], ['audit.read', 'Xem Audit Log']
+  ['knowledge.manage', 'Quản lý tài liệu'], ['rag.manage', 'Quản trị chỉ mục AI'], ['audit.read', 'Xem Audit Log']
 ] as const
 
 export function PermissionProfileManagement() {

@@ -1,12 +1,13 @@
 import React, { Suspense } from 'react'
 import { Link } from 'react-router-dom'
-import { BookOpen, Database, Files, GitBranch, LayoutDashboard, ScrollText, Settings, ShieldCheck, Users } from 'lucide-react'
+import { BookOpen, Database, Files, GitBranch, LayoutDashboard, ScrollText, Settings, ShieldCheck, Users, Sparkles } from 'lucide-react'
 import { AdminAccessProvider } from '../../../features/user-module-access/model/AdminAccessContext'
 import { useSession } from '../../../features/authentication/model/session'
 import { PageIntro, Panel, TableSkeleton } from '../../../shared/ui/molecules/AdminSurface'
 import { PermissionManagementWorkspace } from '../../../features/admin-user-management/ui/PermissionManagementWorkspace'
 import { AuditLogPanel } from '../../../features/admin-user-management/ui/AuditLogPanel'
 import { SystemSettingsForm } from '../../../features/admin-user-management/ui/SystemSettingsForm'
+import { IndexingDashboard } from '../../../features/admin-indexing/ui/IndexingDashboard'
 
 const AdminOverview = React.lazy(() => import('../../admin-overview/ui/AdminOverview').then(module => ({ default: module.AdminOverview })))
 const UserManagement = React.lazy(() => import('../../../features/admin-user-management/ui/UserManagement').then(module => ({ default: module.UserManagement })))
@@ -15,7 +16,7 @@ const AdminDocumentsWorkspace = React.lazy(() => import('../../../features/admin
 const AdminMasterDataWorkspace = React.lazy(() => import('../../../features/admin-master-data/ui/AdminMasterDataWorkspace').then(module => ({ default: module.AdminMasterDataWorkspace })))
 const SopImportWorkspace = React.lazy(() => import('../../../features/sop-import/ui/SopImportWorkspace').then(module => ({ default: module.SopImportWorkspace })))
 
-export type AdminWorkspaceSection = 'overview' | 'users' | 'access' | 'catalog' | 'imports' | 'sop-approvals' | 'master-data' | 'audit' | 'settings'
+export type AdminWorkspaceSection = 'overview' | 'users' | 'access' | 'catalog' | 'imports' | 'sop-approvals' | 'master-data' | 'audit' | 'indexing' | 'settings'
 const navigation: Array<{ id: AdminWorkspaceSection; label: string; icon: typeof LayoutDashboard; superOnly?: boolean }> = [
   { id: 'overview', label: 'Tổng quan', icon: LayoutDashboard },
   { id: 'users', label: 'Người dùng', icon: Users },
@@ -24,6 +25,7 @@ const navigation: Array<{ id: AdminWorkspaceSection; label: string; icon: typeof
   { id: 'imports', label: 'Quản lý tài liệu', icon: Files },
   { id: 'sop-approvals', label: 'Duyệt SOP', icon: GitBranch },
   { id: 'master-data', label: 'Master Data', icon: Database },
+  { id: 'indexing', label: 'Chỉ mục AI', icon: Sparkles },
   { id: 'audit', label: 'Audit Log', icon: ScrollText },
   { id: 'settings', label: 'Cài đặt', icon: Settings, superOnly: true }
 ]
@@ -37,29 +39,30 @@ export function AdminWorkspace({ activeSection }: AdminWorkspaceProps) {
   const session = useSession()
   const isAdmin = ['ADMIN', 'SUPER_ADMIN'].includes(session.systemRole)
   const isSuper = session.systemRole === 'SUPER_ADMIN'
+  const isRagManager = session.capabilities.includes('rag.manage')
 
-  if (!isAdmin) {
+  if (!isAdmin && !(isRagManager && activeSection === 'indexing')) {
     return (
       <Panel>
         <div className="grid min-h-56 place-items-center p-6 text-center">
           <div>
             <ShieldCheck className="mx-auto size-8 text-slate-400" />
             <h2 className="mt-3 text-base font-black">Khu vực dành cho quản trị viên</h2>
-            <p className="mt-1 text-sm text-slate-500">Tài khoản hiện tại không có quyền mở chức năng quản trị hệ thống.</p>
+            <p className="mt-1 text-sm text-slate-500">Tài khoản hiện tại không có quyền mở chức năng quản trị này.</p>
           </div>
         </div>
       </Panel>
     )
   }
 
-  const safeSection = activeSection === 'settings' && !isSuper ? 'overview' : activeSection
+  const safeSection = !isAdmin ? 'indexing' : activeSection === 'settings' && !isSuper ? 'overview' : activeSection
 
   return (
     <section id="ADMIN" className="animate-fadeIn scroll-mt-28">
       <div className="mb-5 overflow-x-auto rounded-xl border border-slate-200 bg-white p-1.5 shadow-sm dark:border-slate-800 dark:bg-slate-900">
         <nav aria-label="Chức năng quản trị" className="flex min-w-max items-center gap-1">
           {navigation
-            .filter((item) => !item.superOnly || isSuper)
+            .filter((item) => (!item.superOnly || isSuper) && (isAdmin || item.id === 'indexing'))
             .map(({ id, label, icon: Icon }) => {
               const active = safeSection === id
               return (
@@ -145,6 +148,10 @@ function AdminSectionContent({ activeSection }: AdminWorkspaceProps) {
 
   if (activeSection === 'master-data') {
     return <AdminMasterDataWorkspace />
+  }
+
+  if (activeSection === 'indexing') {
+    return <IndexingDashboard />
   }
 
   if (activeSection === 'audit') {
