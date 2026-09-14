@@ -17,6 +17,18 @@ export interface SopSubStep {
   typeCode: 'N' | 'A' | 'C' | 'M' | ''
   description: string
   fieldsChecklist?: string[]
+  imageUrl?: string | null
+  media?: Array<{
+    id: string
+    sourceMediaId?: string
+    storageKey?: string
+    url?: string
+    caption?: string
+    role: 'cover' | 'illustration' | 'screenshot' | 'form' | 'diagram'
+    sourcePage?: number
+    sourceSubPath?: string
+    sortOrder: number
+  }>
 }
 
 export interface SopSubProcess {

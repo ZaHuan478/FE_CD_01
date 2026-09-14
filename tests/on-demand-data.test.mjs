@@ -20,6 +20,8 @@ before(async () => {
   globalThis.sessionStorage = globalThis.localStorage
   globalThis.__knowledgeTestSession = session
   server = await createServer({
+    mode: 'test',
+    cacheDir: 'node_modules/.vite-test',
     plugins: [{ name: 'test-auth-context', enforce: 'pre',
       resolveId(id) { if (id.includes('authentication/model/session')) return '\0test-session' },
       load(id) { if (id === '\0test-session') return 'export const useSession = () => globalThis.__knowledgeTestSession; export const useAuth = () => ({ session: globalThis.__knowledgeTestSession, status: "authenticated", roleTitle: "Test", logout() {} }); export const signOut = () => {}' }

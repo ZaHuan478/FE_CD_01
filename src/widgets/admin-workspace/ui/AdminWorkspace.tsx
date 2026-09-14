@@ -1,6 +1,6 @@
 import React, { Suspense } from 'react'
 import { Link } from 'react-router-dom'
-import { BookOpen, Database, Files, GitBranch, LayoutDashboard, ScrollText, Settings, ShieldCheck, Users, Sparkles } from 'lucide-react'
+import { BookOpen, BookOpenCheck, Database, Files, GitBranch, LayoutDashboard, ScrollText, Settings, ShieldCheck, Users, Sparkles } from 'lucide-react'
 import { AdminAccessProvider } from '../../../features/user-module-access/model/AdminAccessContext'
 import { useSession } from '../../../features/authentication/model/session'
 import { PageIntro, Panel, TableSkeleton } from '../../../shared/ui/molecules/AdminSurface'
@@ -15,8 +15,9 @@ const CatalogManagement = React.lazy(() => import('../../../features/admin-catal
 const AdminDocumentsWorkspace = React.lazy(() => import('../../../features/admin-documents/ui/AdminDocumentsWorkspace').then(module => ({ default: module.AdminDocumentsWorkspace })))
 const AdminMasterDataWorkspace = React.lazy(() => import('../../../features/admin-master-data/ui/AdminMasterDataWorkspace').then(module => ({ default: module.AdminMasterDataWorkspace })))
 const SopImportWorkspace = React.lazy(() => import('../../../features/sop-import/ui/SopImportWorkspace').then(module => ({ default: module.SopImportWorkspace })))
+const AdminSystemGuides = React.lazy(() => import('../../../features/admin-system-guides/ui/AdminSystemGuides').then(module => ({ default: module.AdminSystemGuides })))
 
-export type AdminWorkspaceSection = 'overview' | 'users' | 'access' | 'catalog' | 'imports' | 'sop-approvals' | 'master-data' | 'audit' | 'indexing' | 'settings'
+export type AdminWorkspaceSection = 'overview' | 'users' | 'access' | 'catalog' | 'imports' | 'sop-approvals' | 'master-data' | 'audit' | 'indexing' | 'system-guides' | 'settings'
 const navigation: Array<{ id: AdminWorkspaceSection; label: string; icon: typeof LayoutDashboard; superOnly?: boolean }> = [
   { id: 'overview', label: 'Tổng quan', icon: LayoutDashboard },
   { id: 'users', label: 'Người dùng', icon: Users },
@@ -27,6 +28,7 @@ const navigation: Array<{ id: AdminWorkspaceSection; label: string; icon: typeof
   { id: 'master-data', label: 'Master Data', icon: Database },
   { id: 'indexing', label: 'Chỉ mục AI', icon: Sparkles },
   { id: 'audit', label: 'Audit Log', icon: ScrollText },
+  { id: 'system-guides', label: 'Hướng dẫn', icon: BookOpenCheck },
   { id: 'settings', label: 'Cài đặt', icon: Settings, superOnly: true }
 ]
 
@@ -159,6 +161,15 @@ function AdminSectionContent({ activeSection }: AdminWorkspaceProps) {
       <>
         <PageIntro title="Audit Log" description="Tra cứu người thao tác, hành động và dữ liệu thay đổi." />
         <AuditLogPanel />
+      </>
+    )
+  }
+
+  if (activeSection === 'system-guides') {
+    return (
+      <>
+        <PageIntro title="Hướng dẫn hệ thống" description="Soạn, phiên bản hóa và công bố hướng dẫn sử dụng cho người dùng." />
+        <AdminSystemGuides />
       </>
     )
   }

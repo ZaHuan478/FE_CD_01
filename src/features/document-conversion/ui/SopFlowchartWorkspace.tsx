@@ -8,9 +8,15 @@ import '@xyflow/react/dist/style.css'
 import {
   ArrowRight, CheckCircle2, GitBranch, LoaderCircle, RefreshCw, Trash2, TriangleAlert,
   Plus, Undo2, Redo2, Save, UserRound, Clock3, LayoutGrid, Image as ImageIcon,
-  Sparkles, LayoutDashboard
+  Sparkles, LayoutDashboard, ArrowUp, ArrowDown, Star, Crop
 } from 'lucide-react'
-import { sopImportApi, type SopImportPreview, type SopImportStep } from '../model/documentConversionModel'
+import {
+  sopImportApi, type SopImportPreview, type SopImportStep,
+  type SourceMedia, type StepMedia, type StepMediaRole
+} from '../model/documentConversionModel'
+import { MediaLightbox } from './components/MediaLightbox'
+import { PdfCropModal } from './components/PdfCropModal'
+import { SourceMediaPickerModal } from './components/SourceMediaPickerModal'
 import { buildMermaidDefinition, defaultStepPosition } from '../model/mermaidFlow'
 import { getErrorMessage } from '../../../shared/lib/errors/apiError'
 import { Select } from '../../../shared/ui/atoms/Select'
@@ -88,6 +94,7 @@ function toNodes(preview: SopImportPreview, showHeader: boolean): CanvasNode[] {
           kind: step.nodeKind,
           imageUrl: step.imageUrl ?? null,
           illustrationPreset: step.illustrationPreset ?? null,
+          media: step.media ?? [],
           checklistCount: step.checklist?.length ?? 0,
           inputsCount: step.inputs?.length ?? 0,
           outputsCount: step.outputs?.length ?? 0,
@@ -155,6 +162,9 @@ export function SopFlowchartWorkspace({ importId, preview, editable, onPreview, 
   const [past, setPast] = useState<SopImportPreview[]>([])
   const [future, setFuture] = useState<SopImportPreview[]>([])
   const [showHeader, setShowHeader] = useState(true)
+  const [pickerOpen, setPickerOpen] = useState(false)
+  const [cropModalOpen, setCropModalOpen] = useState(false)
+  const [lightboxMedia, setLightboxMedia] = useState<SourceMedia | null>(null)
 
   const commit = useCallback((next: SopImportPreview) => {
     if (!editable) return
@@ -168,6 +178,166 @@ export function SopFlowchartWorkspace({ importId, preview, editable, onPreview, 
     ...preview,
     steps: preview.steps.map(step => step.id === selectedNodeId ? { ...step, ...patch } : step)
   })
+
+  const handleAddMediaFromSource = (sourceMedia: SourceMedia, role: StepMediaRole, caption: string) => {
+    if (!selectedNode) return
+    const currentMedia = selectedNode.media ?? []
+    const newStepMedia: StepMedia = {
+      id: `sm-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
+      sourceMediaId: sourceMedia.id,
+      storageKey: sourceMedia.storageKey,
+      url: sourceMedia.previewUrl,
+      caption: caption || sourceMedia.caption,
+      role,
+      sourcePage: sourceMedia.page,
+      sourceSubPath: sourceMedia.subPath,
+      sortOrder: currentMedia.length + 1,
+      confidence: sourceMedia.confidence
+    }
+    const updatedMedia = role === 'cover'
+      ? [
+          ...currentMedia.map(item => item.role === 'cover' ? { ...item, role: 'illustration' as StepMediaRole } : item),
+          newStepMedia
+        ]
+      : [...currentMedia, newStepMedia]
+
+    const updatedSourceMedia = (preview.sourceStructure?.media ?? []).map(item =>
+      item.id === sourceMedia.id ? { ...item, assignmentStatus: 'assigned' as const } : item
+    )
+
+    commit({
+      ...preview,
+      sourceStructure: preview.sourceStructure
+        ? { ...preview.sourceStructure, media: updatedSourceMedia }
+        : preview.sourceStructure,
+      steps: preview.steps.map(step =>
+        step.id === selectedNodeId
+          ? {
+              ...step,
+              media: updatedMedia,
+              imageUrl: role === 'cover' ? (newStepMedia.url ?? step.imageUrl) : step.imageUrl
+            }
+          : step
+      )
+    })
+    toast.success(`Đã gắn ảnh vào bước "${selectedNode.title}".`)
+  }
+
+  const handleCropSuccess = (croppedMedia: SourceMedia, stepMedia: StepMedia) => {
+    if (!selectedNode) return
+    const currentMedia = selectedNode.media ?? []
+    const updatedMedia = stepMedia.role === 'cover'
+      ? [
+          ...currentMedia.map(item => item.role === 'cover' ? { ...item, role: 'illustration' as StepMediaRole } : item),
+          stepMedia
+        ]
+      : [...currentMedia, stepMedia]
+
+    const existingSourceMedia = preview.sourceStructure?.media ?? []
+    commit({
+      ...preview,
+      sourceStructure: preview.sourceStructure
+        ? { ...preview.sourceStructure, media: [...existingSourceMedia, croppedMedia] }
+        : preview.sourceStructure,
+      steps: preview.steps.map(step =>
+        step.id === selectedNodeId
+          ? {
+              ...step,
+              media: updatedMedia,
+              imageUrl: stepMedia.role === 'cover' ? (stepMedia.url ?? step.imageUrl) : step.imageUrl
+            }
+          : step
+      )
+    })
+    toast.success(`Đã cắt ảnh từ PDF và gắn vào bước "${selectedNode.title}".`)
+  }
+
+  const handleSetAsCover = (mediaId: string) => {
+    if (!selectedNode) return
+    const currentMedia = selectedNode.media ?? []
+    const target = currentMedia.find(m => m.id === mediaId)
+    if (!target) return
+
+    const updatedMedia = currentMedia.map(m => ({
+      ...m,
+      role: m.id === mediaId ? ('cover' as StepMediaRole) : (m.role === 'cover' ? ('illustration' as StepMediaRole) : m.role)
+    }))
+
+    commit({
+      ...preview,
+      steps: preview.steps.map(step =>
+        step.id === selectedNodeId
+          ? { ...step, media: updatedMedia, imageUrl: target.url ?? step.imageUrl }
+          : step
+      )
+    })
+    toast.success('Đã đặt làm ảnh bìa của bước.')
+  }
+
+  const handleRemoveMedia = (mediaId: string) => {
+    if (!selectedNode) return
+    const currentMedia = selectedNode.media ?? []
+    const target = currentMedia.find(m => m.id === mediaId)
+    const updatedMedia = currentMedia.filter(m => m.id !== mediaId)
+
+    let updatedSourceMedia = preview.sourceStructure?.media
+    if (target?.sourceMediaId && updatedSourceMedia) {
+      const isUsedElsewhere = preview.steps.some(step =>
+        step.id !== selectedNodeId && step.media?.some(m => m.sourceMediaId === target.sourceMediaId)
+      )
+      if (!isUsedElsewhere) {
+        updatedSourceMedia = updatedSourceMedia.map(sm =>
+          sm.id === target.sourceMediaId ? { ...sm, assignmentStatus: 'unassigned' as const } : sm
+        )
+      }
+    }
+
+    commit({
+      ...preview,
+      sourceStructure: preview.sourceStructure && updatedSourceMedia
+        ? { ...preview.sourceStructure, media: updatedSourceMedia }
+        : preview.sourceStructure,
+      steps: preview.steps.map(step =>
+        step.id === selectedNodeId
+          ? {
+              ...step,
+              media: updatedMedia,
+              imageUrl: target?.role === 'cover' ? null : step.imageUrl
+            }
+          : step
+      )
+    })
+    toast.success('Đã gỡ ảnh khỏi bước.')
+  }
+
+  const handleUpdateStepMedia = (mediaId: string, patch: Partial<StepMedia>) => {
+    if (!selectedNode) return
+    const currentMedia = selectedNode.media ?? []
+    const updatedMedia = currentMedia.map(m => m.id === mediaId ? { ...m, ...patch } : m)
+    commit({
+      ...preview,
+      steps: preview.steps.map(step =>
+        step.id === selectedNodeId ? { ...step, media: updatedMedia } : step
+      )
+    })
+  }
+
+  const handleMoveStepMedia = (index: number, direction: -1 | 1) => {
+    if (!selectedNode) return
+    const currentMedia = [...(selectedNode.media ?? [])]
+    const targetIndex = index + direction
+    if (targetIndex < 0 || targetIndex >= currentMedia.length) return
+    const temp = currentMedia[index]!
+    currentMedia[index] = currentMedia[targetIndex]!
+    currentMedia[targetIndex] = temp
+    const reordered = currentMedia.map((m, i) => ({ ...m, sortOrder: i + 1 }))
+    commit({
+      ...preview,
+      steps: preview.steps.map(step =>
+        step.id === selectedNodeId ? { ...step, media: reordered } : step
+      )
+    })
+  }
 
   const addNode = () => {
     const id = crypto.randomUUID()
@@ -547,7 +717,6 @@ export function SopFlowchartWorkspace({ importId, preview, editable, onPreview, 
                   fitViewOptions={{ padding: 0.16 }}
                   minZoom={0.2}
                   maxZoom={1.8}
-                  proOptions={{ hideAttribution: true }}
                 >
                   <Background variant={BackgroundVariant.Dots} gap={20} size={1.5} color="#94a3b8" className="opacity-30" />
                   <MiniMap
@@ -594,52 +763,228 @@ export function SopFlowchartWorkspace({ importId, preview, editable, onPreview, 
                   </div>
                 ) : (
                   <fieldset disabled={!editable} className="space-y-3.5">
-                    {/* Visual Banner Preview & Controls */}
-                    <div className="rounded-xl border border-slate-200 bg-slate-50 p-2.5 dark:border-slate-700 dark:bg-slate-950/60">
+                    {/* Visual Banner Preview & Media Gallery */}
+                    <div className="rounded-xl border border-slate-200 bg-slate-50 p-2.5 dark:border-slate-800 dark:bg-slate-950/60 space-y-3">
                       <div className="flex items-center justify-between">
-                        <span className="flex items-center gap-1.5 text-xs font-black text-slate-700 dark:text-slate-300">
+                        <span className="flex items-center gap-1.5 text-xs font-black text-slate-800 dark:text-slate-200">
                           <ImageIcon className="size-3.5 text-sky-500" />
-                          Ảnh bìa / Minh họa thẻ
+                          Ảnh bìa / Minh họa thẻ {selectedNode.media?.length ? `(${selectedNode.media.length})` : ''}
                         </span>
-                        <span className="text-[10px] font-semibold text-slate-400">
-                          {selectedNode.imageUrl ? 'URL riêng' : 'Vector chủ đề'}
-                        </span>
-                      </div>
-
-                      {/* Mini Live Banner Preview */}
-                      <div className="relative mt-2 aspect-video w-full overflow-hidden rounded-lg bg-slate-900">
-                        {selectedNode.imageUrl ? (
-                          <img src={selectedNode.imageUrl} alt="Preview" className="size-full object-cover" />
+                        {selectedNode.media?.some(m => m.role === 'cover') ? (
+                          <span className="inline-flex items-center gap-1 rounded bg-amber-100 px-1.5 py-0.5 text-[10px] font-bold text-amber-800 dark:bg-amber-950/60 dark:text-amber-300">
+                            <Star className="size-3 fill-amber-500 text-amber-500" /> Có ảnh bìa
+                          </span>
+                        ) : selectedNode.imageUrl ? (
+                          <span className="rounded bg-sky-100 px-1.5 py-0.5 text-[10px] font-bold text-sky-800 dark:bg-sky-950/60 dark:text-sky-300">
+                            URL ảnh ngoài
+                          </span>
                         ) : (
-                          renderPresetIllustration(inspectorPreset)
+                          <span className="text-[10px] font-semibold text-slate-400">
+                            Vector chủ đề
+                          </span>
                         )}
                       </div>
 
-                      {/* Preset Selector */}
-                      <label className="mt-2.5 block text-xs font-bold text-slate-700 dark:text-slate-300">
-                        <span>Chủ đề minh họa vector</span>
-                        <Select
-                          className={adminInputClass}
-                          value={selectedNode.illustrationPreset || 'auto'}
-                          onChange={event => patchNode({ illustrationPreset: event.target.value as IllustrationPresetId })}
-                        >
-                          {ILLUSTRATION_PRESETS.map(preset => (
-                            <option key={preset.id} value={preset.id}>{preset.label}</option>
-                          ))}
-                        </Select>
-                      </label>
+                      {/* Mini Live Banner Preview */}
+                      {(() => {
+                        const coverMedia = selectedNode.media?.find(m => m.role === 'cover') || selectedNode.media?.[0]
+                        const displayUrl = coverMedia?.url || (coverMedia?.sourceMediaId && importId?.trim() ? `/api/v1/sop-imports/${encodeURIComponent(importId.trim())}/media/${encodeURIComponent(coverMedia.sourceMediaId)}/preview` : null) || selectedNode.imageUrl
+                        return (
+                          <div className="relative aspect-video w-full overflow-hidden rounded-lg bg-slate-900 border border-slate-200 dark:border-slate-700">
+                            {displayUrl ? (
+                              <img
+                                src={displayUrl}
+                                alt={coverMedia?.caption ?? selectedNode.title}
+                                className="size-full object-cover cursor-pointer"
+                                onClick={() => {
+                                  if (coverMedia?.sourceMediaId) {
+                                    const sm = (preview.sourceStructure?.media ?? []).find(m => m.id === coverMedia.sourceMediaId)
+                                    if (sm) setLightboxMedia(sm)
+                                  }
+                                }}
+                              />
+                            ) : (
+                              renderPresetIllustration(inspectorPreset)
+                            )}
+                          </div>
+                        )
+                      })()}
 
-                      {/* Custom Image URL input */}
-                      <label className="mt-2 block text-xs font-bold text-slate-700 dark:text-slate-300">
-                        <span>Hoặc dán URL hình ảnh riêng</span>
-                        <input
-                          type="url"
-                          placeholder="https://... (ảnh đại diện)"
-                          className={adminInputClass}
-                          value={selectedNode.imageUrl ?? ''}
-                          onChange={event => patchNode({ imageUrl: event.target.value.trim() ? event.target.value : null })}
-                        />
-                      </label>
+                      {/* Action Buttons: Add from Source & Crop from PDF */}
+                      {editable && (
+                        <div className="grid grid-cols-2 gap-2">
+                          <button
+                            type="button"
+                            onClick={() => setPickerOpen(true)}
+                            className="inline-flex items-center justify-center gap-1.5 rounded-lg border border-sky-300 bg-sky-50 px-2.5 py-1.5 text-xs font-bold text-sky-800 hover:bg-sky-100 dark:border-sky-800 dark:bg-sky-950/40 dark:text-sky-200"
+                          >
+                            <Plus className="size-3.5" />
+                            Thêm từ tài liệu
+                          </button>
+                          <button
+                            type="button"
+                            disabled={!importId?.trim()}
+                            title={!importId?.trim() ? 'Chưa có file gốc để cắt ảnh' : 'Cắt ảnh từ trang PDF'}
+                            onClick={() => setCropModalOpen(true)}
+                            className="inline-flex items-center justify-center gap-1.5 rounded-lg border border-amber-300 bg-amber-50 px-2.5 py-1.5 text-xs font-bold text-amber-800 hover:bg-amber-100 disabled:opacity-40 disabled:cursor-not-allowed dark:border-amber-800 dark:bg-amber-950/40 dark:text-amber-200 cursor-pointer"
+                          >
+                            <Crop className="size-3.5" />
+                            Cắt ảnh từ PDF
+                          </button>
+                        </div>
+                      )}
+
+                      {/* Attached Media Items List */}
+                      {selectedNode.media && selectedNode.media.length > 0 && (
+                        <div className="space-y-2 pt-1 border-t border-slate-200 dark:border-slate-800">
+                          <p className="text-[11px] font-bold text-slate-500 uppercase tracking-wider">Danh sách ảnh gắn vào bước:</p>
+                          <div className="space-y-2 max-h-56 overflow-y-auto pr-1">
+                            {selectedNode.media.map((m, mIndex) => {
+                              const isCover = m.role === 'cover'
+                              const previewUrl = m.url || (m.sourceMediaId && importId?.trim() ? `/api/v1/sop-imports/${encodeURIComponent(importId.trim())}/media/${encodeURIComponent(m.sourceMediaId)}/preview` : '')
+                              return (
+                                <div
+                                  key={m.id}
+                                  className={`rounded-lg border p-2 flex gap-2 items-start transition-colors ${
+                                    isCover
+                                      ? 'border-amber-300 bg-amber-50/50 dark:border-amber-800 dark:bg-amber-950/20'
+                                      : 'border-slate-200 bg-white dark:border-slate-800 dark:bg-slate-900'
+                                  }`}
+                                >
+                                  {/* Thumbnail */}
+                                  <div
+                                    className="relative size-12 shrink-0 rounded overflow-hidden bg-slate-100 border border-slate-200 cursor-pointer"
+                                    onClick={() => {
+                                      const sm = (preview.sourceStructure?.media ?? []).find(x => x.id === m.sourceMediaId)
+                                      if (sm) setLightboxMedia(sm)
+                                    }}
+                                  >
+                                    {previewUrl ? (
+                                      <img src={previewUrl} alt={m.caption ?? ''} className="size-full object-cover" />
+                                    ) : (
+                                      <div className="size-full flex items-center justify-center text-slate-400">
+                                        <ImageIcon className="size-4" />
+                                      </div>
+                                    )}
+                                    {isCover && (
+                                      <div className="absolute top-0 right-0 bg-amber-500 text-white p-0.5 rounded-bl">
+                                        <Star className="size-2.5 fill-white" />
+                                      </div>
+                                    )}
+                                  </div>
+
+                                  {/* Info & Controls */}
+                                  <div className="flex-1 min-w-0 space-y-1">
+                                    <div className="flex items-center justify-between gap-1">
+                                      <Select
+                                        value={m.role}
+                                        disabled={!editable}
+                                        className="h-6 text-[11px] py-0 px-1 font-bold"
+                                        onChange={e => handleUpdateStepMedia(m.id, { role: e.target.value as StepMediaRole })}
+                                      >
+                                        <option value="cover">Ảnh bìa</option>
+                                        <option value="illustration">Minh họa</option>
+                                        <option value="screenshot">Chụp màn hình</option>
+                                        <option value="form">Biểu mẫu</option>
+                                        <option value="diagram">Sơ đồ</option>
+                                      </Select>
+
+                                      {editable && (
+                                        <div className="flex items-center gap-0.5 shrink-0">
+                                          {!isCover && (
+                                            <button
+                                              type="button"
+                                              title="Đặt làm ảnh bìa"
+                                              onClick={() => handleSetAsCover(m.id)}
+                                              className="p-1 text-slate-400 hover:text-amber-500 hover:bg-amber-50 rounded dark:hover:bg-amber-950/40"
+                                            >
+                                              <Star className="size-3" />
+                                            </button>
+                                          )}
+                                          <button
+                                            type="button"
+                                            title="Di chuyển lên"
+                                            disabled={mIndex === 0}
+                                            onClick={() => handleMoveStepMedia(mIndex, -1)}
+                                            className="p-1 text-slate-400 hover:text-slate-700 disabled:opacity-30"
+                                          >
+                                            <ArrowUp className="size-3" />
+                                          </button>
+                                          <button
+                                            type="button"
+                                            title="Di chuyển xuống"
+                                            disabled={mIndex === selectedNode.media!.length - 1}
+                                            onClick={() => handleMoveStepMedia(mIndex, 1)}
+                                            className="p-1 text-slate-400 hover:text-slate-700 disabled:opacity-30"
+                                          >
+                                            <ArrowDown className="size-3" />
+                                          </button>
+                                          <button
+                                            type="button"
+                                            title="Gỡ khỏi bước"
+                                            onClick={() => handleRemoveMedia(m.id)}
+                                            className="p-1 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded dark:hover:bg-red-950/40"
+                                          >
+                                            <Trash2 className="size-3" />
+                                          </button>
+                                        </div>
+                                      )}
+                                    </div>
+
+                                    <input
+                                      type="text"
+                                      placeholder="Chú thích ảnh..."
+                                      disabled={!editable}
+                                      value={m.caption ?? ''}
+                                      onChange={e => handleUpdateStepMedia(m.id, { caption: e.target.value })}
+                                      className="h-6 w-full rounded border border-slate-200 bg-transparent px-1.5 text-[11px] outline-none focus:border-sky-500 dark:border-slate-700"
+                                    />
+
+                                    {(m.sourcePage || m.sourceSubPath) && (
+                                      <div className="flex items-center gap-1.5 text-[10px] text-slate-500">
+                                        {m.sourcePage && <span>Trang {m.sourcePage}</span>}
+                                        {m.sourceSubPath && <span className="truncate">· {m.sourceSubPath}</span>}
+                                      </div>
+                                    )}
+                                  </div>
+                                </div>
+                              )
+                            })}
+                          </div>
+                        </div>
+                      )}
+
+                      {/* Collapsible Advanced: Preset & Custom URL */}
+                      <details className="text-xs pt-1">
+                        <summary className="cursor-pointer font-bold text-slate-500 hover:text-slate-700 dark:hover:text-slate-300">
+                          Tùy chọn nâng cao (URL ngoài & Vector)
+                        </summary>
+                        <div className="mt-2 space-y-2 pt-2 border-t border-slate-200 dark:border-slate-800">
+                          <label className="block font-bold text-slate-700 dark:text-slate-300">
+                            <span>Chủ đề minh họa vector (khi không có ảnh)</span>
+                            <Select
+                              className={adminInputClass}
+                              value={selectedNode.illustrationPreset || 'auto'}
+                              onChange={event => patchNode({ illustrationPreset: event.target.value as IllustrationPresetId })}
+                            >
+                              {ILLUSTRATION_PRESETS.map(preset => (
+                                <option key={preset.id} value={preset.id}>{preset.label}</option>
+                              ))}
+                            </Select>
+                          </label>
+
+                          <label className="block font-bold text-slate-700 dark:text-slate-300">
+                            <span>Dán URL hình ảnh ngoài (tùy chọn)</span>
+                            <input
+                              type="url"
+                              placeholder="https://... (ảnh đại diện)"
+                              className={adminInputClass}
+                              value={selectedNode.imageUrl ?? ''}
+                              onChange={event => patchNode({ imageUrl: event.target.value.trim() ? event.target.value : null })}
+                            />
+                          </label>
+                        </div>
+                      </details>
                     </div>
 
                     {(typeof selectedNode.confidence === 'number' || selectedNode.sourceRefs?.length) && (
@@ -804,6 +1149,34 @@ export function SopFlowchartWorkspace({ importId, preview, editable, onPreview, 
           </div>
         </div>
       )}
+
+      {/* Modal: Pick Media from Source Document */}
+      <SourceMediaPickerModal
+        open={pickerOpen}
+        onClose={() => setPickerOpen(false)}
+        onSelect={handleAddMediaFromSource}
+        availableMedia={preview.sourceStructure?.media ?? []}
+        stepTitle={selectedNode?.title ?? ''}
+      />
+
+      {/* Modal: Crop image from PDF */}
+      {cropModalOpen && selectedNode && importId?.trim() ? (
+        <PdfCropModal
+          open={cropModalOpen}
+          onClose={() => setCropModalOpen(false)}
+          importId={importId.trim()}
+          targetStepKey={selectedNode.stableKey}
+          onCropSuccess={handleCropSuccess}
+        />
+      ) : null}
+
+      {/* Modal: Lightbox viewer */}
+      <MediaLightbox
+        media={lightboxMedia}
+        onClose={() => setLightboxMedia(null)}
+        allMedia={preview.sourceStructure?.media ?? []}
+        onSelectMedia={setLightboxMedia}
+      />
     </div>
   )
 }

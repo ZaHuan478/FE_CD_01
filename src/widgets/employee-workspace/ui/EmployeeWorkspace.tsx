@@ -1,7 +1,7 @@
 import { GlobalSopSearch } from '../../../features/sop-search/ui/GlobalSopSearch'
 import React, { useMemo, useState, useEffect, useCallback, Suspense, useTransition } from 'react'
 import { useSearchParams, useParams, useLocation, useNavigate } from 'react-router-dom'
-import { Layers, Database, GitBranch, Sun, Moon, Loader2, ShieldCheck, FileUp, BookOpen, ScanText } from 'lucide-react'
+import { Layers, Database, GitBranch, Sun, Moon, Loader2, ShieldCheck, FileUp, BookOpen, ScanText, HelpCircle } from 'lucide-react'
 
 import { MasterDataRelationshipModal } from '../../master-data-studio/ui/MasterDataRelationshipModal'
 import { SystemSupportBar } from '../../app-support/ui/SystemSupportBar'
@@ -25,6 +25,7 @@ const DocumentConversionWorkspace = React.lazy(() => import('../../../features/d
 const SopManagementWorkspace = React.lazy(() => import('../../../features/sop-management/ui/SopManagementWorkspace').then(module => ({ default: module.SopManagementWorkspace })))
 const SopOperationGuide = React.lazy(() => import('../../../features/sop-management/ui/SopOperationGuide').then(module => ({ default: module.SopOperationGuide })))
 const AdminWorkspace = React.lazy(() => import('../../admin-workspace/ui/AdminWorkspace').then(module => ({ default: module.AdminWorkspace })))
+const SystemGuideWorkspace = React.lazy(() => import('../../../features/system-guide/ui/SystemGuideWorkspace').then(module => ({ default: module.SystemGuideWorkspace })))
 import { LanguageSelector } from '../../../shared/ui/molecules/LanguageSelector'
 import { PageIntro } from '../../../shared/ui/molecules/AdminSurface'
 
@@ -47,9 +48,9 @@ const headerBusinessClusters: Array<{ id: BusinessClusterId; label: string }> = 
   { id: 'platform', label: 'Nền tảng' }
 ]
 
-type EmployeeLifecycleTab = 'lifecycle' | 'masterdata' | 'reports' | 'process-library' | 'journey' | 'operations' | 'policies' | 'imports' | 'conversions' | 'management' | 'admin'
+type EmployeeLifecycleTab = 'lifecycle' | 'masterdata' | 'reports' | 'process-library' | 'journey' | 'operations' | 'policies' | 'imports' | 'conversions' | 'management' | 'guide' | 'admin'
 
-const adminWorkspaceSections = new Set<AdminWorkspaceSection>(['overview', 'users', 'access', 'catalog', 'imports', 'sop-approvals', 'master-data', 'indexing', 'audit', 'settings'])
+const adminWorkspaceSections = new Set<AdminWorkspaceSection>(['overview', 'users', 'access', 'catalog', 'imports', 'sop-approvals', 'master-data', 'indexing', 'audit', 'system-guides', 'settings'])
 
 const getAdminSectionFromLocation = (pathname: string, sectionParam: string | null): AdminWorkspaceSection => {
   if (adminWorkspaceSections.has(sectionParam as AdminWorkspaceSection)) return sectionParam as AdminWorkspaceSection
@@ -62,6 +63,7 @@ const getAdminSectionFromLocation = (pathname: string, sectionParam: string | nu
   if (pathname.endsWith('/audit')) return 'audit'
   if (pathname.endsWith('/master-data')) return 'master-data'
   if (pathname.endsWith('/settings')) return 'settings'
+  if (pathname.endsWith('/system-guides')) return 'system-guides'
   return 'overview'
 }
 
@@ -75,6 +77,7 @@ const getSectionFromTab = (tab: EmployeeLifecycleTab, allowedMenuCodes?: Set<str
   if (tab === 'imports') return 'SOP_IMPORT'
   if (tab === 'conversions') return 'DOCUMENT_CONVERSION'
   if (tab === 'management') return 'SOP_MANAGEMENT'
+  if (tab === 'guide') return 'SYSTEM_GUIDE'
   if (tab === 'process-library') return 'process-library'
   if (tab === 'admin') return 'ADMIN'
   if (tab === 'policies') return 'policy-center'
@@ -110,6 +113,8 @@ export const EmployeeWorkspace: React.FC = () => {
     if (tabParam === 'lifecycle') return 'lifecycle'
     if (tabParam === 'reports') return 'reports'
 
+    if (location.pathname.includes('/employee-lifecycle/system-guide')) return 'guide'
+
     if (location.pathname.includes('/employee-lifecycle/document-conversions')) return 'conversions'
     if (location.pathname.includes('/employee-lifecycle/sop-management') || location.pathname.includes('/employee-lifecycle/operation-guide')) return 'management'
     if (location.pathname.includes('/employee-lifecycle/sop-imports')) return 'imports'
@@ -141,7 +146,8 @@ export const EmployeeWorkspace: React.FC = () => {
     // authorized Admin back to the employee dashboard.
     ...(['ADMIN', 'SUPER_ADMIN'].includes(session.systemRole) || session.capabilities.includes('rag.manage') ? ['ADMIN'] : []),
     // Company policies are available to every authenticated employee.
-    'policy-center'
+    'policy-center',
+    'SYSTEM_GUIDE'
   ]), [session.capabilities, session.menuItems, session.systemRole])
   const [activeSection, setActiveSection] = useState(() => getSectionFromTab(getTabFromLocation(), allowedMenuCodes))
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false)
@@ -176,6 +182,8 @@ export const EmployeeWorkspace: React.FC = () => {
       navigate('/employee-lifecycle/document-conversions')
     } else if (tab === 'management') {
       navigate('/employee-lifecycle/sop-management')
+    } else if (tab === 'guide') {
+      navigate('/employee-lifecycle/system-guide')
     } else if (tab === 'process-library') {
       navigate(`/employee-lifecycle?tab=process-library&cluster=${activeBusinessCluster}`)
     } else if (tab === 'policies') {
@@ -237,6 +245,8 @@ export const EmployeeWorkspace: React.FC = () => {
       setActiveSection('DOCUMENT_CONVERSION')
     } else if (tabFromUrl === 'management') {
       setActiveSection('SOP_MANAGEMENT')
+    } else if (tabFromUrl === 'guide') {
+      setActiveSection('SYSTEM_GUIDE')
     } else if (tabFromUrl === 'process-library') {
       setActiveSection('process-library')
     } else if (tabFromUrl === 'admin' || location.pathname.includes('/employee-lifecycle/admin')) {
@@ -268,6 +278,7 @@ export const EmployeeWorkspace: React.FC = () => {
       imports: ['SOP_IMPORT'],
       conversions: ['DOCUMENT_CONVERSION'],
       management: ['SOP_MANAGEMENT'],
+      guide: ['SYSTEM_GUIDE'],
       admin: ['ADMIN']
     }
     if ((activeTab === 'imports' || activeTab === 'conversions') && canManageOwnDocuments) return
@@ -276,6 +287,7 @@ export const EmployeeWorkspace: React.FC = () => {
 
     const fallbackDestinations: Array<{ code: string; tab: typeof activeTab; path: string }> = [
       { code: 'overview-dashboard', tab: 'reports', path: '/employee-lifecycle' },
+      { code: 'SYSTEM_GUIDE', tab: 'guide', path: '/employee-lifecycle/system-guide' },
       { code: 'process-library', tab: 'process-library', path: '/employee-lifecycle?tab=process-library&cluster=core' },
       { code: 'DOCUMENT_CONVERSION', tab: 'conversions', path: '/employee-lifecycle/document-conversions' },
       { code: 'SOP_MANAGEMENT', tab: 'management', path: '/employee-lifecycle/sop-management' },
@@ -373,7 +385,7 @@ export const EmployeeWorkspace: React.FC = () => {
   const handleNavigateSection = (sectionId: string) => {
     if (['SOP_IMPORT', 'DOCUMENT_CONVERSION'].includes(sectionId) && !canManageOwnDocuments) return
     if (sectionId === 'SOP_MANAGEMENT' && !canManageSops) return
-    if (!['SOP_IMPORT', 'DOCUMENT_CONVERSION', 'SOP_MANAGEMENT'].includes(sectionId) && !allowedMenuCodes.has(sectionId)) return
+    if (!['SYSTEM_GUIDE', 'SOP_IMPORT', 'DOCUMENT_CONVERSION', 'SOP_MANAGEMENT'].includes(sectionId) && !allowedMenuCodes.has(sectionId)) return
     setActiveSection(sectionId)
 
     if (sectionId === 'SOP_IMPORT') {
@@ -383,6 +395,11 @@ export const EmployeeWorkspace: React.FC = () => {
 
     if (sectionId === 'DOCUMENT_CONVERSION') {
       handleTabChange('conversions')
+      return
+    }
+
+    if (sectionId === 'SYSTEM_GUIDE') {
+      handleTabChange('guide')
       return
     }
 
@@ -610,6 +627,13 @@ export const EmployeeWorkspace: React.FC = () => {
   }
 
   const currentHeaderInfo = useMemo(() => {
+    if (activeTab === 'guide' || activeSection === 'SYSTEM_GUIDE') {
+      return {
+        subtitle: 'TRUNG TÂM TRỢ GIÚP',
+        title: 'Hướng dẫn chi tiết',
+        icon: HelpCircle
+      }
+    }
     if (activeTab === 'conversions' || activeSection === 'DOCUMENT_CONVERSION') {
       return {
         subtitle: 'XƯỞNG CHUYỂN HÓA SOP',
@@ -802,7 +826,16 @@ export const EmployeeWorkspace: React.FC = () => {
 
           {/* CỘT PHẢI: TÌM KIẾM, NGÔN NGỮ & GIAO DIỆN TỐI */}
           <div className="flex items-center gap-2.5 text-xs shrink-0">
-            <GlobalSopSearch />
+            <div data-help-id="global-sop-search"><GlobalSopSearch /></div>
+            <button
+              type="button"
+              onClick={() => navigate(`/employee-lifecycle/system-guide?from=${encodeURIComponent(`${location.pathname}${location.search}`)}`)}
+              className="grid size-10 place-items-center rounded-2xl border border-slate-200 bg-slate-50 text-slate-600 transition hover:border-cyan-300 hover:bg-cyan-50 hover:text-[#155e75] dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200"
+              title="Hướng dẫn cho màn hình này"
+              aria-label="Mở hướng dẫn cho màn hình hiện tại"
+            >
+              <HelpCircle className="size-4" />
+            </button>
             {/* Custom Language Selection Popover */}
             <LanguageSelector isDarkTheme={isDarkMode} />
 
@@ -984,6 +1017,14 @@ export const EmployeeWorkspace: React.FC = () => {
           </section>
         )}
 
+        {activeTab === 'guide' && (
+          <section id="SYSTEM_GUIDE" className="space-y-5 animate-fadeIn scroll-mt-28">
+            <Suspense fallback={<div className="flex h-96 flex-col items-center justify-center gap-3"><Loader2 className="h-8 w-8 animate-spin text-[#1f5f86]" /><span className="text-sm font-bold text-slate-500">Đang mở hướng dẫn hệ thống...</span></div>}>
+              <SystemGuideWorkspace />
+            </Suspense>
+          </section>
+        )}
+
         {activeTab === 'management' && canManageSops && (
           <section id="SOP_MANAGEMENT" className="space-y-5 animate-fadeIn scroll-mt-28">
             <Suspense fallback={<div className="flex h-96 flex-col items-center justify-center gap-3"><Loader2 className="h-8 w-8 animate-spin text-[#1f5f86]" /><span className="text-sm font-bold text-slate-500">Đang mở khu vực quản lý SOP...</span></div>}>
@@ -1006,6 +1047,7 @@ export const EmployeeWorkspace: React.FC = () => {
         onClose={handleCloseERD}
         onSelectNode={handleOpenItemDetails}
       />
+
 
     </div>
   )

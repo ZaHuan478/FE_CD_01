@@ -12,7 +12,7 @@ import {
   Search
 } from 'lucide-react'
 import { useSearchParams } from 'react-router-dom'
-import { useAdminCatalog, type AdminDocumentCreateInput, type AdminDocumentType, type AdminModule, type ModuleInput } from '../../user-module-access/hooks/useAdminCatalog'
+import { useAdminCatalog, type AdminDocumentCreateInput, type AdminDocumentType, type AdminModule, type BusinessCluster, type ModuleInput } from '../../user-module-access/hooks/useAdminCatalog'
 import { useAdminAccessContext } from '../../user-module-access/model/AdminAccessContext'
 import { ModalDialog } from '../../../shared/ui/molecules/ModalDialog'
 import { Select } from '../../../shared/ui/atoms/Select'
@@ -30,6 +30,7 @@ export function CatalogManagement() {
   const [viewMode, setViewMode] = useState<ViewMode>('table')
   const [query, setQuery] = useState(urlParams.get('q') ?? '')
   const [moduleId, setModuleId] = useState('')
+  const [moduleCluster, setModuleCluster] = useState<BusinessCluster | 'all'>('all')
   const [type, setType] = useState<AdminDocumentType | 'all'>('all')
   const [page, setPage] = useState(1)
   const [showModuleForm, setShowModuleForm] = useState(false)
@@ -39,8 +40,12 @@ export function CatalogManagement() {
   const catalog = useAdminCatalog({ q: query, moduleId, type, page, pageSize: 20 })
   const filteredModules = useMemo(() => {
     const term = query.trim().toLocaleLowerCase('vi')
-    return term ? admin.modules.filter(module => `${module.code} ${module.title} ${module.description ?? ''}`.toLocaleLowerCase('vi').includes(term)) : admin.modules
-  }, [admin.modules, query])
+    return admin.modules.filter(module => {
+      const matchesCluster = moduleCluster === 'all' || (module.businessCluster ?? 'core') === moduleCluster
+      const matchesTerm = !term || `${module.code} ${module.title} ${module.description ?? ''}`.toLocaleLowerCase('vi').includes(term)
+      return matchesCluster && matchesTerm
+    })
+  }, [admin.modules, moduleCluster, query])
 
   const getModuleActions = (module: (typeof admin.modules)[number]) => [
     {
@@ -111,6 +116,10 @@ export function CatalogManagement() {
       <Tab active={tab === 'documents'} onClick={() => setTab('documents')} icon={<BookOpen className="size-4" />}>Tài liệu</Tab>
     </div>
     {tab === 'modules' ? <Panel>
+      <div className="grid grid-cols-2 gap-2 border-b border-slate-200 p-4 sm:grid-cols-4 xl:grid-cols-5 dark:border-slate-800">
+        <button type="button" onClick={() => setModuleCluster('all')} className={`rounded-lg border px-3 py-2 text-left ${moduleCluster === 'all' ? 'border-[#155e75] bg-cyan-50 dark:bg-cyan-950/30' : 'border-slate-200 dark:border-slate-800'}`}><span className="block text-xs font-bold text-slate-500">Tất cả</span><strong className="text-lg text-slate-900 dark:text-white">{admin.modules.length}</strong></button>
+        {(Object.entries(clusterLabels) as Array<[BusinessCluster, string]>).map(([cluster, label]) => <button key={cluster} type="button" onClick={() => setModuleCluster(cluster)} className={`rounded-lg border px-3 py-2 text-left ${moduleCluster === cluster ? 'border-[#155e75] bg-cyan-50 dark:bg-cyan-950/30' : 'border-slate-200 dark:border-slate-800'}`}><span className="block truncate text-xs font-bold text-slate-500">{label}</span><strong className="text-lg text-slate-900 dark:text-white">{admin.modules.filter(module => (module.businessCluster ?? 'core') === cluster).length}</strong></button>)}
+      </div>
       <div className="flex flex-col gap-3 border-b border-slate-200 p-4 sm:flex-row sm:items-center dark:border-slate-800">
         <label className="relative block min-w-0 flex-1">
           <span className="sr-only">Tìm phân hệ</span>

@@ -37,7 +37,7 @@ export function AdminDocumentViewer({
   document: AdminUserDocumentItem
   onClose: () => void
 }) {
-  const toast = useToast()
+  const { error: showError } = useToast()
   const [blob, setBlob] = useState<Blob | null>(null)
   const [url, setUrl] = useState('')
   const [error, setError] = useState('')
@@ -64,7 +64,7 @@ export function AdminDocumentViewer({
         if (!controller.signal.aborted) {
           const msg = getErrorMessage(reason, 'Không tải được tài liệu')
           setError(msg)
-          toast.error(msg)
+          showError(msg)
         }
       })
       .finally(() => {
@@ -75,7 +75,7 @@ export function AdminDocumentViewer({
       controller.abort()
       if (objectUrl) URL.revokeObjectURL(objectUrl)
     }
-  }, [doc.id, attempt, toast])
+  }, [doc.id, attempt, showError])
 
   useEffect(() => {
     if (!expanded) return

@@ -1,12 +1,14 @@
 import { lazy, Suspense, useEffect, useMemo, useState, type FormEvent } from 'react'
 import {
   AlertTriangle, ArrowDown, ArrowUp, CheckCircle2, ChevronLeft, ChevronRight,
-  FileSearch, FileText, GitBranch, LoaderCircle, Plus, Search, ScanText, Trash2, X
+  FileSearch, FileText, GitBranch, Image as ImageIcon, IndentDecrease, IndentIncrease, ListTree,
+  LoaderCircle, Plus, RefreshCw, Search, ScanText, Trash2, X
 } from 'lucide-react'
 import { useSession } from '../../authentication/model/session'
 import { useSopImportModules } from '../../sop-import/model/sopImportModel'
 import {
-  sopImportApi, type SopImportItem, type SopImportPreview, type SopImportStep
+  sopImportApi, type SopImportItem, type SopImportPreview, type SopImportStep,
+  type SopSourceOutlineItem, type SopSourceSemanticKind
 } from '../model/documentConversionModel'
 import { getErrorMessage } from '../../../shared/lib/errors/apiError'
 import { Select } from '../../../shared/ui/atoms/Select'
@@ -20,8 +22,103 @@ import {
 
 const SourceDocumentViewer = lazy(() => import('../../sop-import/ui/SourceDocumentViewer').then(module => ({ default: module.SourceDocumentViewer })))
 const SopFlowchartWorkspace = lazy(() => import('./SopFlowchartWorkspace').then(module => ({ default: module.SopFlowchartWorkspace })))
+const SourceMediaPanel = lazy(() => import('./components/SourceMediaPanel').then(module => ({ default: module.SourceMediaPanel })))
 const PAGE_SIZE = 8
-type ConversionView = 'draft' | 'flow' | 'source' | 'extracted'
+type ConversionView = 'draft' | 'structure' | 'flow' | 'media' | 'source' | 'extracted'
+
+const operationalKinds = new Set<SopSourceSemanticKind>(['main_step', 'action', 'decision', 'subprocess'])
+const emptySourceOutline: SopSourceOutlineItem[] = []
+
+function flowOutlineItems(outline: SopSourceOutlineItem[]): SopSourceOutlineItem[] {
+  const mainSteps = outline.filter(item => item.semanticKind === 'main_step')
+  if (mainSteps.length) return mainSteps
+
+  const byId = new Map(outline.map(item => [item.id, item]))
+  return outline.filter(item => {
+    if (!operationalKinds.has(item.semanticKind)) return false
+    let parent = item.parentId ? byId.get(item.parentId) : undefined
+    while (parent) {
+      if (operationalKinds.has(parent.semanticKind)) return false
+      parent = parent.parentId ? byId.get(parent.parentId) : undefined
+    }
+    return true
+  })
+}
+
+function outlineDetailLabel(item: SopSourceOutlineItem, rootLevel: number) {
+  const marker = item.marker
+    ? item.markerKind === 'named_step' ? `Bước ${item.marker}: ` : `${item.marker}. `
+    : ''
+  return `${'  '.repeat(Math.max(0, item.level - rootLevel - 1))}${marker}${item.title}${item.content ? `\n${item.content}` : ''}`
+}
+
+function normalizeOutline(items: SopSourceOutlineItem[]): SopSourceOutlineItem[] {
+  const stack: Array<SopSourceOutlineItem | undefined> = []
+  return items.map((item, index) => {
+    const prior = index > 0 ? items[index - 1] : undefined
+    const level = Math.max(0, Math.min(item.level, prior ? prior.level + 1 : 0))
+    const normalized = {
+      ...item,
+      level,
+      parentId: level > 0 ? stack[level - 1]?.id ?? null : null,
+      sortOrder: index + 1
+    }
+    stack[level] = normalized
+    stack.length = level + 1
+    return normalized
+  })
+}
+
+function rebuildStepsFromOutline(preview: SopImportPreview): SopImportPreview {
+  const outline = preview.sourceStructure?.outline ?? emptySourceOutline
+  const previousByKey = new Map(preview.steps.map(step => [step.stableKey, step]))
+  const steps = flowOutlineItems(outline).map((item, index): SopImportStep => {
+    const old = previousByKey.get(`source:${item.id}`)
+    const supporting: SopSourceOutlineItem[] = []
+    for (const candidate of outline.slice(outline.indexOf(item) + 1)) {
+      if (candidate.level <= item.level) break
+      supporting.push(candidate)
+    }
+    const description = [item.content, ...supporting.map(child => outlineDetailLabel(child, item.level))]
+      .filter(Boolean).join('\n')
+    const lineStart = item.lineStart
+    const lineEnd = supporting.at(-1)?.lineEnd ?? item.lineEnd
+    return {
+      id: old?.id ?? `import-step-${index + 1}`,
+      stableKey: `source:${item.id}`,
+      code: old?.code ?? (item.markerKind === 'code' && item.marker ? item.marker : `STEP-${String(index + 1).padStart(2, '0')}`),
+      title: item.title.slice(0, 500),
+      description: description || null,
+      actor: old?.actor ?? null,
+      location: old?.location ?? null,
+      timing: old?.timing ?? null,
+      nodeKind: item.semanticKind === 'decision' ? 'decision' : item.semanticKind === 'subprocess' ? 'subprocess' : 'task',
+      typeCode: old?.typeCode ?? (item.semanticKind === 'decision' ? 'C' : 'N'),
+      sortOrder: index + 1,
+      confidence: item.confidence,
+      sourceRefs: [{ lineStart, lineEnd, page: item.page, text: item.title }],
+      checklist: supporting.map(child => child.title).slice(0, 200),
+      imageUrl: old?.imageUrl,
+      illustrationPreset: old?.illustrationPreset,
+      media: old?.media ?? [],
+      inputs: old?.inputs ?? [],
+      outputs: old?.outputs ?? [],
+      positionX: old?.positionX,
+      positionY: old?.positionY
+    }
+  })
+  return normalizeFlow({
+    ...preview,
+    steps,
+    transitions: steps.slice(0, -1).map((step, index) => ({
+      id: `import-transition-${index + 1}`,
+      fromStepId: step.id,
+      toStepId: steps[index + 1]!.id,
+      kind: 'normal',
+      sortOrder: index + 1
+    }))
+  })
+}
 
 function formatBytes(bytes: number) {
   return bytes < 1024 * 1024
@@ -99,7 +196,7 @@ export function DocumentConversionWorkspace() {
   const [active, setActive] = useState<SopImportItem | null>(null)
   const [preview, setPreview] = useState<SopImportPreview | null>(null)
   const [view, setView] = useState<ConversionView>('draft')
-  const [busy, setBusy] = useState<'open' | 'create' | 'save' | 'complete' | 'delete' | null>(null)
+  const [busy, setBusy] = useState<'open' | 'create' | 'save' | 'complete' | 'delete' | 'reprocess' | 'revise' | null>(null)
   const [conversionError, setConversionError] = useState('')
   const { items, total, totalPages, loading, error, refresh } = useDocumentConversionDocuments({
     search, format, page, pageSize: PAGE_SIZE
@@ -124,7 +221,7 @@ export function DocumentConversionWorkspace() {
     if (!selected?.sourceImportJobId) return () => controller.abort()
     setBusy('open')
     void sopImportApi.get(selected.sourceImportJobId, controller.signal)
-      .then(result => { setActive(result.data); setPreview(result.data.preview); setView('flow') })
+      .then(result => { setActive(result.data); setPreview(result.data.preview); setView(result.data.preview.sourceStructure ? 'structure' : 'flow') })
       .catch(reason => {
         if (!controller.signal.aborted) setConversionError(getErrorMessage(reason, 'Không mở được hồ sơ chuyển hóa đã liên kết'))
       })
@@ -155,7 +252,7 @@ export function DocumentConversionWorkspace() {
       })
       setActive(result.data)
       setPreview(result.data.preview)
-      setView('flow')
+      setView('structure')
       refresh()
       toast.success('Đã trích xuất tài liệu và tạo lưu đồ Mermaid để hiệu chỉnh.')
     } catch (reason) {
@@ -167,16 +264,52 @@ export function DocumentConversionWorkspace() {
     }
   }
 
-  const save = async () => {
-    if (!active || !preview) return
+  const save = async (override?: SopImportPreview) => {
+    const target = override ?? preview
+    if (!active || !target) return
     setBusy('save')
     try {
-      const result = await sopImportApi.update(active.id, normalizeFlow(preview))
+      const result = await sopImportApi.update(active.id, normalizeFlow(target))
       setActive(result.data)
       setPreview(result.data.preview)
       toast.success('Đã lưu bản hiệu chỉnh SOP.')
     } catch (reason) {
       toast.error(getErrorMessage(reason, 'Không lưu được bản hiệu chỉnh'))
+    } finally { setBusy(null) }
+  }
+
+  const reprocess = async () => {
+    if (!active || !editable) return
+    setBusy('reprocess')
+    try {
+      const result = await sopImportApi.reprocess(active.id)
+      setActive(result.data)
+      setPreview(result.data.preview)
+      setView('structure')
+      toast.success('Đã phân tích lại file nguồn theo cây phân cấp mới.')
+    } catch (reason) {
+      toast.error(getErrorMessage(reason, 'Không phân tích lại được tài liệu nguồn'))
+    } finally { setBusy(null) }
+  }
+
+  const reviseAndReprocess = async () => {
+    if (!active || active.createdBy !== session.accountId || !['published', 'archived'].includes(active.status)) return
+    setBusy('revise')
+    try {
+      const imports = await sopImportApi.list()
+      const existingDraft = imports.data.find(item =>
+        item.preview.code === active.preview.code
+        && item.createdBy === session.accountId
+        && item.status === 'needs_review'
+      )
+      const revision = existingDraft ?? (await sopImportApi.revise(active.id)).data
+      const result = await sopImportApi.reprocess(revision.id)
+      setActive(result.data)
+      setPreview(result.data.preview)
+      setView('structure')
+      toast.success('Đã tạo bản chỉnh sửa và phân tích lại cây bước. Bản đã công bố vẫn được giữ nguyên đến khi bản mới được duyệt.')
+    } catch (reason) {
+      toast.error(getErrorMessage(reason, 'Không tạo được bản chỉnh sửa để phân tích lại'))
     } finally { setBusy(null) }
   }
 
@@ -263,6 +396,12 @@ export function DocumentConversionWorkspace() {
                   <strong>{active.status === 'needs_review' ? 'Đang hiệu chỉnh' : active.status === 'accepted' ? 'Đã tạo SOP Draft' : active.status === 'published' ? 'Đã công bố' : 'Đã lưu trữ'}:</strong> {active.preview.code}
                 </div>
                 <button type="button" onClick={() => document.getElementById('conversion-editor')?.scrollIntoView({ behavior: 'smooth' })} className={`${primaryButtonClass} w-full`}><FileSearch className="size-4" />Mở khu vực hiệu chỉnh</button>
+                {['published', 'archived'].includes(active.status) && active.createdBy === session.accountId && (
+                  <button type="button" disabled={busy !== null} onClick={() => void reviseAndReprocess()} className={`${secondaryButtonClass} w-full justify-center`}>
+                    <RefreshCw className={`size-4 ${busy === 'revise' ? 'animate-spin' : ''}`} />
+                    Tạo bản chỉnh sửa & phân tích lại
+                  </button>
+                )}
               </>}
             </div>
           ) : <ConversionSetupForm selected={selected} modules={moduleState.modules} department={department} jobTitle={jobTitle} defaultAudience={defaultAudience} busy={busy === 'create'} onSubmit={startConversion} />}
@@ -273,7 +412,7 @@ export function DocumentConversionWorkspace() {
           item={active} preview={preview} view={view} editable={editable} busy={busy}
           modules={moduleState.modules} onView={setView} onPreview={setPreview}
           onAddStep={addStep} onUpdateStep={updateStep} onRemoveStep={removeStep} onMoveStep={moveStep}
-          onSave={save} onComplete={complete} onDelete={deleteConversion}
+          onSave={save} onReprocess={reprocess} onComplete={complete} onDelete={deleteConversion}
         />
       </section>}
     </div>
@@ -344,16 +483,18 @@ function ConversionEditor(props: {
   onView: (value: ConversionView) => void; onPreview: (value: SopImportPreview) => void
   onAddStep: (patch?: Partial<SopImportStep>) => void; onUpdateStep: (index: number, patch: Partial<SopImportStep>) => void
   onRemoveStep: (index: number) => void; onMoveStep: (index: number, direction: -1 | 1) => void
-  onSave: () => Promise<void>; onComplete: () => Promise<void>; onDelete: () => Promise<void>
+  onSave: (preview?: SopImportPreview) => Promise<void>; onReprocess: () => Promise<void>; onComplete: () => Promise<void>; onDelete: () => Promise<void>
 }) {
   return <div className="space-y-4">
     <div role="tablist" aria-label="Nội dung chuyển hóa" className="flex flex-wrap gap-2">
       <button type="button" role="tab" aria-selected={props.view === 'draft'} onClick={() => props.onView('draft')} className={props.view === 'draft' ? primaryButtonClass : secondaryButtonClass}>SOP bản nháp</button>
+      <button type="button" role="tab" aria-selected={props.view === 'structure'} onClick={() => props.onView('structure')} className={props.view === 'structure' ? primaryButtonClass : secondaryButtonClass}><ListTree className="size-4" />Cấu trúc nguồn</button>
       <button type="button" role="tab" aria-selected={props.view === 'flow'} onClick={() => props.onView('flow')} className={props.view === 'flow' ? primaryButtonClass : secondaryButtonClass}><GitBranch className="size-4" />Lưu đồ Mermaid</button>
+      <button type="button" role="tab" aria-selected={props.view === 'media'} onClick={() => props.onView('media')} className={props.view === 'media' ? primaryButtonClass : secondaryButtonClass}><ImageIcon className="size-4" />Ảnh từ tài liệu nguồn{props.preview.sourceStructure?.media?.length ? ` (${props.preview.sourceStructure.media.length})` : ''}</button>
       <button type="button" role="tab" aria-selected={props.view === 'source'} onClick={() => props.onView('source')} className={props.view === 'source' ? primaryButtonClass : secondaryButtonClass}>File gốc</button>
       <button type="button" role="tab" aria-selected={props.view === 'extracted'} onClick={() => props.onView('extracted')} className={props.view === 'extracted' ? primaryButtonClass : secondaryButtonClass}>Nội dung trích xuất</button>
     </div>
-    {props.view === 'source' ? <Suspense fallback={<p role="status" className="p-6 text-sm text-slate-500">Đang mở tài liệu…</p>}><SourceDocumentViewer item={props.item} /></Suspense> : props.view === 'flow' ? <Suspense fallback={<p role="status" className="flex min-h-80 items-center justify-center gap-2 text-sm text-slate-500"><LoaderCircle className="size-5 animate-spin" />Đang mở công cụ lưu đồ…</p>}><SopFlowchartWorkspace key={props.item.id} importId={props.item.id} preview={props.preview} editable={props.editable} onPreview={props.onPreview} onSave={props.onSave} saving={props.busy !== null} /></Suspense> : props.view === 'extracted' ? <ExtractedTextPanel item={props.item} editable={props.editable} onAddStep={props.onAddStep} /> : <>
+    {props.view === 'source' ? <Suspense fallback={<p role="status" className="p-6 text-sm text-slate-500">Đang mở tài liệu…</p>}><SourceDocumentViewer item={props.item} /></Suspense> : props.view === 'structure' ? <SourceStructurePanel preview={props.preview} editable={props.editable} busy={props.busy} onPreview={props.onPreview} onSave={props.onSave} onReprocess={props.onReprocess} /> : props.view === 'flow' ? <Suspense fallback={<p role="status" className="flex min-h-80 items-center justify-center gap-2 text-sm text-slate-500"><LoaderCircle className="size-5 animate-spin" />Đang mở công cụ lưu đồ…</p>}><SopFlowchartWorkspace key={props.item.id} importId={props.item.id} preview={props.preview} editable={props.editable} onPreview={props.onPreview} onSave={props.onSave} saving={props.busy !== null} /></Suspense> : props.view === 'media' ? <Suspense fallback={<p role="status" className="flex min-h-80 items-center justify-center gap-2 text-sm text-slate-500"><LoaderCircle className="size-5 animate-spin" />Đang tải thư viện ảnh…</p>}><SourceMediaPanel item={props.item} preview={props.preview} editable={props.editable} busy={props.busy} onPreview={props.onPreview} onSave={props.onSave} onReprocess={props.onReprocess} /></Suspense> : props.view === 'extracted' ? <ExtractedTextPanel item={props.item} editable={props.editable} onAddStep={props.onAddStep} /> : <>
       <Panel title="Thông tin SOP" description={`${props.item.file.name} · ${formatBytes(props.item.file.size)} · SHA-256 ${props.item.file.checksum.slice(0, 12)}…`}>
         <div className="grid gap-4 p-4 md:grid-cols-2">
           <Field label="Mã SOP"><input disabled={!props.editable} value={props.preview.code} onChange={event => props.onPreview({ ...props.preview, code: event.target.value })} className={adminInputClass} /></Field>
@@ -373,6 +514,137 @@ function ConversionEditor(props: {
       </Panel>
     </>}
   </div>
+}
+
+const sourceKindLabels: Record<SopSourceSemanticKind, string> = {
+  main_step: 'Bước chính',
+  action: 'Thao tác',
+  decision: 'Điều kiện',
+  subprocess: 'Quy trình con',
+  section: 'Nhóm nội dung',
+  input_field: 'Trường nhập liệu',
+  checklist: 'Checklist',
+  rule: 'Quy tắc',
+  note: 'Lưu ý'
+}
+
+function moveOutlineSubtree(items: SopSourceOutlineItem[], index: number, direction: -1 | 1) {
+  const root = items[index]
+  if (!root) return items
+  let end = index + 1
+  while (end < items.length && items[end]!.level > root.level) end += 1
+  if (direction < 0) {
+    let previousStart = index - 1
+    while (previousStart >= 0 && items[previousStart]!.level > root.level) previousStart -= 1
+    if (previousStart < 0 || items[previousStart]!.level !== root.level || items[previousStart]!.parentId !== root.parentId) return items
+    return normalizeOutline([
+      ...items.slice(0, previousStart),
+      ...items.slice(index, end),
+      ...items.slice(previousStart, index),
+      ...items.slice(end)
+    ])
+  }
+  const nextStart = end
+  if (nextStart >= items.length || items[nextStart]!.level !== root.level || items[nextStart]!.parentId !== root.parentId) return items
+  let nextEnd = nextStart + 1
+  while (nextEnd < items.length && items[nextEnd]!.level > root.level) nextEnd += 1
+  return normalizeOutline([
+    ...items.slice(0, index),
+    ...items.slice(nextStart, nextEnd),
+    ...items.slice(index, end),
+    ...items.slice(nextEnd)
+  ])
+}
+
+function SourceStructurePanel({ preview, editable, busy, onPreview, onSave, onReprocess }: {
+  preview: SopImportPreview
+  editable: boolean
+  busy: string | null
+  onPreview: (value: SopImportPreview) => void
+  onSave: (preview?: SopImportPreview) => Promise<void>
+  onReprocess: () => Promise<void>
+}) {
+  const outline = preview.sourceStructure?.outline ?? emptySourceOutline
+  const [selectedId, setSelectedId] = useState<string | null>(outline[0]?.id ?? null)
+  const selectedIndex = outline.findIndex(value => value.id === selectedId)
+  const selected = outline[selectedIndex]
+
+  useEffect(() => {
+    if (selectedId && outline.some(value => value.id === selectedId)) return
+    setSelectedId(outline[0]?.id ?? null)
+  }, [outline, selectedId])
+
+  const applyOutline = (nextItems: SopSourceOutlineItem[]) => {
+    if (!preview.sourceStructure) return
+    const normalized = normalizeOutline(nextItems)
+    onPreview({
+      ...preview,
+      sourceStructure: {
+        ...preview.sourceStructure,
+        outline: normalized,
+        stats: {
+          ...preview.sourceStructure.stats,
+          itemCount: normalized.length,
+          lowConfidenceCount: normalized.filter(value => value.confidence < 0.7).length,
+          operationalStepCount: normalized.filter(value => operationalKinds.has(value.semanticKind)).length
+        }
+      }
+    })
+  }
+
+  const patchSelected = (patch: Partial<SopSourceOutlineItem>) => {
+    if (!selected) return
+    applyOutline(outline.map(value => value.id === selected.id ? { ...value, ...patch } : value))
+  }
+
+  if (!preview.sourceStructure) return <Panel title="Cấu trúc nguồn" description="Bản chuyển hóa này được tạo bằng bộ phân tích cũ.">
+    <div className="grid min-h-64 place-items-center p-6 text-center"><div><ListTree className="mx-auto size-10 text-slate-300" /><p className="mt-3 text-sm font-black">Chưa có cây phân cấp</p><p className="mt-1 max-w-lg text-sm leading-6 text-slate-500">Phân tích lại file nguồn để nhận diện Bước, mục A/B, danh sách 1/2/3, checklist và quy tắc.</p>{editable && <button type="button" disabled={busy !== null} onClick={() => void onReprocess()} className={`${primaryButtonClass} mt-4`}><RefreshCw className={`size-4 ${busy === 'reprocess' ? 'animate-spin' : ''}`} />Phân tích lại file nguồn</button>}</div></div>
+  </Panel>
+
+  return <div className="space-y-4">
+    <Panel title="Cấu trúc tài liệu nguồn" description="Kiểm tra phân cấp trước khi tạo lưu đồ. Các trường nhập, checklist và quy tắc được gắn vào bước cha thay vì tạo node riêng." action={editable ? <button type="button" disabled={busy !== null} onClick={() => void onReprocess()} className={`${secondaryButtonClass} whitespace-nowrap`}><RefreshCw className={`size-4 ${busy === 'reprocess' ? 'animate-spin' : ''}`} />Phân tích lại</button> : undefined}>
+      <div className="grid grid-cols-2 gap-px border-b border-slate-200 bg-slate-200 sm:grid-cols-5 dark:border-slate-800 dark:bg-slate-800">
+        <StructureStat label="Bộ đọc" value={preview.sourceStructure.adapter === 'docx-html' ? 'Word có cấu trúc' : preview.sourceStructure.adapter === 'docx-ocr' ? 'Word ảnh OCR' : preview.sourceStructure.adapter === 'pdf-ocr' ? 'PDF OCR' : 'PDF có lớp chữ'} />
+        <StructureStat label="Số trang" value={String(preview.sourceStructure.stats.pageCount)} />
+        <StructureStat label="Mục phân cấp" value={String(preview.sourceStructure.stats.itemCount)} />
+        <StructureStat label="Node tổng quan" value={String(flowOutlineItems(outline).length)} />
+        <StructureStat label="Cần kiểm tra" value={String(preview.sourceStructure.stats.lowConfidenceCount)} warn={preview.sourceStructure.stats.lowConfidenceCount > 0} />
+      </div>
+      <div className="grid min-h-[540px] lg:grid-cols-[minmax(0,1fr)_360px]">
+        <div className="max-h-[680px] overflow-y-auto border-b border-slate-200 p-3 lg:border-b-0 lg:border-r dark:border-slate-800">
+          {outline.length === 0 ? <p className="p-6 text-center text-sm text-slate-500">Không nhận diện được cấu trúc. Bạn vẫn có thể dùng tab “Nội dung trích xuất” để thêm bước thủ công.</p> : <ol className="space-y-1" aria-label="Cây cấu trúc tài liệu">{outline.map((outlineItem, index) => {
+            const isSelected = selectedId === outlineItem.id
+            return <li key={outlineItem.id}>
+              <button type="button" onClick={() => setSelectedId(outlineItem.id)} aria-pressed={isSelected} className={`flex min-h-11 w-full items-start gap-2 rounded-lg border px-3 py-2 text-left transition ${isSelected ? 'border-cyan-500 bg-cyan-50 text-cyan-950 dark:border-cyan-700 dark:bg-cyan-950/40 dark:text-cyan-100' : 'border-transparent hover:border-slate-200 hover:bg-slate-50 dark:hover:border-slate-700 dark:hover:bg-slate-800/60'}`} style={{ paddingLeft: `${12 + Math.min(outlineItem.level, 8) * 22}px` }}>
+                <span className={`mt-0.5 shrink-0 rounded-md px-1.5 py-0.5 text-[10px] font-black ${outlineItem.confidence < 0.7 ? 'bg-amber-100 text-amber-800 dark:bg-amber-950 dark:text-amber-200' : 'bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-300'}`}>{outlineItem.marker ? outlineItem.marker : index + 1}</span>
+                <span className="min-w-0 flex-1"><span className="block text-sm font-bold leading-5">{outlineItem.title}</span><span className="mt-0.5 block text-[11px] text-slate-500">{sourceKindLabels[outlineItem.semanticKind]} · Cấp {outlineItem.level + 1}{outlineItem.page ? ` · Trang ${outlineItem.page}` : ''}</span></span>
+              </button>
+            </li>
+          })}</ol>}
+        </div>
+        <aside className="bg-slate-50/70 p-4 dark:bg-slate-900/40">
+          {!selected ? <p className="text-sm text-slate-500">Chọn một mục để xem thuộc tính.</p> : <div className="space-y-4">
+            <div><p className="text-xs font-black uppercase tracking-wide text-[#155e75] dark:text-cyan-300">Thuộc tính mục nguồn</p><p className="mt-1 text-xs text-slate-500">Dòng {selected.lineStart}–{selected.lineEnd}{selected.page ? ` · Trang ${selected.page}` : ''} · Tin cậy {Math.round(selected.confidence * 100)}%</p></div>
+            <Field label="Nội dung"><textarea disabled={!editable} rows={4} value={selected.title} onChange={event => patchSelected({ title: event.target.value })} className={`${adminInputClass} h-auto py-2`} /></Field>
+            <Field label="Phân loại"><Select disabled={!editable} value={selected.semanticKind} onChange={event => patchSelected({ semanticKind: event.target.value as SopSourceSemanticKind })} className={adminInputClass}>{Object.entries(sourceKindLabels).map(([value, label]) => <option key={value} value={value}>{label}</option>)}</Select></Field>
+            {selected.content && <Field label="Nội dung đi kèm"><textarea disabled={!editable} rows={5} value={selected.content} onChange={event => patchSelected({ content: event.target.value })} className={`${adminInputClass} h-auto py-2`} /></Field>}
+            {editable && <div className="grid grid-cols-2 gap-2 border-t border-slate-200 pt-4 dark:border-slate-800">
+              <button type="button" disabled={selected.level === 0} onClick={() => patchSelected({ level: Math.max(0, selected.level - 1) })} className={secondaryButtonClass}><IndentDecrease className="size-4" />Đưa ra</button>
+              <button type="button" disabled={selectedIndex <= 0 || selected.level >= outline[selectedIndex - 1]!.level + 1} onClick={() => patchSelected({ level: selected.level + 1 })} className={secondaryButtonClass}><IndentIncrease className="size-4" />Đưa vào</button>
+              <button type="button" onClick={() => applyOutline(moveOutlineSubtree(outline, selectedIndex, -1))} className={secondaryButtonClass}><ArrowUp className="size-4" />Lên</button>
+              <button type="button" onClick={() => applyOutline(moveOutlineSubtree(outline, selectedIndex, 1))} className={secondaryButtonClass}><ArrowDown className="size-4" />Xuống</button>
+            </div>}
+          </div>}
+        </aside>
+      </div>
+      {editable && <div className="flex flex-wrap items-center justify-end gap-2 border-t border-slate-200 p-4 dark:border-slate-800"><button type="button" disabled={busy !== null} onClick={() => { const next = rebuildStepsFromOutline(preview); onPreview(next); void onSave(next) }} className={secondaryButtonClass}><GitBranch className="size-4" />Áp dụng & lưu các bước</button><button type="button" disabled={busy !== null} onClick={() => void onSave()} className={primaryButtonClass}>{busy === 'save' ? <LoaderCircle className="size-4 animate-spin" /> : null}Lưu cấu trúc</button></div>}
+    </Panel>
+    <div className="rounded-xl border border-cyan-200 bg-cyan-50 p-4 text-sm leading-6 text-cyan-950 dark:border-cyan-900 dark:bg-cyan-950/30 dark:text-cyan-100"><strong>Quy tắc tạo Canvas:</strong> Khi có “Bước N”, chỉ các bước chính trở thành node tổng quan; A/B, 1/2/3, thao tác, trường nhập, quy tắc và lưu ý nằm trong chi tiết của bước cha. Nếu tài liệu không có “Bước N”, hệ thống dùng các thao tác ở cấp cao nhất làm node.</div>
+  </div>
+}
+
+function StructureStat({ label, value, warn = false }: { label: string; value: string; warn?: boolean }) {
+  return <div className="bg-white p-3 dark:bg-slate-900"><span className="block text-[11px] font-bold uppercase tracking-wide text-slate-500">{label}</span><strong className={`mt-1 block text-sm ${warn ? 'text-amber-700 dark:text-amber-300' : 'text-slate-900 dark:text-white'}`}>{value}</strong></div>
 }
 
 function ExtractedTextPanel({ item, editable, onAddStep }: { item: SopImportItem; editable: boolean; onAddStep: (patch?: Partial<SopImportStep>) => void }) {

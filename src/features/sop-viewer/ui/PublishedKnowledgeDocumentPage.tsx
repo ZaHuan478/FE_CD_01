@@ -1,5 +1,5 @@
 import { lazy, Suspense, useEffect, useMemo, useState } from 'react'
-import { ArrowLeft, BookOpen, CheckCircle2, LoaderCircle } from 'lucide-react'
+import { ArrowLeft, BookOpen, CheckCircle2, LoaderCircle, Star } from 'lucide-react'
 import { useNavigate, useParams } from 'react-router-dom'
 import {
   knowledgeApi,
@@ -9,6 +9,8 @@ import type {
   SopImportPreview,
   SopImportStep
 } from '../../sop-import/model/sopImportModel'
+import type { SourceMedia } from '../../document-conversion/model/documentConversionModel'
+import { MediaLightbox } from '../../document-conversion/ui/components/MediaLightbox'
 const SopFlowchartWorkspace = lazy(() => import('../../document-conversion/ui/SopFlowchartWorkspace').then(module => ({ default: module.SopFlowchartWorkspace })))
 import {
   Feedback,
@@ -66,6 +68,7 @@ function toPreview(document: PublishedDocument): SopImportPreview {
       sortOrder: number(value.sortOrder, index + 1),
       imageUrl: text(value.imageUrl) || null,
       illustrationPreset: text(value.illustrationPreset) || null,
+      media: Array.isArray(value.media) ? value.media : undefined,
       checklist: Array.isArray(value.checklist) ? value.checklist.filter((entry): entry is string => typeof entry === 'string') : [],
       inputs: Array.isArray(value.inputs) ? value.inputs.filter(isRecord).map(entry => ({ name: text(entry.name), description: text(entry.description), required: entry.required === true })) : [],
       outputs: Array.isArray(value.outputs) ? value.outputs.filter(isRecord).map(entry => ({ name: text(entry.name), description: text(entry.description), required: entry.required === true })) : [],
@@ -119,6 +122,7 @@ export function PublishedKnowledgeDocumentPage() {
   const [document, setDocument] = useState<PublishedDocument | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
+  const [selectedLightboxMedia, setSelectedLightboxMedia] = useState<SourceMedia | null>(null)
 
   useEffect(() => {
     if (!documentId) {
@@ -174,7 +178,68 @@ export function PublishedKnowledgeDocumentPage() {
 
       {(purpose || scope) && <div className="grid gap-4 md:grid-cols-2">{purpose && <Panel title="Mục đích"><p className="p-4 text-sm leading-6 text-slate-600 dark:text-slate-300">{purpose}</p></Panel>}{scope && <Panel title="Phạm vi áp dụng"><p className="p-4 text-sm leading-6 text-slate-600 dark:text-slate-300">{scope}</p></Panel>}</div>}
 
-      <Panel title={`Các bước nghiệp vụ (${preview.steps.length})`} description="Nội dung đã được Reviewer và Approver xác nhận khi công bố."><div className="divide-y divide-slate-100 dark:divide-slate-800">{preview.steps.map((step, index) => <article key={step.id} className="grid gap-3 p-4 md:grid-cols-[48px_minmax(0,1fr)_220px] md:items-start"><span className="grid size-9 place-items-center rounded-full bg-[#155e75] text-sm font-black text-white">{index + 1}</span><div><div className="flex flex-wrap items-center gap-2"><span className="font-mono text-[11px] font-black text-[#155e75] dark:text-cyan-300">{step.code}</span><h3 className="text-sm font-black text-slate-900 dark:text-white">{step.title}</h3></div>{step.description && <p className="mt-1.5 whitespace-pre-line text-sm leading-6 text-slate-600 dark:text-slate-300">{step.description}</p>}</div>{step.actor && <div className="rounded-lg bg-slate-50 px-3 py-2 text-xs text-slate-600 dark:bg-slate-950 dark:text-slate-300"><span className="block font-bold uppercase tracking-wide text-slate-400">Người thực hiện</span><span className="mt-1 block font-semibold">{step.actor}</span></div>}</article>)}</div></Panel>
+      <Panel title={`Các bước nghiệp vụ (${preview.steps.length})`} description="Nội dung đã được Reviewer và Approver xác nhận khi công bố.">
+        <div className="divide-y divide-slate-100 dark:divide-slate-800">
+          {preview.steps.map((step, index) => (
+            <article key={step.id} className="grid gap-3 p-4 md:grid-cols-[48px_minmax(0,1fr)_220px] md:items-start">
+              <span className="grid size-9 place-items-center rounded-full bg-[#155e75] text-sm font-black text-white">{index + 1}</span>
+              <div>
+                <div className="flex flex-wrap items-center gap-2">
+                  <span className="font-mono text-[11px] font-black text-[#155e75] dark:text-cyan-300">{step.code}</span>
+                  <h3 className="text-sm font-black text-slate-900 dark:text-white">{step.title}</h3>
+                </div>
+                {step.description && <p className="mt-1.5 whitespace-pre-line text-sm leading-6 text-slate-600 dark:text-slate-300">{step.description}</p>}
+                {step.media && step.media.length > 0 && (
+                  <div className="mt-3 flex flex-wrap gap-2.5">
+                    {step.media.map(m => (
+                      <div
+                        key={m.id}
+                        onClick={() => setSelectedLightboxMedia({
+                          id: m.id,
+                          kind: 'embedded_image',
+                          page: m.sourcePage,
+                          subPath: m.sourceSubPath,
+                          storageKey: m.storageKey || '',
+                          previewUrl: m.url,
+                          mimeType: 'image/png',
+                          checksum: '',
+                          caption: m.caption,
+                          sortOrder: m.sortOrder,
+                          confidence: 1,
+                          assignmentStatus: 'assigned'
+                        })}
+                        className="group relative cursor-pointer rounded-lg border border-slate-200 overflow-hidden bg-slate-950 size-20 hover:ring-2 hover:ring-sky-500 transition-all dark:border-slate-800"
+                        title={m.caption || 'Xem ảnh lớn'}
+                      >
+                        {m.url ? (
+                          <img src={m.url} alt={m.caption || ''} className="size-full object-cover group-hover:scale-105 transition-transform" />
+                        ) : null}
+                        {m.role === 'cover' && (
+                          <span className="absolute top-1 left-1 bg-amber-500 rounded p-0.5 text-white shadow"><Star className="size-2.5 fill-white" /></span>
+                        )}
+                        {m.sourcePage && (
+                          <span className="absolute bottom-1 right-1 rounded bg-black/70 px-1 text-[9px] text-white">Tr.{m.sourcePage}</span>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+              {step.actor && (
+                <div className="rounded-lg bg-slate-50 px-3 py-2 text-xs text-slate-600 dark:bg-slate-950 dark:text-slate-300">
+                  <span className="block font-bold uppercase tracking-wide text-slate-400">Người thực hiện</span>
+                  <span className="mt-1 block font-semibold">{step.actor}</span>
+                </div>
+              )}
+            </article>
+          ))}
+        </div>
+      </Panel>
     </main>
+
+    <MediaLightbox
+      media={selectedLightboxMedia}
+      onClose={() => setSelectedLightboxMedia(null)}
+    />
   </div>
 }

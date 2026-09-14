@@ -19,10 +19,14 @@ export function SourceDocumentViewer({ item }: { item: SopImportItem }) {
   const [attempt, setAttempt] = useState(0)
   const [expanded, setExpanded] = useState(false)
   useEffect(() => {
+    if (!item?.id || !item.id.trim()) {
+      setLoading(false)
+      return
+    }
     const controller = new AbortController()
     let objectUrl = ''
     setBlob(null); setUrl(''); setError(''); setLoading(true)
-    void fetchSopSource(item.id, controller.signal).then(file => {
+    void fetchSopSource(item.id.trim(), controller.signal).then(file => {
       if (controller.signal.aborted) return
       objectUrl = URL.createObjectURL(file)
       setBlob(file); setUrl(objectUrl)
@@ -30,7 +34,7 @@ export function SourceDocumentViewer({ item }: { item: SopImportItem }) {
       if (!controller.signal.aborted) setError(reason instanceof Error ? reason.message : 'Không tải được tài liệu')
     }).finally(() => { if (!controller.signal.aborted) setLoading(false) })
     return () => { controller.abort(); if (objectUrl) URL.revokeObjectURL(objectUrl) }
-  }, [item.id, attempt])
+  }, [item?.id, attempt])
   useEffect(() => {
     if (!expanded) return
     const close = (event: KeyboardEvent) => { if (event.key === 'Escape') setExpanded(false) }

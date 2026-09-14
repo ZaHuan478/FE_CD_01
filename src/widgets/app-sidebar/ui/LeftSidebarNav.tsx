@@ -68,6 +68,13 @@ export const LeftSidebarNav: React.FC<LeftSidebarNavProps> = ({
       groupTitle: t('sidebar.group.overview', 'BẮT ĐẦU TỪ ĐÂY'),
       items: [
         {
+          id: 'SYSTEM_GUIDE',
+          label: 'Hướng dẫn chi tiết',
+          icon: HelpCircle,
+          badge: 'Bắt đầu',
+          color: 'text-cyan-700'
+        },
+        {
           id: 'overview-dashboard',
           label: t('sidebar.item.dashboard', 'Tổng quan hệ thống'),
           icon: LayoutDashboard,
@@ -172,7 +179,7 @@ export const LeftSidebarNav: React.FC<LeftSidebarNavProps> = ({
     }] : [])
   ].map((group) => ({
     ...group,
-    items: group.items.filter((item) => ['SOP_IMPORT', 'DOCUMENT_CONVERSION', 'SOP_MANAGEMENT', 'policy-center'].includes(item.id) || allowedMenuCodes.has(item.id))
+    items: group.items.filter((item) => ['SYSTEM_GUIDE', 'SOP_IMPORT', 'DOCUMENT_CONVERSION', 'SOP_MANAGEMENT', 'policy-center'].includes(item.id) || allowedMenuCodes.has(item.id))
   })).filter((group) => group.items.length > 0)
 
   const initials = session.fullName
@@ -184,6 +191,7 @@ export const LeftSidebarNav: React.FC<LeftSidebarNavProps> = ({
 
   return (
     <aside
+      data-help-id="main-sidebar"
       className={`fixed left-0 top-0 bottom-0 z-40 bg-white text-slate-800 border-r border-slate-200 transition-all duration-300 flex flex-col shadow-lg dark:bg-slate-900 dark:text-slate-100 dark:border-slate-800 ${isCollapsed ? 'w-12 sm:w-16' : 'w-56 sm:w-64'
         }`}
     >

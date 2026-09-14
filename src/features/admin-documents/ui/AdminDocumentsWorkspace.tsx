@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import {
   AlertTriangle,
   CheckCircle2,
@@ -132,6 +132,13 @@ export function AdminDocumentsWorkspace() {
   const [confirmDeleteDoc, setConfirmDeleteDoc] = useState<{ doc: AdminUserDocumentItem; permanent: boolean } | null>(null)
   const [confirmBatchAction, setConfirmBatchAction] = useState<'trash' | 'restore' | 'permanentDelete' | null>(null)
 
+  useEffect(() => {
+    const availableIds = new Set(documents.map(document => document.id))
+    setPreviewingDoc(current => current && !availableIds.has(current.id) ? null : current)
+    setDetailsDoc(current => current && !availableIds.has(current.id) ? null : current)
+    setRenamingDoc(current => current && !availableIds.has(current.id) ? null : current)
+  }, [documents])
+
   const handleOpenRename = (doc: AdminUserDocumentItem) => {
     setRenamingDoc(doc)
     setNewDisplayName(doc.displayName)
@@ -146,17 +153,26 @@ export function AdminDocumentsWorkspace() {
   const handleConfirmSingleDelete = async () => {
     if (!confirmDeleteDoc) return
     const { doc, permanent } = confirmDeleteDoc
-    if (permanent) {
-      await permanentDelete(doc.id)
-    } else {
-      await moveToTrash(doc.id)
+    const succeeded = permanent
+      ? await permanentDelete(doc.id)
+      : await moveToTrash(doc.id)
+    if (succeeded) {
+      setPreviewingDoc(current => current?.id === doc.id ? null : current)
+      setDetailsDoc(current => current?.id === doc.id ? null : current)
+      setRenamingDoc(current => current?.id === doc.id ? null : current)
     }
     setConfirmDeleteDoc(null)
   }
 
   const handleConfirmBatch = async () => {
     if (!confirmBatchAction) return
-    await batchAction(confirmBatchAction)
+    const affectedIds = new Set(selectedIds)
+    const succeeded = await batchAction(confirmBatchAction)
+    if (succeeded) {
+      setPreviewingDoc(current => current && affectedIds.has(current.id) ? null : current)
+      setDetailsDoc(current => current && affectedIds.has(current.id) ? null : current)
+      setRenamingDoc(current => current && affectedIds.has(current.id) ? null : current)
+    }
     setConfirmBatchAction(null)
   }
 

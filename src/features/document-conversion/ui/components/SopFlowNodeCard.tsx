@@ -1,7 +1,7 @@
 import { memo, useEffect, useState } from 'react'
 import { Handle, Position, type NodeProps, type Node } from '@xyflow/react'
 import { UserRound, Clock3, CirclePlay, CircleStop, GitFork, GitBranch, ListChecks, CheckSquare2 } from 'lucide-react'
-import type { SopImportStep } from '../../model/documentConversionModel'
+import type { SopImportStep, StepMedia } from '../../model/documentConversionModel'
 import { detectIllustrationPreset, renderPresetIllustration } from './sopIllustrations'
 
 export type FlowNodeData = Record<string, unknown> & {
@@ -16,6 +16,7 @@ export type FlowNodeData = Record<string, unknown> & {
   kind: SopImportStep['nodeKind']
   imageUrl?: string | null
   illustrationPreset?: string | null
+  media?: StepMedia[]
   checklistCount?: number
   inputsCount?: number
   outputsCount?: number
@@ -42,7 +43,10 @@ function SopFlowNodeCardComponent({ data, selected }: NodeProps<SopFlowNode>) {
   const isSubprocess = data.kind === 'subprocess'
   const [imageFailed, setImageFailed] = useState(false)
 
-  useEffect(() => setImageFailed(false), [data.imageUrl])
+  const coverMedia = data.media?.find(m => m.role === 'cover') || data.media?.[0]
+  const displayImageUrl = coverMedia?.url || data.imageUrl
+
+  useEffect(() => setImageFailed(false), [displayImageUrl])
 
   const preset = detectIllustrationPreset({
     title: data.title,
@@ -101,18 +105,24 @@ function SopFlowNodeCardComponent({ data, selected }: NodeProps<SopFlowNode>) {
 
       {/* Top Banner Image or Thematic SVG Vector Illustration */}
       <div className="relative aspect-video w-full overflow-hidden bg-slate-950">
-        {data.imageUrl && !imageFailed ? (
+        {displayImageUrl && !imageFailed ? (
           <img
-            src={data.imageUrl}
-            alt={data.title}
+            src={displayImageUrl}
+            alt={coverMedia?.caption || data.title}
             className="size-full object-cover transition-transform duration-300 group-hover:scale-105"
+            loading="lazy"
             onError={() => {
-              // Use the thematic SVG when a remote image is unavailable.
               setImageFailed(true)
             }}
           />
         ) : (
           renderPresetIllustration(preset)
+        )}
+
+        {data.media && data.media.length > 1 && (
+          <div className="absolute bottom-2 right-2 flex items-center gap-1 rounded-md border border-white/10 bg-slate-950/70 px-1.5 py-0.5 text-[10px] font-medium text-slate-200 shadow-sm backdrop-blur-md">
+            <span>📷 {data.media.length}</span>
+          </div>
         )}
 
         {/* Top-Left Glassmorphic Step Code Badge */}

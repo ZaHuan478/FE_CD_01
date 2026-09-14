@@ -1,10 +1,10 @@
 import { useCallback, useEffect, useState } from 'react'
 import { knowledgeApi, type CreateKnowledgeDocumentBody, type KnowledgeListParams, type KnowledgePage } from '../../../shared/api/knowledge.api'
-import type { AdminModule, ModuleInput } from '../../../shared/api/admin-access.api'
+import type { AdminModule, BusinessCluster, ModuleInput } from '../../../shared/api/admin-access.api'
 import { useToast } from '../../../shared/ui/toast'
 import { getErrorMessage } from '../../../shared/lib/errors/apiError'
 
-export type { AdminModule, ModuleInput }
+export type { AdminModule, BusinessCluster, ModuleInput }
 export type AdminDocumentType = CreateKnowledgeDocumentBody['type']
 export type AdminDocumentCreateInput = CreateKnowledgeDocumentBody
 

@@ -65,6 +65,20 @@ test('PublishedSopFlow supports view mode toggle between Mermaid and Canvas', ()
   assert(content.includes('<SopFlowchartWorkspace'))
 })
 
+test('document outline keeps nested instructions inside explicit major steps', () => {
+  const content = read('src/features/document-conversion/ui/DocumentConversionWorkspace.tsx')
+
+  assert(content.includes("const mainSteps = outline.filter(item => item.semanticKind === 'main_step')"))
+  assert(content.includes('if (mainSteps.length) return mainSteps'))
+  assert(content.includes('if (operationalKinds.has(parent.semanticKind)) return false'))
+  assert(content.includes('supporting.push(candidate)'))
+  assert(content.includes('Node tổng quan'))
+  assert(content.includes('chỉ các bước chính trở thành node tổng quan'))
+  assert(content.includes('Tạo bản chỉnh sửa & phân tích lại'))
+  assert(content.includes('const result = await sopImportApi.reprocess(revision.id)'))
+  assert(!content.includes('if (!operationalKinds.has(candidate.semanticKind)) supporting.push(candidate)'))
+})
+
 test('shared Mermaid diagram exposes a keyboard-friendly actions menu', () => {
   const content = read('src/shared/ui/diagrams/MermaidDiagram.tsx')
 

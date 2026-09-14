@@ -87,6 +87,12 @@ export const SessionProvider: React.FC<React.PropsWithChildren> = ({ children })
     }
   }, [refreshSession])
 
+  useEffect(() => {
+    const refreshCatalog = () => { if (isAuthenticated()) void refreshSession() }
+    window.addEventListener('sop-catalog-changed', refreshCatalog)
+    return () => window.removeEventListener('sop-catalog-changed', refreshCatalog)
+  }, [refreshSession])
+
   const roleTitle = useMemo(() => resolveUserRoleTitle(session), [session])
 
   const contextValue = useMemo<AuthContextType>(() => ({

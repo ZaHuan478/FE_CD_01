@@ -37,11 +37,13 @@ export function KnowledgeBoundary({ children }: PropsWithChildren) {
   const location = useLocation()
   const isAdminWorkspace = location.pathname.startsWith('/employee-lifecycle/admin')
     || new URLSearchParams(location.search).get('tab') === 'admin'
+  const isUniversalWorkspace = location.pathname.startsWith('/employee-lifecycle/system-guide')
+    || location.pathname.startsWith('/employee-lifecycle/policies')
   const boundaryResetKey = `${location.pathname}:${location.search}`
-  if (!session.modules.length && ['ADMIN', 'SUPER_ADMIN'].includes(session.systemRole) && !isAdminWorkspace) {
+  if (!session.modules.length && ['ADMIN', 'SUPER_ADMIN'].includes(session.systemRole) && !isAdminWorkspace && !isUniversalWorkspace) {
     return <Navigate to="/employee-lifecycle/admin" replace />
   }
-  if (!session.modules.length && !['ADMIN', 'SUPER_ADMIN'].includes(session.systemRole)) return <main className="p-8 text-center"><h1>Chưa được cấp quyền phân hệ</h1><p>Vui lòng liên hệ quản trị viên để được cấp quyền xem tài liệu phù hợp.</p></main>
+  if (!session.modules.length && !['ADMIN', 'SUPER_ADMIN'].includes(session.systemRole) && !isUniversalWorkspace) return <main className="p-8 text-center"><h1>Chưa được cấp quyền phân hệ</h1><p>Vui lòng liên hệ quản trị viên để được cấp quyền xem tài liệu phù hợp.</p></main>
   return <ReadErrorBoundary key={session.accountId} resetKey={boundaryResetKey}><TranslatedContent>{children}</TranslatedContent></ReadErrorBoundary>
 }
 

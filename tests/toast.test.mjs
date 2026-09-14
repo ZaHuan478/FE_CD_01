@@ -12,7 +12,12 @@ const read = (rel) => readFileSync(path.join(root, rel), 'utf8')
 
 let server
 before(async () => {
-  server = await createServer({ server: { middlewareMode: true, hmr: false }, appType: 'custom' })
+  server = await createServer({
+    mode: 'test',
+    cacheDir: 'node_modules/.vite-test',
+    server: { middlewareMode: true, hmr: false },
+    appType: 'custom'
+  })
 })
 after(async () => {
   await server?.close()

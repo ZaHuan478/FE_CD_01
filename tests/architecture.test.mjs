@@ -68,13 +68,13 @@ test('public URLs and lazy workspace loading are preserved', () => {
   const router = read(path.join(root, 'src/app/router.tsx'))
   const paths = [...router.matchAll(/path="([^"]+)"/g)].map((match) => match[1])
   assert.deepEqual(paths, [
-    '/', '/login', '/employee-lifecycle/knowledge-documents/:documentId', '/employee-lifecycle/sop-imports', '/employee-lifecycle/document-conversions', '/employee-lifecycle/sop-management', '/employee-lifecycle/operation-guide', '/employee-lifecycle', '/employee-lifecycle/journey', '/employee-lifecycle/lifecycle',
+    '/', '/login', '/employee-lifecycle/knowledge-documents/:documentId', '/employee-lifecycle/sop-imports', '/employee-lifecycle/document-conversions', '/employee-lifecycle/sop-management', '/employee-lifecycle/operation-guide', '/employee-lifecycle/system-guide', '/employee-lifecycle/system-guide/:guideSlug', '/employee-lifecycle', '/employee-lifecycle/journey', '/employee-lifecycle/lifecycle',
     '/employee-lifecycle/operations', '/employee-lifecycle/masterdata', '/employee-lifecycle/reports',
     '/employee-lifecycle/workbench', '/employee-lifecycle/infographic/:id', '/employee-lifecycle/flowchart/:id',
     '/employee-lifecycle/raci/:id', '/employee-lifecycle/workflow/:id',
     '/employee-lifecycle/erd', '/employee-lifecycle/policies', '/employee-lifecycle/policies/:id',
     '/employee-lifecycle/admin', '/employee-lifecycle/admin/users', '/employee-lifecycle/admin/access',
-    '/employee-lifecycle/admin/catalog', '/employee-lifecycle/admin/imports', '/employee-lifecycle/admin/sop-approvals', '/employee-lifecycle/admin/master-data', '/employee-lifecycle/admin/indexing', '/employee-lifecycle/admin/settings', '*'
+    '/employee-lifecycle/admin/catalog', '/employee-lifecycle/admin/imports', '/employee-lifecycle/admin/sop-approvals', '/employee-lifecycle/admin/master-data', '/employee-lifecycle/admin/indexing', '/employee-lifecycle/admin/audit', '/employee-lifecycle/admin/settings', '/employee-lifecycle/admin/system-guides', '*'
   ])
   assert(router.includes("import('../pages/employee-lifecycle/EmployeeLifecyclePage')"))
 })
@@ -103,6 +103,9 @@ test('document conversion renders editable React Flow and derived Mermaid withou
   const publishedViewer = read(path.join(root, 'src/features/sop-viewer/ui/WorkflowDetailPage.tsx'))
   const api = read(path.join(root, 'src/shared/api/sop-import.api.ts'))
   assert(workspace.includes("'flow'"))
+  assert(workspace.includes("'structure'"))
+  assert(workspace.includes('Cấu trúc nguồn'))
+  assert(api.includes('/reprocess'))
   assert(workspace.includes('Lưu đồ Mermaid'))
   assert(flowchart.includes('ReactFlow'))
   assert(mermaidDiagram.includes("import('mermaid')"))
@@ -225,6 +228,20 @@ test('admin catalog loads independently and does not invent unavailable persiste
   assert(catalog.includes('Sửa và lưu trữ chưa có endpoint'))
   assert(settings.includes('<SystemSettingsForm />'))
   assert(settings.includes('<AuditLogPanel />'))
+})
+
+test('admin document preview does not refetch when toast state changes and closes after deletion', () => {
+  const viewer = read(path.join(root, 'src/features/admin-documents/ui/AdminDocumentViewer.tsx'))
+  const workspace = read(path.join(root, 'src/features/admin-documents/ui/AdminDocumentsWorkspace.tsx'))
+  const api = read(path.join(root, 'src/shared/api/admin-documents.api.ts'))
+
+  assert(viewer.includes('const { error: showError } = useToast()'))
+  assert(viewer.includes('[doc.id, attempt, showError]'))
+  assert(!viewer.includes('[doc.id, attempt, toast]'))
+  assert(workspace.includes('setPreviewingDoc(current => current?.id === doc.id ? null : current)'))
+  assert(workspace.includes('const availableIds = new Set(documents.map'))
+  assert(api.includes("VITE_ADMIN_DOCUMENT_DEMO_FALLBACK === 'true'"))
+  assert(api.includes('if (!demoFallbackEnabled) throw error'))
 })
 
 

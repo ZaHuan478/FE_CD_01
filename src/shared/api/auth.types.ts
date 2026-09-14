@@ -17,6 +17,10 @@ export interface SessionModule {
   code: string
   title: string
   moduleType: string
+  status?: 'draft' | 'published' | 'archived'
+  businessCluster?: 'core' | 'people' | 'organization' | 'platform'
+  iconKey?: string
+  sortOrder?: number
 }
 
 export interface UserSession {

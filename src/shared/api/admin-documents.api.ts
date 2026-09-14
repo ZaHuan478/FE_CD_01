@@ -219,6 +219,11 @@ let fallbackDocuments: AdminUserDocumentItem[] = [
   }
 ]
 
+// Mock records are available only for an explicitly requested standalone demo.
+// Normal development and production must surface backend errors so the UI does
+// not report a successful mutation that never reached the database.
+const demoFallbackEnabled = import.meta.env.VITE_ADMIN_DOCUMENT_DEMO_FALLBACK === 'true'
+
 function computeFallbackStats(): AdminDocumentStats {
   const totalFiles = fallbackDocuments.length
   const totalBytes = fallbackDocuments.reduce((sum, d) => sum + d.fileSize, 0)
@@ -310,10 +315,11 @@ export async function fetchAdminDocumentBlob(id: string, signal?: AbortSignal): 
     if (isAbortError(error) || error instanceof ApiClientError) {
       throw error
     }
-    // Backend offline; create a mock demo blob if item exists
+    if (!demoFallbackEnabled) throw error
   }
 
   const doc = fallbackDocuments.find(d => d.id === id)
+  if (!doc) throw new Error('Không tìm thấy tài liệu demo')
   const isPdf = doc?.format === 'pdf'
   const text = isPdf
     ? `%PDF-1.4\n1 0 obj<</Type/Catalog/Pages 2 0 R>>endobj\n2 0 obj<</Type/Pages/Count 1/Kids[3 0 R]>>endobj\n3 0 obj<</Type/Page/Parent 2 0 R/MediaBox[0 0 612 792]>>endobj\nxref\n0 4\n0000000000 65535 f\n0000000010 00000 n\n0000000053 00000 n\n0000000102 00000 n\ntrailer<</Size 4/Root 1 0 R>>\nstartxref\n178\n%%EOF`
@@ -337,7 +343,8 @@ export const adminDocumentsApi = {
     try {
       const res = await apiRequest<{ data: ListAdminDocumentsResult }>(`/admin/documents${query}`, { signal })
       return res.data
-    } catch {
+    } catch (error) {
+      if (!demoFallbackEnabled) throw error
       return getFallbackList(options)
     }
   },
@@ -346,7 +353,8 @@ export const adminDocumentsApi = {
     try {
       const res = await apiRequest<{ data: AdminUserDocumentItem }>(`/admin/documents/${encodeURIComponent(id)}`, { signal })
       return res.data
-    } catch {
+    } catch (error) {
+      if (!demoFallbackEnabled) throw error
       const doc = fallbackDocuments.find(d => d.id === id)
       if (!doc) throw new Error('Không tìm thấy tài liệu')
       return doc
@@ -360,7 +368,8 @@ export const adminDocumentsApi = {
         body: JSON.stringify({ displayName })
       })
       return res.data
-    } catch {
+    } catch (error) {
+      if (!demoFallbackEnabled) throw error
       const doc = fallbackDocuments.find(d => d.id === id)
       if (doc) {
         doc.displayName = displayName
@@ -376,7 +385,8 @@ export const adminDocumentsApi = {
         method: 'DELETE'
       })
       return res.data
-    } catch {
+    } catch (error) {
+      if (!demoFallbackEnabled) throw error
       const doc = fallbackDocuments.find(d => d.id === id)
       if (doc) {
         doc.deletedAt = new Date().toISOString()
@@ -392,7 +402,8 @@ export const adminDocumentsApi = {
         method: 'POST'
       })
       return res.data
-    } catch {
+    } catch (error) {
+      if (!demoFallbackEnabled) throw error
       const doc = fallbackDocuments.find(d => d.id === id)
       if (doc) {
         doc.deletedAt = null
@@ -408,7 +419,8 @@ export const adminDocumentsApi = {
         method: 'DELETE'
       })
       return res.data
-    } catch {
+    } catch (error) {
+      if (!demoFallbackEnabled) throw error
       fallbackDocuments = fallbackDocuments.filter(d => d.id !== id)
       return { id, success: true }
     }
@@ -421,7 +433,8 @@ export const adminDocumentsApi = {
         body: JSON.stringify({ action, documentIds })
       })
       return res.data
-    } catch {
+    } catch (error) {
+      if (!demoFallbackEnabled) throw error
       let count = 0
       for (const id of documentIds) {
         const doc = fallbackDocuments.find(d => d.id === id)

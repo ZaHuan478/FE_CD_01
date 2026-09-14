@@ -389,8 +389,21 @@ export const SystemOverviewDashboard: React.FC<{ activeCluster: BusinessClusterI
   }
 
   const accessibleModuleIds = useMemo(() => new Set(session.modules.map((module) => module.id)), [session.modules])
+  const configuredModules = useMemo(() => new Map(session.modules.map(module => [module.id, module])), [session.modules])
   const visibleModuleMenus = getPreparedModuleMenus()
-    .filter((module) => moduleClusterById[module.id] === activeCluster)
+    .map((module) => {
+      const configured = configuredModules.get(dashboardModuleAccess[module.id])
+      return configured ? {
+        ...module,
+        label: configured.title || module.label,
+        code: configured.code || module.code,
+        businessCluster: configured.businessCluster ?? moduleClusterById[module.id],
+        sortOrder: configured.sortOrder ?? 0,
+        status: configured.status ?? 'published'
+      } : null
+    })
+    .filter((module): module is NonNullable<typeof module> => Boolean(module))
+    .filter((module) => module.status === 'published' && module.businessCluster === activeCluster)
     .filter((module) => accessibleModuleIds.has(dashboardModuleAccess[module.id]))
     .map((module) => ({
       ...module,
@@ -399,6 +412,7 @@ export const SystemOverviewDashboard: React.FC<{ activeCluster: BusinessClusterI
         requiredModuleIdsForRoute(item.workflowId, item.sopCode)
       ))
     }))
+    .sort((left, right) => left.sortOrder - right.sortOrder || left.label.localeCompare(right.label, 'vi'))
 
   return (
     <div className="space-y-5">

@@ -23,7 +23,12 @@ before(async () => {
       : { items: [], acknowledged: true, acknowledgedAt: null }
     return new Response(JSON.stringify(nextStatus === 200 ? payload : { error: { message: 'Forbidden' } }), { status: nextStatus, headers: { 'content-type': 'application/json' } })
   }
-  server = await createServer({ server: { middlewareMode: true, hmr: false }, appType: 'custom' })
+  server = await createServer({
+    mode: 'test',
+    cacheDir: 'node_modules/.vite-test',
+    server: { middlewareMode: true, hmr: false },
+    appType: 'custom'
+  })
 })
 after(async () => {
   await server?.close()
@@ -188,4 +193,3 @@ test('my documents API encodes filters, pagination and mutation payloads', async
   assert(calls.at(-1).url.endsWith('/my-documents/doc-123/file'))
   assert.equal(calls.at(-1).init.headers['x-user-id'], 'doc-owner')
 })
-
