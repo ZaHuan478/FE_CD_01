@@ -17,6 +17,10 @@ export interface SopSubStep {
   typeCode: 'N' | 'A' | 'C' | 'M' | ''
   description: string
   fieldsChecklist?: string[]
+  inputs?: Array<{ id?: string; name: string; description?: string | null; required?: boolean }> | string[]
+  outputs?: Array<{ id?: string; name: string; description?: string | null; required?: boolean }> | string[]
+  condition?: string
+  branchLabel?: string
   imageUrl?: string | null
   media?: Array<{
     id: string
@@ -24,7 +28,7 @@ export interface SopSubStep {
     storageKey?: string
     url?: string
     caption?: string
-    role: 'cover' | 'illustration' | 'screenshot' | 'form' | 'diagram'
+    role?: 'cover' | 'illustration' | 'screenshot' | 'form' | 'diagram'
     sourcePage?: number
     sourceSubPath?: string
     sortOrder: number
@@ -40,6 +44,20 @@ export interface SopSubProcess {
   outputs?: string[]
   rules?: string[]
   steps: SopSubStep[]
+  documentId?: string
+  version?: number
+  moduleIds?: string[]
+  primaryModuleId?: string
+  relatedDocuments?: string[]
+  transitions?: Array<{
+    id?: string
+    fromStepId?: string | null
+    toStepId?: string | null
+    kind: 'normal' | 'conditional' | 'return' | 'parallel_fork' | 'parallel_join' | 'subprocess'
+    condition?: string | null
+    branchLabel?: string | null
+    sortOrder?: number
+  }>
   sourceNote?: string
   notes?: string[]
   access?: {

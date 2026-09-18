@@ -50,7 +50,7 @@ export function ProcessLibraryWorkspace() {
         <h3 className="mt-3 font-bold">{item.title}</h3>
         {item.summary && <p className="mt-2 line-clamp-2 text-sm text-slate-500">{item.summary}</p>}
         <p className="mt-3 text-xs text-slate-500">Phiên bản {item.version ?? 1} · {item.moduleIds.map(id => session.modules.find(module => module.id === id)?.title ?? id).join(', ')}</p>
-        <span className="mt-3 inline-block text-sm font-bold text-[#155e75] dark:text-cyan-300">Xem quy trình và Canvas →</span>
+        <span className="mt-3 inline-block text-sm font-bold text-[#155e75] dark:text-cyan-300">Xem quy trình & chi tiết →</span>
       </Link>{canEdit && <Link to={`/employee-lifecycle/sop-management?source=${encodeURIComponent(item.id)}`} className="mt-3 inline-block rounded-md border border-slate-200 px-3 py-2 text-xs font-bold text-[#155e75] hover:bg-slate-50 dark:border-slate-700 dark:text-cyan-300 dark:hover:bg-slate-800">Tạo bản sửa</Link>}</article>)}</div>
       {!result?.data.length && !error && <p className="p-6 text-center text-sm text-slate-500">Không có SOP đã công bố phù hợp với bộ lọc. Tài liệu chỉ mới upload hoặc còn bản nháp sẽ chưa xuất hiện ở đây.</p>}
       <nav aria-label="Phân trang thư viện" className="flex items-center justify-end gap-3 border-t border-slate-200 p-4 dark:border-slate-800"><button type="button" disabled={page <= 1} onClick={() => change('page', String(page - 1))} className={secondaryButtonClass}><ChevronLeft className="size-4" />Trước</button><span className="text-sm">Trang {page}/{totalPages}</span><button type="button" disabled={page >= totalPages} onClick={() => change('page', String(page + 1))} className={secondaryButtonClass}>Sau<ChevronRight className="size-4" /></button></nav>

@@ -74,7 +74,7 @@ test('public URLs and lazy workspace loading are preserved', () => {
     '/employee-lifecycle/raci/:id', '/employee-lifecycle/workflow/:id',
     '/employee-lifecycle/erd', '/employee-lifecycle/policies', '/employee-lifecycle/policies/:id',
     '/employee-lifecycle/admin', '/employee-lifecycle/admin/users', '/employee-lifecycle/admin/access',
-    '/employee-lifecycle/admin/catalog', '/employee-lifecycle/admin/imports', '/employee-lifecycle/admin/sop-approvals', '/employee-lifecycle/admin/master-data', '/employee-lifecycle/admin/indexing', '/employee-lifecycle/admin/audit', '/employee-lifecycle/admin/settings', '/employee-lifecycle/admin/system-guides', '*'
+    '/employee-lifecycle/admin/catalog', '/employee-lifecycle/admin/sop-management', '/employee-lifecycle/admin/imports', '/employee-lifecycle/admin/sop-approvals', '/employee-lifecycle/admin/master-data', '/employee-lifecycle/admin/indexing', '/employee-lifecycle/admin/audit', '/employee-lifecycle/admin/settings', '/employee-lifecycle/admin/system-guides', '*'
   ])
   assert(router.includes("import('../pages/employee-lifecycle/EmployeeLifecyclePage')"))
 })
@@ -95,25 +95,43 @@ test('personal documents and document conversion have separate employee workspac
   assert(!sidebar.includes("navigate('/employee-lifecycle/sop-imports')"))
 })
 
-test('document conversion renders editable React Flow and derived Mermaid without duplicating source data', () => {
+test('document conversion and published SOP use business-facing process views', () => {
   const workspace = read(path.join(root, 'src/features/document-conversion/ui/DocumentConversionWorkspace.tsx'))
-  const flowchart = read(path.join(root, 'src/features/document-conversion/ui/SopFlowchartWorkspace.tsx'))
-  const mermaidFlow = read(path.join(root, 'src/features/document-conversion/model/mermaidFlow.ts'))
-  const mermaidDiagram = read(path.join(root, 'src/shared/ui/diagrams/MermaidDiagram.tsx'))
+  const interpretation = read(path.join(root, 'src/features/document-conversion/ui/components/DigitalProcessInterpretation.tsx'))
   const publishedViewer = read(path.join(root, 'src/features/sop-viewer/ui/WorkflowDetailPage.tsx'))
+  const publishedDocumentViewer = read(path.join(root, 'src/features/sop-viewer/ui/PublishedKnowledgeDocumentPage.tsx'))
   const api = read(path.join(root, 'src/shared/api/sop-import.api.ts'))
-  assert(workspace.includes("'flow'"))
+  assert(!workspace.includes("'interpretation'"))
   assert(workspace.includes("'structure'"))
   assert(workspace.includes('Cấu trúc nguồn'))
   assert(api.includes('/reprocess'))
-  assert(workspace.includes('Lưu đồ Mermaid'))
-  assert(flowchart.includes('ReactFlow'))
-  assert(mermaidDiagram.includes("import('mermaid')"))
-  assert(flowchart.includes('validateFlow(importId, preview)'))
-  assert(mermaidFlow.includes('buildMermaidDefinition'))
-  assert(mermaidFlow.includes('generatedStart'))
-  assert(api.includes('/flow/validate'))
-  assert(publishedViewer.includes('Flowchart Mermaid'))
+  assert(!workspace.includes('Kiểm tra diễn giải số hóa'))
+  assert(!workspace.includes('<DigitalProcessInterpretation'))
+  assert(!workspace.includes('Lưu đồ Mermaid'))
+  assert(!workspace.includes('SopFlowchartWorkspace'))
+  assert(!workspace.includes('Canvas'))
+  assert(interpretation.includes('Workflow đã diễn giải'))
+  assert(interpretation.includes('Tài liệu liên quan đến quy trình'))
+  assert(interpretation.includes('Test diễn giải số hóa'))
+  assert(publishedViewer.includes('<MetroWorkflowPipeline'))
+  assert(!publishedViewer.includes('PublishedSopFlow'))
+  assert(!publishedViewer.includes('Flowchart Mermaid'))
+  assert(publishedDocumentViewer.includes('<MetroWorkflowPipeline'))
+  assert(!publishedDocumentViewer.includes('SopFlowchartWorkspace'))
+  assert(!publishedDocumentViewer.includes('Canvas tương tác'))
+  assert(!publishedDocumentViewer.includes('Danh sách các bước quy trình'))
+})
+
+test('the full SOP guide opens as an accessible centered modal', () => {
+  const stepDetail = read(path.join(root, 'src/features/sop-viewer/ui/components/UniversalStepDetailCanvas.tsx'))
+  const guide = read(path.join(root, 'src/features/sop-viewer/ui/components/FullSopGuideModal.tsx'))
+  assert(stepDetail.includes('Xem hướng dẫn/SOP đầy đủ'))
+  assert(guide.includes('role="dialog"'))
+  assert(guide.includes('aria-modal="true"'))
+  assert(guide.includes('place-items-center'))
+  assert(guide.includes("document.body.style.overflow = 'hidden'"))
+  assert(guide.includes("e.key !== 'Tab'"))
+  assert(!guide.includes('fixed inset-y-0 right-0'))
 })
 
 test('admin lands on the workspace and receives an admin-only sidebar destination', () => {

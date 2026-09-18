@@ -42,7 +42,7 @@ export const LanguageSelector: React.FC<LanguageSelectorProps> = ({
       <Button
         type="button"
         onClick={() => setIsOpen(!isOpen)}
-        className={`flex items-center gap-2 px-3.5 py-2 rounded-2xl border text-xs font-bold transition-all duration-200 cursor-pointer shadow-xs ${
+        className={`flex min-h-11 items-center gap-2 rounded-2xl border px-3.5 py-2 text-xs font-bold transition-all duration-200 cursor-pointer shadow-xs ${
           isDarkTheme
             ? 'bg-slate-800/90 hover:bg-slate-700/90 border-slate-700 text-slate-100 hover:border-blue-500/60'
             : 'bg-white hover:bg-slate-50 border-slate-200 text-slate-800 hover:border-blue-500/60 shadow-2xs'

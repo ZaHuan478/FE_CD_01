@@ -1,7 +1,7 @@
 import { lazy, Suspense, useEffect, useMemo, useRef, useState, type ChangeEvent, type FormEvent } from 'react'
 import { AlertTriangle, ArrowDown, ArrowUp, CheckCircle2, FileText, LoaderCircle, Plus, ScanText, Trash2, UploadCloud } from 'lucide-react'
 import { sopImportApi, useSopImportModules, getErrorMessage, type SopImportItem, type SopImportPreview, type SopImportStep } from '../model/sopImportModel'
-import { useSession } from '../../authentication/model/session'
+import { useSession, canPublishSop, canReviewSop } from '../../authentication/model/session'
 import { Feedback, Panel, adminInputClass, primaryButtonClass, secondaryButtonClass } from '../../../shared/ui/molecules/AdminSurface'
 import { Select } from '../../../shared/ui/atoms/Select'
 import { useToast } from '../../../shared/ui/toast'
@@ -43,8 +43,8 @@ export function SopImportWorkspace({ adminMode = false }: { adminMode?: boolean 
   const toast = useToast()
   const moduleState = useSopImportModules()
   const session = useSession()
-  const canPublish = adminMode || session.capabilities.includes('sop.publish')
-  const canReview = adminMode || session.capabilities.includes('sop.review')
+  const canPublish = canPublishSop(session)
+  const canReview = canReviewSop(session)
   const department = session.organization?.department?.trim() ?? ''
   const jobTitle = session.organization?.jobTitle?.trim() ?? ''
   const defaultAudience = department && jobTitle ? 'department_job_title' : department ? 'department' : jobTitle ? 'job_title' : 'personal'

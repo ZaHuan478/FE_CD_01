@@ -120,13 +120,18 @@ export async function streamChatMessage(
     for (const event of events) {
       const payload = event.split('\n').find(line => line.startsWith('data: '))?.slice(6)
       if (!payload || payload === '[DONE]') continue
-      const item = JSON.parse(payload) as { type: 'token' | 'done'; token?: string; citations?: Citation[]; sessionId?: string }
+      const item = JSON.parse(payload) as { type: 'token' | 'done' | 'error'; token?: string; citations?: Citation[]; sessionId?: string; message?: string }
       if (item.type === 'token' && item.token) {
         message += item.token
         onToken(item.token)
       } else if (item.type === 'done') {
         citations = item.citations || []
         sessionId = item.sessionId || sessionId
+      } else if (item.type === 'error') {
+        if (item.sessionId) sessionId = item.sessionId
+        const err = new Error(item.message || 'Lỗi dịch vụ AI') as Error & { sessionId?: string }
+        err.sessionId = sessionId
+        throw err
       }
     }
   }

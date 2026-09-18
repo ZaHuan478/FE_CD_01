@@ -5,7 +5,8 @@ import {
   Trash2,
   Sparkles,
   Maximize2,
-  Minimize2
+  Minimize2,
+  RefreshCw
 } from 'lucide-react'
 import { ChatMessageList } from './ChatMessageList'
 import { useAuth } from '../../authentication/model/session'
@@ -23,6 +24,7 @@ export const ChatAssistantDrawer: React.FC = () => {
   const [sessionId, setSessionId] = useState<string | undefined>()
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [lastPrompt, setLastPrompt] = useState<string | null>(null)
 
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const inputRef = useRef<HTMLTextAreaElement>(null)
@@ -52,6 +54,7 @@ export const ChatAssistantDrawer: React.FC = () => {
 
     setMessages((prev) => [...prev, userMessage])
     setInputMessage('')
+    setLastPrompt(textToSend.trim())
     setError(null)
     setIsLoading(true)
 
@@ -77,6 +80,10 @@ export const ChatAssistantDrawer: React.FC = () => {
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : 'Có lỗi khi kết nối với máy chủ AI'
       setError(msg)
+      if (err && typeof err === 'object' && 'sessionId' in err && (err as any).sessionId) {
+        setSessionId((err as any).sessionId)
+      }
+      setMessages((prev) => prev.filter(m => m.content.trim() !== '' || m.role === 'user'))
     } finally {
       setIsLoading(false)
     }
@@ -92,6 +99,7 @@ export const ChatAssistantDrawer: React.FC = () => {
   const handleClear = () => {
     setMessages([])
     setSessionId(undefined)
+    setLastPrompt(null)
     setError(null)
   }
 
@@ -112,14 +120,16 @@ export const ChatAssistantDrawer: React.FC = () => {
         <button
           type="button"
           onClick={() => setIsOpen(true)}
-          className="fixed bottom-6 right-6 z-50 flex items-center gap-2.5 px-4 py-3 bg-gradient-to-r from-indigo-600 via-indigo-700 to-sky-600 text-white rounded-full shadow-2xl hover:shadow-indigo-500/25 hover:scale-105 active:scale-95 transition-all duration-200 cursor-pointer group"
+          className="fixed bottom-4 right-4 sm:bottom-6 sm:right-6 z-50 flex items-center justify-center gap-2 p-3 sm:px-4 sm:py-3 bg-gradient-to-r from-indigo-600 via-indigo-700 to-sky-600 text-white rounded-full shadow-2xl hover:shadow-indigo-500/25 hover:scale-105 active:scale-95 transition-all duration-200 cursor-pointer group"
           title="Mở Trợ lý AI Tra cứu Quy trình iSOP"
+          aria-label="Mở Trợ lý AI Tra cứu Quy trình iSOP"
         >
-          <div className="relative">
+          <div className="relative flex items-center justify-center">
             <Sparkles className="w-5 h-5 text-amber-300 animate-pulse" />
+            <span className="absolute -top-1 -right-1 w-2 h-2 rounded-full bg-emerald-400 sm:hidden"></span>
           </div>
-          <span className="font-semibold text-sm tracking-wide">Hỏi đáp SOP</span>
-          <span className="w-2 h-2 rounded-full bg-emerald-400"></span>
+          <span className="hidden sm:inline font-semibold text-sm tracking-wide">Hỏi đáp SOP</span>
+          <span className="hidden sm:inline-block w-2 h-2 rounded-full bg-emerald-400"></span>
         </button>
       )}
 
@@ -128,8 +138,8 @@ export const ChatAssistantDrawer: React.FC = () => {
         <div
           className={`fixed z-50 transition-all duration-200 shadow-2xl border border-slate-200/80 bg-slate-50 flex flex-col overflow-hidden ${
             isExpanded
-              ? 'inset-4 md:inset-10 rounded-2xl'
-              : 'bottom-4 right-4 md:bottom-6 md:right-6 w-[95vw] md:w-[440px] h-[600px] max-h-[90vh] rounded-2xl'
+              ? 'inset-3 rounded-2xl md:inset-10'
+              : 'bottom-3 left-3 right-3 h-[600px] max-h-[calc(100dvh-1.5rem)] rounded-2xl md:bottom-6 md:left-auto md:right-6 md:w-[440px] md:max-w-[calc(100vw-3rem)]'
           }`}
         >
           {/* Header */}
@@ -154,7 +164,7 @@ export const ChatAssistantDrawer: React.FC = () => {
                 <button
                   type="button"
                   onClick={handleClear}
-                  className="p-1.5 text-slate-400 hover:text-red-400 hover:bg-slate-800 rounded-lg transition-colors cursor-pointer"
+                  className="grid min-h-11 min-w-11 place-items-center rounded-lg text-slate-400 transition-colors hover:bg-slate-800 hover:text-red-400 cursor-pointer"
                   title="Xóa đoạn hội thoại"
                 >
                   <Trash2 className="w-4 h-4" />
@@ -173,7 +183,7 @@ export const ChatAssistantDrawer: React.FC = () => {
               <button
                 type="button"
                 onClick={() => setIsOpen(false)}
-                className="p-1.5 text-slate-400 hover:text-white hover:bg-slate-800 rounded-lg transition-colors cursor-pointer"
+                className="grid min-h-11 min-w-11 place-items-center rounded-lg text-slate-400 transition-colors hover:bg-slate-800 hover:text-white cursor-pointer"
                 title="Đóng"
               >
                 <X className="w-5 h-5" />
@@ -204,17 +214,31 @@ export const ChatAssistantDrawer: React.FC = () => {
             </div>
           )}
 
-          {/* Thông báo lỗi nếu có */}
+          {/* Thông báo lỗi nếu có kèm nút Thử lại */}
           {error && (
-            <div className="mx-4 mb-2 p-2.5 bg-red-50 border border-red-200 text-red-700 text-xs rounded-lg flex items-center justify-between">
-              <span>{error}</span>
-              <button
-                type="button"
-                onClick={() => setError(null)}
-                className="text-red-500 hover:text-red-800 cursor-pointer"
-              >
-                <X className="w-3.5 h-3.5" />
-              </button>
+            <div className="mx-4 mb-2 p-2.5 bg-red-50 border border-red-200 text-red-700 text-xs rounded-lg flex items-center justify-between gap-2 shadow-xs">
+              <span className="flex-1 leading-snug">{error}</span>
+              <div className="flex items-center gap-1.5 shrink-0">
+                {lastPrompt && (
+                  <button
+                    type="button"
+                    onClick={() => void handleSend(lastPrompt)}
+                    className="flex items-center gap-1 px-2 py-1 bg-red-600 hover:bg-red-700 active:bg-red-800 text-white rounded font-medium text-[11px] transition-colors cursor-pointer"
+                    title="Thử lại yêu cầu vừa gửi"
+                  >
+                    <RefreshCw className="w-3 h-3 animate-spin-reverse" />
+                    <span>Thử lại</span>
+                  </button>
+                )}
+                <button
+                  type="button"
+                  onClick={() => setError(null)}
+                  className="text-red-500 hover:text-red-800 p-0.5 cursor-pointer"
+                  title="Đóng thông báo"
+                >
+                  <X className="w-3.5 h-3.5" />
+                </button>
+              </div>
             </div>
           )}
 
@@ -228,13 +252,13 @@ export const ChatAssistantDrawer: React.FC = () => {
                 onKeyDown={handleKeyDown}
                 rows={1}
                 placeholder="Nhập câu hỏi về quy trình hoặc thủ tục..."
-                className="flex-1 bg-transparent border-0 resize-none outline-none text-xs md:text-sm text-slate-800 placeholder:text-slate-400 max-h-24 px-2 py-1"
+                className="flex-1 bg-transparent border-0 resize-none outline-none text-base md:text-sm text-slate-800 placeholder:text-slate-400 max-h-24 px-2 py-1"
               />
               <button
                 type="button"
                 onClick={() => void handleSend()}
                 disabled={!inputMessage.trim() || isLoading}
-                className="w-8 h-8 rounded-lg bg-indigo-600 hover:bg-indigo-700 active:bg-indigo-800 disabled:opacity-40 disabled:hover:bg-indigo-600 text-white flex items-center justify-center shrink-0 transition-colors cursor-pointer"
+                className="size-11 rounded-lg bg-indigo-600 hover:bg-indigo-700 active:bg-indigo-800 disabled:opacity-40 disabled:hover:bg-indigo-600 text-white flex items-center justify-center shrink-0 transition-colors cursor-pointer"
                 title="Gửi câu hỏi"
               >
                 <Send className="w-4 h-4" />

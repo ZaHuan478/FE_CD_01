@@ -43,8 +43,14 @@ export function PermissionProfileManagement() {
     if (!userId) { setUserProfiles([]); return }
     const controller = new AbortController()
     void administrationGateway.userProfiles(userId, controller.signal)
-      .then(result => setUserProfiles(result.data.profileIds))
-      .catch(reason => setError(reason instanceof Error ? reason.message : 'Không tải được nhóm của người dùng'))
+      .then(result => {
+        if (!controller.signal.aborted) setUserProfiles(result.data.profileIds)
+      })
+      .catch(reason => {
+        if (!controller.signal.aborted) {
+          setError(getErrorMessage(reason, 'Không tải được nhóm của người dùng'))
+        }
+      })
     return () => controller.abort()
   }, [userId])
 

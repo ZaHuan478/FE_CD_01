@@ -46,8 +46,8 @@ export const featureMapDomains: DomainGroup[] = [
   },
   {
     id: 'domain-sop',
-    title: '3. SOP và lưu đồ',
-    subtitle: 'Tra cứu quy trình chuẩn, chuyển hóa văn bản, xem canvas và quản lý vòng đời',
+    title: '3. SOP và quy trình trực quan',
+    subtitle: 'Tra cứu quy trình chuẩn, chuyển hóa văn bản và quản lý vòng đời SOP',
     icon: Layers,
     color: 'text-teal-700 dark:text-teal-300',
     slugs: [

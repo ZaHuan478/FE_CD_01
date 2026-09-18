@@ -366,6 +366,7 @@ export const SystemOverviewDashboard: React.FC<{ activeCluster: BusinessClusterI
   const [coverageViewMode, setCoverageViewMode] = useState<'wheel' | 'matrix'>('wheel')
   const [isCoverageExpanded, setIsCoverageExpanded] = useState(true)
   const closeMenuTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const canHoverModuleMenu = () => window.matchMedia('(min-width: 1024px) and (hover: hover)').matches
   const keepMenuOpen = () => {
     if (closeMenuTimer.current) {
       clearTimeout(closeMenuTimer.current)
@@ -421,12 +422,12 @@ export const SystemOverviewDashboard: React.FC<{ activeCluster: BusinessClusterI
           {visibleModuleMenus.map((module) => {
             const active = openModule === module.id
             return (
-              <div key={module.id} className="relative shrink-0" onMouseEnter={() => { keepMenuOpen(); setOpenModule(module.id); setOpenProcessKey(null); setOpenProcessTop(8) }} onMouseLeave={scheduleMenuClose}>
+              <div key={module.id} className="static shrink-0 lg:relative" onMouseEnter={() => { if (!canHoverModuleMenu()) return; keepMenuOpen(); setOpenModule(module.id); setOpenProcessKey(null); setOpenProcessTop(8) }} onMouseLeave={() => { if (canHoverModuleMenu()) scheduleMenuClose() }}>
                 <button type="button" onClick={() => { setOpenModule(active ? null : module.id); setOpenProcessKey(null) }} aria-expanded={active} className={`flex items-center gap-1.5 border-r border-white/20 px-3 py-2 text-xs font-semibold transition-colors ${active ? 'bg-white/15' : 'hover:bg-white/10'}`}>
                   <span className="flex h-5 w-5 items-center justify-center rounded-sm bg-cyan-400 text-[10px] font-black text-white">{module.code.slice(0, 1)}</span><span>{module.label}</span><ChevronDown className={`h-3.5 w-3.5 transition-transform ${active ? 'rotate-180' : ''}`} />
                 </button>
                 {active && (
-                  <div onMouseEnter={keepMenuOpen} onMouseLeave={scheduleMenuClose} className="absolute left-0 top-full z-50 mt-1 w-[330px] max-w-[calc(100vw-2rem)] rounded-lg border border-slate-300 bg-white p-2 text-slate-700 shadow-xl dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200">
+                  <div onMouseEnter={() => { if (canHoverModuleMenu()) keepMenuOpen() }} onMouseLeave={() => { if (canHoverModuleMenu()) scheduleMenuClose() }} className="absolute left-2 right-2 top-full z-50 mt-1 w-auto rounded-lg border border-slate-300 bg-white p-2 text-slate-700 shadow-xl dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200 sm:right-auto sm:w-[330px] lg:left-0 lg:max-w-[calc(100vw-2rem)]">
                     <div className="relative max-h-64 overflow-y-auto" onScroll={() => setOpenProcessKey(null)}>
                       {module.items.map((item) => {
                         if (item.groupHeader) {
@@ -435,20 +436,116 @@ export const SystemOverviewDashboard: React.FC<{ activeCluster: BusinessClusterI
                         const process = getProcessForMenuItem(item)
                         const processKey = `${module.id}-${item.sopCode ?? item.label}-${item.stepNumber ?? item.label}`
                         const hasSteps = Boolean(process?.steps?.length)
-                        return <button key={`${module.id}-${item.label}`} type="button" disabled={item.disabled} onMouseEnter={(event) => { if (hasSteps) { const listContainer = event.currentTarget.parentElement; const rowTop = event.currentTarget.offsetTop - (listContainer?.scrollTop ?? 0); setOpenProcessKey(processKey); setOpenProcessTop(Math.max(8, rowTop + 8)) } }} onClick={() => !item.disabled && openMenuItem(item, item.stepNumber)} className={`flex w-full items-center justify-between gap-2 rounded-md px-2 py-2 text-left text-xs transition-colors ${item.disabled ? 'cursor-not-allowed text-slate-400' : openProcessKey === processKey ? 'bg-[#2e8bbd] text-white' : 'text-slate-700 hover:bg-sky-50 hover:text-[#1f5f86] dark:text-slate-200 dark:hover:bg-sky-500/15 dark:hover:text-sky-300'}`}>
-                          <span className="min-w-0">{item.label}</span><span className={`flex h-4 w-4 shrink-0 items-center justify-center rounded text-[10px] font-bold ${item.disabled ? 'bg-slate-100 text-slate-400' : openProcessKey === processKey ? 'bg-white/20 text-white' : 'bg-sky-100 text-[#1f5f86]'}`}>{item.disabled ? '-' : hasSteps ? <ChevronRight className="h-3 w-3" /> : '›'}</span>
-                        </button>
+                        return (
+                          <div key={`${module.id}-${item.label}`} className="flex flex-col">
+                            <button
+                              type="button"
+                              disabled={item.disabled}
+                              onMouseEnter={(event) => {
+                                if (hasSteps && canHoverModuleMenu()) {
+                                  const listContainer = event.currentTarget.parentElement?.parentElement
+                                  const rowTop = event.currentTarget.offsetTop - (listContainer?.scrollTop ?? 0)
+                                  setOpenProcessKey(processKey)
+                                  setOpenProcessTop(Math.max(8, rowTop + 8))
+                                }
+                              }}
+                              onClick={() => {
+                                if (item.disabled) return
+                                if (hasSteps && !canHoverModuleMenu()) {
+                                  setOpenProcessKey(openProcessKey === processKey ? null : processKey)
+                                } else {
+                                  openMenuItem(item, item.stepNumber)
+                                }
+                              }}
+                              className={`flex w-full items-center justify-between gap-2 rounded-md px-2 py-2 text-left text-xs transition-colors ${
+                                item.disabled
+                                  ? 'cursor-not-allowed text-slate-400'
+                                  : openProcessKey === processKey
+                                  ? 'bg-[#2e8bbd] text-white'
+                                  : 'text-slate-700 hover:bg-sky-50 hover:text-[#1f5f86] dark:text-slate-200 dark:hover:bg-sky-500/15 dark:hover:text-sky-300'
+                              }`}
+                            >
+                              <span className="min-w-0">{item.label}</span>
+                              <span
+                                className={`flex h-4 w-4 shrink-0 items-center justify-center rounded text-[10px] font-bold ${
+                                  item.disabled
+                                    ? 'bg-slate-100 text-slate-400'
+                                    : openProcessKey === processKey
+                                    ? 'bg-white/20 text-white'
+                                    : 'bg-sky-100 text-[#1f5f86]'
+                                }`}
+                              >
+                                {item.disabled ? '-' : hasSteps ? (
+                                  <ChevronRight
+                                    className={`h-3 w-3 transition-transform ${
+                                      openProcessKey === processKey ? 'rotate-90 lg:rotate-0' : ''
+                                    }`}
+                                  />
+                                ) : (
+                                  '›'
+                                )}
+                              </span>
+                            </button>
+
+                            {/* Mobile / Tablet Inline Steps Accordion (< lg) */}
+                            {hasSteps && openProcessKey === processKey && (
+                              <div className="my-1 ml-2 space-y-1 rounded-r-lg border-l-2 border-sky-400 bg-slate-50 p-1.5 dark:bg-slate-800/50 lg:hidden">
+                                {process?.steps.map((step, stepIndex) => (
+                                  <button
+                                    key={step.stepCode}
+                                    type="button"
+                                    onClick={() =>
+                                      openMenuItem(
+                                        { label: step.title, sopCode: process.sopCode, workflowId: item.workflowId },
+                                        stepIndex + 1
+                                      )
+                                    }
+                                    className="flex w-full items-start gap-1.5 rounded p-1.5 text-left text-xs text-slate-700 hover:bg-sky-50 dark:text-slate-200 dark:hover:bg-sky-500/15"
+                                  >
+                                    <span className="shrink-0 rounded bg-sky-100 px-1 py-0.5 font-mono text-[9px] font-bold text-[#1f5f86] dark:bg-sky-500/20 dark:text-sky-300">
+                                      {step.stepCode}
+                                    </span>
+                                    <span className="line-clamp-1">{step.title}</span>
+                                  </button>
+                                ))}
+                              </div>
+                            )}
+                          </div>
+                        )
                       })}
                     </div>
                     {module.items.map((item) => {
                       const process = getProcessForMenuItem(item)
                       const processKey = `${module.id}-${item.sopCode ?? item.label}-${item.stepNumber ?? item.label}`
                       if (!process || openProcessKey !== processKey) return null
-                      return <div key={`steps-${processKey}`} style={{ top: openProcessTop }} className="absolute left-[calc(100%+4px)] z-50 w-[360px] max-w-[calc(100vw-2rem)] rounded-lg border border-slate-300 bg-white p-2 text-slate-700 shadow-xl dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200">
-                        <div className="max-h-64 overflow-y-auto">
-                          {process.steps.map((step, stepIndex) => <button key={step.stepCode} type="button" onClick={() => openMenuItem({ label: step.title, sopCode: process.sopCode, workflowId: item.workflowId }, stepIndex + 1)} className="flex w-full items-start gap-2 rounded-md px-2 py-2 text-left text-xs text-slate-700 hover:bg-sky-50 hover:text-[#1f5f86] dark:text-slate-200 dark:hover:bg-sky-500/15 dark:hover:text-sky-300"><span className="mt-0.5 rounded bg-sky-100 px-1 py-0.5 font-mono text-[9px] font-bold text-[#1f5f86] dark:bg-sky-500/20 dark:text-sky-300">{step.stepCode}</span><span>{step.title}</span></button>)}
+                      return (
+                        <div
+                          key={`steps-${processKey}`}
+                          style={{ top: openProcessTop }}
+                          className="absolute left-[calc(100%+4px)] z-50 hidden w-[360px] max-w-[calc(100vw-2rem)] rounded-lg border border-slate-300 bg-white p-2 text-slate-700 shadow-xl dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200 lg:block"
+                        >
+                          <div className="max-h-64 overflow-y-auto">
+                            {process.steps.map((step, stepIndex) => (
+                              <button
+                                key={step.stepCode}
+                                type="button"
+                                onClick={() =>
+                                  openMenuItem(
+                                    { label: step.title, sopCode: process.sopCode, workflowId: item.workflowId },
+                                    stepIndex + 1
+                                  )
+                                }
+                                className="flex w-full items-start gap-2 rounded-md px-2 py-2 text-left text-xs text-slate-700 hover:bg-sky-50 hover:text-[#1f5f86] dark:text-slate-200 dark:hover:bg-sky-500/15 dark:hover:text-sky-300"
+                              >
+                                <span className="mt-0.5 rounded bg-sky-100 px-1 py-0.5 font-mono text-[9px] font-bold text-[#1f5f86] dark:bg-sky-500/20 dark:text-sky-300">
+                                  {step.stepCode}
+                                </span>
+                                <span>{step.title}</span>
+                              </button>
+                            ))}
+                          </div>
                         </div>
-                      </div>
+                      )
                     })}
                   </div>
                 )}

@@ -19,12 +19,10 @@ import { useToast } from '../../../shared/ui/toast'
 import {
   useDocumentConversionDocuments, type UserDocumentItem
 } from '../model/useDocumentConversionDocuments'
-
 const SourceDocumentViewer = lazy(() => import('../../sop-import/ui/SourceDocumentViewer').then(module => ({ default: module.SourceDocumentViewer })))
-const SopFlowchartWorkspace = lazy(() => import('./SopFlowchartWorkspace').then(module => ({ default: module.SopFlowchartWorkspace })))
 const SourceMediaPanel = lazy(() => import('./components/SourceMediaPanel').then(module => ({ default: module.SourceMediaPanel })))
 const PAGE_SIZE = 8
-type ConversionView = 'draft' | 'structure' | 'flow' | 'media' | 'source' | 'extracted'
+type ConversionView = 'draft' | 'structure' | 'media' | 'source' | 'extracted'
 
 const operationalKinds = new Set<SopSourceSemanticKind>(['main_step', 'action', 'decision', 'subprocess'])
 const emptySourceOutline: SopSourceOutlineItem[] = []
@@ -221,7 +219,7 @@ export function DocumentConversionWorkspace() {
     if (!selected?.sourceImportJobId) return () => controller.abort()
     setBusy('open')
     void sopImportApi.get(selected.sourceImportJobId, controller.signal)
-      .then(result => { setActive(result.data); setPreview(result.data.preview); setView(result.data.preview.sourceStructure ? 'structure' : 'flow') })
+      .then(result => { setActive(result.data); setPreview(result.data.preview); setView(result.data.preview.sourceStructure ? 'structure' : 'draft') })
       .catch(reason => {
         if (!controller.signal.aborted) setConversionError(getErrorMessage(reason, 'Không mở được hồ sơ chuyển hóa đã liên kết'))
       })
@@ -254,7 +252,7 @@ export function DocumentConversionWorkspace() {
       setPreview(result.data.preview)
       setView('structure')
       refresh()
-      toast.success('Đã trích xuất tài liệu và tạo lưu đồ Mermaid để hiệu chỉnh.')
+      toast.success('Đã trích xuất tài liệu và tạo bản diễn giải số hóa để kiểm tra.')
     } catch (reason) {
       const message = getErrorMessage(reason, 'Không thể chuyển hóa tài liệu')
       setConversionError(message)
@@ -424,10 +422,9 @@ function ConversionProgress({ active, selected, busy }: { active: SopImportItem 
     ['1', 'Chọn tài liệu', Boolean(selected)],
     ['2', 'Trích xuất nội dung', Boolean(active) || ['open', 'create'].includes(busy ?? '')],
     ['3', 'Hiệu chỉnh các bước', Boolean(active)],
-    ['4', 'Tạo lưu đồ Mermaid', Boolean(active)],
-    ['5', 'Tạo SOP Draft', Boolean(active && active.status !== 'needs_review')]
+    ['4', 'Tạo SOP Draft', Boolean(active && active.status !== 'needs_review')]
   ] as const
-  return <ol className="grid gap-2 sm:grid-cols-2 xl:grid-cols-5" aria-label="Tiến trình chuyển hóa">{steps.map(([number, label, done]) => (
+  return <ol className="grid gap-2 sm:grid-cols-2 xl:grid-cols-4" aria-label="Tiến trình chuyển hóa">{steps.map(([number, label, done]) => (
     <li key={number} className={`flex min-h-12 items-center gap-3 rounded-xl border px-4 text-sm font-bold ${done ? 'border-cyan-300 bg-cyan-50 text-cyan-950 dark:border-cyan-800 dark:bg-cyan-950/30 dark:text-cyan-100' : 'border-slate-200 bg-white text-slate-500 dark:border-slate-800 dark:bg-slate-900'}`}><span className="grid size-7 place-items-center rounded-full bg-[#155e75] text-xs text-white">{number}</span>{label}</li>
   ))}</ol>
 }
@@ -473,7 +470,7 @@ function ConversionSetupForm({ selected, modules, department, jobTitle, defaultA
     <Field label="Phân hệ"><Select required name="primaryModuleId" className={adminInputClass}><option value="">Chọn phân hệ</option>{modules.map(module => <option key={module.id} value={module.id}>{module.code} · {module.title}</option>)}</Select></Field>
     <Field label="Nhóm tài liệu"><input name="category" placeholder="Hợp đồng lao động" className={adminInputClass} /></Field>
     <Field label="Ai được xem sau khi công bố"><Select name="audienceMode" defaultValue={defaultAudience} className={adminInputClass}><option value="personal">Chỉ tôi và người kiểm duyệt</option><option value="module">Người có quyền phân hệ</option>{department && <option value="department">Cùng phòng ban · {department}</option>}{jobTitle && <option value="job_title">Cùng chức danh · {jobTitle}</option>}{department && jobTitle && <option value="department_job_title">Cùng chức danh trong phòng ban</option>}</Select></Field>
-    <button disabled={busy} className={`${primaryButtonClass} w-full`}>{busy ? <><LoaderCircle className="size-4 animate-spin" />Đang trích xuất…</> : <><ScanText className="size-4" />Trích xuất & tạo Mermaid</>}</button>
+    <button disabled={busy} className={`${primaryButtonClass} w-full`}>{busy ? <><LoaderCircle className="size-4 animate-spin" />Đang trích xuất…</> : <><ScanText className="size-4" />Trích xuất & tạo bản nháp</>}</button>
   </form>
 }
 
@@ -489,12 +486,11 @@ function ConversionEditor(props: {
     <div role="tablist" aria-label="Nội dung chuyển hóa" className="flex flex-wrap gap-2">
       <button type="button" role="tab" aria-selected={props.view === 'draft'} onClick={() => props.onView('draft')} className={props.view === 'draft' ? primaryButtonClass : secondaryButtonClass}>SOP bản nháp</button>
       <button type="button" role="tab" aria-selected={props.view === 'structure'} onClick={() => props.onView('structure')} className={props.view === 'structure' ? primaryButtonClass : secondaryButtonClass}><ListTree className="size-4" />Cấu trúc nguồn</button>
-      <button type="button" role="tab" aria-selected={props.view === 'flow'} onClick={() => props.onView('flow')} className={props.view === 'flow' ? primaryButtonClass : secondaryButtonClass}><GitBranch className="size-4" />Lưu đồ Mermaid</button>
       <button type="button" role="tab" aria-selected={props.view === 'media'} onClick={() => props.onView('media')} className={props.view === 'media' ? primaryButtonClass : secondaryButtonClass}><ImageIcon className="size-4" />Ảnh từ tài liệu nguồn{props.preview.sourceStructure?.media?.length ? ` (${props.preview.sourceStructure.media.length})` : ''}</button>
       <button type="button" role="tab" aria-selected={props.view === 'source'} onClick={() => props.onView('source')} className={props.view === 'source' ? primaryButtonClass : secondaryButtonClass}>File gốc</button>
       <button type="button" role="tab" aria-selected={props.view === 'extracted'} onClick={() => props.onView('extracted')} className={props.view === 'extracted' ? primaryButtonClass : secondaryButtonClass}>Nội dung trích xuất</button>
     </div>
-    {props.view === 'source' ? <Suspense fallback={<p role="status" className="p-6 text-sm text-slate-500">Đang mở tài liệu…</p>}><SourceDocumentViewer item={props.item} /></Suspense> : props.view === 'structure' ? <SourceStructurePanel preview={props.preview} editable={props.editable} busy={props.busy} onPreview={props.onPreview} onSave={props.onSave} onReprocess={props.onReprocess} /> : props.view === 'flow' ? <Suspense fallback={<p role="status" className="flex min-h-80 items-center justify-center gap-2 text-sm text-slate-500"><LoaderCircle className="size-5 animate-spin" />Đang mở công cụ lưu đồ…</p>}><SopFlowchartWorkspace key={props.item.id} importId={props.item.id} preview={props.preview} editable={props.editable} onPreview={props.onPreview} onSave={props.onSave} saving={props.busy !== null} /></Suspense> : props.view === 'media' ? <Suspense fallback={<p role="status" className="flex min-h-80 items-center justify-center gap-2 text-sm text-slate-500"><LoaderCircle className="size-5 animate-spin" />Đang tải thư viện ảnh…</p>}><SourceMediaPanel item={props.item} preview={props.preview} editable={props.editable} busy={props.busy} onPreview={props.onPreview} onSave={props.onSave} onReprocess={props.onReprocess} /></Suspense> : props.view === 'extracted' ? <ExtractedTextPanel item={props.item} editable={props.editable} onAddStep={props.onAddStep} /> : <>
+    {props.view === 'source' ? <Suspense fallback={<p role="status" className="p-6 text-sm text-slate-500">Đang mở tài liệu…</p>}><SourceDocumentViewer item={props.item} /></Suspense> : props.view === 'structure' ? <SourceStructurePanel preview={props.preview} editable={props.editable} busy={props.busy} onPreview={props.onPreview} onSave={props.onSave} onReprocess={props.onReprocess} /> : props.view === 'media' ? <Suspense fallback={<p role="status" className="flex min-h-80 items-center justify-center gap-2 text-sm text-slate-500"><LoaderCircle className="size-5 animate-spin" />Đang tải thư viện ảnh…</p>}><SourceMediaPanel item={props.item} preview={props.preview} editable={props.editable} busy={props.busy} onPreview={props.onPreview} onSave={props.onSave} onReprocess={props.onReprocess} /></Suspense> : props.view === 'extracted' ? <ExtractedTextPanel item={props.item} editable={props.editable} onAddStep={props.onAddStep} /> : <>
       <Panel title="Thông tin SOP" description={`${props.item.file.name} · ${formatBytes(props.item.file.size)} · SHA-256 ${props.item.file.checksum.slice(0, 12)}…`}>
         <div className="grid gap-4 p-4 md:grid-cols-2">
           <Field label="Mã SOP"><input disabled={!props.editable} value={props.preview.code} onChange={event => props.onPreview({ ...props.preview, code: event.target.value })} className={adminInputClass} /></Field>
@@ -602,12 +598,12 @@ function SourceStructurePanel({ preview, editable, busy, onPreview, onSave, onRe
   </Panel>
 
   return <div className="space-y-4">
-    <Panel title="Cấu trúc tài liệu nguồn" description="Kiểm tra phân cấp trước khi tạo lưu đồ. Các trường nhập, checklist và quy tắc được gắn vào bước cha thay vì tạo node riêng." action={editable ? <button type="button" disabled={busy !== null} onClick={() => void onReprocess()} className={`${secondaryButtonClass} whitespace-nowrap`}><RefreshCw className={`size-4 ${busy === 'reprocess' ? 'animate-spin' : ''}`} />Phân tích lại</button> : undefined}>
+    <Panel title="Cấu trúc tài liệu nguồn" description="Kiểm tra phân cấp trước khi diễn giải số hóa. Trường nhập, checklist và quy tắc được gắn vào đúng bước nghiệp vụ." action={editable ? <button type="button" disabled={busy !== null} onClick={() => void onReprocess()} className={`${secondaryButtonClass} whitespace-nowrap`}><RefreshCw className={`size-4 ${busy === 'reprocess' ? 'animate-spin' : ''}`} />Phân tích lại</button> : undefined}>
       <div className="grid grid-cols-2 gap-px border-b border-slate-200 bg-slate-200 sm:grid-cols-5 dark:border-slate-800 dark:bg-slate-800">
         <StructureStat label="Bộ đọc" value={preview.sourceStructure.adapter === 'docx-html' ? 'Word có cấu trúc' : preview.sourceStructure.adapter === 'docx-ocr' ? 'Word ảnh OCR' : preview.sourceStructure.adapter === 'pdf-ocr' ? 'PDF OCR' : 'PDF có lớp chữ'} />
         <StructureStat label="Số trang" value={String(preview.sourceStructure.stats.pageCount)} />
         <StructureStat label="Mục phân cấp" value={String(preview.sourceStructure.stats.itemCount)} />
-        <StructureStat label="Node tổng quan" value={String(flowOutlineItems(outline).length)} />
+        <StructureStat label="Bước quy trình" value={String(flowOutlineItems(outline).length)} />
         <StructureStat label="Cần kiểm tra" value={String(preview.sourceStructure.stats.lowConfidenceCount)} warn={preview.sourceStructure.stats.lowConfidenceCount > 0} />
       </div>
       <div className="grid min-h-[540px] lg:grid-cols-[minmax(0,1fr)_360px]">
@@ -639,7 +635,7 @@ function SourceStructurePanel({ preview, editable, busy, onPreview, onSave, onRe
       </div>
       {editable && <div className="flex flex-wrap items-center justify-end gap-2 border-t border-slate-200 p-4 dark:border-slate-800"><button type="button" disabled={busy !== null} onClick={() => { const next = rebuildStepsFromOutline(preview); onPreview(next); void onSave(next) }} className={secondaryButtonClass}><GitBranch className="size-4" />Áp dụng & lưu các bước</button><button type="button" disabled={busy !== null} onClick={() => void onSave()} className={primaryButtonClass}>{busy === 'save' ? <LoaderCircle className="size-4 animate-spin" /> : null}Lưu cấu trúc</button></div>}
     </Panel>
-    <div className="rounded-xl border border-cyan-200 bg-cyan-50 p-4 text-sm leading-6 text-cyan-950 dark:border-cyan-900 dark:bg-cyan-950/30 dark:text-cyan-100"><strong>Quy tắc tạo Canvas:</strong> Khi có “Bước N”, chỉ các bước chính trở thành node tổng quan; A/B, 1/2/3, thao tác, trường nhập, quy tắc và lưu ý nằm trong chi tiết của bước cha. Nếu tài liệu không có “Bước N”, hệ thống dùng các thao tác ở cấp cao nhất làm node.</div>
+    <div className="rounded-xl border border-cyan-200 bg-cyan-50 p-4 text-sm leading-6 text-cyan-950 dark:border-cyan-900 dark:bg-cyan-950/30 dark:text-cyan-100"><strong>Quy tắc diễn giải:</strong> Khi có “Bước N”, hệ thống dùng các bước chính làm workflow; A/B, 1/2/3, thao tác, trường nhập, quy tắc và lưu ý được giữ trong chi tiết của bước cha. Nếu tài liệu không có “Bước N”, các thao tác ở cấp cao nhất được dùng làm bước quy trình.</div>
   </div>
 }
 

@@ -316,7 +316,7 @@ export function MyDocumentsWorkspace() {
       ) : (
         <>
           {/* Main Control Panel */}
-          <div className="flex flex-col gap-4 rounded-2xl border border-slate-200 bg-white p-4 shadow-xs sm:flex-row sm:items-center sm:justify-between dark:border-slate-800 dark:bg-slate-900">
+          <div className="flex flex-col gap-4 rounded-2xl border border-slate-200 bg-white p-4 shadow-xs xl:flex-row xl:items-center xl:justify-between dark:border-slate-800 dark:bg-slate-900">
             {/* Tabs: Active vs Trash */}
             <div className="flex items-center gap-1.5 rounded-xl bg-slate-100 p-1 dark:bg-slate-800 shrink-0">
               <button
@@ -351,61 +351,79 @@ export function MyDocumentsWorkspace() {
             </div>
 
             {/* Actions: Search, Filter, Upload */}
-            <div className="flex flex-wrap items-center gap-2.5 flex-1 justify-end">
+            <div className="flex w-full min-w-0 flex-col gap-2.5 sm:flex-row sm:items-center sm:justify-end xl:w-auto xl:flex-1">
               {/* Search Form */}
-              <form onSubmit={handleSearchSubmit} className="relative min-w-[200px] flex-1 sm:max-w-xs">
+              <form onSubmit={handleSearchSubmit} className="relative w-full sm:w-auto sm:flex-1 sm:min-w-[200px] sm:max-w-xs">
                 <input
                   type="text"
                   placeholder="Tìm kiếm tài liệu..."
                   value={searchInput}
-                  onChange={(e) => setSearchInput(e.target.value)}
-                  className="w-full rounded-xl border border-slate-200 bg-slate-50/80 py-1.5 pr-8 pl-9 text-xs font-medium text-slate-900 placeholder:text-slate-400 focus:border-[#1f5f86] focus:bg-white focus:outline-none dark:border-slate-700 dark:bg-slate-800 dark:text-white"
+                  onChange={(e) => {
+                    setSearchInput(e.target.value)
+                    if (!e.target.value.trim() && searchKeyword) {
+                      setSearchKeyword('')
+                      setPage(1)
+                    }
+                  }}
+                  className="h-9 w-full rounded-xl border border-slate-200 bg-slate-50/80 pl-9 pr-8 text-xs font-medium text-slate-900 placeholder:text-slate-400 focus:border-[#1f5f86] focus:bg-white focus:outline-none dark:border-slate-700 dark:bg-slate-800 dark:text-white"
                 />
-                <Search className="absolute top-2 left-2.5 size-4 text-slate-400" />
+                <button
+                  type="submit"
+                  className="absolute top-1/2 left-2.5 -translate-y-1/2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 cursor-pointer"
+                  title="Tìm kiếm"
+                  aria-label="Tìm kiếm"
+                >
+                  <Search className="size-4" />
+                </button>
                 {searchInput && (
                   <button
                     type="button"
                     onClick={handleClearSearch}
-                    className="absolute top-2 right-2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200"
+                    className="absolute top-1/2 right-2.5 -translate-y-1/2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 cursor-pointer"
+                    title="Xóa tìm kiếm"
+                    aria-label="Xóa tìm kiếm"
                   >
                     <X className="size-4" />
                   </button>
                 )}
               </form>
 
-              {/* Format Filter */}
-              <div className="flex items-center gap-1.5">
-                <Filter className="size-3.5 text-slate-400 shrink-0 hidden md:block" />
-                <Select
-                  visualSize="compact"
-                  aria-label="Lọc theo định dạng tài liệu"
-                  value={formatFilter}
-                  onChange={(e) => {
-                    setFormatFilter(e.target.value as 'all' | 'docx' | 'pdf')
-                    setPage(1)
-                  }}
-                  containerClassName="w-auto min-w-[155px]"
-                  className="rounded-xl border border-slate-200 bg-slate-50/80 px-2.5 py-1 text-xs font-bold text-slate-700 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200"
-                >
-                  <option value="all">Tất cả định dạng</option>
-                  <option value="docx">Word (.docx)</option>
-                  <option value="pdf">PDF (.pdf)</option>
-                </Select>
-              </div>
+              {/* Format Filter & Upload Group */}
+              <div className="flex w-full items-center justify-between gap-2.5 sm:w-auto sm:justify-end shrink-0">
+                {/* Format Filter */}
+                <div className="flex items-center gap-1.5 flex-1 sm:flex-none">
+                  <Filter className="size-3.5 text-slate-400 shrink-0 hidden md:block" />
+                  <Select
+                    visualSize="compact"
+                    aria-label="Lọc theo định dạng tài liệu"
+                    value={formatFilter}
+                    onChange={(e) => {
+                      setFormatFilter(e.target.value as 'all' | 'docx' | 'pdf')
+                      setPage(1)
+                    }}
+                    containerClassName="w-full sm:w-auto sm:min-w-[155px]"
+                    className="rounded-xl border border-slate-200 bg-slate-50/80 px-2.5 py-1 text-xs font-bold text-slate-700 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200"
+                  >
+                    <option value="all">Tất cả định dạng</option>
+                    <option value="docx">Word (.docx)</option>
+                    <option value="pdf">PDF (.pdf)</option>
+                  </Select>
+                </div>
 
-              {/* Upload Button */}
-              <button
-                type="button"
-                onClick={() => {
-                  setIsUploadOpen(true)
-                  setSelectedFile(null)
-                  setFileError('')
-                }}
-                className={`${primaryButtonClass} inline-flex items-center gap-1.5 shrink-0`}
-              >
-                <Plus className="size-4" />
-                <span>Upload tài liệu</span>
-              </button>
+                {/* Upload Button */}
+                <button
+                  type="button"
+                  onClick={() => {
+                    setIsUploadOpen(true)
+                    setSelectedFile(null)
+                    setFileError('')
+                  }}
+                  className={`${primaryButtonClass} h-9 min-h-0 text-xs px-3.5 inline-flex items-center gap-1.5 shrink-0`}
+                >
+                  <Plus className="size-4" />
+                  <span>Upload tài liệu</span>
+                </button>
+              </div>
             </div>
           </div>
 

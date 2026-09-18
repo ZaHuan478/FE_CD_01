@@ -19,12 +19,12 @@ before(async () => {
   globalThis.localStorage = { getItem: key => storage.get(key) ?? null, setItem: (key, value) => storage.set(key, value), removeItem: key => storage.delete(key) }
   globalThis.sessionStorage = globalThis.localStorage
   globalThis.__knowledgeTestSession = session
-  server = await createServer({
+    server = await createServer({
     mode: 'test',
     cacheDir: 'node_modules/.vite-test',
     plugins: [{ name: 'test-auth-context', enforce: 'pre',
       resolveId(id) { if (id.includes('authentication/model/session')) return '\0test-session' },
-      load(id) { if (id === '\0test-session') return 'export const useSession = () => globalThis.__knowledgeTestSession; export const useAuth = () => ({ session: globalThis.__knowledgeTestSession, status: "authenticated", roleTitle: "Test", logout() {} }); export const signOut = () => {}' }
+      load(id) { if (id === '\0test-session') return 'export const useSession = () => globalThis.__knowledgeTestSession; export const useAuth = () => ({ session: globalThis.__knowledgeTestSession, status: "authenticated", roleTitle: "Test", logout() {} }); export const signOut = () => {}; export const canApproveSop = (s) => s?.systemRole === "SUPER_ADMIN" || (Array.isArray(s?.capabilities) && (s.capabilities.includes("sop.review") || s.capabilities.includes("sop.publish"))); export const canReviewSop = (s) => s?.systemRole === "SUPER_ADMIN" || (Array.isArray(s?.capabilities) && s.capabilities.includes("sop.review")); export const canPublishSop = (s) => s?.systemRole === "SUPER_ADMIN" || (Array.isArray(s?.capabilities) && s.capabilities.includes("sop.publish"));' }
     }],
     server: { middlewareMode: true, hmr: false }, appType: 'custom'
   })

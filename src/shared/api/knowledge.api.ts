@@ -4,7 +4,7 @@ export interface KnowledgeSummary {
   id: string
   code: string
   title: string
-  type: 'procedure' | 'policy' | 'guide' | 'glossary' | 'form'
+  type: 'procedure' | 'policy' | 'guide' | 'glossary' | 'form' | 'catalog'
   summary: string
   workflowId: string | null
   moduleIds: string[]

@@ -21,7 +21,7 @@ import { AdminActionMenu } from '../../../shared/ui/molecules/AdminActionMenu'
 
 type CatalogTab = 'modules' | 'documents'
 type ViewMode = 'table' | 'grid'
-const typeLabels: Record<AdminDocumentType, string> = { procedure: 'Quy trình', policy: 'Quy định', guide: 'Hướng dẫn', glossary: 'Thuật ngữ', form: 'Biểu mẫu' }
+const typeLabels: Record<AdminDocumentType, string> = { procedure: 'Quy trình', policy: 'Quy định', guide: 'Hướng dẫn', glossary: 'Thuật ngữ', form: 'Biểu mẫu', catalog: 'Danh mục Master Data' }
 
 export function CatalogManagement() {
   const admin = useAdminAccessContext()

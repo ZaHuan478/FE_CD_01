@@ -1,11 +1,10 @@
-import { lazy, Suspense, useCallback, useEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { Link, useSearchParams } from 'react-router-dom'
 import { ArrowLeft, Plus, RefreshCw, Save, Search } from 'lucide-react'
 import { useSession } from '../../authentication/model/session'
 import { emptySop, getErrorMessage, sopManagementApi, stateLabels, type ManagedSop, type SopAction, type SopImportPreview } from '../model/sopManagementModel'
 import { adminInputClass, EmptyState, Feedback, PageIntro, Panel, primaryButtonClass, secondaryButtonClass, TableSkeleton } from '../../../shared/ui/molecules/AdminSurface'
-
-const Flowchart = lazy(() => import('../../document-conversion/ui/SopFlowchartWorkspace').then(m => ({ default: m.SopFlowchartWorkspace })))
+import { BusinessWorkflowEditor } from './BusinessWorkflowEditor'
 
 export function SopManagementWorkspace() {
   const session = useSession()
@@ -83,7 +82,7 @@ export function SopManagementWorkspace() {
           <label className="space-y-1 text-sm font-semibold">Nội dung thay đổi<textarea className={`${adminInputClass} h-20 py-2`} value={preview.changeLog ?? ''} onChange={e => update({ changeLog: e.target.value })} /></label>
         </fieldset>
       </Panel>
-      <Suspense fallback={<TableSkeleton />}><Flowchart importId="" preview={preview} editable={editable && !busy} onPreview={setPreview} onSave={save} saving={busy} /></Suspense>
+      <BusinessWorkflowEditor preview={preview} editable={editable && !busy} onPreview={setPreview} />
       {selected && <Panel title="Xử lý và lịch sử phiên bản" description="Người soạn, người rà soát và người công bố là các tài khoản khác nhau.">
         <div className="space-y-4 p-4">
           <p className="text-sm text-slate-500">Người soạn: {selected.createdBy} · Người sửa cuối: {selected.editedBy} · Rà soát: {selected.reviewedBy || 'Chưa rà soát'} · Công bố: {selected.publishedBy || 'Chưa công bố'} · Phiên bản gốc: {selected.baseVersion || 'SOP mới'}</p>

@@ -15,9 +15,53 @@ const roles: Array<{ code: SopRoleCode; label: string; detail: string }> = [
 
 export function SopRoleManagement() {
   const toast = useToast()
-  const admin = useAdminAccessContext(); const [sops, setSops] = useState<SopResource[]>([]); const [sopId, setSopId] = useState(''); const [assignments, setAssignments] = useState<SopRoleAssignment[]>([]); const [query, setQuery] = useState(''); const [loading, setLoading] = useState(true); const [saving, setSaving] = useState(false); const [error, setError] = useState('')
-  useEffect(() => { const controller = new AbortController(); void administrationGateway.sopResources(controller.signal).then(result => { setSops(result.data); setSopId(result.data[0]?.id ?? '') }).catch(reason => setError(reason instanceof Error ? reason.message : 'Không tải được SOP')).finally(() => setLoading(false)); return () => controller.abort() }, [])
-  useEffect(() => { if (!sopId) return; const controller = new AbortController(); void administrationGateway.sopRoles(sopId, controller.signal).then(result => setAssignments(result.data.assignments)).catch(reason => setError(reason instanceof Error ? reason.message : 'Không tải được vai trò SOP')); return () => controller.abort() }, [sopId])
+  const admin = useAdminAccessContext()
+  const [sops, setSops] = useState<SopResource[]>([])
+  const [sopId, setSopId] = useState('')
+  const [assignments, setAssignments] = useState<SopRoleAssignment[]>([])
+  const [query, setQuery] = useState('')
+  const [loading, setLoading] = useState(true)
+  const [saving, setSaving] = useState(false)
+  const [error, setError] = useState('')
+
+  useEffect(() => {
+    const controller = new AbortController()
+    void administrationGateway.sopResources(controller.signal)
+      .then(result => {
+        if (!controller.signal.aborted) {
+          setSops(result.data)
+          setSopId(result.data[0]?.id ?? '')
+          setError('')
+        }
+      })
+      .catch(reason => {
+        if (!controller.signal.aborted) {
+          setError(getErrorMessage(reason, 'Không tải được SOP'))
+        }
+      })
+      .finally(() => {
+        if (!controller.signal.aborted) setLoading(false)
+      })
+    return () => controller.abort()
+  }, [])
+
+  useEffect(() => {
+    if (!sopId) return
+    const controller = new AbortController()
+    void administrationGateway.sopRoles(sopId, controller.signal)
+      .then(result => {
+        if (!controller.signal.aborted) {
+          setAssignments(result.data.assignments)
+          setError('')
+        }
+      })
+      .catch(reason => {
+        if (!controller.signal.aborted) {
+          setError(getErrorMessage(reason, 'Không tải được vai trò SOP'))
+        }
+      })
+    return () => controller.abort()
+  }, [sopId])
   const users = useMemo(() => { const term = query.trim().toLocaleLowerCase('vi'); return admin.users.filter(user => user.active && (!term || `${user.fullName} ${user.username}`.toLocaleLowerCase('vi').includes(term))) }, [admin.users, query])
   const checked = (accountId: string, roleCode: SopRoleCode) => assignments.some(item => item.accountId === accountId && item.roleCode === roleCode)
   const toggle = (accountId: string, roleCode: SopRoleCode) => setAssignments(current => checked(accountId, roleCode) ? current.filter(item => item.accountId !== accountId || item.roleCode !== roleCode) : [...current, { accountId, roleCode }])

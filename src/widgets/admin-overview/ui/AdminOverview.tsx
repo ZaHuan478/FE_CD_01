@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom'
-import { BookOpen, Boxes, ChevronRight, ShieldAlert, UserRoundCheck, Users } from 'lucide-react'
+import { BookOpen, Boxes, ChevronRight, FilePenLine, ShieldAlert, UserRoundCheck, Users } from 'lucide-react'
 import { useAdminCatalog } from '../../../features/user-module-access/hooks/useAdminCatalog'
 import { useAdminAccessContext } from '../../../features/user-module-access/model/AdminAccessContext'
 import { EmptyState, Feedback, Panel, TableSkeleton } from '../../../shared/ui/molecules/AdminSurface'
@@ -37,6 +37,7 @@ export function AdminOverview() {
           <QuickLink to="/employee-lifecycle/admin/users" icon={<Users className="size-4" />} title="Quản lý tài khoản" detail="Tạo, khóa hoặc đổi vai trò" />
           <QuickLink to="/employee-lifecycle/admin/access" icon={<ShieldAlert className="size-4" />} title="Phân quyền phân hệ" detail="Cấp quyền cho từng người dùng" />
           <QuickLink to="/employee-lifecycle/admin/catalog" icon={<BookOpen className="size-4" />} title="Quản lý danh mục" detail="Phân hệ và tài liệu nghiệp vụ" />
+          <QuickLink to="/employee-lifecycle/admin/sop-management" icon={<FilePenLine className="size-4" />} title="Toàn bộ SOP" detail="Xem và xử lý SOP của toàn hệ thống" />
           <QuickLink to="/employee-lifecycle/admin/master-data" icon={<Boxes className="size-4" />} title="Quản lý Master Data" detail="Quản trị tệp dữ liệu danh mục tải lên và đồng bộ" />
         </div>
       </Panel>

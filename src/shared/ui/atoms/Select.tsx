@@ -61,7 +61,7 @@ export const Select = forwardRef<HTMLSelectElement, SelectProps>(function Select
   },
   forwardedRef
 ) {
-  const { value: propValue, defaultValue, ...restSelectProps } = props
+  const { value: propValue, defaultValue, id: propId, ...restSelectProps } = props
   const options = useMemo(() => extractOptions(children), [children])
   const isControlled = propValue !== undefined
 
@@ -77,6 +77,19 @@ export const Select = forwardRef<HTMLSelectElement, SelectProps>(function Select
   }, [options, currentValue])
 
   const displayLabel = selectedOption ? selectedOption.label : ''
+
+  const ariaLabelProp = props['aria-label']
+  const computedAriaLabel = useMemo(() => {
+    if (!ariaLabelProp) return undefined
+    const strDisplay = typeof displayLabel === 'string' ? displayLabel : String(displayLabel ?? '')
+    if (!strDisplay) return ariaLabelProp
+    const lowerDisplay = strDisplay.trim().toLowerCase()
+    const lowerAria = ariaLabelProp.trim().toLowerCase()
+    if (lowerAria.includes(lowerDisplay)) {
+      return ariaLabelProp
+    }
+    return `${ariaLabelProp}: ${strDisplay}`
+  }, [ariaLabelProp, displayLabel])
 
   const [isOpen, setIsOpen] = useState(false)
   const [position, setPosition] = useState<React.CSSProperties>({})
@@ -257,6 +270,7 @@ export const Select = forwardRef<HTMLSelectElement, SelectProps>(function Select
       <select
         ref={setNativeRefs}
         {...restSelectProps}
+        id={propId ? `${propId}-native-select` : undefined}
         {...(isControlled ? { value: currentValue } : { defaultValue: defaultValue ?? currentValue })}
         onChange={(e) => {
           if (!isControlled) setUncontrolledValue(e.target.value)
@@ -273,6 +287,7 @@ export const Select = forwardRef<HTMLSelectElement, SelectProps>(function Select
       <button
         ref={triggerRef}
         type="button"
+        id={propId}
         disabled={props.disabled}
         onClick={(e) => {
           e.stopPropagation()
@@ -287,7 +302,8 @@ export const Select = forwardRef<HTMLSelectElement, SelectProps>(function Select
           }
         }}
         onKeyDown={handleTriggerKeyDown}
-        aria-label={props['aria-label']}
+        aria-label={computedAriaLabel}
+        aria-labelledby={props['aria-labelledby']}
         aria-haspopup="listbox"
         aria-expanded={isOpen}
         className={`flex w-full items-center justify-between gap-2 rounded-xl border border-slate-300 bg-white px-3 font-semibold text-slate-800 shadow-sm outline-none transition-colors hover:border-slate-400 focus-visible:border-[#155e75] focus-visible:ring-2 focus-visible:ring-cyan-200 disabled:cursor-not-allowed disabled:bg-slate-100 disabled:opacity-60 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-100 dark:focus-visible:ring-cyan-900 ${height} ${className}`}

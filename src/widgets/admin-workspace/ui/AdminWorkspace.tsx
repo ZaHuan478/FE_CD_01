@@ -1,8 +1,8 @@
 import React, { Suspense } from 'react'
 import { Link } from 'react-router-dom'
-import { BookOpen, BookOpenCheck, Database, Files, GitBranch, LayoutDashboard, ScrollText, Settings, ShieldCheck, Users, Sparkles } from 'lucide-react'
+import { BookOpen, BookOpenCheck, Database, FilePenLine, Files, GitBranch, LayoutDashboard, ScrollText, Settings, ShieldCheck, Users, Sparkles } from 'lucide-react'
 import { AdminAccessProvider } from '../../../features/user-module-access/model/AdminAccessContext'
-import { useSession } from '../../../features/authentication/model/session'
+import { useSession, canApproveSop } from '../../../features/authentication/model/session'
 import { PageIntro, Panel, TableSkeleton } from '../../../shared/ui/molecules/AdminSurface'
 import { PermissionManagementWorkspace } from '../../../features/admin-user-management/ui/PermissionManagementWorkspace'
 import { AuditLogPanel } from '../../../features/admin-user-management/ui/AuditLogPanel'
@@ -13,16 +13,18 @@ const AdminOverview = React.lazy(() => import('../../admin-overview/ui/AdminOver
 const UserManagement = React.lazy(() => import('../../../features/admin-user-management/ui/UserManagement').then(module => ({ default: module.UserManagement })))
 const CatalogManagement = React.lazy(() => import('../../../features/admin-catalog/ui/CatalogManagement').then(module => ({ default: module.CatalogManagement })))
 const AdminDocumentsWorkspace = React.lazy(() => import('../../../features/admin-documents/ui/AdminDocumentsWorkspace').then(module => ({ default: module.AdminDocumentsWorkspace })))
+const GlobalSopManagementWorkspace = React.lazy(() => import('../../../features/admin-sop-management/ui/GlobalSopManagementWorkspace').then(module => ({ default: module.GlobalSopManagementWorkspace })))
 const AdminMasterDataWorkspace = React.lazy(() => import('../../../features/admin-master-data/ui/AdminMasterDataWorkspace').then(module => ({ default: module.AdminMasterDataWorkspace })))
-const SopImportWorkspace = React.lazy(() => import('../../../features/sop-import/ui/SopImportWorkspace').then(module => ({ default: module.SopImportWorkspace })))
+const SopApprovalWorkspace = React.lazy(() => import('../../../features/sop-import/ui/SopApprovalWorkspace').then(module => ({ default: module.SopApprovalWorkspace })))
 const AdminSystemGuides = React.lazy(() => import('../../../features/admin-system-guides/ui/AdminSystemGuides').then(module => ({ default: module.AdminSystemGuides })))
 
-export type AdminWorkspaceSection = 'overview' | 'users' | 'access' | 'catalog' | 'imports' | 'sop-approvals' | 'master-data' | 'audit' | 'indexing' | 'system-guides' | 'settings'
+export type AdminWorkspaceSection = 'overview' | 'users' | 'access' | 'catalog' | 'sop-management' | 'imports' | 'sop-approvals' | 'master-data' | 'audit' | 'indexing' | 'system-guides' | 'settings'
 const navigation: Array<{ id: AdminWorkspaceSection; label: string; icon: typeof LayoutDashboard; superOnly?: boolean }> = [
   { id: 'overview', label: 'Tổng quan', icon: LayoutDashboard },
   { id: 'users', label: 'Người dùng', icon: Users },
   { id: 'access', label: 'Phân quyền', icon: ShieldCheck },
   { id: 'catalog', label: 'Danh mục', icon: BookOpen },
+  { id: 'sop-management', label: 'Toàn bộ SOP', icon: FilePenLine },
   { id: 'imports', label: 'Quản lý tài liệu', icon: Files },
   { id: 'sop-approvals', label: 'Duyệt SOP', icon: GitBranch },
   { id: 'master-data', label: 'Master Data', icon: Database },
@@ -42,6 +44,7 @@ export function AdminWorkspace({ activeSection }: AdminWorkspaceProps) {
   const isAdmin = ['ADMIN', 'SUPER_ADMIN'].includes(session.systemRole)
   const isSuper = session.systemRole === 'SUPER_ADMIN'
   const isRagManager = session.capabilities.includes('rag.manage')
+  const isApprover = canApproveSop(session)
 
   if (!isAdmin && !(isRagManager && activeSection === 'indexing')) {
     return (
@@ -57,14 +60,24 @@ export function AdminWorkspace({ activeSection }: AdminWorkspaceProps) {
     )
   }
 
-  const safeSection = !isAdmin ? 'indexing' : activeSection === 'settings' && !isSuper ? 'overview' : activeSection
+  const safeSection = !isAdmin
+    ? 'indexing'
+    : activeSection === 'settings' && !isSuper
+    ? 'overview'
+    : activeSection === 'sop-approvals' && !isApprover
+    ? 'overview'
+    : activeSection
 
   return (
     <section id="ADMIN" className="animate-fadeIn scroll-mt-28">
       <div className="mb-5 overflow-x-auto rounded-xl border border-slate-200 bg-white p-1.5 shadow-sm dark:border-slate-800 dark:bg-slate-900">
         <nav aria-label="Chức năng quản trị" className="flex min-w-max items-center gap-1">
           {navigation
-            .filter((item) => (!item.superOnly || isSuper) && (isAdmin || item.id === 'indexing'))
+            .filter((item) => {
+              if (item.superOnly && !isSuper) return false
+              if (item.id === 'sop-approvals' && !isApprover) return false
+              return isAdmin || item.id === 'indexing'
+            })
             .map(({ id, label, icon: Icon }) => {
               const active = safeSection === id
               return (
@@ -132,6 +145,15 @@ function AdminSectionContent({ activeSection }: AdminWorkspaceProps) {
     )
   }
 
+  if (activeSection === 'sop-management') {
+    return (
+      <>
+        <PageIntro title="Quản lý toàn bộ SOP" description="Admin xem và xử lý toàn bộ SOP đã công bố cùng các hồ sơ SOP của mọi người." />
+        <GlobalSopManagementWorkspace />
+      </>
+    )
+  }
+
   if (activeSection === 'imports') {
     return <AdminDocumentsWorkspace />
   }
@@ -141,9 +163,9 @@ function AdminSectionContent({ activeSection }: AdminWorkspaceProps) {
       <>
         <PageIntro
           title="Duyệt SOP"
-          description="Mở các SOP Draft do người dùng gửi, xác nhận rà soát và phê duyệt công bố theo đúng phạm vi phân quyền."
+          description="Mở các hồ sơ SOP Draft do người dùng gửi, xác nhận rà soát và phê duyệt công bố theo đúng phạm vi phân quyền."
         />
-        <SopImportWorkspace adminMode />
+        <SopApprovalWorkspace />
       </>
     )
   }

@@ -193,6 +193,7 @@ export const AppRoutes: React.FC = () => {
         <Route path="/employee-lifecycle/admin/users" element={<EmployeeLifecycleAdminPage />} />
         <Route path="/employee-lifecycle/admin/access" element={<EmployeeLifecycleAdminPage />} />
         <Route path="/employee-lifecycle/admin/catalog" element={<EmployeeLifecycleAdminPage />} />
+        <Route path="/employee-lifecycle/admin/sop-management" element={<EmployeeLifecycleAdminPage />} />
         <Route path="/employee-lifecycle/admin/imports" element={<EmployeeLifecycleAdminPage />} />
         <Route path="/employee-lifecycle/admin/sop-approvals" element={<EmployeeLifecycleAdminPage />} />
         <Route path="/employee-lifecycle/admin/master-data" element={<EmployeeLifecycleAdminPage />} />

@@ -61,10 +61,12 @@ export const AdminActionMenu: React.FC<AdminActionMenuProps> = ({
       pos.top = rect.bottom + 6
     }
 
+    const menuWidth = Math.min(224, viewportWidth - 16)
     if (align === 'left') {
-      pos.left = Math.max(8, Math.min(rect.left, viewportWidth - 220))
+      pos.left = Math.max(8, Math.min(rect.left, viewportWidth - menuWidth - 8))
     } else {
-      pos.right = Math.max(8, viewportWidth - rect.right)
+      const rightDistance = viewportWidth - rect.right
+      pos.right = Math.max(8, Math.min(rightDistance, viewportWidth - menuWidth - 8))
     }
 
     setPosition(pos)
@@ -169,7 +171,7 @@ export const AdminActionMenu: React.FC<AdminActionMenuProps> = ({
               right: position.right !== undefined ? `${position.right}px` : undefined,
               zIndex: 9999
             }}
-            className="w-56 animate-in fade-in zoom-in-95 duration-150 rounded-xl border border-slate-200 bg-white p-1.5 shadow-xl shadow-slate-950/10 dark:border-slate-800 dark:bg-slate-900 dark:shadow-slate-950/50"
+            className="w-56 max-w-[calc(100vw-1rem)] animate-in fade-in zoom-in-95 duration-150 rounded-xl border border-slate-200 bg-white p-1.5 shadow-xl shadow-slate-950/10 dark:border-slate-800 dark:bg-slate-900 dark:shadow-slate-950/50"
             onClick={(e) => e.stopPropagation()}
           >
             <div className="space-y-0.5">

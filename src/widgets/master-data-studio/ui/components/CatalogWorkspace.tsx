@@ -5,7 +5,8 @@ import {
   getSTATUS_LABELS,
   type CatalogViewModel,
   type CatalogStatus,
-  type DomainGroup
+  type DomainGroup,
+  type DomainGroupId
 } from '../../../../entities/master-data/model/masterDataCatalogAdapter'
 import type { CatalogTier } from '../../../../entities/master-data/model/types'
 import { DomainIcon } from './DomainIcon'
@@ -14,6 +15,9 @@ import { CatalogCard } from './CatalogCard'
 export interface CatalogWorkspaceProps {
   isDarkMode: boolean
   activeGroup: DomainGroup
+  domainGroups?: DomainGroup[]
+  onGroupChange?: (groupId: DomainGroupId) => void
+  groupCounts?: Record<string, number>
   filteredItems: CatalogViewModel[]
   filteredItemCount: number
   allGroupItems: CatalogViewModel[]
@@ -38,6 +42,9 @@ export interface CatalogWorkspaceProps {
 export const CatalogWorkspace: React.FC<CatalogWorkspaceProps> = ({
   isDarkMode,
   activeGroup,
+  domainGroups,
+  onGroupChange,
+  groupCounts,
   filteredItems,
   filteredItemCount,
   allGroupItems,
@@ -76,6 +83,51 @@ export const CatalogWorkspace: React.FC<CatalogWorkspaceProps> = ({
 
   return (
     <div className="flex flex-col h-full">
+      {/* Mobile Domain Group Selector (shown only on <sm when DomainRail is hidden) */}
+      {domainGroups && onGroupChange && (
+        <div
+          className={`sm:hidden flex items-center gap-1.5 overflow-x-auto no-scrollbar px-3 py-2 border-b ${
+            isDarkMode ? 'border-slate-800 bg-slate-900/90' : 'border-slate-200 bg-slate-50'
+          }`}
+          aria-label="Chọn nhóm danh mục"
+        >
+          {domainGroups.map((group) => {
+            const isSelected = group.id === activeGroup.id
+            const count = groupCounts?.[group.id]
+            return (
+              <button
+                key={group.id}
+                type="button"
+                onClick={() => onGroupChange(group.id)}
+                className={`whitespace-nowrap shrink-0 flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+                  isSelected
+                    ? 'bg-[#1f5f86] text-white shadow-xs'
+                    : isDarkMode
+                    ? 'bg-slate-800 text-slate-300 hover:bg-slate-700'
+                    : 'bg-white text-slate-700 border border-slate-200 hover:bg-slate-100'
+                }`}
+              >
+                <DomainIcon name={group.iconName} className="w-3.5 h-3.5" />
+                <span>{group.label}</span>
+                {count !== undefined && (
+                  <span
+                    className={`text-[10px] px-1.5 py-0.5 rounded-full font-mono font-bold ${
+                      isSelected
+                        ? 'bg-white/20 text-white'
+                        : isDarkMode
+                        ? 'bg-slate-700 text-slate-400'
+                        : 'bg-slate-100 text-slate-500'
+                    }`}
+                  >
+                    {count}
+                  </span>
+                )}
+              </button>
+            )
+          })}
+        </div>
+      )}
+
       {/* Workspace toolbar */}
       <div
         className={`

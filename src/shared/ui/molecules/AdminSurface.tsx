@@ -1,15 +1,64 @@
-import type { ReactNode } from 'react'
-import { AlertCircle, Inbox } from 'lucide-react'
+import { useState, type ReactNode } from 'react'
+import { AlertCircle, Inbox, ChevronDown } from 'lucide-react'
 
 export function PageIntro({ title, description, actions }: { title: string; description: string; actions?: ReactNode }) {
   return <div className="mb-5 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between"><div><h2 className="text-xl font-black tracking-tight text-slate-950 dark:text-white">{title}</h2><p className="mt-1 max-w-3xl text-sm leading-6 text-slate-600 dark:text-slate-400">{description}</p></div>{actions && <div className="shrink-0">{actions}</div>}</div>
 }
 
-export function Panel({ title, description, action, children, className = '' }: { title?: string; description?: string; action?: ReactNode; children: ReactNode; className?: string }) {
-  return <section className={`overflow-hidden rounded-xl border border-slate-200 bg-white dark:border-slate-800 dark:bg-slate-900 ${className}`}>
-    {(title || action) && <div className="flex items-start justify-between gap-4 border-b border-slate-200 px-4 py-3.5 dark:border-slate-800"><div>{title && <h3 className="text-sm font-black text-slate-950 dark:text-white">{title}</h3>}{description && <p className="mt-1 text-xs leading-5 text-slate-500 dark:text-slate-400">{description}</p>}</div>{action}</div>}
-    {children}
-  </section>
+export function Panel({
+  title,
+  description,
+  action,
+  children,
+  className = '',
+  collapsible = false,
+  defaultExpanded = true
+}: {
+  title?: string
+  description?: string
+  action?: ReactNode
+  children: ReactNode
+  className?: string
+  collapsible?: boolean
+  defaultExpanded?: boolean
+}) {
+  const [expanded, setExpanded] = useState(defaultExpanded)
+
+  return (
+    <section className={`overflow-hidden rounded-xl border border-slate-200 bg-white dark:border-slate-800 dark:bg-slate-900 ${className}`}>
+      {(title || action || collapsible) && (
+        <div
+          className={`flex items-start justify-between gap-4 border-slate-200 px-4 py-3.5 dark:border-slate-800 ${
+            expanded ? 'border-b' : ''
+          } ${collapsible ? 'cursor-pointer select-none hover:bg-slate-50/70 dark:hover:bg-slate-850/50 transition-colors' : ''}`}
+          onClick={collapsible ? () => setExpanded(prev => !prev) : undefined}
+          role={collapsible ? 'button' : undefined}
+          tabIndex={collapsible ? 0 : undefined}
+          onKeyDown={collapsible ? (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setExpanded(prev => !prev) } } : undefined}
+        >
+          <div className="min-w-0">
+            {title && <h3 className="text-sm font-black text-slate-950 dark:text-white truncate">{title}</h3>}
+            {description && <p className="mt-1 text-xs leading-5 text-slate-500 dark:text-slate-400">{description}</p>}
+          </div>
+          <div className="flex items-center gap-2 shrink-0">
+            {action}
+            {collapsible && (
+              <span
+                className={`p-1 rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-100/80 dark:text-slate-500 dark:hover:text-slate-200 dark:hover:bg-slate-800/80 transition-transform duration-200 inline-flex items-center justify-center ${
+                  expanded ? 'rotate-180' : ''
+                }`}
+                title={expanded ? 'Thu gọn' : 'Mở rộng'}
+                aria-label={expanded ? 'Thu gọn' : 'Mở rộng'}
+              >
+                <ChevronDown className="size-4" />
+              </span>
+            )}
+          </div>
+        </div>
+      )}
+      {(!collapsible || expanded) && children}
+    </section>
+  )
 }
 
 export function Feedback({ type, children, action }: { type: 'error' | 'success' | 'info'; children: ReactNode; action?: ReactNode }) {

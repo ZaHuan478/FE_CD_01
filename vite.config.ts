@@ -6,7 +6,7 @@ import tailwindcss from '@tailwindcss/vite'
 export default defineConfig({
   plugins: [react(), tailwindcss()],
   optimizeDeps: {
-    include: ['@xyflow/react', 'docx-preview', 'pdfjs-dist', 'mermaid'],
+    include: ['docx-preview', 'pdfjs-dist'],
   },
   server: {
     host: '0.0.0.0',

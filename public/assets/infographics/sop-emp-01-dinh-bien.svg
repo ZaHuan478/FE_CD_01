@@ -1,0 +1,120 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 540" width="960" height="540" fill="none">
+  <defs>
+    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0f172a"/>
+      <stop offset="100%" stop-color="#1e293b"/>
+    </linearGradient>
+    <linearGradient id="cardGrad1" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#3b82f6"/>
+      <stop offset="100%" stop-color="#1d4ed8"/>
+    </linearGradient>
+    <linearGradient id="cardGrad2" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#06b6d4"/>
+      <stop offset="100%" stop-color="#0e7490"/>
+    </linearGradient>
+    <linearGradient id="cardGrad3" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#8b5cf6"/>
+      <stop offset="100%" stop-color="#6d28d9"/>
+    </linearGradient>
+    <linearGradient id="cardGrad4" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#f59e0b"/>
+      <stop offset="100%" stop-color="#d97706"/>
+    </linearGradient>
+    <linearGradient id="cardGrad5" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#10b981"/>
+      <stop offset="100%" stop-color="#047857"/>
+    </linearGradient>
+    <filter id="dropShadow" x="-10%" y="-10%" width="120%" height="125%">
+      <feDropShadow dx="0" dy="8" stdDeviation="6" flood-color="#000" flood-opacity="0.35"/>
+    </filter>
+  </defs>
+
+  <!-- Background -->
+  <rect width="960" height="540" fill="url(#bgGrad)"/>
+
+  <!-- Grid Accent Pattern -->
+  <circle cx="120" cy="80" r="180" fill="#3b82f6" opacity="0.06"/>
+  <circle cx="840" cy="460" r="220" fill="#8b5cf6" opacity="0.05"/>
+
+  <!-- Header Section -->
+  <rect x="40" y="30" width="880" height="70" rx="12" fill="#1e293b" stroke="#334155" stroke-width="1.5"/>
+  <text x="70" y="65" font-family="'Segoe UI', Roboto, sans-serif" font-size="14" font-weight="700" fill="#38bdf8" letter-spacing="1.5">SOP-EMP-01 | HR LIFECYCLE STAGE: LIFE-00</text>
+  <text x="70" y="87" font-family="'Segoe UI', Roboto, sans-serif" font-size="18" font-weight="700" fill="#ffffff">QUY TRÌNH THIẾT LẬP VÀ PHÊ DUYỆT ĐỊNH BIÊN NHÂN SỰ</text>
+  <rect x="790" y="47" width="110" height="34" rx="8" fill="#0284c7" fill-opacity="0.2" stroke="#38bdf8" stroke-width="1"/>
+  <text x="845" y="69" font-family="'Segoe UI', Roboto, sans-serif" font-size="12" font-weight="600" fill="#38bdf8" text-anchor="middle">ĐÃ CÔNG BỐ</text>
+
+  <!-- Flow Connector Line -->
+  <path d="M 120 280 L 840 280" stroke="#475569" stroke-width="3" stroke-dasharray="6 6"/>
+
+  <!-- Step 1 Card -->
+  <g filter="url(#dropShadow)">
+    <rect x="50" y="170" width="150" height="220" rx="14" fill="#1e293b" stroke="#3b82f6" stroke-width="2"/>
+    <rect x="50" y="170" width="150" height="50" rx="14" fill="url(#cardGrad1)"/>
+    <text x="125" y="202" font-family="'Segoe UI', Roboto, sans-serif" font-size="14" font-weight="800" fill="#ffffff" text-anchor="middle">BƯỚC 01</text>
+    <text x="125" y="250" font-family="'Segoe UI', Roboto, sans-serif" font-size="13" font-weight="700" fill="#f8fafc" text-anchor="middle">Thu thập nhu cầu</text>
+    <text x="125" y="280" font-family="'Segoe UI', Roboto, sans-serif" font-size="11" fill="#94a3b8" text-anchor="middle">Trưởng đơn vị gửi</text>
+    <text x="125" y="300" font-family="'Segoe UI', Roboto, sans-serif" font-size="11" fill="#94a3b8" text-anchor="middle">kế hoạch nhân sự</text>
+    <text x="125" y="320" font-family="'Segoe UI', Roboto, sans-serif" font-size="11" fill="#94a3b8" text-anchor="middle">năm tài chính</text>
+    <rect x="75" y="350" width="100" height="24" rx="6" fill="#334155"/>
+    <text x="125" y="366" font-family="'Segoe UI', Roboto, sans-serif" font-size="10" font-weight="600" fill="#cbd5e1" text-anchor="middle">Dept Head</text>
+  </g>
+
+  <!-- Step 2 Card -->
+  <g filter="url(#dropShadow)">
+    <rect x="230" y="170" width="150" height="220" rx="14" fill="#1e293b" stroke="#06b6d4" stroke-width="2"/>
+    <rect x="230" y="170" width="150" height="50" rx="14" fill="url(#cardGrad2)"/>
+    <text x="305" y="202" font-family="'Segoe UI', Roboto, sans-serif" font-size="14" font-weight="800" fill="#ffffff" text-anchor="middle">BƯỚC 02</text>
+    <text x="305" y="250" font-family="'Segoe UI', Roboto, sans-serif" font-size="13" font-weight="700" fill="#f8fafc" text-anchor="middle">Tổng hợp định biên</text>
+    <text x="305" y="280" font-family="'Segoe UI', Roboto, sans-serif" font-size="11" fill="#94a3b8" text-anchor="middle">HR Planning rà soát</text>
+    <text x="305" y="300" font-family="'Segoe UI', Roboto, sans-serif" font-size="11" fill="#94a3b8" text-anchor="middle">khối lượng việc &amp;</text>
+    <text x="305" y="320" font-family="'Segoe UI', Roboto, sans-serif" font-size="11" fill="#94a3b8" text-anchor="middle">tỷ lệ tăng trưởng</text>
+    <rect x="255" y="350" width="100" height="24" rx="6" fill="#334155"/>
+    <text x="305" y="366" font-family="'Segoe UI', Roboto, sans-serif" font-size="10" font-weight="600" fill="#cbd5e1" text-anchor="middle">HR Specialist</text>
+  </g>
+
+  <!-- Step 3 Card -->
+  <g filter="url(#dropShadow)">
+    <rect x="410" y="170" width="150" height="220" rx="14" fill="#1e293b" stroke="#8b5cf6" stroke-width="2"/>
+    <rect x="410" y="170" width="150" height="50" rx="14" fill="url(#cardGrad3)"/>
+    <text x="485" y="202" font-family="'Segoe UI', Roboto, sans-serif" font-size="14" font-weight="800" fill="#ffffff" text-anchor="middle">BƯỚC 03</text>
+    <text x="485" y="250" font-family="'Segoe UI', Roboto, sans-serif" font-size="13" font-weight="700" fill="#f8fafc" text-anchor="middle">Thẩm định quỹ lương</text>
+    <text x="485" y="280" font-family="'Segoe UI', Roboto, sans-serif" font-size="11" fill="#94a3b8" text-anchor="middle">Tài chính đối soát</text>
+    <text x="485" y="300" font-family="'Segoe UI', Roboto, sans-serif" font-size="11" fill="#94a3b8" text-anchor="middle">hạn mức ngân sách</text>
+    <text x="485" y="320" font-family="'Segoe UI', Roboto, sans-serif" font-size="11" fill="#94a3b8" text-anchor="middle">&amp; chi phí nhân công</text>
+    <rect x="435" y="350" width="100" height="24" rx="6" fill="#334155"/>
+    <text x="485" y="366" font-family="'Segoe UI', Roboto, sans-serif" font-size="10" font-weight="600" fill="#cbd5e1" text-anchor="middle">Finance Dept</text>
+  </g>
+
+  <!-- Step 4 Card -->
+  <g filter="url(#dropShadow)">
+    <rect x="590" y="170" width="150" height="220" rx="14" fill="#1e293b" stroke="#f59e0b" stroke-width="2"/>
+    <rect x="590" y="170" width="150" height="50" rx="14" fill="url(#cardGrad4)"/>
+    <text x="665" y="202" font-family="'Segoe UI', Roboto, sans-serif" font-size="14" font-weight="800" fill="#ffffff" text-anchor="middle">BƯỚC 04</text>
+    <text x="665" y="250" font-family="'Segoe UI', Roboto, sans-serif" font-size="13" font-weight="700" fill="#f8fafc" text-anchor="middle">Ban Giám Đốc duyệt</text>
+    <text x="665" y="280" font-family="'Segoe UI', Roboto, sans-serif" font-size="11" fill="#94a3b8" text-anchor="middle">CEO/BOD xem xét</text>
+    <text x="665" y="300" font-family="'Segoe UI', Roboto, sans-serif" font-size="11" fill="#94a3b8" text-anchor="middle">phê chuẩn định biên</text>
+    <text x="665" y="320" font-family="'Segoe UI', Roboto, sans-serif" font-size="11" fill="#94a3b8" text-anchor="middle">chính thức</text>
+    <rect x="615" y="350" width="100" height="24" rx="6" fill="#334155"/>
+    <text x="665" y="366" font-family="'Segoe UI', Roboto, sans-serif" font-size="10" font-weight="600" fill="#cbd5e1" text-anchor="middle">BOD / CEO</text>
+  </g>
+
+  <!-- Step 5 Card -->
+  <g filter="url(#dropShadow)">
+    <rect x="770" y="170" width="150" height="220" rx="14" fill="#1e293b" stroke="#10b981" stroke-width="2"/>
+    <rect x="770" y="170" width="150" height="50" rx="14" fill="url(#cardGrad5)"/>
+    <text x="845" y="202" font-family="'Segoe UI', Roboto, sans-serif" font-size="14" font-weight="800" fill="#ffffff" text-anchor="middle">BƯỚC 05</text>
+    <text x="845" y="250" font-family="'Segoe UI', Roboto, sans-serif" font-size="13" font-weight="700" fill="#f8fafc" text-anchor="middle">Khóa định biên gốc</text>
+    <text x="845" y="280" font-family="'Segoe UI', Roboto, sans-serif" font-size="11" fill="#94a3b8" text-anchor="middle">Nhập hệ thống HRUX</text>
+    <text x="845" y="300" font-family="'Segoe UI', Roboto, sans-serif" font-size="11" fill="#94a3b8" text-anchor="middle">khóa baseline</text>
+    <text x="845" y="320" font-family="'Segoe UI', Roboto, sans-serif" font-size="11" fill="#94a3b8" text-anchor="middle">&amp; kích hoạt tuyển dụng</text>
+    <rect x="795" y="350" width="100" height="24" rx="6" fill="#334155"/>
+    <text x="845" y="366" font-family="'Segoe UI', Roboto, sans-serif" font-size="10" font-weight="600" fill="#cbd5e1" text-anchor="middle">HR Admin</text>
+  </g>
+
+  <!-- Footer Info -->
+  <rect x="40" y="440" width="880" height="70" rx="12" fill="#1e293b" stroke="#334155" stroke-width="1.5"/>
+  <circle cx="70" cy="475" r="16" fill="#0284c7" fill-opacity="0.2"/>
+  <text x="70" y="480" font-family="'Segoe UI', Roboto, sans-serif" font-size="14" font-weight="700" fill="#38bdf8" text-anchor="middle">i</text>
+  <text x="105" y="468" font-family="'Segoe UI', Roboto, sans-serif" font-size="12" font-weight="700" fill="#f8fafc">Quy chuẩn kiểm soát:</text>
+  <text x="105" y="490" font-family="'Segoe UI', Roboto, sans-serif" font-size="11" fill="#94a3b8">Định biên nhân sự là căn cứ pháp lý duy nhất để mở đợt tuyển dụng (LIFE-01) và điều chuyển vị trí (LIFE-02).</text>
+</svg>

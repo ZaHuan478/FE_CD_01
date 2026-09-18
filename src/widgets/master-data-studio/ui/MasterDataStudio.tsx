@@ -308,6 +308,9 @@ export const MasterDataStudio: React.FC<MasterDataStudioProps> = ({
             <CatalogWorkspace
               isDarkMode={isDarkMode}
               activeGroup={activeGroup}
+              domainGroups={domainGroups}
+              onGroupChange={handleGroupChange}
+              groupCounts={groupCounts}
               filteredItems={paginatedItems}
               filteredItemCount={filteredItems.length}
               allGroupItems={groupItems}

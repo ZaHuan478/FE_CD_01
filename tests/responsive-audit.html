@@ -1,0 +1,125 @@
+<!doctype html>
+<html lang="vi">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Responsive audit</title>
+    <style>
+      body { margin: 0; background: #e2e8f0; }
+      iframe { display: block; border: 0; background: white; }
+      nav { position: fixed; top: 8px; left: 438px; display: grid; width: 90px; gap: 6px; }
+      button { padding: 5px 8px; border: 1px solid #94a3b8; border-radius: 5px; background: white; cursor: pointer; }
+    </style>
+  </head>
+  <body>
+    <iframe id="viewport" title="Màn hình kiểm thử responsive"></iframe>
+    <nav aria-label="Điều khiển kiểm thử">
+      <button type="button" data-width="320">320px</button>
+      <button type="button" data-width="375">375px</button>
+      <button type="button" data-width="390">390px</button>
+      <button type="button" data-width="430">430px</button>
+      <button type="button" data-width="768">768px</button>
+      <button type="button" data-width="1024">1024px</button>
+      <button type="button" id="run-audit">Quét tất cả</button>
+      <button type="button" id="test-drawer">Thử menu</button>
+      <button type="button" id="test-chat">Thử chat</button>
+      <button type="button" data-route="/employee-lifecycle">Tổng quan</button>
+      <button type="button" data-route="/employee-lifecycle/operations">Nghiệp vụ</button>
+      <button type="button" data-route="/employee-lifecycle/masterdata">Danh mục</button>
+      <button type="button" data-route="/employee-lifecycle/lifecycle">Vòng đời</button>
+      <button type="button" data-route="/employee-lifecycle/infographic/LIFE-00?sop=SOP%20EMP01">Chi tiết SOP</button>
+      <button type="button" data-route="/employee-lifecycle?tab=process-library">Thư viện</button>
+      <button type="button" data-route="/employee-lifecycle/journey?stage=LIFE-00&amp;scenario=all">Hành trình</button>
+      <button type="button" data-route="/employee-lifecycle/policies">Chính sách</button>
+      <button type="button" data-route="/employee-lifecycle/sop-imports">Tài liệu</button>
+      <button type="button" data-route="/employee-lifecycle/document-conversions">Chuyển hóa</button>
+      <button type="button" data-route="/employee-lifecycle/sop-management">Quản lý SOP</button>
+      <button type="button" data-route="/employee-lifecycle/admin/users">Quản trị</button>
+      <button type="button" data-route="/employee-lifecycle/admin/access">Phân quyền</button>
+      <button type="button" data-route="/employee-lifecycle/admin/master-data">QT danh mục</button>
+      <button type="button" data-route="/employee-lifecycle/admin/indexing">Chỉ mục</button>
+      <button type="button" data-route="/employee-lifecycle/admin/audit">Nhật ký</button>
+      <button type="button" data-route="/employee-lifecycle/admin/settings">Cài đặt</button>
+      <button type="button" data-route="/employee-lifecycle/system-guide">Hướng dẫn</button>
+    </nav>
+    <pre id="report" aria-live="polite" style="position:absolute;left:550px;top:0;max-width:700px;white-space:pre-wrap"></pre>
+    <script>
+      const params = new URLSearchParams(location.search)
+      const width = Math.max(320, Math.min(1920, Number(params.get('width')) || 430))
+      const heights = { 320: 568, 375: 812, 390: 844, 430: 932, 768: 1024, 1024: 768 }
+      const route = params.get('route') || '/employee-lifecycle'
+      const frame = document.getElementById('viewport')
+      frame.style.width = `${width}px`
+      frame.style.height = `${heights[width] || 900}px`
+      frame.src = route.startsWith('/employee-lifecycle') ? route : '/employee-lifecycle'
+      document.querySelectorAll('[data-width]').forEach((button) => {
+        button.addEventListener('click', () => {
+          frame.style.width = `${button.dataset.width}px`
+          frame.style.height = `${heights[button.dataset.width]}px`
+        })
+      })
+      document.querySelectorAll('[data-route]').forEach((button) => {
+        button.addEventListener('click', () => { frame.src = button.dataset.route })
+      })
+      document.getElementById('test-drawer').addEventListener('click', async () => {
+        const doc = frame.contentDocument
+        const opener = doc.querySelector('button[aria-label="Mở menu điều hướng"]')
+        if (!opener) return
+        opener.click()
+        await new Promise((resolve) => setTimeout(resolve, 100))
+        const aside = doc.querySelector('[data-help-id="main-sidebar"]')
+        const opened = { display: getComputedStyle(aside).display, width: Math.round(aside.getBoundingClientRect().width), backdrop: [...doc.querySelectorAll('button[aria-label="Đóng menu điều hướng"]')].some((button) => button.classList.contains('fixed')) }
+        doc.querySelector('button[aria-label="Đóng menu điều hướng"]')?.click()
+        await new Promise((resolve) => setTimeout(resolve, 100))
+        document.getElementById('report').textContent = JSON.stringify({ viewport: frame.contentWindow.innerWidth, opened, closed: getComputedStyle(aside).display }, null, 2)
+      })
+      document.getElementById('test-chat').addEventListener('click', async () => {
+        const doc = frame.contentDocument
+        doc.querySelector('button[title="Mở Trợ lý AI Tra cứu Quy trình iSOP"]')?.click()
+        await new Promise((resolve) => setTimeout(resolve, 100))
+        const drawer = [...doc.querySelectorAll('.fixed')].find((element) => element.className.includes('max-h-[calc(100dvh'))
+        const rect = drawer?.getBoundingClientRect()
+        document.getElementById('report').textContent = JSON.stringify({ viewport: [frame.contentWindow.innerWidth, frame.contentWindow.innerHeight], drawer: rect && { left: Math.round(rect.left), right: Math.round(rect.right), top: Math.round(rect.top), bottom: Math.round(rect.bottom) } }, null, 2)
+      })
+      document.getElementById('run-audit').addEventListener('click', async () => {
+        const routes = [...document.querySelectorAll('[data-route]')].map((button) => button.dataset.route)
+        const report = document.getElementById('report')
+        const results = []
+        report.dataset.complete = 'false'
+        report.textContent = 'Đang kiểm tra...'
+        for (const route of routes) {
+          await new Promise((resolve) => {
+            frame.onload = resolve
+            frame.src = route
+          })
+          for (let attempt = 0; attempt < 30 && !frame.contentDocument.querySelector('header'); attempt += 1) {
+            await new Promise((resolve) => setTimeout(resolve, 200))
+          }
+          await new Promise((resolve) => setTimeout(resolve, 300))
+          const doc = frame.contentDocument
+          const body = doc.body
+          const header = doc.querySelector('header')
+          const title = header?.querySelector('h1')
+          const main = doc.querySelector('main')
+          const aside = doc.querySelector('[data-help-id="main-sidebar"]')
+          const viewportWidth = doc.documentElement.clientWidth
+          const escaped = [...doc.querySelectorAll('body *')].filter((element) => {
+            const style = getComputedStyle(element)
+            const rect = element.getBoundingClientRect()
+            if (style.display === 'none' || style.visibility === 'hidden' || rect.width === 0 || rect.right <= viewportWidth + 2) return false
+            let parent = element.parentElement
+            while (parent && parent !== body) {
+              const overflow = getComputedStyle(parent).overflowX
+              if (['auto', 'scroll', 'hidden'].includes(overflow) && parent.scrollWidth > parent.clientWidth) return false
+              parent = parent.parentElement
+            }
+            return true
+          }).slice(0, 5).map((element) => ({ tag: element.tagName, className: String(element.className).slice(0, 55), right: Math.round(element.getBoundingClientRect().right) }))
+          results.push({ route, viewportWidth, viewportHeight: frame.contentWindow.innerHeight, bodyWidth: body.scrollWidth, headerHeight: Math.round(header?.getBoundingClientRect().height || 0), titleWidth: Math.round(title?.getBoundingClientRect().width || 0), titleHeight: Math.round(title?.getBoundingClientRect().height || 0), mainWidth: Math.round(main?.getBoundingClientRect().width || 0), asideDisplay: aside && getComputedStyle(aside).display, escaped })
+          report.textContent = JSON.stringify(results, null, 2)
+        }
+        report.dataset.complete = 'true'
+      })
+    </script>
+  </body>
+</html>

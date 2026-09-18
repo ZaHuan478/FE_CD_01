@@ -135,3 +135,22 @@ export function signOut(): void {
   resetRuntimeDatasets()
   window.location.assign('/login')
 }
+
+export function canApproveSop(session: UserSession | null): boolean {
+  if (!session) return false
+  if (session.systemRole === 'SUPER_ADMIN') return true
+  return session.capabilities.includes('sop.review') || session.capabilities.includes('sop.publish')
+}
+
+export function canReviewSop(session: UserSession | null): boolean {
+  if (!session) return false
+  if (session.systemRole === 'SUPER_ADMIN') return true
+  return session.capabilities.includes('sop.review')
+}
+
+export function canPublishSop(session: UserSession | null): boolean {
+  if (!session) return false
+  if (session.systemRole === 'SUPER_ADMIN') return true
+  return session.capabilities.includes('sop.publish')
+}
+

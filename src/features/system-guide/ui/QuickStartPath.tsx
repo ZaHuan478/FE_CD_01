@@ -45,8 +45,8 @@ export const defaultQuickStartSteps: QuickStartStepConfig[] = [
   {
     id: 'step-view-flowchart',
     slug: 'xem-luu-do-va-canvas-sop',
-    title: '3. Xem lưu đồ & canvas',
-    description: 'Đọc sơ đồ trực quan, bước rẽ nhánh và trách nhiệm',
+    title: '3. Xem quy trình trực quan',
+    description: 'Đọc luồng nghiệp vụ, các bước và trách nhiệm thực hiện',
     estimatedTime: '1 phút',
     icon: Layers
   },
@@ -149,7 +149,7 @@ export const QuickStartPath: React.FC<QuickStartPathProps> = ({
 
       {/* Connected 5-Step Learning Path */}
       <div className="mt-5">
-        <ol className="grid gap-3 md:grid-cols-5 relative">
+        <ol className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 relative">
           {stepStatuses.map((step, idx) => {
             const Icon = step.icon
             const isLast = idx === stepStatuses.length - 1
@@ -167,10 +167,10 @@ export const QuickStartPath: React.FC<QuickStartPathProps> = ({
                     : 'border-slate-200 bg-slate-50/50 hover:border-slate-300 dark:border-slate-800 dark:bg-slate-900/50'
                 }`}
               >
-                {/* Connector Arrow for Desktop */}
+                {/* Connector Arrow for Desktop (only on full 5-col row) */}
                 {!isLast && (
                   <div
-                    className="hidden md:block pointer-events-none absolute -right-3 top-1/2 -translate-y-1/2 z-10 text-slate-300 dark:text-slate-700"
+                    className="hidden xl:block pointer-events-none absolute -right-3 top-1/2 -translate-y-1/2 z-10 text-slate-300 dark:text-slate-700"
                     aria-hidden="true"
                   >
                     <ArrowRight className="size-4" />

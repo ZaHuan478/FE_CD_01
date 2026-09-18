@@ -1,7 +1,7 @@
 import { GlobalSopSearch } from '../../../features/sop-search/ui/GlobalSopSearch'
 import React, { useMemo, useState, useEffect, useCallback, Suspense, useTransition } from 'react'
 import { useSearchParams, useParams, useLocation, useNavigate } from 'react-router-dom'
-import { Layers, Database, GitBranch, Sun, Moon, Loader2, ShieldCheck, FileUp, BookOpen, ScanText, HelpCircle } from 'lucide-react'
+import { Layers, Database, GitBranch, Sun, Moon, Loader2, ShieldCheck, FileUp, BookOpen, ScanText, HelpCircle, Menu } from 'lucide-react'
 
 import { MasterDataRelationshipModal } from '../../master-data-studio/ui/MasterDataRelationshipModal'
 import { SystemSupportBar } from '../../app-support/ui/SystemSupportBar'
@@ -35,7 +35,7 @@ import { getSopDictionary } from '../../../entities/sop/model/sopDictionary'
 import { getCROSS_FUNCTIONAL_REGISTRY } from '../../../entities/sop/cross-functional/index'
 import type { LifecycleStep, OperationModule, DetailItem } from '../../../entities/module/model/lifecycle.types'
 import { useLanguage } from '../../../shared/lib/i18n/LanguageContext'
-import { useSession } from '../../../features/authentication/model/session'
+import { useSession, canApproveSop } from '../../../features/authentication/model/session'
 import { getCORE_OPERATIONS_STAGE_MAP } from '../../../entities/module/data/coreOperationsStageMap'
 import { canAccessAnyModule, requiredModuleIdsForRoute } from '../../../entities/module/lib/moduleAccess'
 import type { AdminWorkspaceSection } from '../../admin-workspace/ui/AdminWorkspace'
@@ -50,13 +50,14 @@ const headerBusinessClusters: Array<{ id: BusinessClusterId; label: string }> = 
 
 type EmployeeLifecycleTab = 'lifecycle' | 'masterdata' | 'reports' | 'process-library' | 'journey' | 'operations' | 'policies' | 'imports' | 'conversions' | 'management' | 'guide' | 'admin'
 
-const adminWorkspaceSections = new Set<AdminWorkspaceSection>(['overview', 'users', 'access', 'catalog', 'imports', 'sop-approvals', 'master-data', 'indexing', 'audit', 'system-guides', 'settings'])
+const adminWorkspaceSections = new Set<AdminWorkspaceSection>(['overview', 'users', 'access', 'catalog', 'sop-management', 'imports', 'sop-approvals', 'master-data', 'indexing', 'audit', 'system-guides', 'settings'])
 
 const getAdminSectionFromLocation = (pathname: string, sectionParam: string | null): AdminWorkspaceSection => {
   if (adminWorkspaceSections.has(sectionParam as AdminWorkspaceSection)) return sectionParam as AdminWorkspaceSection
   if (pathname.endsWith('/users')) return 'users'
   if (pathname.endsWith('/access')) return 'access'
   if (pathname.endsWith('/catalog')) return 'catalog'
+  if (pathname.endsWith('/sop-management')) return 'sop-management'
   if (pathname.endsWith('/imports')) return 'imports'
   if (pathname.endsWith('/sop-approvals')) return 'sop-approvals'
   if (pathname.endsWith('/indexing')) return 'indexing'
@@ -151,12 +152,14 @@ export const EmployeeWorkspace: React.FC = () => {
   ]), [session.capabilities, session.menuItems, session.systemRole])
   const [activeSection, setActiveSection] = useState(() => getSectionFromTab(getTabFromLocation(), allowedMenuCodes))
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false)
+  const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false)
   const [, startTransition] = useTransition()
   const canManageOwnDocuments = Array.isArray(session.capabilities)
     && session.capabilities.includes('sop.read')
     && session.modules.length > 0
   const canManageSops = ['ADMIN', 'SUPER_ADMIN'].includes(session.systemRole)
     || session.capabilities.some((code) => ['sop.create', 'sop.edit', 'sop.review', 'sop.publish'].includes(code))
+  const canApproveSops = canApproveSop(session)
   const canOpenAdministration = ['ADMIN', 'SUPER_ADMIN'].includes(session.systemRole)
     || session.capabilities.includes('rag.manage')
   const accessibleModuleIds = useMemo(() => new Set(session.modules.map((module) => module.id)), [session.modules])
@@ -309,8 +312,12 @@ export const EmployeeWorkspace: React.FC = () => {
   useEffect(() => {
     if (activeTab === 'admin' && !canOpenAdministration) {
       navigate('/employee-lifecycle', { replace: true })
+      return
     }
-  }, [activeTab, canOpenAdministration, navigate])
+    if (activeTab === 'admin' && activeAdminSection === 'sop-approvals' && !canApproveSops) {
+      navigate('/employee-lifecycle/admin', { replace: true })
+    }
+  }, [activeTab, activeAdminSection, canOpenAdministration, canApproveSops, navigate])
 
   useEffect(() => {
     const clusterFromUrl = searchParams.get('cluster')
@@ -758,8 +765,8 @@ export const EmployeeWorkspace: React.FC = () => {
   const HeaderIcon = currentHeaderInfo.icon
 
   return (
-    <div className={`min-h-screen transition-[padding-left] duration-300 pb-20 ${isDarkMode ? 'bg-slate-950 text-slate-100' : 'bg-slate-50/50 text-slate-800'
-      } ${isSidebarCollapsed ? 'pl-12 sm:pl-16' : 'pl-12 sm:pl-16 md:pl-64'
+    <div className={`min-h-[100dvh] transition-[padding-left] duration-300 pb-20 ${isDarkMode ? 'bg-slate-950 text-slate-100' : 'bg-slate-50/50 text-slate-800'
+      } ${isSidebarCollapsed ? 'pl-0 lg:pl-16' : 'pl-0 lg:pl-64'
       }`}>
 
       {/* LEFT FIXED SIDEBAR NAVIGATION */}
@@ -769,23 +776,34 @@ export const EmployeeWorkspace: React.FC = () => {
         onOpenERD={handleOpenERD}
         isCollapsed={isSidebarCollapsed}
         onToggleCollapse={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
+        isMobileOpen={isMobileSidebarOpen}
+        onCloseMobile={() => setIsMobileSidebarOpen(false)}
       />
 
       {/* Streamlined Compact Top Navigation Header */}
       <header className="bg-white text-slate-900 border-b border-slate-200 sticky top-0 z-50 shadow-sm dark:bg-slate-900 dark:text-slate-100 dark:border-slate-800">
-        <div className="w-[96%] max-w-[1920px] mx-auto px-2 sm:px-4 py-2 sm:py-2.5 flex flex-wrap items-center justify-between gap-x-4 gap-y-2">
+        <div className="mx-auto flex w-full max-w-[1920px] flex-wrap items-center justify-between gap-x-4 gap-y-2 px-3 py-2 sm:px-4 sm:py-2.5 lg:w-[96%]">
           {/* CỘT TRÁI: LOGO VÀ TIÊU ĐỀ HỆ THỐNG */}
-          <div className="flex min-w-0 items-center gap-2.5 sm:gap-3 shrink-0">
+          <div className="flex w-full min-w-0 items-center gap-2.5 sm:gap-3 xl:w-auto xl:flex-1">
+            <button
+              type="button"
+              onClick={() => setIsMobileSidebarOpen(true)}
+              className="grid size-11 shrink-0 place-items-center rounded-xl border border-slate-200 bg-slate-50 text-slate-600 transition hover:border-cyan-300 hover:bg-cyan-50 hover:text-[#155e75] dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 lg:hidden"
+              aria-label="Mở menu điều hướng"
+              aria-expanded={isMobileSidebarOpen}
+            >
+              <Menu className="size-5" />
+            </button>
             <div className="p-1.5 sm:p-2 bg-[#1f5f86] rounded-lg text-white shadow-xs shrink-0">
               <HeaderIcon className="w-4 h-4 sm:w-5 sm:h-5" />
             </div>
-            <div>
-              <div className="flex flex-wrap items-center gap-1.5">
-                <span className="text-[10px] font-extrabold text-[#1f5f86] dark:text-sky-300 uppercase tracking-widest">
+            <div className="min-w-0 flex-1">
+              <div className="flex min-w-0 flex-wrap items-center gap-1.5">
+                <span className="max-w-full truncate text-[10px] font-extrabold text-[#1f5f86] dark:text-sky-300 uppercase tracking-widest">
                   {currentHeaderInfo.subtitle}
                 </span>
               </div>
-              <h1 className="text-xs sm:text-sm lg:text-base font-black tracking-tight text-slate-900 mt-0.5 leading-snug dark:text-white whitespace-nowrap">
+              <h1 className="mt-0.5 break-words text-xs font-black leading-snug tracking-tight text-slate-900 dark:text-white sm:text-sm lg:text-base">
                 {currentHeaderInfo.title}
               </h1>
             </div>
@@ -794,7 +812,7 @@ export const EmployeeWorkspace: React.FC = () => {
           {/* CỘT GIỮA: CỤM NGHIỆP VỤ HRM (CHỈ HIỂN THỊ KHI Ở MÀN HÌNH DASHBOARD CHỈ SỐ) */}
           {activeTab === 'reports' && (
             <nav
-              className="hidden md:flex flex-1 items-center justify-center gap-1.5 max-w-[720px] rounded-xl animate-fadeIn"
+              className="order-3 flex w-full overflow-x-auto pb-1 no-scrollbar items-center justify-start sm:justify-center gap-1.5 rounded-xl animate-fadeIn md:w-auto md:max-w-[720px] md:flex-1 md:overflow-visible md:pb-0 2xl:order-none"
               aria-label="Cụm nghiệp vụ HRM"
             >
               {visibleBusinessClusters.map((cluster) => {
@@ -804,7 +822,7 @@ export const EmployeeWorkspace: React.FC = () => {
                     key={cluster.id}
                     type="button"
                     onClick={() => handleBusinessClusterChange(cluster.id)}
-                    className={`whitespace-nowrap rounded-lg px-3.5 py-1.5 text-xs sm:text-[13px] font-bold transition-all cursor-pointer ${active
+                    className={`whitespace-nowrap shrink-0 rounded-lg px-3 py-1.5 text-xs sm:text-[13px] font-bold transition-all cursor-pointer ${active
                       ? 'bg-[#1f5f86] text-white shadow-2xs'
                       : 'text-slate-700 hover:bg-white hover:text-[#1f5f86] dark:text-slate-300 dark:hover:bg-slate-800 dark:hover:text-white'
                       }`}
@@ -820,17 +838,17 @@ export const EmployeeWorkspace: React.FC = () => {
             <MasterDataViewTabs
               value={activeMasterDataView}
               onChange={handleMasterDataViewChange}
-              className="order-3 hidden w-full justify-center lg:flex 2xl:order-none 2xl:w-auto 2xl:max-w-[520px] 2xl:flex-1"
+              className="order-3 flex w-full overflow-x-auto pb-1 no-scrollbar justify-start sm:justify-center lg:w-auto lg:max-w-[520px] lg:flex-1 lg:overflow-visible lg:pb-0 2xl:order-none"
             />
           )}
 
           {/* CỘT PHẢI: TÌM KIẾM, NGÔN NGỮ & GIAO DIỆN TỐI */}
-          <div className="flex items-center gap-2.5 text-xs shrink-0">
+          <div className="flex w-full flex-wrap items-center justify-end gap-2 text-xs xl:w-auto xl:shrink-0 xl:gap-2.5">
             <div data-help-id="global-sop-search"><GlobalSopSearch /></div>
             <button
               type="button"
               onClick={() => navigate(`/employee-lifecycle/system-guide?from=${encodeURIComponent(`${location.pathname}${location.search}`)}`)}
-              className="grid size-10 place-items-center rounded-2xl border border-slate-200 bg-slate-50 text-slate-600 transition hover:border-cyan-300 hover:bg-cyan-50 hover:text-[#155e75] dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200"
+              className="grid size-11 place-items-center rounded-2xl border border-slate-200 bg-slate-50 text-slate-600 transition hover:border-cyan-300 hover:bg-cyan-50 hover:text-[#155e75] dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200"
               title="Hướng dẫn cho màn hình này"
               aria-label="Mở hướng dẫn cho màn hình hiện tại"
             >
@@ -843,7 +861,7 @@ export const EmployeeWorkspace: React.FC = () => {
             <button
               type="button"
               onClick={() => setIsDarkMode(!isDarkMode)}
-              className={`px-3 py-2 rounded-2xl border transition-all flex items-center gap-2 text-xs font-bold cursor-pointer ${isDarkMode
+              className={`flex min-h-11 min-w-11 items-center justify-center gap-2 rounded-2xl border px-3 py-2 text-xs font-bold transition-all cursor-pointer ${isDarkMode
                 ? 'bg-slate-800 hover:bg-slate-700 border-slate-700 text-amber-400'
                 : 'bg-slate-50 hover:bg-slate-100 border-slate-200 text-slate-700 dark:bg-slate-800 dark:hover:bg-slate-700 dark:border-slate-700 dark:text-slate-200'
                 }`}

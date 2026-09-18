@@ -9,8 +9,30 @@ const defaults: SystemSettings = { portalName: 'SOP Management', defaultPageSize
 
 export function SystemSettingsForm() {
   const toast = useToast()
-  const [value, setValue] = useState(defaults); const [loading, setLoading] = useState(true); const [saving, setSaving] = useState(false); const [error, setError] = useState('')
-  useEffect(() => { const controller = new AbortController(); void administrationGateway.settings(controller.signal).then(result => setValue(result.data)).catch(reason => setError(reason instanceof Error ? reason.message : 'Không tải được cấu hình')).finally(() => setLoading(false)); return () => controller.abort() }, [])
+  const [value, setValue] = useState(defaults)
+  const [loading, setLoading] = useState(true)
+  const [saving, setSaving] = useState(false)
+  const [error, setError] = useState('')
+
+  useEffect(() => {
+    const controller = new AbortController()
+    void administrationGateway.settings(controller.signal)
+      .then(result => {
+        if (!controller.signal.aborted) {
+          setValue(result.data)
+          setError('')
+        }
+      })
+      .catch(reason => {
+        if (!controller.signal.aborted) {
+          setError(getErrorMessage(reason, 'Không tải được cấu hình'))
+        }
+      })
+      .finally(() => {
+        if (!controller.signal.aborted) setLoading(false)
+      })
+    return () => controller.abort()
+  }, [])
   const submit = async (event: FormEvent) => {
     event.preventDefault()
     setSaving(true)

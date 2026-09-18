@@ -60,7 +60,7 @@ export const MasterDataRelationshipModal: React.FC<MasterDataRelationshipModalPr
                   Master Data
                 </span>
               </div>
-              <h2 className="text-xl font-bold text-white tracking-tight mt-0.5">
+              <h2 className="text-xs sm:text-base lg:text-xl font-bold text-white tracking-tight mt-0.5 line-clamp-1 sm:line-clamp-none">
                 {language === 'vi'
                   ? 'BẢN ĐỒ QUAN HỆ DỮ LIỆU MASTER DATA'
                   : 'MASTER DATA RELATIONSHIP MAP'}
@@ -91,14 +91,14 @@ export const MasterDataRelationshipModal: React.FC<MasterDataRelationshipModalPr
         </div>
 
         {/* Modal Footer */}
-        <div className="px-6 py-4 bg-slate-900 border-t border-slate-800 flex items-center justify-between">
-          <span className="text-xs text-slate-400">
+        <div className="px-4 sm:px-6 py-3 sm:py-4 bg-slate-900 border-t border-slate-800 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
+          <span className="text-[11px] sm:text-xs text-slate-400">
             Mối quan hệ dữ liệu được cấu hình theo mô hình Enterprise HRMS SaaS
           </span>
           <button
             type="button"
             onClick={onClose}
-            className="px-5 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-white font-medium text-xs transition-colors cursor-pointer"
+            className="w-full sm:w-auto px-5 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-white font-medium text-xs transition-colors cursor-pointer text-center"
           >
             Đóng (ESC)
           </button>

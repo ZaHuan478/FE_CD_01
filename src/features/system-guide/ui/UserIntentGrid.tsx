@@ -61,8 +61,8 @@ export const defaultUserIntents: UserIntentItem[] = [
   {
     id: 'intent-view-flowchart',
     slug: 'xem-luu-do-va-canvas-sop',
-    actionTitle: 'Tôi muốn xem lưu đồ & canvas',
-    description: 'Xem trực quan luồng rẽ nhánh, vai trò thực hiện và chi tiết từng bước.',
+    actionTitle: 'Tôi muốn xem quy trình trực quan',
+    description: 'Xem luồng nghiệp vụ, vai trò thực hiện và nội dung chi tiết của từng bước.',
     categoryBadge: 'Trực quan',
     estimatedTime: '2 phút',
     icon: Layers,

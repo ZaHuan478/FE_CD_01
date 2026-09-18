@@ -14,7 +14,8 @@ import {
   FileUp,
   ScanText,
   BookOpen,
-  FilePenLine
+  FilePenLine,
+  X
 } from 'lucide-react'
 import { useLanguage } from '../../../shared/lib/i18n/LanguageContext'
 import { signOut, useAuth, useSession } from '../../../features/authentication/model/session'
@@ -25,6 +26,8 @@ interface LeftSidebarNavProps {
   onOpenERD: () => void
   isCollapsed?: boolean
   onToggleCollapse?: () => void
+  isMobileOpen?: boolean
+  onCloseMobile?: () => void
 }
 
 export const LeftSidebarNav: React.FC<LeftSidebarNavProps> = ({
@@ -32,7 +35,9 @@ export const LeftSidebarNav: React.FC<LeftSidebarNavProps> = ({
   onNavigateSection,
   onOpenERD,
   isCollapsed: externalIsCollapsed,
-  onToggleCollapse
+  onToggleCollapse,
+  isMobileOpen = false,
+  onCloseMobile
 }) => {
   const { t } = useLanguage()
   const session = useSession()
@@ -190,11 +195,20 @@ export const LeftSidebarNav: React.FC<LeftSidebarNavProps> = ({
     .join('') || 'U'
 
   return (
-    <aside
-      data-help-id="main-sidebar"
-      className={`fixed left-0 top-0 bottom-0 z-40 bg-white text-slate-800 border-r border-slate-200 transition-all duration-300 flex flex-col shadow-lg dark:bg-slate-900 dark:text-slate-100 dark:border-slate-800 ${isCollapsed ? 'w-12 sm:w-16' : 'w-56 sm:w-64'
-        }`}
-    >
+    <>
+      {isMobileOpen && (
+        <button
+          type="button"
+          aria-label="Đóng menu điều hướng"
+          onClick={onCloseMobile}
+          className="fixed inset-0 z-50 bg-slate-950/35 lg:hidden"
+        />
+      )}
+      <aside
+        data-help-id="main-sidebar"
+        className={`fixed left-0 top-0 bottom-0 z-[60] ${isMobileOpen ? 'flex' : 'hidden'} bg-white text-slate-800 border-r border-slate-200 transition-all duration-300 flex-col shadow-lg dark:bg-slate-900 dark:text-slate-100 dark:border-slate-800 lg:flex lg:z-40 ${isCollapsed ? 'w-12 sm:w-16' : 'w-64 max-w-[calc(100vw-2.5rem)] lg:max-w-none'
+          }`}
+      >
 
       {/* SIDEBAR HEADER LOGO */}
       <div className="p-4 border-b border-slate-200 flex items-center justify-between gap-2 shrink-0 dark:border-slate-800">
@@ -223,9 +237,19 @@ export const LeftSidebarNav: React.FC<LeftSidebarNavProps> = ({
         {/* Collapse Toggle Button */}
         <button
           type="button"
+          onClick={onCloseMobile}
+          className="grid min-h-11 min-w-11 place-items-center rounded-lg bg-slate-100 text-slate-500 transition-colors hover:bg-slate-200 hover:text-slate-900 dark:bg-slate-800 dark:text-slate-400 dark:hover:bg-slate-700 dark:hover:text-white lg:hidden"
+          title="Đóng Menu"
+          aria-label="Đóng menu điều hướng"
+        >
+          <X className="h-5 w-5" />
+        </button>
+        <button
+          type="button"
           onClick={handleToggle}
-          className="p-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-500 hover:text-slate-900 transition-colors cursor-pointer shrink-0 dark:bg-slate-800 dark:hover:bg-slate-700 dark:text-slate-400 dark:hover:text-white"
+          className="hidden min-h-11 min-w-11 place-items-center rounded-lg bg-slate-100 text-slate-500 transition-colors hover:bg-slate-200 hover:text-slate-900 dark:bg-slate-800 dark:text-slate-400 dark:hover:bg-slate-700 dark:hover:text-white lg:grid"
           title={isCollapsed ? 'Mở rộng Menu' : 'Thu gọn Menu'}
+          aria-label={isCollapsed ? 'Mở rộng menu điều hướng' : 'Thu gọn menu điều hướng'}
         >
           {isCollapsed ? <ChevronRight className="w-4 h-4" /> : <ChevronLeft className="w-4 h-4" />}
         </button>
@@ -251,6 +275,7 @@ export const LeftSidebarNav: React.FC<LeftSidebarNavProps> = ({
                     key={item.id}
                     type="button"
                     onClick={() => {
+                      onCloseMobile?.()
                       if (item.onClick) {
                         item.onClick()
                       } else {
@@ -339,7 +364,8 @@ export const LeftSidebarNav: React.FC<LeftSidebarNavProps> = ({
         )}
       </div>
 
-    </aside>
+      </aside>
+    </>
   )
 }
 

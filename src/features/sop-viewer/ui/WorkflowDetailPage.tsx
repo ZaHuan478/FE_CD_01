@@ -1,64 +1,65 @@
 import React, { useState, useEffect, useMemo } from 'react'
-import { useLocation, useSearchParams } from 'react-router-dom'
-import {
-  Sparkles,
-  UserCheck,
-  ListCheck,
-  GitBranch,
-  Rows3
-} from 'lucide-react'
+import { useSearchParams } from 'react-router-dom'
 import type { WorkflowDetailPageProps } from '../../../entities/sop/model/types'
 import {
   resolveWorkflowSops,
-  resolveSelectedSop,
-  selectWorkflowBusinessBrief
+  resolveSelectedSop
 } from '../../../entities/sop/lib/workflowSelectors'
 import { UniversalWorkflowHeader } from './components/UniversalWorkflowHeader'
-import { UniversalBusinessBrief } from './components/UniversalBusinessBrief'
-import { UniversalWorkflowStepper } from './components/UniversalWorkflowStepper'
+import { MetroWorkflowPipeline } from './components/metro-pipeline/MetroWorkflowPipeline'
 import { UniversalStepDetailCanvas } from './components/UniversalStepDetailCanvas'
-import { RoleFlowSection } from './components/RoleFlowSection'
-import { SopGovernancePanel } from './components/SopGovernancePanel'
-import { CrossFunctionalOperationalSpec } from './components/CrossFunctionalOperationalSpec'
-import { getCrossFunctionalModule } from '../../../entities/sop/cross-functional/index'
-import { RelatedPoliciesWidget } from '../../policy-browser/ui/components/RelatedPoliciesWidget'
-import { useLanguage } from '../../../shared/lib/i18n/LanguageContext'
-import { PublishedSopFlow } from '../../document-conversion/ui/PublishedSopFlow'
-import { workflowCanvasPreview } from '../../document-conversion/model/workflowCanvasPreview'
-import { buildPublishedWorkflowMermaid } from '../../../entities/sop/lib/workflowMermaid'
+import { CanonicalSopViewer } from './CanonicalSopViewer'
+import { knowledgeApi } from '../model/knowledgeModel'
 
 export const WorkflowDetailPage: React.FC<WorkflowDetailPageProps> = ({
   item,
   onBack
 }) => {
-  const { language, t } = useLanguage()
-  const location = useLocation()
   const [searchParams, setSearchParams] = useSearchParams()
 
   const targetSopParam = searchParams.get('sop')
   const targetStepParam = searchParams.get('step')
+
+  // Lookup published KnowledgeDocument for this workflow/sop
+  const [publishedDocId, setPublishedDocId] = useState<string | null>(null)
+
+  useEffect(() => {
+    const controller = new AbortController()
+    knowledgeApi.catalogDocuments({ type: 'procedure', pageSize: 100 }, controller.signal)
+      .then(res => {
+        if (!controller.signal.aborted) {
+          const matched = res.data.find(d => {
+            if (targetSopParam && (d.code.toLowerCase() === targetSopParam.toLowerCase() || d.id === targetSopParam)) {
+              return true
+            }
+            return d.workflowId === item.id || d.code === item.id
+          })
+          if (matched) {
+            setPublishedDocId(matched.id)
+          }
+        }
+      })
+      .catch(() => {
+        // Fallback to item
+      })
+    return () => controller.abort()
+  }, [item.id, targetSopParam])
 
   // Always scroll to top when opening or switching workflow detail
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: 'instant' })
   }, [item.id])
 
-  // Active top-level tab in workflow detail initialized from URL pathname
-  const [activeWorkflowTab, setActiveWorkflowTab] = useState<'diagram' | 'roles' | 'specs'>(() => {
-    if (location.pathname.startsWith('/employee-lifecycle/raci/')) return 'roles'
-    if (location.pathname.startsWith('/employee-lifecycle/specs/')) return 'specs'
-    return 'diagram'
-  })
-
   // Theme state synced with global document dark mode
   const [isDarkMode, setIsDarkMode] = useState<boolean>(() => {
     return (
-      document.documentElement.classList.contains('dark') ||
-      localStorage.getItem('employee_lifecycle_theme') === 'dark'
+      (typeof document !== 'undefined' && document.documentElement.classList.contains('dark')) ||
+      (typeof localStorage !== 'undefined' && localStorage.getItem('employee_lifecycle_theme') === 'dark')
     )
   })
 
   useEffect(() => {
+    if (typeof document === 'undefined') return
     const handleClassChange = () => {
       setIsDarkMode(document.documentElement.classList.contains('dark'))
     }
@@ -84,8 +85,9 @@ export const WorkflowDetailPage: React.FC<WorkflowDetailPageProps> = ({
     }
   }
 
-  // Canonical Cross-Functional Module Definition (if viewing CF-01 .. CF-08)
-  const cfModule = useMemo(() => getCrossFunctionalModule(item.id), [item.id])
+  if (publishedDocId) {
+    return <CanonicalSopViewer documentId={publishedDocId} onBack={onBack} />
+  }
 
   // Resolve all available SOP SubProcesses dynamically from DB or module metadata
   const availableSopProcesses = useMemo(() => {
@@ -93,7 +95,7 @@ export const WorkflowDetailPage: React.FC<WorkflowDetailPageProps> = ({
   }, [item])
 
   // Resolve currently active SOP
-  const { selectedSop, selectedSopIdx } = useMemo(() => {
+  const { selectedSop } = useMemo(() => {
     return resolveSelectedSop(availableSopProcesses, targetSopParam)
   }, [availableSopProcesses, targetSopParam])
 
@@ -111,30 +113,11 @@ export const WorkflowDetailPage: React.FC<WorkflowDetailPageProps> = ({
   }, [targetStepParam, selectedSop.steps])
 
   const [selectedStepIdx, setSelectedStepIdx] = useState<number>(initialStepIdx)
-  const [diagramMode, setDiagramMode] = useState<'steps' | 'mermaid'>('mermaid')
 
   // Sync state when SOP changes
   useEffect(() => {
     setSelectedStepIdx(initialStepIdx)
-    setDiagramMode('mermaid')
   }, [initialStepIdx, selectedSop.sopCode])
-
-  // Unified non-redundant business brief
-  const businessBrief = useMemo(() => {
-    return selectWorkflowBusinessBrief(item, selectedSop, language)
-  }, [item, selectedSop, language])
-  const publishedMermaid = useMemo(() => buildPublishedWorkflowMermaid(selectedSop), [selectedSop])
-
-  // Handlers for switching SOP & Steps with URL query syncing
-  const handleSelectSop = (sopCode: string) => {
-    setSearchParams((prev) => {
-      const next = new URLSearchParams(prev)
-      next.set('sop', sopCode)
-      next.delete('step')
-      return next
-    })
-    setSelectedStepIdx(0)
-  }
 
   const handleSelectStep = (idx: number) => {
     setSelectedStepIdx(idx)
@@ -174,186 +157,25 @@ export const WorkflowDetailPage: React.FC<WorkflowDetailPageProps> = ({
         onToggleTheme={toggleTheme}
       />
 
-      {/* 2. UNIVERSAL VIEW TABS */}
-      <div className="border-b border-slate-200/80 dark:border-slate-800/80 bg-slate-100/60 dark:bg-slate-950/60">
-        <div className="w-[94%] max-w-[1920px] mx-auto px-2 sm:px-4 flex items-center justify-between gap-4 overflow-x-auto no-scrollbar py-2">
-          <div className="flex items-center gap-2">
-            <button
-              type="button"
-              onClick={() => setActiveWorkflowTab('diagram')}
-              className={`px-3.5 py-1.5 text-xs font-bold rounded-xl border transition-all flex items-center gap-2 cursor-pointer shrink-0 shadow-2xs ${
-                activeWorkflowTab === 'diagram'
-                  ? 'bg-[#1f5f86] text-white border-[#1f5f86] shadow-sm'
-                  : 'bg-white hover:bg-slate-100 text-slate-700 dark:bg-slate-900 dark:hover:bg-slate-800 dark:text-white border-slate-200 dark:border-slate-700'
-              }`}
-            >
-              <Sparkles className="w-3.5 h-3.5 text-amber-400" />
-              <span>{t('workflow.tab.diagram', 'Sơ đồ quy trình')}</span>
-            </button>
-
-            <button
-              type="button"
-              onClick={() => setActiveWorkflowTab('roles')}
-              className={`px-3.5 py-1.5 text-xs font-bold rounded-xl border transition-all flex items-center gap-2 cursor-pointer shrink-0 shadow-2xs ${
-                activeWorkflowTab === 'roles'
-                  ? 'bg-[#1f5f86] text-white border-[#1f5f86] shadow-sm'
-                  : 'bg-white hover:bg-slate-100 text-slate-700 dark:bg-slate-900 dark:hover:bg-slate-800 dark:text-white border-slate-200 dark:border-slate-700'
-              }`}
-            >
-              <UserCheck className="w-3.5 h-3.5 text-blue-400" />
-              <span>{t('workflow.tab.roles', 'Vai trò & trách nhiệm')}</span>
-            </button>
-
-            <button
-              type="button"
-              onClick={() => setActiveWorkflowTab('specs')}
-              className={`px-3.5 py-1.5 text-xs font-bold rounded-xl border transition-all flex items-center gap-2 cursor-pointer shrink-0 shadow-2xs ${
-                activeWorkflowTab === 'specs'
-                  ? 'bg-[#1f5f86] text-white border-[#1f5f86] shadow-sm'
-                  : 'bg-white hover:bg-slate-100 text-slate-700 dark:bg-slate-900 dark:hover:bg-slate-800 dark:text-white border-slate-200 dark:border-slate-700'
-              }`}
-            >
-              <ListCheck className="w-3.5 h-3.5 text-emerald-400" />
-              <span>
-                {cfModule
-                  ? 'Đặc tả Vận hành & RACI (Tầng 3)'
-                  : t('workflow.tab.specs', 'Bảng kiểm & quy định')}
-              </span>
-            </button>
-          </div>
-        </div>
-      </div>
-
-      {/* 3. MAIN WORKFLOW WORKSPACE CONTENT */}
+      {/* 2. MAIN WORKFLOW WORKSPACE CONTENT */}
       <main className="w-[94%] max-w-[1920px] mx-auto px-2 sm:px-4 py-5 space-y-5">
-        {/* SUB-PROCESS SOP SELECTOR BAR (Only if workflow has multiple SOPs) */}
-        {availableSopProcesses.length > 1 && (
-          <div
-            className={`p-3 rounded-2xl border flex items-center gap-2 overflow-x-auto no-scrollbar shadow-2xs ${
-              isDarkMode ? 'bg-slate-900 border-slate-800' : 'bg-white border-slate-200'
-            }`}
-          >
-            <span className="text-[11px] font-extrabold uppercase tracking-wider text-[#1f5f86] dark:text-sky-300 shrink-0 pl-1">
-              {language === 'vi' ? 'Chọn SOP quy trình:' : 'Select SOP:'}
-            </span>
+        <MetroWorkflowPipeline
+          process={selectedSop}
+          selectedStepIdx={selectedStepIdx}
+          onSelectStep={handleSelectStep}
+          isDarkMode={isDarkMode}
+        />
 
-            <div className="flex items-center gap-2">
-              {availableSopProcesses.map((proc, idx) => {
-                const isSelected = selectedSopIdx === idx
-                return (
-                  <button
-                    key={proc.sopCode}
-                    type="button"
-                    onClick={() => handleSelectSop(proc.sopCode)}
-                    className={`px-3 py-1.5 rounded-xl text-xs font-bold whitespace-nowrap cursor-pointer transition-all flex items-center gap-2 border ${
-                      isSelected
-                        ? 'bg-[#1f5f86] text-white border-[#1f5f86] shadow-xs'
-                        : 'bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-200 border-slate-200 dark:border-slate-700 hover:bg-slate-200 dark:hover:bg-slate-700'
-                    }`}
-                  >
-                    <span className="font-mono text-[10px] opacity-80">{proc.sopCode}</span>
-                    <span>{proc.sopTitle}</span>
-                  </button>
-                )
-              })}
-            </div>
-          </div>
-        )}
-
-        {/* 4. TAB 1: SƠ ĐỒ QUY TRÌNH TRỰC QUAN */}
-        {activeWorkflowTab === 'diagram' && (
-          <div className="space-y-5 animate-fadeIn">
-            {/* Unified 4-Grid Business Brief Card (Replaces redundant multiple cards) */}
-            <UniversalBusinessBrief brief={businessBrief} isDarkMode={isDarkMode} />
-
-            <div className="flex flex-wrap gap-2" role="group" aria-label="Kiểu hiển thị lưu đồ">
-              <button type="button" aria-pressed={diagramMode === 'mermaid'} onClick={() => setDiagramMode('mermaid')} className={`inline-flex min-h-10 items-center gap-2 rounded-xl border px-4 text-xs font-bold ${diagramMode === 'mermaid' ? 'border-[#1f5f86] bg-[#1f5f86] text-white' : 'border-slate-200 bg-white text-slate-700 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200'}`}><GitBranch className="size-4" />Flowchart Mermaid</button>
-              <button type="button" aria-pressed={diagramMode === 'steps'} onClick={() => setDiagramMode('steps')} className={`inline-flex min-h-10 items-center gap-2 rounded-xl border px-4 text-xs font-bold ${diagramMode === 'steps' ? 'border-[#1f5f86] bg-[#1f5f86] text-white' : 'border-slate-200 bg-white text-slate-700 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200'}`}><Rows3 className="size-4" />Các bước</button>
-            </div>
-
-            {diagramMode === 'steps' ? (
-              <UniversalWorkflowStepper
-                steps={selectedSop.steps}
-                selectedStepIdx={selectedStepIdx}
-                onSelectStep={handleSelectStep}
-                isDarkMode={isDarkMode}
-              />
-            ) : (
-              <PublishedSopFlow key={selectedSop.sopCode} code={selectedSop.sopCode} fallback={publishedMermaid} fallbackPreview={workflowCanvasPreview(selectedSop)} />
-            )}
-
-            {/* Selected Step Detail Canvas (Positioned immediately below stepper in plain view) */}
-            <UniversalStepDetailCanvas
-              step={currentStep}
-              stepIdx={selectedStepIdx}
-              totalSteps={selectedSop.steps.length}
-              onPreviousStep={handlePreviousStep}
-              onNextStep={handleNextStep}
-              isDarkMode={isDarkMode}
-            />
-          </div>
-        )}
-
-        {/* 5. TAB 2: VAI TRÒ & PHÂN ĐỊNH RACI */}
-        {activeWorkflowTab === 'roles' && (
-          <div className="space-y-5 animate-fadeIn">
-            <SopGovernancePanel currentProcess={selectedSop} isDarkMode={isDarkMode} />
-            <RoleFlowSection currentProcess={selectedSop} isDarkMode={isDarkMode} />
-          </div>
-        )}
-
-        {/* 6. TAB 3: BẢNG KIỂM & ĐẶC TẢ VẬN HÀNH */}
-        {activeWorkflowTab === 'specs' && (
-          <div className="space-y-5 animate-fadeIn">
-            {cfModule ? (
-              <CrossFunctionalOperationalSpec
-                module={cfModule}
-              />
-            ) : (
-              <div
-                className={`rounded-2xl border p-5 shadow-xs space-y-4 ${
-                  isDarkMode ? 'bg-slate-900 border-slate-800' : 'bg-white border-slate-200/90'
-                }`}
-              >
-                <div className="flex items-center gap-2">
-                  <ListCheck className="w-5 h-5 text-emerald-500 shrink-0" />
-                  <div>
-                    <h3 className="text-sm font-extrabold text-slate-900 dark:text-white">
-                      {language === 'vi' ? 'Bảng kiểm & Quy định vận hành' : 'Verification Checklist & Controls'}
-                    </h3>
-                    <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
-                      {language === 'vi'
-                        ? 'Danh mục các trường thông tin và điều kiện kiểm soát khi thực hiện quy trình.'
-                        : 'List of data fields and control conditions during workflow execution.'}
-                    </p>
-                  </div>
-                </div>
-
-                <div className="flex flex-wrap gap-2 pt-2">
-                  {item.fieldsChecklist && item.fieldsChecklist.length > 0 ? (
-                    item.fieldsChecklist.map((field, idx) => (
-                      <span
-                        key={idx}
-                        className="px-3 py-1.5 rounded-xl text-xs font-semibold bg-slate-100 dark:bg-slate-800 text-slate-800 dark:text-slate-200 border border-slate-200 dark:border-slate-700"
-                      >
-                        ✓ {field}
-                      </span>
-                    ))
-                  ) : (
-                    <p className="text-xs text-slate-400 italic">
-                      {language === 'vi'
-                        ? 'Chưa có danh mục trường dữ liệu riêng biệt. Tuân thủ theo các bước SOP chuẩn.'
-                        : 'No custom fields defined. Follow standard SOP steps.'}
-                    </p>
-                  )}
-                </div>
-              </div>
-            )}
-
-            {/* Linked Policies & Compliance Widget */}
-            <RelatedPoliciesWidget processId={item.id} sopCode={selectedSop.sopCode} />
-          </div>
-        )}
+        {/* Selected Step Detail Canvas */}
+        <UniversalStepDetailCanvas
+          step={currentStep}
+          stepIdx={selectedStepIdx}
+          totalSteps={selectedSop.steps.length}
+          onPreviousStep={handlePreviousStep}
+          onNextStep={handleNextStep}
+          isDarkMode={isDarkMode}
+          process={selectedSop}
+        />
       </main>
     </div>
   )

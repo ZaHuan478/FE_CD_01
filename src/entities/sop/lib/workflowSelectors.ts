@@ -122,55 +122,64 @@ export interface BusinessBriefViewModel {
  * Does NOT repeat title or description verbatim if already present.
  */
 export const selectWorkflowBusinessBrief = (
-  item: DetailItem,
-  currentSop: SopSubProcess,
+  item?: DetailItem | null,
+  currentSop?: SopSubProcess | null,
   language: string = 'vi'
 ): BusinessBriefViewModel => {
-  const cfMod = getCrossFunctionalModule(item.id)
+  let cfMod: ReturnType<typeof getCrossFunctionalModule> = undefined
+  try {
+    if (item?.id) {
+      cfMod = getCrossFunctionalModule(item.id)
+    }
+  } catch {
+    cfMod = undefined
+  }
 
-  // 1. When / Context Trigger
+  // 1. When / Context Trigger (Real data only)
   let when = ''
   if (cfMod?.triggerSummary) {
     when = cfMod.triggerSummary
-  } else if (currentSop.description && currentSop.description !== item.subtitle) {
+  } else if (currentSop?.description && (!item?.subtitle || currentSop.description !== item.subtitle)) {
     when = currentSop.description
+  } else if (item?.subtitle) {
+    when = item.subtitle
   } else {
-    when =
-      language === 'vi'
-        ? `Kích hoạt khi phát sinh nhu cầu "${item.title}" trong quá trình vận hành doanh nghiệp.`
-        : `Activated when "${item.title}" arises during operations.`
+    when = language === 'vi' ? 'Chưa được khai báo' : 'Not specified'
   }
 
-  // 2. Who / RACI Sequence
+  // 2. Who / RACI Sequence (Real actors only)
   let who = ''
   if (cfMod?.actorsMatrix) {
     who = `${cfMod.actorsMatrix.proposer.split('(')[0].trim()} (Tạo) ➔ ${cfMod.actorsMatrix.approver.split('(')[0].trim()} (Duyệt) ➔ ${cfMod.actorsMatrix.executor.split('(')[0].trim()} (Thực thi)`
-  } else if (currentSop.steps.length > 0) {
+  } else if (currentSop?.steps && currentSop.steps.length > 0) {
     const uniqueActors = Array.from(new Set(currentSop.steps.map((s) => s.actor).filter(Boolean)))
-    who = uniqueActors.slice(0, 3).join(' ➔ ')
-  } else if (item.actors && item.actors.length > 0) {
+    if (uniqueActors.length > 0) {
+      who = uniqueActors.slice(0, 3).join(' ➔ ')
+    }
+  } else if (item?.actors && item.actors.length > 0) {
     who = item.actors.map((a) => `${a.name} (${a.role})`).slice(0, 3).join(' ➔ ')
-  } else {
-    who = language === 'vi' ? 'Chuyên viên nhân sự & Quản lý phụ trách' : 'HR Specialist & Department Manager'
+  }
+  if (!who) {
+    who = language === 'vi' ? 'Chưa được khai báo' : 'Not specified'
   }
 
-  // 3. Inputs
-  const rawInputs = currentSop.inputs && currentSop.inputs.length > 0
+  // 3. Inputs (Real inputs only)
+  const rawInputs = currentSop?.inputs && currentSop.inputs.length > 0
     ? currentSop.inputs
-    : item.inputs && item.inputs.length > 0
+    : item?.inputs && item.inputs.length > 0
       ? item.inputs
       : cfMod?.inputs && cfMod.inputs.length > 0
         ? cfMod.inputs
-        : [language === 'vi' ? 'Hồ sơ yêu cầu & Chứng từ liên quan' : 'Request profile & Supporting documents']
+        : [language === 'vi' ? 'Chưa được khai báo' : 'Not specified']
 
-  // 4. Outputs
-  const rawOutputs = currentSop.outputs && currentSop.outputs.length > 0
+  // 4. Outputs (Real outputs only)
+  const rawOutputs = currentSop?.outputs && currentSop.outputs.length > 0
     ? currentSop.outputs
-    : item.outputs && item.outputs.length > 0
+    : item?.outputs && item.outputs.length > 0
       ? item.outputs
       : cfMod?.outputs && cfMod.outputs.length > 0
         ? cfMod.outputs
-        : [language === 'vi' ? 'Bản ghi kết quả cập nhật trên hệ thống' : 'Official updated record on system']
+        : [language === 'vi' ? 'Chưa được khai báo' : 'Not specified']
 
   return {
     when,

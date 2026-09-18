@@ -77,7 +77,11 @@ export const UniversalBusinessBrief: React.FC<UniversalBusinessBriefProps> = ({
                 <span>{language === 'vi' ? '1. Khi nào kích hoạt?' : '1. Trigger Condition'}</span>
               </div>
               <p className="text-xs leading-relaxed text-slate-700 dark:text-slate-200">
-                {brief.when}
+                {!brief.when || brief.when === 'Chưa được khai báo' ? (
+                  <span className="text-slate-400 dark:text-slate-500 italic">Chưa được khai báo</span>
+                ) : (
+                  brief.when
+                )}
               </p>
             </div>
           </div>
@@ -91,10 +95,14 @@ export const UniversalBusinessBrief: React.FC<UniversalBusinessBriefProps> = ({
             <div>
               <div className="flex items-center gap-1.5 mb-1 text-[#1f5f86] dark:text-sky-300 font-extrabold text-[10px] uppercase tracking-wider">
                 <Users className="w-3 h-3 text-blue-500 shrink-0" />
-                <span>{language === 'vi' ? '2. Ai tham gia & RACI?' : '2. Key Actors'}</span>
+                <span>{language === 'vi' ? '2. Ai tham gia & Vai trò' : '2. Key Actors'}</span>
               </div>
               <p className="text-xs leading-relaxed text-slate-700 dark:text-slate-200">
-                {brief.who}
+                {!brief.who || brief.who === 'Chưa được khai báo' ? (
+                  <span className="text-slate-400 dark:text-slate-500 italic">Chưa được khai báo</span>
+                ) : (
+                  brief.who
+                )}
               </p>
             </div>
           </div>
@@ -111,7 +119,11 @@ export const UniversalBusinessBrief: React.FC<UniversalBusinessBriefProps> = ({
                 <span>{language === 'vi' ? '3. Đầu vào cần chuẩn bị' : '3. Inputs to Prepare'}</span>
               </div>
               <p className="text-xs leading-relaxed text-slate-700 dark:text-slate-200 line-clamp-3">
-                {brief.inputs.join(' · ')}
+                {!brief.inputs || brief.inputs.length === 0 || (brief.inputs.length === 1 && brief.inputs[0] === 'Chưa được khai báo') ? (
+                  <span className="text-slate-400 dark:text-slate-500 italic">Chưa được khai báo</span>
+                ) : (
+                  brief.inputs.join(' · ')
+                )}
               </p>
             </div>
           </div>
@@ -128,7 +140,11 @@ export const UniversalBusinessBrief: React.FC<UniversalBusinessBriefProps> = ({
                 <span>{language === 'vi' ? '4. Kết quả bàn giao (Outputs)' : '4. Expected Deliverables'}</span>
               </div>
               <p className="text-xs leading-relaxed text-slate-700 dark:text-slate-200 line-clamp-3">
-                {brief.outputs.join(' · ')}
+                {!brief.outputs || brief.outputs.length === 0 || (brief.outputs.length === 1 && brief.outputs[0] === 'Chưa được khai báo') ? (
+                  <span className="text-slate-400 dark:text-slate-500 italic">Chưa được khai báo</span>
+                ) : (
+                  brief.outputs.join(' · ')
+                )}
               </p>
             </div>
           </div>
